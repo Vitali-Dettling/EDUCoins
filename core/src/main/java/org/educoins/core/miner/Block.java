@@ -11,13 +11,14 @@ public class Block {
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
 	private int timeStamp;
-	private int difficulty;
+	private int difficulty;//The target threshold is a 256-bit unsigned integer which a header hash must be equal to or below in order for that header to be a valid part of the block chain.
+					   	 	//Bits is the same as the Difficulty. 
 	private int nonce;
 	
 	//Additional block information
 	private long id;
 	private int height;
-	private int nTx;
+	private int nTx;//Count of all transactions
 	// List<? extends Appendix> getAppendages(); !!! -> Will we need later !!!
 	
 	public int getVersion() {
