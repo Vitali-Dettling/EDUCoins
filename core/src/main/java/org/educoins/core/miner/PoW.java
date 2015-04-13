@@ -11,6 +11,8 @@ import java.util.concurrent.Executors;
 
 import org.educoins.core.cryptography.Scrypt;
 
+import com.sun.xml.internal.ws.encoding.MtomCodec.ByteArrayBuffer;
+
 
 public class PoW {
 	
@@ -18,16 +20,19 @@ public class PoW {
 	private final static int running = 0;
 	private final static int exit = 1;
 	private final static int bit32 = 32;
+	private final static int bit256 = 256;
 	private final static int eightHexaDecimalDigits = 4;
+	private final static int hex = 16;
 	
-	private final Scrypt scrypt;
+	//private final Scrypt scrypt;
 	private Block blockHeader;
 	
 	
-	public PoW(){
+	public PoW(Block block){
 		
-		this.blockHeader = new Block();
-		this.scrypt = new Scrypt();
+		
+		this.blockHeader = block;
+		//this.scrypt = new Scrypt();
 		
 		findPoW();
 	}
@@ -40,6 +45,21 @@ public class PoW {
 	 * */
 	private void findPoW(){
 	
+		try {
+			
+			Thread.sleep(5000);
+			
+			
+			
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			System.err.println("ERROR: Thread problem class PoW");
+		}
+		
+		
+		
+		/* Wenn Zeit dann richtig schön fertig machen !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 		byte[] hashedHeader = getHashedHeader(outputStream);					   
 		SecureRandom nonce = new SecureRandom();
@@ -49,7 +69,7 @@ public class PoW {
 		int challenge;
 		
 		int loop = running;
-		while(loop == 0)
+		while(loop == running)
 		{
 			
 			try {
@@ -72,8 +92,13 @@ public class PoW {
 				e.printStackTrace();
 				System.err.println(e.getMessage() + "Class: PoW");
 			}
-		}	
+		}	*/
 	}
+	
+	
+	
+	
+	
 	
 	
 	/*
@@ -81,19 +106,32 @@ public class PoW {
 	 * http://bitcoin.stackexchange.com/questions/2924/how-to-calculate-new-bits-value
 	 * https://bitcoin.org/en/developer-reference#merkle-trees
 	 * */
+	/* Wenn Zeit dann richtig schön fertig machen !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	private int getTarget(){
+		
+		
 		
 		//Formula: target = coefficient * 2^(8 * (exponent – 3))
 		//the first two hexadecimal digits => exponent 
 		//the next six hex digits => coefficient
-		
+				
 		//????????????????????????????????????????? if that work ?????????????????????????????????????????????
-		byte[] hexTarget = ByteBuffer.allocate(eightHexaDecimalDigits).putInt(blockHeader.getDifficulty()).array();
+//		byte[] hexTarget = ByteBuffer.allocate(eightHexaDecimalDigits).putInt(blockHeader.getDifficulty()).array();
+		byte[] nonce256 = new byte[bit256];
 		
-		int coefficient = Integer.parseInt(ByteBuffer.wrap(hexTarget, 1, 4).toString());//Da muss es doch eine bessere MEthode geben um es zu lösen??? -> Als anstadt hin und her zu casten...
-		int exponent = Integer.parseInt(ByteBuffer.wrap(hexTarget, 0, 1).toString());//Da muss es doch eine bessere MEthode geben um es zu lösen??? -> Als anstadt hin und her zu casten...
+		byte[] hexTarget = ByteBuffer.
 		
-		return coefficient * 2 ^(8 * (exponent - 3));
+		//+ Integer.toString(blockHeader.getDifficulty()
+				
+		String hexTarget = Integer.toHexString(blockHeader.getDifficulty());
+		
+		int coefficient = Integer.parseInt(hexTarget.substring(0,2), hex);//Da muss es doch eine bessere MEthode geben um es zu lösen??? -> Als anstadt hin und her zu casten...
+		//int exponent = Integer.parseInt(ByteBuffer.wrap(hexTarget, 0, 1).toString());//Da muss es doch eine bessere MEthode geben um es zu lösen??? -> Als anstadt hin und her zu casten...
+		// coefficient * 2 ^(8 * (exponent - 3));
+		
+		
+		
+		return 100;
 	}
 	
     private final ThreadLocal<SecureRandom> secureRandom = new ThreadLocal<SecureRandom>() {
@@ -143,7 +181,7 @@ public class PoW {
 	
 	
 	
-	
+	*/
 	
 	
 	

@@ -1,6 +1,6 @@
 package org.educoins.core.cryptography;
 
-import java.security.SecureRandom;//Werden wir später bracuhen um einen Schlüssel erzeugen zu können...
+import java.security.SecureRandom;//Werden wir spÃ¤ter bracuhen um einen SchlÃ¼ssel erzeugen zu kÃ¶nnen...
 
 
 
