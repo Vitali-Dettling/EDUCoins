@@ -1,10 +1,11 @@
 package org.educoins.core.cryptography;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
 import javax.crypto.Mac;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 @SuppressWarnings({"PointlessBitwiseExpression", "PointlessArithmeticExpression"})
 public final class Scrypt {
@@ -28,8 +29,8 @@ public final class Scrypt {
         try {
             mac.init(new SecretKeySpec(B, 0, 40, "HmacSHA256"));
         } catch (InvalidKeyException e) {
-            throw new IllegalStateException(e);
-        }
+			throw new IllegalStateException(e);
+		}
         B[40] = 0;
         B[41] = 0;
         B[42] = 0;
