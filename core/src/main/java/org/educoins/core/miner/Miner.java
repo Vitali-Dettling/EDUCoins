@@ -12,7 +12,7 @@ public class Miner {
 		block.setVersion(0);
 		block.setHashedPrevBlock("Damy value previouse block");
 		block.setHashedMerkleRoot("Damy value merkle root");
-		block.setTimeStamp(0);
+		block.setTimestamp(0);
 		block.setDifficulty(1);
 
 		MinerThread minerThread = new MinerThread();

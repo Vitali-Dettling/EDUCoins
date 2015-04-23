@@ -7,7 +7,7 @@ public class Block {
 	private int version;
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
-	private int timeStamp;
+	private int timestamp;
 	private int difficulty; // The target threshold is a 256-bit unsigned
 							// integer
 							// which a header hash must be equal to or below in
@@ -47,12 +47,12 @@ public class Block {
 		this.hashMerkleRoot = merkleRoot;
 	}
 
-	public int getTimeStamp() {
-		return timeStamp;
+	public int getTimestamp() {
+		return timestamp;
 	}
 
-	public void setTimeStamp(int timeStamp) {
-		this.timeStamp = timeStamp;
+	public void setTimestamp(int timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	public int getDifficulty() {
@@ -93,6 +93,14 @@ public class Block {
 
 	public void setHeight(int height) {
 		this.height = height;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Block[version=%d;" + "hashPrevBlock=%s;"
+				+ "hashMerkleRoot=%s;timestamp=%d;difficulty=%d;nonce=%d]",
+				version, hashPrevBlock, hashMerkleRoot, timestamp, difficulty,
+				nonce);
 	}
 
 }

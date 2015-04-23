@@ -34,7 +34,7 @@ public class BlockChain {
 			this.newBlock.println(Integer.toString(this.block.getVersion()));
 			this.newBlock.println(this.block.getHashedPrevBlock());
 			this.newBlock.println(this.block.getHashedMerkleRoot());
-			this.newBlock.println(Integer.toString(this.block.getTimeStamp()));
+			this.newBlock.println(Integer.toString(this.block.getTimestamp()));
 			this.newBlock.println(Integer.toString(this.block.getDifficulty()));
 			this.newBlock.close();
 
