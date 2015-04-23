@@ -1,48 +1,38 @@
 package org.educoins.core.miner;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 
 public class BlockChain {
 
-	private Block block;
-	private static int blockCount = 0;
-	private File directory;
-	private PrintWriter newBlock;
+	private File blockChainFile;
 
-	public BlockChain(Block block) {
-
-		this.block = block;
-		this.directory = new File("C://Users//admin//Documents//BlockChain");
-
-		blockContent();
+	public BlockChain() throws IOException {
+		blockChainFile = new File("blockchain.txt");
+		if (!blockChainFile.exists()) {
+			try {
+				blockChainFile.createNewFile();
+			} catch (IOException e) {
+				System.err.printf("Error while creating block chain file: "
+						+ "%s\r\n", e.toString());
+				throw e;
+			}
+		}
 	}
 
-	private void blockContent() {
-
-		if (!directory.isDirectory()) {
-			this.directory.mkdirs();
-		}
-
+	public void addBlock(Block block) {
+		PrintWriter writer = null;
 		try {
-
-			this.newBlock = new PrintWriter(this.directory.getPath()
-					+ "//Block_" + this.blockCount++, "UTF-8");
-
-			this.newBlock.println(Integer.toString(this.block.getVersion()));
-			this.newBlock.println(this.block.getHashedPrevBlock());
-			this.newBlock.println(this.block.getHashedMerkleRoot());
-			this.newBlock.println(Integer.toString(this.block.getTimestamp()));
-			this.newBlock.println(Integer.toString(this.block.getDifficulty()));
-			this.newBlock.close();
-
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			e.printStackTrace();
-			System.err.println("ERROR: Class BlockChain");
+			writer = new PrintWriter(new FileOutputStream(blockChainFile, true));
+			writer.println(block);
+		} catch (IOException e) {
+			System.err.printf("Error while writing to block chain file: "
+					+ "%s\r\n", e.toString());
+		} finally {
+			writer.close();
 		}
-
 	}
 
 }

@@ -31,7 +31,7 @@ public class Miner {
 			while (true) {
 
 				new PoW(block);
-				new BlockChain(block);
+				//new BlockChain(block);
 
 				System.out.println("Block");
 
