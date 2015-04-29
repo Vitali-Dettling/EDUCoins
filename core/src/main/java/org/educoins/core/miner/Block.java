@@ -4,17 +4,18 @@ public class Block {
 
 	// BlockHeader parameters for the PoW algorithm
 	// https://litecoin.info/Block_header
-	private int version;
+	private long version;
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
-	private int timestamp;
-	private int difficulty; // The target threshold is a 256-bit unsigned
+	private long timestamp;
+	//Max difficulty, because of 0xFFFFFFFF => 4294967295
+	private long difficulty; // The target threshold is a 256-bit unsigned
 							// integer
 							// which a header hash must be equal to or below in
 							// order for that header to be a valid part of the
 							// block chain.
 							// Bits is the same as the Difficulty.
-	private int nonce;
+	private long nonce;
 
 	// Additional block information
 	private long id;
@@ -23,11 +24,11 @@ public class Block {
 
 	// List<? extends Appendix> getAppendages(); !!! -> Will we need later !!!
 
-	public int getVersion() {
+	public long getVersion() {
 		return version;
 	}
 
-	public void setVersion(int version) {
+	public void setVersion(long version) {
 		this.version = version;
 	}
 
@@ -47,7 +48,7 @@ public class Block {
 		this.hashMerkleRoot = merkleRoot;
 	}
 
-	public int getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
 	}
 
@@ -55,15 +56,15 @@ public class Block {
 		this.timestamp = timestamp;
 	}
 
-	public int getDifficulty() {
+	public long getDifficulty() {
 		return difficulty;
 	}
 
-	public void setDifficulty(int difficulty) {
+	public void setDifficulty(long difficulty) {
 		this.difficulty = difficulty;
 	}
 
-	public int getNonce() {
+	public long getNonce() {
 		return nonce;
 	}
 
