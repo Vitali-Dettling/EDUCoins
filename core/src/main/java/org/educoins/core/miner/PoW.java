@@ -3,11 +3,16 @@ package org.educoins.core.miner;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.codec.BinaryEncoder;
+import org.apache.commons.codec.binary.BinaryCodec;
+import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.educoins.core.cryptography.Hashes;
 import org.educoins.core.cryptography.SHA;
 import org.educoins.core.cryptography.Scrypt;
@@ -25,75 +30,59 @@ public class PoW {
 	private final static int HEX = 16;
 	
 	private final Scrypt scrypt;
-	private Block blockHeader;
-	
-	private byte[] test;
-		
+	private Block blockHeader;		
 	
 	public PoW(Block block){
 		
 		this.blockHeader = block;
 		this.scrypt = new Scrypt();
-		
-
-		
-		findPoW();
 	}
 	
 	/**
-	 * Information:
+	 * Used this API's for converting purpose.
+	 * https://commons.apache.org/proper/commons-lang/javadocs/api-release/index.html
+	 * https://commons.apache.org/proper/commons-codec/apidocs/
+	 * 
 	 * https://litecoin.info/Block_hashing_algorithm
 	 * https://litecoin.info/Scrypt
 	 * https://github.com/wg/scrypt/blob/master/src/main/java/com/lambdaworks/crypto/SCrypt.java
+	 * 
 	 * */
-	private void findPoW(){
-		
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-		byte[] hashedHeader = getHashedHeader(outputStream);
-		
-		
-		this.test = hashedHeader;
+public void startMiningPOW(){
+	
+		byte[] hashedHeader = getHashedHeader();
+		byte[] random32Bit = new byte[BIT32];
+		byte[] targetInByteArray  = StringUtils.getBytesUsAscii(blockHeader.getDifficulty());
 		
 		SecureRandom nonce = new SecureRandom();
-		byte[] random32Bit = new byte[BIT32];
-		
-		BigInteger target = getDifficultyTargetAsInteger();
+		BigInteger target = new BigInteger(targetInByteArray);
 		BigInteger challenge;
 		
 		int loop = RUNNING;
 		while(loop == RUNNING)
 		{
-				nonce.nextBytes(random32Bit);			
-				byte[] concatByte = concat(hashedHeader , random32Bit);
-				
-//Enable for test use only!!! -> Delte
-//				System.out.println("hashedHeader Original: " + Arrays.toString(hashedHeader));
-//				System.out.println("               Random: " + Arrays.toString(random32Bit));
-//				System.out.println("hashedHeader + Random: " + Arrays.toString(concatByte));
-				
-		
-			byte[] scryptHashed = SHA.sha256().digest(concatByte);
-//For scrypt hashine!!! -> May change if possible???
-//			byte[] scryptHashed = this.scrypt.hash(outputStream.toByteArray()); -> Hash with scrypt...
+			nonce.nextBytes(random32Bit);			
+			byte[] concatedByte = concat(hashedHeader , random32Bit);
 			
-			long convertedByteArrayIntoLong =  convertIntoLong(scryptHashed);
-			
-			challenge = Utils.decodeCompactBits(convertedByteArrayIntoLong);
-			System.err.println("challenge: " + challenge.toString());
-			
-			if(compareBigInteger(challenge , target)){
+			//For scrypt hashine!!! -> May change if possible???
+			byte[] sha256Hashed = SHA.sha256().digest(concatedByte);
+			challenge = invertNegaitve(sha256Hashed);
+
+			//Enable for test use only!!! -> Delete
+			System.err.println("Challenge: " + challenge.toString());
+			System.err.println("Target:    " + target.toString());
+
+			if(compareBigInteger(challenge, target)){
 				loop = EXIT;
 			}	
 		}	
 	}
-	
-	private long convertIntoLong(byte[] byteArrayToConvert){
-		long converted = 0;
-		for (int i = 0; i < byteArrayToConvert.length; i++)
-		{
-			converted = (converted << 8) + (byteArrayToConvert[i] & 0xff);
-		}
-		return converted;
+
+	private BigInteger invertNegaitve(byte[] toInvertBitInteger){
+		boolean isNegative = (toInvertBitInteger[0] & 0x80) == 0x80;
+		if (isNegative)
+			toInvertBitInteger[0] &= 0x7f;
+		return new BigInteger(toInvertBitInteger);
 	}
 	
 	
@@ -112,32 +101,17 @@ public class PoW {
 		return false;
     }
 	
-    /**
-     * Returns the difficulty target as a 256 bit value that can be compared to a SHA-256 hash. Inside a block the
-     * target is represented using a compact form. If this form decodes to a value that is out of bounds, an exception
-     * is thrown.
-     */
-    public BigInteger getDifficultyTargetAsInteger(){
-       
-        BigInteger target = Utils.decodeCompactBits(this.blockHeader.getDifficulty());
-        if (target.compareTo(BigInteger.ZERO) <= 0)
-            System.err.println("Target: " + target.toString());
-        return target;
-    }
  
-	private byte[] getHashedHeader(ByteArrayOutputStream outputStream){
+	private byte[] getHashedHeader(){
 		
 		byte[] version = byteToArray(blockHeader.getVersion());
 		byte[] hashPrevBlock = blockHeader.getHashedPrevBlock().getBytes();
 		byte[] hashMerkleRoot = blockHeader.getHashedMerkleRoot().getBytes();
-		byte[] timeStamp = byteToArray(blockHeader.getTimestamp());//!!! Cast to int -> Wrong!!!
-		byte[] difficulty = byteToArray(blockHeader.getDifficulty());
+		byte[] timeStamp = byteToArray(blockHeader.getTimestamp());
+		byte[] difficulty = StringUtils.getBytesUsAscii(blockHeader.getDifficulty());
 		
-		byte[] concatByte = concat(version, hashPrevBlock, hashMerkleRoot, timeStamp, difficulty);
-			
-//For scrypt hashine!!! -> May change if possible???		
-//		return scrypt.hash(outputStream.toByteArray()); 
-		return SHA.sha256().digest(concatByte);			
+		return concat(version, hashPrevBlock, hashMerkleRoot, timeStamp, difficulty);
+
 	}
 	
 	private byte[] byteToArray( final long i ) {

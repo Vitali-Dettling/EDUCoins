@@ -18,9 +18,7 @@ public class Miner {
 		block.setHashedPrevBlock("Damy value previouse block");
 		block.setHashedMerkleRoot("Damy value merkle root");
 		block.setTimestamp(0);
-		block.setDifficulty(Long.parseLong("1d07fff8", 16));//Max difficulty, because of 0xFFFFFFFF => 4294967295 
-		 																   
-		 																       
+		block.setDifficulty("fffffffffffffffffffffffffffff");//29 f's Time between 15 and 30 seconds.
 
 		MinerThread minerThread = new MinerThread();
 		minerThread.start();
@@ -37,10 +35,11 @@ public class Miner {
 
 			while (true) {
 
-				new PoW(block);
+				new PoW(block).startMiningPOW();
 				blockChain.addBlock(block);
 
 				System.out.println("Block");
+				System.out.println();
 
 			}
 		}

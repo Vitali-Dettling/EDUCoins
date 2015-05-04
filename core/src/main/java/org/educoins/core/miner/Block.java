@@ -8,13 +8,7 @@ public class Block {
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
 	private long timestamp;
-	//Max difficulty, because of 0xFFFFFFFF => 4294967295
-	private long difficulty; // The target threshold is a 256-bit unsigned
-							// integer
-							// which a header hash must be equal to or below in
-							// order for that header to be a valid part of the
-							// block chain.
-							// Bits is the same as the Difficulty.
+	private String difficulty;
 	private long nonce;
 
 	// Additional block information
@@ -56,11 +50,11 @@ public class Block {
 		this.timestamp = timestamp;
 	}
 
-	public long getDifficulty() {
+	public String getDifficulty() {
 		return difficulty;
 	}
 
-	public void setDifficulty(long difficulty) {
+	public void setDifficulty(String difficulty) {
 		this.difficulty = difficulty;
 	}
 
@@ -99,7 +93,7 @@ public class Block {
 	@Override
 	public String toString() {
 		return String.format("Block[version=%d;" + "hashPrevBlock=%s;"
-				+ "hashMerkleRoot=%s;timestamp=%d;difficulty=%d;nonce=%d]",
+				+ "hashMerkleRoot=%s;timestamp=%d;difficulty=%s;nonce=%d]",
 				version, hashPrevBlock, hashMerkleRoot, timestamp, difficulty,
 				nonce);
 	}
