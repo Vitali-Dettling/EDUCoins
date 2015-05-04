@@ -1,38 +1,47 @@
 package org.educoins.core.miner;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 public class BlockChain {
 
-	private File blockChainFile;
+	private static int blockCount = 0;
+	private File directory;
+	private PrintWriter newBlock;
 
-	public BlockChain() throws IOException {
-		blockChainFile = new File("blockchain.txt");
-		if (!blockChainFile.exists()) {
-			try {
-				blockChainFile.createNewFile();
-			} catch (IOException e) {
-				System.err.printf("Error while creating block chain file: "
-						+ "%s\r\n", e.toString());
-				throw e;
-			}
-		}
+	public BlockChain() {
+
+		this.directory = new File("./../../../BlockChain");
 	}
 
-	public void addBlock(Block block) {
-		PrintWriter writer = null;
-		try {
-			writer = new PrintWriter(new FileOutputStream(blockChainFile, true));
-			writer.println(block);
-		} catch (IOException e) {
-			System.err.printf("Error while writing to block chain file: "
-					+ "%s\r\n", e.toString());
-		} finally {
-			writer.close();
+	public void newBlock(Block block) {
+
+		//Löschen nachdem das Program fertig ist, weil er den BlockChain ordner nicht löschen soll, sondern immer erweitern...
+		if(this.blockCount == 0){
+			for(String s: this.directory.list()){
+			    File currentFile = new File(this.directory.getPath(),s);
+			    currentFile.delete();
+			}
+		}//!!! Bis hier Löschen !!!
+		
+		if (!directory.isDirectory()) {
+			this.directory.mkdirs();
 		}
+
+		try {
+			this.newBlock = new PrintWriter(this.directory.getPath()
+					+ "//Block_" + this.blockCount++, "UTF-8");
+
+			this.newBlock.println(block);
+			this.newBlock.close();
+
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			e.printStackTrace();
+			System.err.println("ERROR: Class BlockChain");
+		}
+
 	}
 
 }

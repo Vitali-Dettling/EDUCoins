@@ -1,6 +1,12 @@
 package org.educoins.core.miner;
 
+import java.math.BigInteger;
+
 public class Block {
+	
+	private final static long DEFAULT_VALUE= 0;
+	private final static String DEFAULT_DIFFICULTY_30 = "ffffffffffffffffffffffffffffff";
+	private final static String GENESIS_BLOCK = "Genesis Block";
 
 	// BlockHeader parameters for the PoW algorithm
 	// https://litecoin.info/Block_header
@@ -9,7 +15,7 @@ public class Block {
 	private String hashMerkleRoot;
 	private long timestamp;
 	private String difficulty;
-	private long nonce;
+	private BigInteger nonce;
 
 	// Additional block information
 	private long id;
@@ -18,6 +24,17 @@ public class Block {
 
 	// List<? extends Appendix> getAppendages(); !!! -> Will we need later !!!
 
+	
+	public Block(){
+		//Genesis Block and default values
+		this.version = DEFAULT_VALUE;
+		this.hashPrevBlock = GENESIS_BLOCK;
+		this.hashMerkleRoot = Long.toString(DEFAULT_VALUE);
+		this.timestamp = DEFAULT_VALUE;
+		this.difficulty = DEFAULT_DIFFICULTY_30;
+		this.nonce = BigInteger.valueOf(DEFAULT_VALUE); 
+	}
+	
 	public long getVersion() {
 		return version;
 	}
@@ -30,7 +47,7 @@ public class Block {
 		return hashPrevBlock;
 	}
 
-	public void setHashedPrevBlock(String prevBlock) {
+	public void setNewHashValue(String prevBlock) {
 		this.hashPrevBlock = prevBlock;
 	}
 
@@ -46,8 +63,8 @@ public class Block {
 		return timestamp;
 	}
 
-	public void setTimestamp(int timestamp) {
-		this.timestamp = timestamp;
+	public void setTimestamp(long timeStamp) {
+		this.timestamp = timeStamp;
 	}
 
 	public String getDifficulty() {
@@ -58,11 +75,11 @@ public class Block {
 		this.difficulty = difficulty;
 	}
 
-	public long getNonce() {
+	public BigInteger getNonce() {
 		return nonce;
 	}
 
-	public void setNonce(int nonce) {
+	public void setNonce(BigInteger nonce) {
 		this.nonce = nonce;
 	}
 
@@ -92,10 +109,13 @@ public class Block {
 
 	@Override
 	public String toString() {
-		return String.format("Block[version=%d;" + "hashPrevBlock=%s;"
-				+ "hashMerkleRoot=%s;timestamp=%d;difficulty=%s;nonce=%d]",
-				version, hashPrevBlock, hashMerkleRoot, timestamp, difficulty,
-				nonce);
+		return String.format("version = %d; \n" + 
+							 "hashPrevBlock = %s; \n" + 
+							 "hashMerkleRoot = %s; \n" + 
+							 "timestamp = %d; \n" + 
+							 "difficulty = %s; \n" +
+							 "nonce = %d \n",
+							 version, hashPrevBlock, hashMerkleRoot, timestamp, difficulty,	nonce);
 	}
 
 }

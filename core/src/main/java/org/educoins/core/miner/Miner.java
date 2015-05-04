@@ -9,17 +9,6 @@ public class Miner {
 
 	public static void main(String[] args) throws IOException {
 		
-		blockChain = new BlockChain();
-
-		block = new Block();
-
-		// Dummy
-		block.setVersion(0);
-		block.setHashedPrevBlock("Damy value previouse block");
-		block.setHashedMerkleRoot("Damy value merkle root");
-		block.setTimestamp(0);
-		block.setDifficulty("fffffffffffffffffffffffffffff");//29 f's Time between 15 and 30 seconds.
-
 		MinerThread minerThread = new MinerThread();
 		minerThread.start();
 
@@ -32,17 +21,26 @@ public class Miner {
 	public static class MinerThread extends Thread {
 
 		public void run() {
-
+			
+			//Hier Klasse um letzten Block aus der BlocChain, mit daten zu bekommen...
+			blockChain = new BlockChain();
+			PoW mining = new PoW();	
+			Block lastBlock = new Block();
+			Block newBlock = lastBlock;
 			while (true) {
-
-				new PoW(block).startMiningPOW();
-				blockChain.addBlock(block);
+				
+				blockChain.newBlock(newBlock);
+				newBlock = mining.startMiningPOW(lastBlock);
 
 				System.out.println("Block");
-				System.out.println();
-
 			}
 		}
 	}
-
 }
+
+
+
+
+
+
+

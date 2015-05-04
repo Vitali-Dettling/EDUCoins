@@ -1,42 +1,20 @@
 package org.educoins.core.miner;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-import java.util.Arrays;
+import java.sql.Timestamp;
 
-import javax.xml.bind.DatatypeConverter;
-
-import org.apache.commons.codec.BinaryEncoder;
-import org.apache.commons.codec.binary.BinaryCodec;
 import org.apache.commons.codec.binary.StringUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.educoins.core.cryptography.Hashes;
 import org.educoins.core.cryptography.SHA;
-import org.educoins.core.cryptography.Scrypt;
 
 
 
 
 public class PoW {
-	
-	
-	private final static int RUNNING = 0;
-	private final static int EXIT = 1;
-	private final static int BIT32 = 32;
-	private final static int BIT256 = 256;
-	private final static int HEX = 16;
-	
-	private final Scrypt scrypt;
-	private Block blockHeader;		
-	
-	public PoW(Block block){
 		
-		this.blockHeader = block;
-		this.scrypt = new Scrypt();
-	}
+	private final static boolean RUNNING = true;
+	private final static int BIT32 = 32;
+	private final static String SHA256 = "SHA-256";
 	
 	/**
 	 * Used this API's for converting purpose.
@@ -48,35 +26,50 @@ public class PoW {
 	 * https://github.com/wg/scrypt/blob/master/src/main/java/com/lambdaworks/crypto/SCrypt.java
 	 * 
 	 * */
-public void startMiningPOW(){
+public Block startMiningPOW(Block lastBlock){
 	
-		byte[] hashedHeader = getHashedHeader();
+		byte[] hashedHeader = getHashedHeader(lastBlock);
 		byte[] random32Bit = new byte[BIT32];
-		byte[] targetInByteArray  = StringUtils.getBytesUsAscii(blockHeader.getDifficulty());
+		byte[] targetInByteArray  = StringUtils.getBytesUsAscii(lastBlock.getDifficulty());
 		
 		SecureRandom nonce = new SecureRandom();
 		BigInteger target = new BigInteger(targetInByteArray);
 		BigInteger challenge;
-		
-		int loop = RUNNING;
-		while(loop == RUNNING)
+
+		while(RUNNING)
 		{
 			nonce.nextBytes(random32Bit);			
 			byte[] concatedByte = concat(hashedHeader , random32Bit);
 			
 			//For scrypt hashine!!! -> May change if possible???
-			byte[] sha256Hashed = SHA.sha256().digest(concatedByte);
+			byte[] sha256Hashed = SHA.getMessageDigest(SHA256).digest(concatedByte);
 			challenge = invertNegaitve(sha256Hashed);
 
 			//Enable for test use only!!! -> Delete
-			System.err.println("Challenge: " + challenge.toString());
-			System.err.println("Target:    " + target.toString());
+			//System.err.println("Challenge: " + challenge.toString());
+			//System.err.println("Target:    " + target.toString());
 
-			if(compareBigInteger(challenge, target)){
-				loop = EXIT;
+			if(compareBigInteger(challenge, target)){	
+				return SetNewBlock(challenge, random32Bit);
 			}	
 		}	
 	}
+
+	private Block SetNewBlock(BigInteger newHashValue, byte[] nonce)
+	{
+		Block newBlock = new Block();
+		newBlock.setNewHashValue(newHashValue.toString());
+		newBlock.setNonce(invertNegaitve(nonce));
+		newBlock.setTimestamp(System.currentTimeMillis());
+		
+		//todo: Müssen noch immplementiert werden und sich überlegen wie??? 
+		newBlock.setVersion(1);
+		newBlock.setHashedMerkleRoot("0");
+		/////////////////////////////////////////////////////77
+		
+		return newBlock;
+	}
+	
 
 	private BigInteger invertNegaitve(byte[] toInvertBitInteger){
 		boolean isNegative = (toInvertBitInteger[0] & 0x80) == 0x80;
@@ -102,16 +95,15 @@ public void startMiningPOW(){
     }
 	
  
-	private byte[] getHashedHeader(){
+	private byte[] getHashedHeader(Block lastblock){
 		
-		byte[] version = byteToArray(blockHeader.getVersion());
-		byte[] hashPrevBlock = blockHeader.getHashedPrevBlock().getBytes();
-		byte[] hashMerkleRoot = blockHeader.getHashedMerkleRoot().getBytes();
-		byte[] timeStamp = byteToArray(blockHeader.getTimestamp());
-		byte[] difficulty = StringUtils.getBytesUsAscii(blockHeader.getDifficulty());
+		byte[] version = byteToArray(lastblock.getVersion());
+		byte[] hashPrevBlock = lastblock.getHashedPrevBlock().getBytes();
+		byte[] hashMerkleRoot = lastblock.getHashedMerkleRoot().getBytes();
+		byte[] timeStamp = byteToArray(lastblock.getTimestamp());
+		byte[] difficulty = StringUtils.getBytesUsAscii(lastblock.getDifficulty());
 		
 		return concat(version, hashPrevBlock, hashMerkleRoot, timeStamp, difficulty);
-
 	}
 	
 	private byte[] byteToArray( final long i ) {
