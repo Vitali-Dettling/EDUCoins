@@ -5,37 +5,38 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
-public class BlockChain {
+public final class BlockChain {
 
 	private static int blockCount = 0;
-	private File directory;
-	private PrintWriter newBlock;
+	private static File directory;
+	private static PrintWriter newBlock;
 
-	public BlockChain() {
 
-		this.directory = new File("./../../../BlockChain");
+	public static void setAddress(String blockChainDirectory) {
+		directory = new File(blockChainDirectory);
+		
 	}
+	
+	public static void newBlock(Block block) {
 
-	public void newBlock(Block block) {
-
+		if (!directory.isDirectory()) {
+			directory.mkdirs();
+		}
+		
 		//Löschen nachdem das Program fertig ist, weil er den BlockChain ordner nicht löschen soll, sondern immer erweitern...
-		if(this.blockCount == 0){
-			for(String s: this.directory.list()){
-			    File currentFile = new File(this.directory.getPath(),s);
+		if(blockCount == 0){
+			for(String s: directory.list()){
+			    File currentFile = new File(directory.getPath(),s);
 			    currentFile.delete();
 			}
 		}//!!! Bis hier Löschen !!!
 		
-		if (!directory.isDirectory()) {
-			this.directory.mkdirs();
-		}
-
 		try {
-			this.newBlock = new PrintWriter(this.directory.getPath()
-					+ "//Block_" + this.blockCount++, "UTF-8");
+			newBlock = new PrintWriter(directory.getPath()
+					+ "//Block_" + blockCount++, "UTF-8");
 
-			this.newBlock.println(block);
-			this.newBlock.close();
+			newBlock.println(block);
+			newBlock.close();
 
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -43,5 +44,9 @@ public class BlockChain {
 		}
 
 	}
+
+
+
+
 
 }

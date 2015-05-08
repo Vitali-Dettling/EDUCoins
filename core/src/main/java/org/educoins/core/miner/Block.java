@@ -1,12 +1,22 @@
 package org.educoins.core.miner;
 
+
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+
+import org.educoins.core.client.Transaction;
+
 
 public class Block {
 	
 	private final static long DEFAULT_VALUE= 0;
-	private final static String DEFAULT_DIFFICULTY_30 = "ffffffffffffffffffffffffffffff";
+//	private final static String DEFAULT_DIFFICULTY_30 = "ffffffffffffffffffffffffffffff";TODO Delete ???
+	private final static String DEFAULT_DIFFICULTY_30 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 	private final static String GENESIS_BLOCK = "Genesis Block";
+	private final static int HEX = 16;
 
 	// BlockHeader parameters for the PoW algorithm
 	// https://litecoin.info/Block_header
@@ -14,7 +24,7 @@ public class Block {
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
 	private long timestamp;
-	private String difficulty;
+	private BigInteger difficulty;
 	private BigInteger nonce;
 
 	// Additional block information
@@ -22,7 +32,7 @@ public class Block {
 	private int height;
 	private int nTx;// Count of all transactions
 
-	// List<? extends Appendix> getAppendages(); !!! -> Will we need later !!!
+	private List <Transaction> transactions;
 
 	
 	public Block(){
@@ -31,8 +41,12 @@ public class Block {
 		this.hashPrevBlock = GENESIS_BLOCK;
 		this.hashMerkleRoot = Long.toString(DEFAULT_VALUE);
 		this.timestamp = DEFAULT_VALUE;
-		this.difficulty = DEFAULT_DIFFICULTY_30;
-		this.nonce = BigInteger.valueOf(DEFAULT_VALUE); 
+		this.difficulty = new BigInteger(DEFAULT_DIFFICULTY_30, HEX);
+		this.nonce = BigInteger.valueOf(DEFAULT_VALUE);		
+	}
+	
+	public void addTransaction(List<Transaction> transactions) {
+		this.transactions = transactions;
 	}
 	
 	public long getVersion() {
@@ -67,11 +81,11 @@ public class Block {
 		this.timestamp = timeStamp;
 	}
 
-	public String getDifficulty() {
+	public BigInteger getDifficulty() {
 		return difficulty;
 	}
 
-	public void setDifficulty(String difficulty) {
+	public void setDifficulty(BigInteger difficulty) {
 		this.difficulty = difficulty;
 	}
 
@@ -109,13 +123,22 @@ public class Block {
 
 	@Override
 	public String toString() {
+		
+		
+		
+		
+		
 		return String.format("version = %d; \n" + 
 							 "hashPrevBlock = %s; \n" + 
 							 "hashMerkleRoot = %s; \n" + 
 							 "timestamp = %d; \n" + 
 							 "difficulty = %s; \n" +
-							 "nonce = %d \n",
-							 version, hashPrevBlock, hashMerkleRoot, timestamp, difficulty,	nonce);
+							 "nonce = %d \n" +
+							 "\n\n" +
+							 "nTx = %d \n", +
+							 version, hashPrevBlock, hashMerkleRoot, timestamp, difficulty,	nonce, nTx);
+
+		
 	}
 
 }
