@@ -15,8 +15,7 @@ import Transactions.Transaction;
 public class Block {
 	
 	private final static long DEFAULT_VALUE = 0;
-//	private final static String DEFAULT_DIFFICULTY_30 = "ffffffffffffffffffffffffffffff";TODO Delete ???
-	private final static String DEFAULT_DIFFICULTY_30 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+	private final static String DEFAULT_DIFFICULTY_62 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 	private final static String GENESIS_BLOCK = "Genesis Block";
 	private final static int HEX = 16;
 
@@ -26,8 +25,8 @@ public class Block {
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
 	private long timestamp;
-	private BigInteger difficulty;
-	private BigInteger nonce;
+	private String difficulty;
+	private String nonce;
 
 	// Additional block information
 	private long id;
@@ -44,8 +43,8 @@ public class Block {
 		this.hashPrevBlock = GENESIS_BLOCK;
 		this.hashMerkleRoot = GENESIS_BLOCK;
 		this.timestamp = DEFAULT_VALUE;
-		this.difficulty = new BigInteger(DEFAULT_DIFFICULTY_30, HEX);
-		this.nonce = BigInteger.valueOf(DEFAULT_VALUE);		
+		this.difficulty = DEFAULT_DIFFICULTY_62;
+		this.nonce = GENESIS_BLOCK;		
 		this.height = (int) DEFAULT_VALUE;
 		this.transactions = new ArrayList<Transaction>();
 	}
@@ -86,19 +85,19 @@ public class Block {
 		this.timestamp = timeStamp;
 	}
 
-	public BigInteger getDifficulty() {
+	public String getDifficulty() {
 		return difficulty;
 	}
 
-	public void setDifficulty(BigInteger difficulty) {
+	public void setDifficulty(String difficulty) {
 		this.difficulty = difficulty;
 	}
 
-	public BigInteger getNonce() {
+	public String getNonce() {
 		return nonce;
 	}
 
-	public void setNonce(BigInteger nonce) {
+	public void setNonce(String nonce) {
 		this.nonce = nonce;
 	}
 
@@ -127,8 +126,8 @@ public class Block {
 							 "hashPrevBlock = %s; \n" + 
 							 "hashMerkleRoot = %s; \n" + 
 							 "timestamp = %d; \n" + 
-							 "difficulty = %d; \n" +
-							 "nonce = %d \n" +
+							 "difficulty = %s; \n" +
+							 "nonce = %s \n" +
 							 "\n", + 
 							 version, hashPrevBlock, hashMerkleRoot, timestamp, difficulty, nonce);
 		

@@ -10,16 +10,21 @@ import Transactions.Transaction;
 public final class Wallet {
 
 	private static String walletAddress;
-	private static Transaction transaction;
 
-	public static void enterWalletAddress() {
+	public static void enterWalletAddress(String EDUCoinAddress) {
 
 		//TODO: Asking for wallet address...
-		walletAddress = "Address";
-		
-		
+		walletAddress = EDUCoinAddress;
 
 	}
+	
+	
+	public static String getWalletAddress() {
+		return walletAddress;
+	}
+
+	
+	
 
 	
 

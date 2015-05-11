@@ -1,15 +1,15 @@
 package org.educoins.core.miner;
 
-import java.io.Console;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import org.educoins.core.client.Wallet;
+import org.educoins.core.cryptography.ECDSA;
 import org.educoins.core.cryptography.SHA;
 
 import Transactions.EType;
@@ -27,9 +27,10 @@ public class Miner {
 	private static final int BIT32 = 32;
 	private static final String SHA256 = "SHA-256";
 	private static final int BLOCK_REWARD = 10; //TODO Dummy has to be changed...
+	private static final int BIG_ENDIAN_ALWAYS_POSITIVE = 1;
+	private static final int HEX = 16;
 	
 	//TODO Delete after Testing!!!
-	private static final String pubKHash = "Dummy Umändern";
 	private static final long testVersion = 1;
 	///////////////////////////////////
 	
@@ -37,20 +38,17 @@ public class Miner {
 	private static long lastBlockTime;
 	
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, SignatureException {//TODO Delete Exception...
 
 		//TODO: Tread ist nur drinnen, damit man den Rechner nutzen kann und er nicht voll beschäftig ist zu minern... 
 		//Den Inhalt vom thread in den haupt thread einbinden, sobald der Miner seperat läuft...
 		
-		Wallet.enterWalletAddress();
-		
-		MinerThread minerThread = new MinerThread();
+		MinerThread minerThread = new MinerThread();	
 		minerThread.start();
 
 		// Input inputTransacation = new Input();
 
 		Thread.yield();
-
 	}
 
 	public static class MinerThread extends Thread {
@@ -61,6 +59,10 @@ public class Miner {
 			// bekommen...
 			Block block = new Block();
 			BlockChain.setAddress("./../../../BlockChain");
+			
+			ECDSA publicKey = new ECDSA(); 
+			//TODO Falsch, es darf keine direkte Verbindung zur Wallet gehen...
+			Wallet.enterWalletAddress(publicKey.getPublicKey().toString());
 			
 			lastBlockTime = System.currentTimeMillis();
 			blockCounter = 0;
@@ -81,13 +83,13 @@ public class Miner {
 		//TODO lockingScript procedure has to be established, which fits our needs...
 		String lockingScript = EScripts.DUB.toString() + " " +
 							   EScripts.HASH160.toString() + " " +
-							   pubKHash + " " +
+							   Wallet.getWalletAddress() + " " +//TODO Might needs to be delete after real address entry!!!
 							   EScripts.EQUALVERIFY.toString() + " " +
 							   EScripts.CHECKSIG.toString();
-
+		//Input is empty because it is a coinbase transaction.
 		List<Input> input = new ArrayList<Input>();
 		List<Output> output = new ArrayList<Output>();
-		output.add(new Output(BLOCK_REWARD, pubKHash, EType.COINBASE, lockingScript));
+		output.add(new Output(BLOCK_REWARD, Wallet.getWalletAddress(), EType.COINBASE, lockingScript));
 		//Input is empty because it is a coinbase transaction.
 		Transaction transation = new Transaction(testVersion, input, output);
 		block.addTransaction(transation);
@@ -109,12 +111,11 @@ public class Miner {
 		if(blockCounter == CHECK_AFTER_BLOCKS){
 
 			long currentBlockTime = System.currentTimeMillis();
-			BigDecimal currentDifficulty = new BigDecimal(block.getDifficulty()).setScale(100, BigDecimal.ROUND_HALF_UP);;
+			BigDecimal currentDifficulty = new BigDecimal(new BigInteger(block.getDifficulty(), HEX)).setScale(100, BigDecimal.ROUND_HALF_UP);
 			BigDecimal actualBlockTime = BigDecimal.valueOf(currentBlockTime - lastBlockTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
 			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 			BigDecimal newDifficulty = currentDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME), BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP)); 
-			
-			block.setDifficulty(newDifficulty.toBigInteger());
+			block.setDifficulty(newDifficulty.toBigInteger().toString(HEX));			
 			lastBlockTime = currentBlockTime;
 			blockCounter = 0;
 		}
@@ -140,8 +141,8 @@ public class Miner {
 		byte[] hashedHeader = getHashedHeader(block);
 		byte[] random32Bit = new byte[BIT32];
 		
-		SecureRandom nonce = new SecureRandom();
-		BigInteger target = block.getDifficulty();
+		SecureRandom nonce = new SecureRandom();//TODO Vielleicht die SecureRandom con ECDSA nutzen??? -> Damit es nur einmal defeniert worden ist...
+		BigInteger target = new BigInteger(block.getDifficulty(), HEX);
 		BigInteger challenge;
 
 		while (RUNNING) {
@@ -150,11 +151,13 @@ public class Miner {
 
 			// For scrypt hashine!!! -> May change if possible???
 			byte[] sha256Hashed = SHA.getMessageDigest(SHA256).digest(concatedByte);
-			challenge = invertNegaitve(sha256Hashed);
+			challenge = new BigInteger(BIG_ENDIAN_ALWAYS_POSITIVE, sha256Hashed);
 
 			// Enable for test use only!!! -> Delete
-			   System.err.println("Challenge: " + challenge.toString().length());
-			   System.err.println("Target:    " + target.toString().length());
+//			   System.err.println("Challenge: " + challenge.toString().length());
+//			   System.err.println("Target:    " + target.toString().length());
+			   System.err.println("Challenge: " + challenge.toString());
+			   System.err.println("Target:    " + target.toString());
 
 			if (compareBigInteger(challenge, target)) {
 				return createNewBlockHeader(challenge, random32Bit, block.getDifficulty(), block.getHeight());
@@ -162,12 +165,12 @@ public class Miner {
 		}
 	}
 
-	private static Block createNewBlockHeader(BigInteger newHashValue, byte[] nonce, BigInteger newDifficulty, int blockHeight) {
+	private static Block createNewBlockHeader(BigInteger newHashValue, byte[] nonce, String newDifficulty, int blockHeight) {
 		
 		//Block header.
 		Block newBlock = new Block();
 		newBlock.setNewHashValue(newHashValue.toString());
-		newBlock.setNonce(invertNegaitve(nonce));
+		newBlock.setNonce(new BigInteger(BIG_ENDIAN_ALWAYS_POSITIVE, nonce).toString(HEX));
 		newBlock.setTimestamp(System.currentTimeMillis());
 		newBlock.setDifficulty(newDifficulty);
 
@@ -216,7 +219,7 @@ public class Miner {
 		byte[] hashPrevBlock = lastblock.getHashedPrevBlock().getBytes();
 		byte[] hashMerkleRoot = lastblock.getHashedMerkleRoot().getBytes();
 		byte[] timeStamp = byteToArray(lastblock.getTimestamp());
-		byte[] difficulty = lastblock.getDifficulty().toByteArray();
+		byte[] difficulty = lastblock.getDifficulty().getBytes();
 
 		return concat(version, hashPrevBlock, hashMerkleRoot, timeStamp, difficulty);
 	}
