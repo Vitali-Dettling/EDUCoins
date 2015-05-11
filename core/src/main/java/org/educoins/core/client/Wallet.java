@@ -5,6 +5,8 @@ import java.io.Console;
 
 import org.educoins.core.miner.Block;
 
+import Transactions.Transaction;
+
 public final class Wallet {
 
 	private static String walletAddress;
@@ -15,20 +17,10 @@ public final class Wallet {
 		//TODO: Asking for wallet address...
 		walletAddress = "Address";
 		
-		transaction = new Transaction();
+		
 
 	}
 
-	public static void reward(Block block) {
-		
-		//Increase the transaction number by one...
-		block.setnTx(block.getnTx()+1);
-		
-		
 	
-		
-		
-
-	}
 
 }

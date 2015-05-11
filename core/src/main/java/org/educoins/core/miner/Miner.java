@@ -5,10 +5,16 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import org.educoins.core.client.Wallet;
 import org.educoins.core.cryptography.SHA;
+
+import Transactions.EType;
+import Transactions.Output;
+import Transactions.Transaction;
 
 public class Miner {
 
@@ -20,6 +26,12 @@ public class Miner {
 	private static final boolean RUNNING = true;
 	private static final int BIT32 = 32;
 	private static final String SHA256 = "SHA-256";
+	private static final int BLOCK_REWARD = 10; //TODO Dummy has to be changed...
+	
+	//TODO Delete after Testing!!!
+	private static final String pubKHash = "Dummy Umändern";
+	private static final long testVersion = 1;
+	///////////////////////////////////
 	
 	private static int blockCounter;
 	private static long lastBlockTime;
@@ -55,22 +67,31 @@ public class Miner {
 			
 			while (true) {
 
-				blockFound(block);
 				BlockChain.newBlock(block);
 				retargedDifficulty(block);
-				miningPOW(block);
+				block = miningPOW(block);
+				reward(block);
 			}
 		}
 	}
 	
 	
-	private static void blockFound(Block block){
+	public static void reward(Block block) {
 		
-		block.setnTx(block.getnTx()+1);
-		//TODO Make seriouse though how it will work from here on forward????
-		
-		
-	} 
+		//TODO lockingScript procedure has to be established, which fits our needs...
+		String lockingScript = EScripts.DUB.toString() + " " +
+							   EScripts.HASH160.toString() + " " +
+							   pubKHash + " " +
+							   EScripts.EQUALVERIFY.toString() + " " +
+							   EScripts.CHECKSIG.toString();
+
+		List<Input> input = new ArrayList<Input>();
+		List<Output> output = new ArrayList<Output>();
+		output.add(new Output(BLOCK_REWARD, pubKHash, EType.COINBASE, lockingScript));
+		//Input is empty because it is a coinbase transaction.
+		Transaction transation = new Transaction(testVersion, input, output);
+		block.addTransaction(transation);
+	}
 	
 	
 
@@ -89,7 +110,8 @@ public class Miner {
 
 			long currentBlockTime = System.currentTimeMillis();
 			BigDecimal currentDifficulty = new BigDecimal(block.getDifficulty()).setScale(100, BigDecimal.ROUND_HALF_UP);;
-			BigDecimal actualBlockTime = BigDecimal.valueOf(currentBlockTime - lastBlockTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);					
+			BigDecimal actualBlockTime = BigDecimal.valueOf(currentBlockTime - lastBlockTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
+			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 			BigDecimal newDifficulty = currentDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME), BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP)); 
 			
 			block.setDifficulty(newDifficulty.toBigInteger());
@@ -113,7 +135,7 @@ public class Miner {
 	 * main/java/com/lambdaworks/crypto/SCrypt.java
 	 * 
 	 * */
-	public static void miningPOW(Block block) {
+	public static Block miningPOW(Block block) {
 
 		byte[] hashedHeader = getHashedHeader(block);
 		byte[] random32Bit = new byte[BIT32];
@@ -135,25 +157,28 @@ public class Miner {
 			   System.err.println("Target:    " + target.toString().length());
 
 			if (compareBigInteger(challenge, target)) {
-				block = createNewBlock(challenge, random32Bit, block.getDifficulty());
-				break;
+				return createNewBlockHeader(challenge, random32Bit, block.getDifficulty(), block.getHeight());
 			}
 		}
 	}
 
-	private static Block createNewBlock(BigInteger newHashValue, byte[] nonce, BigInteger newDifficulty) {
+	private static Block createNewBlockHeader(BigInteger newHashValue, byte[] nonce, BigInteger newDifficulty, int blockHeight) {
 		
+		//Block header.
 		Block newBlock = new Block();
 		newBlock.setNewHashValue(newHashValue.toString());
 		newBlock.setNonce(invertNegaitve(nonce));
 		newBlock.setTimestamp(System.currentTimeMillis());
 		newBlock.setDifficulty(newDifficulty);
 
-		// TODO [Vitali] Müssen noch immplementiert werden und sich überlegen
+		// TODO Müssen noch immplementiert werden und sich überlegen
 		// wie???
-		newBlock.setVersion(1);
+		newBlock.setVersion(testVersion);
 		newBlock.setHashedMerkleRoot("0");
 		// ///////////////////////////////////////////////////
+		
+		//Block additional information.
+		newBlock.setHeight(++blockHeight);
 
 		return newBlock;
 	}
