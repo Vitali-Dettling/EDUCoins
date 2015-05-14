@@ -1,5 +1,6 @@
 package org.educoins.demo;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,11 +8,18 @@ import java.nio.file.Paths;
 
 import org.educoins.core.Block;
 import org.educoins.core.IBlockTransmitter;
+import org.educoins.core.cryptography.SHA256Hasher;
+import org.educoins.core.utils.ByteArray;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class DemoBlockTransmitter implements IBlockTransmitter {
 
 	private Path localStorage;
 	private Path remoteStorage;
+
+	private Gson gson;
 
 	public DemoBlockTransmitter(String localStorage, String remoteStorage) throws IOException {
 		this(Paths.get(localStorage), Paths.get(remoteStorage));
@@ -36,11 +44,29 @@ public class DemoBlockTransmitter implements IBlockTransmitter {
 		if (!Files.exists(remoteStorage)) {
 			Files.createDirectories(remoteStorage);
 		}
+
+		this.gson = new GsonBuilder().setPrettyPrinting().create();
 	}
 
 	@Override
 	public void transmitBlock(Block block) {
-		
+		Path fileName = Paths.get(ByteArray.convertToString(block.hash(new SHA256Hasher()), 16) + ".json");
+		Path localBlockFile = this.localStorage.resolve(fileName);
+		Path remoteBlockFile = this.remoteStorage.resolve(fileName);
+		try {
+			Files.createFile(localBlockFile);
+			String json = this.gson.toJson(block);
+			FileWriter writer = new FileWriter(localBlockFile.toFile());
+			writer.write(json);
+			writer.close();
+			Thread.sleep(5);
+			Files.copy(localBlockFile, remoteBlockFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }

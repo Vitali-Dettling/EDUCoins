@@ -23,6 +23,7 @@ public class Miner implements IBlockListener {
 
 	@Override
 	public void blockReceived(Block block) {
+		// TODO [joeren]: delete temp message
 		Thread powThread = new PoWThread(blockReceiver, blockTransmitter, block, hasher);
 		powThread.start();
 	}
@@ -46,9 +47,7 @@ public class Miner implements IBlockListener {
 			this.prevBlock = prevBlock;
 
 			this.hasher = hasher;
-
-			this.blockReceiver.addBlockListener(this);
-
+			
 			this.active = true;
 		}
 
@@ -70,6 +69,8 @@ public class Miner implements IBlockListener {
 
 		@Override
 		public void run() {
+			this.blockReceiver.addBlockListener(this);
+			
 			Block block = this.prepareBlock();
 
 			SecureRandom nonceGenerator = new SecureRandom();
@@ -84,7 +85,12 @@ public class Miner implements IBlockListener {
 			} while (this.active && ByteArray.compare(block.hash(hasher), targetThreshold) > 0);
 
 			if (this.active) {
+				// TODO [joeren]: delete output message
+				System.out.println("Won :-)");
 				this.blockTransmitter.transmitBlock(block);
+			} else {
+				// TODO [joeren]: delete output message
+				System.out.println("Loose :-(");
 			}
 
 			this.blockReceiver.removeBlockListener(this);
@@ -94,6 +100,11 @@ public class Miner implements IBlockListener {
 		@Override
 		public void blockReceived(Block block) {
 			this.active = false;
+		}
+		
+		@Override
+		public String toString() {
+			return "PoWThread";
 		}
 	}
 

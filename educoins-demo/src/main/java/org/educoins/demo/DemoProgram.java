@@ -8,7 +8,12 @@ import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
+import org.educoins.core.Block;
+import org.educoins.core.GenesisBlock;
+import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
+import org.educoins.core.Miner;
+import org.educoins.core.cryptography.SHA256Hasher;
 
 public class DemoProgram {
 
@@ -120,6 +125,12 @@ public class DemoProgram {
 
 		if (runMiner) {
 			IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
+			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
+			blockReceiver.receiveBlocks();
+			Miner miner = new Miner(blockReceiver, blockTransmitter, new SHA256Hasher());
+			Block block = new GenesisBlock();
+			blockTransmitter.transmitBlock(block);
 		}
+		
 	}
 }
