@@ -120,6 +120,7 @@ public class DemoBlockReceiver implements IBlockReceiver {
 					Path createdFile = ((WatchEvent<Path>) event).context();
 					if (createdFile.toString().toLowerCase().endsWith(".json")) {
 						try {
+							// XXX [joeren]: Spielerischer Wert
 							Thread.sleep(10);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
