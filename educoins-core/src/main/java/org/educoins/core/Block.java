@@ -2,6 +2,7 @@ package org.educoins.core;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.educoins.core.cryptography.IHasher;
@@ -16,10 +17,12 @@ public class Block {
 	private String bits;
 	private long nonce;
 
-	private List<ATransaction> tx;
+	private int transactionsCount;
+	private List<ATransaction> transactions;
 
 	public Block() {
-		this.tx = new ArrayList<>();
+		this.transactions = new ArrayList<>();
+		this.transactionsCount = this.transactions.size();
 	}
 
 	public int getVersion() {
@@ -70,12 +73,42 @@ public class Block {
 		this.nonce = nonce;
 	}
 
-	public List<ATransaction> getTx() {
-		return this.tx;
+	public int getTransactionsCount() {
+		return this.transactionsCount;
 	}
 
-	public void setTx(List<ATransaction> tx) {
-		this.tx = tx;
+	public List<ATransaction> getTransactions() {
+		// [joeren]: return just a copy of the transaction list, because of
+		// potential effects with transactionsCount
+		if (this.transactions != null) {
+			return new ArrayList<ATransaction>(this.transactions);
+		}
+		return null;
+	}
+
+	public void setTransactions(List<ATransaction> transactions) {
+		this.transactions = transactions;
+		if (this.transactions == null) {
+			this.transactionsCount = 0;
+		} else {
+			this.transactionsCount = this.transactions.size();
+		}
+	}
+
+	public void addTransaction(ATransaction transaction) {
+		if (this.transactions == null) {
+			this.transactions = new ArrayList<>();
+		}
+		this.transactions.add(transaction);
+		this.transactionsCount = this.transactions.size();
+	}
+
+	public void addTransactions(Collection<ATransaction> transactions) {
+		if (this.transactions == null) {
+			this.transactions = new ArrayList<>();
+		}
+		this.transactions.addAll(transactions);
+		this.transactionsCount = this.transactions.size();
 	}
 
 	public byte[] hash(IHasher hasher) {
@@ -84,7 +117,7 @@ public class Block {
 
 	public static byte[] getTargetThreshold(String bits) {
 		byte[] convertedBits = ByteArray.convertFromString(bits, 16);
-		
+
 		// split the bits byte array into variables
 		byte[] var1 = new byte[3];
 		System.arraycopy(convertedBits, 1, var1, 0, convertedBits.length - 1);
