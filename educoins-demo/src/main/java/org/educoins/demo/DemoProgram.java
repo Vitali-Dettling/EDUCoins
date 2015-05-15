@@ -111,16 +111,20 @@ public class DemoProgram {
 		System.out.println();
 
 		if (init) {
-			Stream<Path> localFiles = Files.list(Paths.get(localStorage));
-			for (Object file : localFiles.toArray()) {
-				Files.delete((Path)file);
+			if (Files.exists(Paths.get(localStorage))) {
+				Stream<Path> localFiles = Files.list(Paths.get(localStorage));
+				for (Object file : localFiles.toArray()) {
+					Files.delete((Path) file);
+				}
+				localFiles.close();
 			}
-			localFiles.close();
-			Stream<Path> remoteFiles = Files.list(Paths.get(remoteStorage));
-			for (Object file : remoteFiles.toArray()) {
-				Files.delete((Path)file);
+			if (Files.exists(Paths.get(localStorage))) {
+				Stream<Path> remoteFiles = Files.list(Paths.get(remoteStorage));
+				for (Object file : remoteFiles.toArray()) {
+					Files.delete((Path) file);
+				}
+				remoteFiles.close();
 			}
-			remoteFiles.close();
 		}
 
 		if (runMiner) {
@@ -131,6 +135,6 @@ public class DemoProgram {
 			Block block = new GenesisBlock();
 			blockTransmitter.transmitBlock(block);
 		}
-		
+
 	}
 }
