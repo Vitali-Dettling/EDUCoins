@@ -16,7 +16,7 @@ public class Block {
 	private String bits;
 	private long nonce;
 
-	private List<Transaction> tx;
+	private List<ATransaction> tx;
 
 	public Block() {
 		this.tx = new ArrayList<>();
@@ -70,11 +70,11 @@ public class Block {
 		this.nonce = nonce;
 	}
 
-	public List<Transaction> getTx() {
+	public List<ATransaction> getTx() {
 		return this.tx;
 	}
 
-	public void setTx(List<Transaction> tx) {
+	public void setTx(List<ATransaction> tx) {
 		this.tx = tx;
 	}
 
