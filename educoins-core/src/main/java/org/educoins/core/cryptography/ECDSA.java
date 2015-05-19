@@ -7,6 +7,8 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 
+import org.educoins.core.utils.ByteArray;
+
 /**
  * @information What is a private/public key and signature.
  * 
@@ -23,6 +25,7 @@ public class ECDSA {
 	private static final String ECDSA = "EC";
 	private static final String SHA256_WITH_ECDSA = "SHA256withECDSA";
 	private static final int ADDRESS_SPACE_256 = 256;
+	private static final int HEX = 16;
 
 	private KeyPairGenerator keyPairGenerator;
 	private KeyPair keyPair;
@@ -49,8 +52,8 @@ public class ECDSA {
 	 * random number.
 	 * 
 	 * */
-	public String getPublicKey() {
-		return this.keyPair.getPublic().getEncoded().toString();
+	public String getPublicKey() {	
+		return ByteArray.convertToString(this.keyPair.getPublic().getEncoded(), HEX);
 	}
 
 	/**
@@ -59,7 +62,7 @@ public class ECDSA {
 	 * 
 	 * */
 	public String getPrivateKey() {
-		return this.keyPair.getPrivate().getEncoded().toString();
+		return ByteArray.convertToString(this.keyPair.getPrivate().getEncoded(), HEX);
 	}
 
 	/**

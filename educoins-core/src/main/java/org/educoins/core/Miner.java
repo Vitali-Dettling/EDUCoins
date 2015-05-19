@@ -4,14 +4,15 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import org.educoins.core.cryptography.ECDSA;
 import org.educoins.core.cryptography.IHasher;
 import org.educoins.core.utils.ByteArray;
 
 public class Miner implements IBlockListener {
 
-	private static final int CHECK_AFTER_BLOCKS = 5;
+	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int RESET_BLOCKS_COUNT = 0;
-	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 5;//TODO Change time to 30 which is equal to 5 min...
+	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 30;
 	private static final int MILLISECONDS = 1000;
 	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * CHECK_AFTER_BLOCKS * MILLISECONDS;
 	private static final int SCALE_DECIMAL_LENGTH = 100;
@@ -21,15 +22,17 @@ public class Miner implements IBlockListener {
 	
 	private IBlockReceiver blockReceiver;
 	private IBlockTransmitter blockTransmitter;
+	private static ECDSA ecdsa;
 	
 	private static int blockCounter;
 
 	private IHasher hasher;
 
-	public Miner(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, IHasher hasher) {
+	public Miner(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, IHasher hasher, ECDSA ecdsa) {
 		this.blockReceiver = blockReceiver;
 		this.blockTransmitter = blockTransmitter;
-
+		Miner.ecdsa = ecdsa;
+		
 		this.hasher = hasher;
 		this.blockReceiver.addBlockListener(this);	
 		Miner.blockCounter = RESET_BLOCKS_COUNT;
@@ -140,7 +143,7 @@ public class Miner implements IBlockListener {
 			} while (this.active && ByteArray.compare(invertNegaitve(test), targetThreshold) > 0);
 
 			if (this.active) {
-				//reward(block);TODO commend in reward.
+				reward(newBlock);
 				// TODO [joeren]: delete output message
 				System.out.println("Won :-)");
 				this.blockTransmitter.transmitBlock(newBlock);
@@ -160,32 +163,22 @@ public class Miner implements IBlockListener {
 			return toInvertBitInteger;
 		}
 
-		
-	
-		/*
-		public static void reward(Block block) {
+		public void reward(Block newBlock) {
 			
-			//TODO lockingScript procedure has to be established, which fits our needs...
+			//TODO [Vitali] lockingScript procedure has to be established, which fits our needs...
 			String lockingScript = EScripts.DUB.toString() + " " +
 								   EScripts.HASH160.toString() + " " +
-								   Wallet.getWalletAddress() + " " +//TODO Might needs to be delete after real address entry!!!
+								   Miner.ecdsa.getPublicKey() + " " +//TODO[Vitali] Might needs to be delete after real address entry!!!
 								   EScripts.EQUALVERIFY.toString() + " " +
 								   EScripts.CHECKSIG.toString();
 			//Input is empty because it is a coinbase transaction.
-			List<Input> input = new ArrayList<Input>();
-			List<Output> output = new ArrayList<Output>();
-			output.add(new Output(BLOCK_REWARD, Wallet.getWalletAddress(), EType.COINBASE, lockingScript));
-			//Input is empty because it is a coinbase transaction.
-			Transaction transation = new Transaction(testVersion, input, output);
-			block.addTransaction(transation);
-		}*/
+			Output output = new Output(10, Miner.ecdsa.getPublicKey(), lockingScript);
+			
+			RegularTransaction transaction = new RegularTransaction(); 
+			transaction.addOutput(output);
+			newBlock.addTransaction(transaction);
+		}
 		
-		
-
-
-		
-		
-
 		@Override
 		public void blockReceived(Block block) {
 			this.active = false;

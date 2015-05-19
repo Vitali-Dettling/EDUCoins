@@ -5,6 +5,13 @@ public class Output {
 	private int amount;
 	private String dstPublicKey;
 	private String lockingScript;
+	
+	public Output(int amount, String dstPublicKey, String lockingScript){
+		
+		this.amount = amount;
+		this.dstPublicKey = dstPublicKey;
+		this.lockingScript = lockingScript;
+	}
 
 	public int getAmount() {
 		return this.amount;

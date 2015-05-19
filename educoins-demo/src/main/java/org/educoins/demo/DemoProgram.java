@@ -5,18 +5,22 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
+import org.educoins.core.ATransaction;
 import org.educoins.core.Block;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
+import org.educoins.core.RegularTransaction;
+import org.educoins.core.cryptography.ECDSA;
 import org.educoins.core.cryptography.SHA256Hasher;
 
 public class DemoProgram {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
 		String localStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
 				+ "educoins" + File.separator + "demo" + File.separator + "localBlockChain";
@@ -27,7 +31,7 @@ public class DemoProgram {
 
 		boolean runMiner = false;
 		boolean init = false;
-
+		ECDSA ecdsa = new ECDSA();
 		if (args.length != 0) {
 
 			for (int i = 0; i < args.length; i++) {
@@ -71,6 +75,11 @@ public class DemoProgram {
 		} else {
 			Scanner scanner = new Scanner(System.in);
 			String input = null;
+			
+			//TODO [Vitali] Sollte durch eine GUI ersetzt werden, in dem man seinen Public key eintragen muss...
+			System.out.print("EDUCoin Address: " + ecdsa.getPublicKey() + "\n");
+			
+			
 			System.out.print("path of local storage (" + localStorage + "): ");
 			input = scanner.nextLine().trim();
 			if (!input.isEmpty()) {
@@ -81,6 +90,7 @@ public class DemoProgram {
 			if (!input.isEmpty()) {
 				remoteStorage = input;
 			}
+			
 			System.out.print("run miner [Y|n]: ");
 			input = scanner.nextLine().trim();
 			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
@@ -92,6 +102,7 @@ public class DemoProgram {
 				scanner.close();
 				return;
 			}
+			
 			System.out.print("initial run [Y|n]: ");
 			input = scanner.nextLine().trim();
 			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
@@ -103,6 +114,7 @@ public class DemoProgram {
 				scanner.close();
 				return;
 			}
+			
 			scanner.close();
 		}
 
@@ -130,10 +142,18 @@ public class DemoProgram {
 			IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
 			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 			blockReceiver.receiveBlocks();
-			Miner miner = new Miner(blockReceiver, blockTransmitter, new SHA256Hasher());
+			Miner miner = new Miner(blockReceiver, blockTransmitter, new SHA256Hasher(), ecdsa);
 			Block block = new Block();
 			blockTransmitter.transmitBlock(block);
 		}
-
+		
+//		// Temporary
+//		IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
+//		IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
+//		blockReceiver.receiveBlocks();
+//		Block block = new Block();
+//		ATransaction tx = new RegularTransaction();
+//		block.addTransaction(tx);
+//		blockTransmitter.transmitBlock(block);
 	}
 }

@@ -6,6 +6,14 @@ public class Input {
 	private String hashPrevOutput;
 	private String srcPublicKey;
 	private String unlockingScript;
+	
+	public Input(int amount, String hashPrevOutput, String srcPublicKey, String publicKey, String unlockingScript){
+		
+		this.amount = amount;
+		this.hashPrevOutput = hashPrevOutput;
+		this.srcPublicKey = srcPublicKey;
+		this.unlockingScript = unlockingScript;
+	}
 
 	public int getAmount() {
 		return this.amount;
