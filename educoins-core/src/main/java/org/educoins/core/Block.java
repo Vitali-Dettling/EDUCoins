@@ -1,6 +1,5 @@
 package org.educoins.core;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,21 +8,37 @@ import org.educoins.core.cryptography.IHasher;
 import org.educoins.core.utils.ByteArray;
 
 public class Block {
-
+	
+	private static final int VERSION = 2;//TODO [vitali] Change the version.
+	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
+	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
+	private static final long TIME = System.currentTimeMillis();
+	//private static final String BITS = "1f01ff3f";
+	private static final String BITS = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+	private static final long NONCE = 1114735442;
+	
 	private int version;
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
+	//Always the last time stamp since the last retargeting.
 	private long time;
 	private String bits;
 	private long nonce;
-
+	
 	private int transactionsCount;
 	private List<ATransaction> transactions;
-
 	public Block() {
+		this.setVersion(Block.VERSION);
+		this.setHashPrevBlock(Block.HASH_PREV_BLOCK);
+		this.setHashMerkleRoot(Block.HASH_MERKLE_ROOT);
+		this.setTime(Block.TIME);
+		this.setBits(Block.BITS);
+		this.setNonce(Block.NONCE);
+		
 		this.transactions = new ArrayList<>();
 		this.transactionsCount = this.transactions.size();
 	}
+
 
 	public int getVersion() {
 		return this.version;
@@ -115,31 +130,39 @@ public class Block {
 		return Block.hash(this, hasher);
 	}
 
-	public static byte[] getTargetThreshold(String bits) {
-		byte[] convertedBits = ByteArray.convertFromString(bits, 16);
-
-		// split the bits byte array into variables
-		byte[] var1 = new byte[3];
-		System.arraycopy(convertedBits, 1, var1, 0, convertedBits.length - 1);
-		byte[] var2 = { convertedBits[0] };
-
-		// define factor 1 (h2h3h4h5h6h7)
-		BigInteger factor1 = new BigInteger(1, var1);
-
-		// calculate exponent
-		BigInteger exponent = new BigInteger(1, var2);
-		exponent = exponent.subtract(new BigInteger("3"));
-		exponent = exponent.multiply(new BigInteger("8"));
-
-		// calculate factor 2 (2^exponent)
-		BigInteger factor2 = new BigInteger("2");
-		factor2 = factor2.pow(exponent.intValue());
-
-		// calculate product (factor1 * factor2) and return
-		BigInteger product = factor1.multiply(factor2);
-		byte[] expandedBits = product.toByteArray();
-		return expandedBits;
+	public static byte[] getTargetThreshold(String bits){
+		return ByteArray.convertFromString(bits, 16);
 	}
+	
+	
+// TODO Ist der richtige code, um exponenden und Mantise zu trennen und damit rechnen...
+//	public static byte[] getTargetThreshold(String bits) {
+//		byte[] convertedBits = ByteArray.convertFromString(bits, 16);
+//		
+//		// split the bits byte array into variables
+//		byte[] var1 = new byte[convertedBits.length - 1];
+//		System.arraycopy(convertedBits, 1, var1, 0, convertedBits.length - 1);
+//		byte[] var2 = { convertedBits[0] };
+//
+//		// define factor 1 (h2h3h4h5h6h7)
+//		BigInteger factor1 = new BigInteger(1, var1);
+//
+//		// calculate exponent
+//		BigInteger exponent = new BigInteger(1, var2);
+//		//exponent = exponent.subtract(new BigInteger("3"));
+//		exponent = exponent.multiply(new BigInteger("8"));
+//
+//		// calculate factor 2 (2^exponent)
+//		BigInteger factor2 = new BigInteger("2");
+//		factor2 = factor2.pow(exponent.intValue());
+//
+//		// calculate product (factor1 * factor2) and return
+//		BigInteger product = factor1.multiply(factor2);
+//		byte[] expandedBits = product.toByteArray();
+//		return expandedBits;
+//	}
+	
+
 
 	public static byte[] hash(Block block, IHasher hasher) {
 		// specify used header fields (in byte arrays)

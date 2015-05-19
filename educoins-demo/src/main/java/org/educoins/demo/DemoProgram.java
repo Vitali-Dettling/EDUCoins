@@ -9,7 +9,6 @@ import java.util.Scanner;
 import java.util.stream.Stream;
 
 import org.educoins.core.Block;
-import org.educoins.core.GenesisBlock;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
@@ -132,7 +131,7 @@ public class DemoProgram {
 			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 			blockReceiver.receiveBlocks();
 			Miner miner = new Miner(blockReceiver, blockTransmitter, new SHA256Hasher());
-			Block block = new GenesisBlock();
+			Block block = new Block();
 			blockTransmitter.transmitBlock(block);
 		}
 
