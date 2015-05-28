@@ -9,15 +9,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
-import org.educoins.core.ATransaction;
 import org.educoins.core.Block;
-import org.educoins.core.Wallet;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
-import org.educoins.core.RegularTransaction;
+import org.educoins.core.Wallet;
 import org.educoins.core.cryptography.ECDSA;
-import org.educoins.core.cryptography.SHA256Hasher;
 
 public class DemoProgram {
 
@@ -29,12 +26,16 @@ public class DemoProgram {
 		String remoteStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
 				+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
 		boolean remoteStorageSet = false;
-
+		String walletStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
+				+ "educoins" + File.separator + "demo" + File.separator + "walletBlockChain";
+		boolean walletStorageSet = false;
+		
 		boolean runMiner = false;
+		boolean runWallet = false;
 		boolean init = false;
 		ECDSA ecdsa = new ECDSA();
 		if (args.length != 0) {
-
+	
 			for (int i = 0; i < args.length; i++) {
 				switch (args[i]) {
 				case "-localStorage":
@@ -53,12 +54,27 @@ public class DemoProgram {
 					remoteStorage = args[++i];
 					remoteStorageSet = true;
 					break;
+				case "-walletStorage":
+					if (walletStorageSet) {
+						System.err.println("wallet storage can only set once");
+						return;
+					}
+					walletStorage = args[++i];
+					walletStorageSet = true;
+					break;
 				case "-runMiner":
 					if (runMiner) {
 						System.err.println("runMiner can only set once");
 						return;
 					}
 					runMiner = true;
+					break;
+				case "-runWallet":
+					if (runWallet) {
+						System.err.println("runWallet can only set once");
+						return;
+					}
+					runWallet = true;
 					break;
 				case "-init":
 					if (init) {
@@ -91,6 +107,11 @@ public class DemoProgram {
 			if (!input.isEmpty()) {
 				remoteStorage = input;
 			}
+			System.out.print("path of wallet storage (" + walletStorage + "): ");
+			input = scanner.nextLine().trim();
+			if (!input.isEmpty()) {
+				walletStorage = input;
+			}
 			
 			System.out.print("run miner [Y|n]: ");
 			input = scanner.nextLine().trim();
@@ -98,6 +119,18 @@ public class DemoProgram {
 				runMiner = true;
 			} else if (input.equalsIgnoreCase("n")) {
 				runMiner = false;
+			} else {
+				System.err.println("illegal input " + input);
+				scanner.close();
+				return;
+			}
+			
+			System.out.print("run wallet [Y|n]: ");
+			input = scanner.nextLine().trim();
+			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
+				runWallet = true;
+			} else if (input.equalsIgnoreCase("n")) {
+				runWallet = false;
 			} else {
 				System.err.println("illegal input " + input);
 				scanner.close();
@@ -130,23 +163,43 @@ public class DemoProgram {
 				}
 				localFiles.close();
 			}
-			if (Files.exists(Paths.get(localStorage))) {
+			if (Files.exists(Paths.get(remoteStorage))) {
 				Stream<Path> remoteFiles = Files.list(Paths.get(remoteStorage));
 				for (Object file : remoteFiles.toArray()) {
 					Files.delete((Path) file);
 				}
 				remoteFiles.close();
 			}
+			if (Files.exists(Paths.get(walletStorage))) {
+				Stream<Path> walletFiles = Files.list(Paths.get(walletStorage));
+				for (Object file : walletFiles.toArray()) {
+					Files.delete((Path) file);
+				}
+				walletFiles.close();
+			}
 		}
 
-		if (runMiner) {
-			IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
+		if (runWallet) {
+			
+			IBlockTransmitter blockTransmitterWallet = new DemoBlockTransmitterWallet(remoteStorage, walletStorage);
+			
 			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
+			
+			Wallet wallet = new Wallet(blockReceiver, blockTransmitterWallet);
+
 			blockReceiver.receiveBlocks();
-			Miner miner = new Miner(blockReceiver, blockTransmitter, ecdsa);
-			Wallet client = new Wallet(blockReceiver);
-			Block block = new Block();
-			blockTransmitter.transmitBlock(block);
+		}
+		
+		if (runMiner) {
+			IBlockTransmitter blockTransmitterMiner = new DemoBlockTransmitterMiner(localStorage, remoteStorage);
+	
+			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
+
+			Miner miner = new Miner(blockReceiver, blockTransmitterMiner, ecdsa);
+			
+			blockReceiver.receiveBlocks();
+			
+			blockTransmitterMiner.transmitBlock(new Block());
 		}
 		
 //		// Temporary
@@ -158,4 +211,6 @@ public class DemoProgram {
 //		block.addTransaction(tx);
 //		blockTransmitter.transmitBlock(block);
 	}
+
+	
 }

@@ -8,24 +8,23 @@ import java.nio.file.Paths;
 
 import org.educoins.core.Block;
 import org.educoins.core.IBlockTransmitter;
-import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class DemoBlockTransmitter implements IBlockTransmitter {
+public class DemoBlockTransmitterMiner implements IBlockTransmitter {
 
 	private Path localStorage;
 	private Path remoteStorage;
 
 	private Gson gson;
 
-	public DemoBlockTransmitter(String localStorage, String remoteStorage) throws IOException {
+	public DemoBlockTransmitterMiner(String localStorage, String remoteStorage) throws IOException {
 		this(Paths.get(localStorage), Paths.get(remoteStorage));
 	}
 
-	public DemoBlockTransmitter(Path localStorage, Path remoteStorage) throws IOException {
+	public DemoBlockTransmitterMiner(Path localStorage, Path remoteStorage) throws IOException {
 		this.localStorage = localStorage;
 		this.remoteStorage = remoteStorage;
 
@@ -51,6 +50,7 @@ public class DemoBlockTransmitter implements IBlockTransmitter {
 	@Override
 	public void transmitBlock(Block block) {
 		Path fileName = Paths.get(ByteArray.convertToString(block.hash(), 16) + ".json");
+		
 		Path localBlockFile = this.localStorage.resolve(fileName);
 		Path remoteBlockFile = this.remoteStorage.resolve(fileName);
 		try {

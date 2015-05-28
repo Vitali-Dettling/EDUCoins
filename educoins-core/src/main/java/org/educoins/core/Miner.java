@@ -9,11 +9,12 @@ import org.educoins.core.utils.ByteArray;
 
 public class Miner implements IBlockListener {
 
-	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int RESET_BLOCKS_COUNT = 0;
-	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 30;
-	private static final int MILLISECONDS = 1000;
-	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * CHECK_AFTER_BLOCKS * MILLISECONDS;
+	private static final int CHECK_AFTER_BLOCKS = 10;
+	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
+	private static final int IN_SECONDS = 1000;
+	//TODO aus irgend einem Grund funktioniert die Desired Time nicht? Um so höcher diese ist um so unwahrscheinlicher kalibriert sich die Difficulty???
+	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * IN_SECONDS * CHECK_AFTER_BLOCKS;
 	private static final int SCALE_DECIMAL_LENGTH = 100;
 	
 	private static final int BIT32 = 32;
@@ -131,10 +132,10 @@ public class Miner implements IBlockListener {
 				
 				test = invertNegaitve(challenge);
 				
-				System.err.println("Target   : " + new BigInteger(targetThreshold));
-				System.err.println("Challenge: " + new BigInteger(test));
+				System.out.println("Target   : " + new BigInteger(targetThreshold));
+				System.out.println("Challenge: " + new BigInteger(test));
 
-			} while (this.active && ByteArray.compare(invertNegaitve(test), targetThreshold) > 0);
+			} while (this.active && ByteArray.compare(test, targetThreshold) > 0);
 
 			if (this.active) {
 				reward(newBlock);
