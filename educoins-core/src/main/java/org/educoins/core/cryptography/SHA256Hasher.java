@@ -3,7 +3,7 @@ package org.educoins.core.cryptography;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class SHA256Hasher implements IHasher {
+public class SHA256Hasher {
 
 	private static MessageDigest messageDigest;
 
@@ -15,8 +15,7 @@ public class SHA256Hasher implements IHasher {
 		}
 	}
 
-	@Override
-	public byte[] hash(byte[] byteArray) {
+	public static byte[] hash(byte[] byteArray) {
 		return SHA256Hasher.messageDigest.digest(byteArray);
 	}
 

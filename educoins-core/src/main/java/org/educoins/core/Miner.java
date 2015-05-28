@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import org.educoins.core.cryptography.ECDSA;
-import org.educoins.core.cryptography.IHasher;
 import org.educoins.core.utils.ByteArray;
 
 public class Miner implements IBlockListener {
@@ -26,22 +25,20 @@ public class Miner implements IBlockListener {
 	
 	private static int blockCounter;
 
-	private IHasher hasher;
 
-	public Miner(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, IHasher hasher, ECDSA ecdsa) {
+	public Miner(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, ECDSA ecdsa) {
 		this.blockReceiver = blockReceiver;
 		this.blockTransmitter = blockTransmitter;
 		Miner.ecdsa = ecdsa;
 		
-		this.hasher = hasher;
 		this.blockReceiver.addBlockListener(this);	
 		Miner.blockCounter = RESET_BLOCKS_COUNT;
 	}
 
 	@Override
 	public void blockReceived(Block block) {
-		// TODO [joeren]: delete temp message
-		Thread powThread = new PoWThread(blockReceiver, blockTransmitter, block, hasher);
+		
+		Thread powThread = new PoWThread(blockReceiver, blockTransmitter, block);
 		powThread.start();
 	}
 
@@ -52,16 +49,13 @@ public class Miner implements IBlockListener {
 		private IBlockTransmitter blockTransmitter;
 
 		private Block prevBlock;
-		private IHasher hasher;
 		private boolean active;
 
-		public PoWThread(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, Block prevBlock,
-				IHasher hasher) {
+		public PoWThread(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, Block prevBlock) {
 			this.blockReceiver = blockReceiver;
 			this.blockTransmitter = blockTransmitter;
 
 			this.prevBlock = prevBlock;
-			this.hasher = hasher;
 			this.active = true;
 		}
 
@@ -71,7 +65,7 @@ public class Miner implements IBlockListener {
 			// TODO [joeren]: which version?! Temporary take the version of the
 			// previous block.
 			newBlock.setVersion(this.prevBlock.getVersion());
-			newBlock.setHashPrevBlock(ByteArray.convertToString(this.prevBlock.hash(hasher), 16));
+			newBlock.setHashPrevBlock(ByteArray.convertToString(this.prevBlock.hash(), 16));
 			// TODO [joeren]: calculate hash merkle root! Temporary take the
 			// hash merkle root of the previous block.
 			newBlock.setHashMerkleRoot(this.prevBlock.getHashMerkleRoot());
@@ -130,7 +124,7 @@ public class Miner implements IBlockListener {
 				nonceGenerator.nextBytes(nonce);
 				newBlock.setNonce(ByteArray.convertToInt(nonce));
 				
-				challenge = newBlock.hash(hasher);
+				challenge = newBlock.hash();
 				//TODO [Vitali] Delete after testing.
 //				System.err.println("Target   : " + targetThreshold.length);
 //				System.err.println("Challenge: " + challenge.length);

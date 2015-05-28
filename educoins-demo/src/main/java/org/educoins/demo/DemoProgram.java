@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import org.educoins.core.ATransaction;
 import org.educoins.core.Block;
+import org.educoins.core.Wallet;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
@@ -142,7 +143,8 @@ public class DemoProgram {
 			IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
 			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 			blockReceiver.receiveBlocks();
-			Miner miner = new Miner(blockReceiver, blockTransmitter, new SHA256Hasher(), ecdsa);
+			Miner miner = new Miner(blockReceiver, blockTransmitter, ecdsa);
+			Wallet client = new Wallet(blockReceiver);
 			Block block = new Block();
 			blockTransmitter.transmitBlock(block);
 		}

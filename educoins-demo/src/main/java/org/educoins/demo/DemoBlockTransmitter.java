@@ -50,7 +50,7 @@ public class DemoBlockTransmitter implements IBlockTransmitter {
 
 	@Override
 	public void transmitBlock(Block block) {
-		Path fileName = Paths.get(ByteArray.convertToString(block.hash(new SHA256Hasher()), 16) + ".json");
+		Path fileName = Paths.get(ByteArray.convertToString(block.hash(), 16) + ".json");
 		Path localBlockFile = this.localStorage.resolve(fileName);
 		Path remoteBlockFile = this.remoteStorage.resolve(fileName);
 		try {

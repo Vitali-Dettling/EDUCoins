@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.educoins.core.cryptography.IHasher;
+import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 
 public class Block {
@@ -126,8 +126,8 @@ public class Block {
 		this.transactionsCount = this.transactions.size();
 	}
 
-	public byte[] hash(IHasher hasher) {
-		return Block.hash(this, hasher);
+	public byte[] hash() {
+		return Block.hash(this);
 	}
 
 	public static byte[] getTargetThreshold(String bits){
@@ -164,7 +164,7 @@ public class Block {
 	
 
 
-	public static byte[] hash(Block block, IHasher hasher) {
+	public static byte[] hash(Block block) {
 		// specify used header fields (in byte arrays)
 		byte[] version = ByteArray.convertFromLong(block.version);
 		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock, 16);
@@ -178,7 +178,7 @@ public class Block {
 				bits, nonce);
 
 		// hash concatenated header fields and return
-		byte[] hash = hasher.hash(hasher.hash(concatenatedHeaderFields));
+		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
 		return hash;
 	}
 
