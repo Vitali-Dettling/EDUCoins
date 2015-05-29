@@ -39,12 +39,20 @@ public class ECDSA {
 	 *             If e.g. the ECDSA does not exist.
 	 * 
 	 * */
-	public ECDSA() throws NoSuchAlgorithmException {
+	public ECDSA() {
 
-		this.keyPairGenerator = KeyPairGenerator.getInstance(ECDSA);
-		this.keyPairGenerator.initialize(ADDRESS_SPACE_256, new SecureRandom());
-		this.keyPair = this.keyPairGenerator.generateKeyPair();
-		this.signature = Signature.getInstance(SHA256_WITH_ECDSA);
+		try {
+		
+			this.signature = Signature.getInstance(SHA256_WITH_ECDSA);
+			this.keyPairGenerator = KeyPairGenerator.getInstance(ECDSA);
+					
+			this.keyPairGenerator.initialize(ADDRESS_SPACE_256, new SecureRandom());
+			this.keyPair = this.keyPairGenerator.generateKeyPair();
+		
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**

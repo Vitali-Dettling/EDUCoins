@@ -22,18 +22,21 @@ public class DemoProgram {
 
 		String localStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
 				+ "educoins" + File.separator + "demo" + File.separator + "localBlockChain";
-		boolean localStorageSet = false;
 		String remoteStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
-				+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
-		boolean remoteStorageSet = false;
+				+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";	
 		String walletStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
 				+ "educoins" + File.separator + "demo" + File.separator + "walletBlockChain";
+		
+		boolean localStorageSet = false;
+		boolean remoteStorageSet = false;
 		boolean walletStorageSet = false;
 		
 		boolean runMiner = false;
 		boolean runWallet = false;
 		boolean init = false;
+		
 		ECDSA ecdsa = new ECDSA();
+		
 		if (args.length != 0) {
 	
 			for (int i = 0; i < args.length; i++) {
@@ -185,7 +188,7 @@ public class DemoProgram {
 			
 			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 			
-			Wallet wallet = new Wallet(blockReceiver, blockTransmitterWallet);
+			Wallet wallet = new Wallet(blockReceiver, blockTransmitterWallet, ecdsa);
 
 			blockReceiver.receiveBlocks();
 		}
@@ -195,7 +198,7 @@ public class DemoProgram {
 	
 			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 
-			Miner miner = new Miner(blockReceiver, blockTransmitterMiner, ecdsa);
+			Miner miner = new Miner(blockReceiver, blockTransmitterMiner, ecdsa);//TODO[Vitali] Braucht der Miner das ecdsa oder bekommt er es von der Wallet???
 			
 			blockReceiver.receiveBlocks();
 			
