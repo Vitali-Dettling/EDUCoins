@@ -2,6 +2,7 @@ package org.educoins.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.educoins.core.utils.ByteArray;
@@ -10,20 +11,59 @@ import org.educoins.core.utils.Deserializer;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-public abstract class Verifier {
+public class BlockChain implements IBlockListener {
 
 	private static final int TRUE = 0;
 	private static final String GENIUSES_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 
-	public static boolean verifyBlock(Block testblock) {
+	private IBlockReceiver blockReceiver;
+	private IBlockTransmitter blockTransmitter;
+	
+	private List<IBlockListener> blockListeners;
+
+	
+	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter) {
+		
+		this.blockListeners = new ArrayList<>();
+		
+		this.blockReceiver = blockReceiver;
+		this.blockTransmitter = blockTransmitter;
+		
+		this.blockReceiver.addBlockListener(this);	
+	}
+	
+	public void addBlockListener(IBlockListener blockListener) {
+		this.blockListeners.add(blockListener);
+	}
+
+	public void removeBlockListener(IBlockListener blockListener) {
+		this.blockListeners.remove(blockListener);
+	}
+	
+	public void notifyBlockReceived(Block block) {
+		for (IBlockListener blockListener : blockListeners) {
+			blockListener.blockReceived(block);
+		}
+	}
+	
+	@Override
+	public void blockReceived(Block block) {
+		notifyBlockReceived(block);
+	}
+	
+	public void transmitBlock(Block block){
+		this.blockTransmitter.transmitBlock(block);
+	}
+	
+	public boolean verifyBlock(Block testBlock) {
 
 		// 0. If geniuses block return true, because there no other block before.
-		if (testblock.getHashPrevBlock().equals(GENIUSES_BLOCK)) {
+		if (testBlock.getHashPrevBlock().equals(GENIUSES_BLOCK)) {
 			return true;
 		}
 
 		// 1. Find the previous block.
-		Block lastBlock = getPreviousBlock(testblock);
+		Block lastBlock = getPreviousBlock(testBlock);
 
 		// 2. Does the previous block exist?
 		if (lastBlock == null) {
@@ -31,10 +71,18 @@ public abstract class Verifier {
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
-		byte[] testBlockHash = testblock.hash();
+		byte[] testBlockHash = testBlock.hash();
 		byte[] lastBlockHash = lastBlock.getHashPrevBlock().getBytes();
 		if (ByteArray.compare(testBlockHash, lastBlockHash) == TRUE) {
 			return false;
+		}
+		
+		//4. Verification of all transactions in a block.
+		List<Transaction> transactions = testBlock.getTransactions();
+		if (transactions != null) {
+			for (Transaction transaction : transactions) {
+				verifyTransaction(transaction);
+			}
 		}
 
 		// TODO[Vitali] Überlegen ob weitere Test von nöten wären???
@@ -43,7 +91,7 @@ public abstract class Verifier {
 
 	}
 
-	public static boolean verifyTransaction(Transaction transaction) {
+	public boolean verifyTransaction(Transaction transaction) {
 
 		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
 
@@ -137,7 +185,7 @@ public abstract class Verifier {
 
 	}
 
-	private static Block getPreviousBlock(Block testblock) {
+	private Block getPreviousBlock(Block testblock) {
 		try {
 
 			String lastBlockName = testblock.getHashPrevBlock();
@@ -155,5 +203,7 @@ public abstract class Verifier {
 		}
 
 	}
+
+
 
 }

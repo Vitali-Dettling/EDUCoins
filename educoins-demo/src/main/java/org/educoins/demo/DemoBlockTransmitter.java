@@ -13,18 +13,18 @@ import org.educoins.core.utils.ByteArray;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class DemoBlockTransmitterMiner implements IBlockTransmitter {
+public class DemoBlockTransmitter implements IBlockTransmitter {
 
 	private Path localStorage;
 	private Path remoteStorage;
 
 	private Gson gson;
 
-	public DemoBlockTransmitterMiner(String localStorage, String remoteStorage) throws IOException {
+	public DemoBlockTransmitter(String localStorage, String remoteStorage) throws IOException {
 		this(Paths.get(localStorage), Paths.get(remoteStorage));
 	}
 
-	public DemoBlockTransmitterMiner(Path localStorage, Path remoteStorage) throws IOException {
+	public DemoBlockTransmitter(Path localStorage, Path remoteStorage) throws IOException {
 		this.localStorage = localStorage;
 		this.remoteStorage = remoteStorage;
 

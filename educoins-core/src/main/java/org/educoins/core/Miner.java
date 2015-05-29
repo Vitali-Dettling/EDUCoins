@@ -19,40 +19,36 @@ public class Miner implements IBlockListener {
 	private static final int BIT32 = 32;
 	private static final int HEX = 16;
 	
-	private IBlockReceiver blockReceiver;
-	private IBlockTransmitter blockTransmitter;
-	
 	private static int blockCounter;
 	private static String publicKey;
+	
+	private static BlockChain blockChain;
 
-	public Miner(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, Wallet wallet) {
-		this.blockReceiver = blockReceiver;
-		this.blockTransmitter = blockTransmitter;
-		this.publicKey =  wallet.getPublicKey();
+	public Miner(BlockChain blockChain, Wallet wallet) {
 		
-		this.blockReceiver.addBlockListener(this);	
+		Miner.publicKey =  wallet.getPublicKey();
+		
 		Miner.blockCounter = RESET_BLOCKS_COUNT;
+		
+		Miner.blockChain = blockChain;
+		
+		Miner.blockChain.addBlockListener(this);
 	}
 
 	@Override
 	public void blockReceived(Block block) {
-		
-		Thread powThread = new PoWThread(blockReceiver, blockTransmitter, block);
+		Thread powThread = new PoWThread(block);
 		powThread.start();
 	}
 
 	
 	private static class PoWThread extends Thread implements IBlockListener {
 		
-		private IBlockReceiver blockReceiver;
-		private IBlockTransmitter blockTransmitter;
 
 		private Block prevBlock;
 		private boolean active;
 
-		public PoWThread(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, Block prevBlock) {
-			this.blockReceiver = blockReceiver;
-			this.blockTransmitter = blockTransmitter;
+		public PoWThread(Block prevBlock) {
 
 			this.prevBlock = prevBlock;
 			this.active = true;
@@ -68,6 +64,8 @@ public class Miner implements IBlockListener {
 			// TODO [joeren]: calculate hash merkle root! Temporary take the
 			// hash merkle root of the previous block.
 			newBlock.setHashMerkleRoot(this.prevBlock.getHashMerkleRoot());
+			
+			newBlock.addTransaction(reward());
 			
 			return retargedBits(newBlock);
 		}
@@ -109,7 +107,7 @@ public class Miner implements IBlockListener {
 		@Override
 		public void run() {
 			
-			this.blockReceiver.addBlockListener(this);
+			Miner.blockChain.addBlockListener(this);
 			
 			Block newBlock = prepareNewBlock();
 			
@@ -136,16 +134,16 @@ public class Miner implements IBlockListener {
 			} while (this.active && ByteArray.compare(challengePositive, targetThreshold) > 0);
 
 			if (this.active) {
-				reward(newBlock);
 				// TODO [joeren]: delete output message
 				System.out.println("Won :-)");
-				this.blockTransmitter.transmitBlock(newBlock);
+				Miner.blockChain.transmitBlock(newBlock);
+				
 			} else {
 				// TODO [joeren]: delete output message
 				System.out.println("Loose :-(");
 			}
 			
-			this.blockReceiver.removeBlockListener(this);
+			Miner.blockChain.removeBlockListener(this);
 		}
 		
 
@@ -156,7 +154,7 @@ public class Miner implements IBlockListener {
 			return toInvertBitInteger;
 		}
 
-		public void reward(Block newBlock) {
+		private Transaction reward() {
 
 			//TODO [Vitali] lockingScript procedure has to be established, which fits our needs...
 			String lockingScript = EScripts.DUB.toString() + " " +
@@ -169,8 +167,9 @@ public class Miner implements IBlockListener {
 			
 			RegularTransaction transaction = new RegularTransaction(); 
 			transaction.addOutput(output);
-			newBlock.addTransaction(transaction);
+			return transaction;
 		}
+		
 		
 		@Override
 		public void blockReceived(Block block) {

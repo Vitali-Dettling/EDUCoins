@@ -16,32 +16,28 @@ import java.util.stream.Stream;
 
 import org.educoins.core.utils.ByteArray;
 
-
 public class Wallet implements IBlockListener {
 
 	private static final int HEX = 16;
 	private static final String UTF_8 = "UTF-8";
 	private static final String KeyStorageFile = "/wallet.keys";
 	
-	private IBlockReceiver blockReceiver;
-	private IBlockTransmitter blockTransmitter;
 	private ECDSA keyPair;
 	private Path walletDirectory;
 	private PrintWriter walletKeysStorage;
+	private BlockChain blockChain; 
 	
-	public Wallet(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter){
+	public Wallet(BlockChain blockChain){
 		
 		try {
-		
-			this.blockReceiver = blockReceiver;				
-			this.blockTransmitter = blockTransmitter;
-			
-			this.blockReceiver.addBlockListener(this);
 			
 			this.walletDirectory = Paths.get(System.getProperty("user.home") + File.separator + "documents" + File.separator
 					+ "educoins" + File.separator + "demo" + File.separator + "wallet");
 		
 			this.walletKeysStorage = createNewDirectory();
+			
+			this.blockChain = blockChain;
+			
 			
 		} catch (IOException e) {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
@@ -52,11 +48,12 @@ public class Wallet implements IBlockListener {
 	@Override
 	public void blockReceived(Block block) {
 		
-		if(Verifier.verifyBlock(block)){
+		if(this.blockChain.verifyBlock(block)){
 			
 			//TODO[Vitali] Hier Implementierung wo und wie die BlockChain lokal gespeichert werden soll. 
 			//P.s. Die jetztige Implemtierung ist nur zum veranschaulichen.
-			this.blockTransmitter.transmitBlock(block);
+			//What to do here???
+			System.out.println("INFO: Block is verified correct, what now???");
 			
 			
 		}

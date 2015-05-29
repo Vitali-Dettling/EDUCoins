@@ -10,6 +10,7 @@ import java.util.Scanner;
 import java.util.stream.Stream;
 
 import org.educoins.core.Block;
+import org.educoins.core.BlockChain;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
@@ -23,12 +24,9 @@ public class DemoProgram {
 				+ "educoins" + File.separator + "demo" + File.separator + "localBlockChain";
 		String remoteStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
 				+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";	
-		String walletStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
-				+ "educoins" + File.separator + "demo" + File.separator + "walletBlockChain";
 		
 		boolean localStorageSet = false;
 		boolean remoteStorageSet = false;
-		boolean walletStorageSet = false;
 		
 		boolean runMiner = false;
 		boolean runWallet = false;
@@ -53,14 +51,6 @@ public class DemoProgram {
 					}
 					remoteStorage = args[++i];
 					remoteStorageSet = true;
-					break;
-				case "-walletStorage":
-					if (walletStorageSet) {
-						System.err.println("wallet storage can only set once");
-						return;
-					}
-					walletStorage = args[++i];
-					walletStorageSet = true;
 					break;
 				case "-runMiner":
 					if (runMiner) {
@@ -98,17 +88,6 @@ public class DemoProgram {
 			if (!input.isEmpty()) {
 				localStorage = input;
 			}
-			System.out.print("path of remote storage (" + remoteStorage + "): ");
-			input = scanner.nextLine().trim();
-			if (!input.isEmpty()) {
-				remoteStorage = input;
-			}
-			System.out.print("path of wallet storage (" + walletStorage + "): ");
-			input = scanner.nextLine().trim();
-			if (!input.isEmpty()) {
-				walletStorage = input;
-			}
-			
 			System.out.print("run miner [Y|n]: ");
 			input = scanner.nextLine().trim();
 			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
@@ -166,38 +145,24 @@ public class DemoProgram {
 				}
 				remoteFiles.close();
 			}
-			if (Files.exists(Paths.get(walletStorage))) {
-				Stream<Path> walletFiles = Files.list(Paths.get(walletStorage));
-				for (Object file : walletFiles.toArray()) {
-					Files.delete((Path) file);
-				}
-				walletFiles.close();
-			}
 		}
 
+		IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
+		IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
+		
 		Wallet wallet = null;
-		if (runWallet) {
-			
-			IBlockTransmitter blockTransmitterWallet = new DemoBlockTransmitterWallet(remoteStorage, walletStorage);
-			
-			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
-			
-			wallet = new Wallet(blockReceiver, blockTransmitterWallet);
-
-			blockReceiver.receiveBlocks();
+		BlockChain blockChain = new BlockChain(blockReceiver, blockTransmitter);
+		
+		if (runWallet) {		
+			wallet = new Wallet(blockChain);
 		}
 		
 		if (runMiner) {
-			IBlockTransmitter blockTransmitterMiner = new DemoBlockTransmitterMiner(localStorage, remoteStorage);
-	
-			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
-
-			Miner miner = new Miner(blockReceiver, blockTransmitterMiner, wallet);
-			
-			blockReceiver.receiveBlocks();
-			
-			blockTransmitterMiner.transmitBlock(new Block());
+			new Miner(blockChain, wallet);
 		}
+	
+		blockReceiver.receiveBlocks();
+		blockTransmitter.transmitBlock(new Block());
 		
 //		// Temporary
 //		IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
