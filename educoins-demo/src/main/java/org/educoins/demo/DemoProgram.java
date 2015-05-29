@@ -14,7 +14,6 @@ import org.educoins.core.BlockChain;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
-import org.educoins.core.Wallet;
 
 public class DemoProgram {
 
@@ -29,7 +28,6 @@ public class DemoProgram {
 		boolean remoteStorageSet = false;
 		
 		boolean runMiner = false;
-		boolean runWallet = false;
 		boolean init = false;
 		
 		if (args.length != 0) {
@@ -59,13 +57,6 @@ public class DemoProgram {
 					}
 					runMiner = true;
 					break;
-				case "-runWallet":
-					if (runWallet) {
-						System.err.println("runWallet can only set once");
-						return;
-					}
-					runWallet = true;
-					break;
 				case "-init":
 					if (init) {
 						System.err.println("init can only set once");
@@ -94,18 +85,6 @@ public class DemoProgram {
 				runMiner = true;
 			} else if (input.equalsIgnoreCase("n")) {
 				runMiner = false;
-			} else {
-				System.err.println("illegal input " + input);
-				scanner.close();
-				return;
-			}
-			
-			System.out.print("run wallet [Y|n]: ");
-			input = scanner.nextLine().trim();
-			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
-				runWallet = true;
-			} else if (input.equalsIgnoreCase("n")) {
-				runWallet = false;
 			} else {
 				System.err.println("illegal input " + input);
 				scanner.close();
@@ -150,15 +129,12 @@ public class DemoProgram {
 		IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
 		IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 		
-		Wallet wallet = null;
+		
 		BlockChain blockChain = new BlockChain(blockReceiver, blockTransmitter);
 		
-		if (runWallet) {		
-			wallet = new Wallet(blockChain);
-		}
 		
 		if (runMiner) {
-			new Miner(blockChain, wallet);
+			new Miner(blockChain);
 		}
 	
 		blockReceiver.receiveBlocks();

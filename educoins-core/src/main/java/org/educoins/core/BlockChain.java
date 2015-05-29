@@ -2,6 +2,8 @@ package org.educoins.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,22 +16,32 @@ import com.google.gson.JsonSyntaxException;
 public class BlockChain implements IBlockListener {
 
 	private static final int TRUE = 0;
+	private static final int CHECK_AFTER_BLOCKS = 10;
+	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
+	private static final int IN_SECONDS = 1000;
+	//TODO aus irgend einem Grund funktioniert die Desired Time nicht? Um so höcher diese ist um so unwahrscheinlicher kalibriert sich die Difficulty???
+	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * IN_SECONDS * CHECK_AFTER_BLOCKS;
+	private static final int SCALE_DECIMAL_LENGTH = 100;
+	private static final int HEX = 16;
+	private static final int RESET_BLOCKS_COUNT = 0;
 	private static final String GENIUSES_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
-
+	
+	private int blockCounter;
 	private IBlockReceiver blockReceiver;
 	private IBlockTransmitter blockTransmitter;
-	
 	private List<IBlockListener> blockListeners;
+	private Wallet wallet;
+	private Block previousBlock;
 
-	
 	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter) {
 		
+		this.wallet = new Wallet(this);
 		this.blockListeners = new ArrayList<>();
-		
 		this.blockReceiver = blockReceiver;
 		this.blockTransmitter = blockTransmitter;
-		
 		this.blockReceiver.addBlockListener(this);	
+	
+		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
 	
 	public void addBlockListener(IBlockListener blockListener) {
@@ -40,20 +52,107 @@ public class BlockChain implements IBlockListener {
 		this.blockListeners.remove(blockListener);
 	}
 	
-	public void notifyBlockReceived(Block block) {
+	public void notifyBlockReceived(Block newBlock) {
 		for (IBlockListener blockListener : blockListeners) {
-			blockListener.blockReceived(block);
+			blockListener.blockReceived(newBlock);
 		}
 	}
 	
 	@Override
 	public void blockReceived(Block block) {
-		notifyBlockReceived(block);
+		if(verifyBlock(block)){
+			Block newBlock = prepareNewBlock(block);
+			notifyBlockReceived(newBlock);
+		}
 	}
 	
 	public void transmitBlock(Block block){
 		this.blockTransmitter.transmitBlock(block);
 	}
+	
+	public Block prepareNewBlock(Block previousBlock) {
+		
+		this.previousBlock = previousBlock;
+		Block newBlock = new Block();
+		// TODO [joeren]: which version?! Temporary take the version of the
+		// previous block.
+		newBlock.setVersion(this.previousBlock.getVersion());
+		newBlock.setHashPrevBlock(ByteArray.convertToString(this.previousBlock.hash(), 16));
+		// TODO [joeren]: calculate hash merkle root! Temporary take the
+		// hash merkle root of the previous block.
+		newBlock.setHashMerkleRoot(this.previousBlock.getHashMerkleRoot());
+		
+		newBlock.addTransaction(coinbaseTransaction());
+		
+		return retargedBits(newBlock);
+	}
+	
+	
+	private Transaction coinbaseTransaction() {
+
+		String publicKey = this.wallet.getPublicKey();
+		
+		//TODO [Vitali] lockingScript procedure has to be established, which fits our needs...
+		String lockingScript = EScripts.DUB.toString() + " " +
+							   EScripts.HASH160.toString() + " " +
+							   publicKey + " " +//TODO[Vitali] Modify that it can be changed on or more addresses???
+							   EScripts.EQUALVERIFY.toString() + " " +
+							   EScripts.CHECKSIG.toString();
+		
+		//Input is empty because it is a coinbase transaction.
+		Output output = new Output(rewardCalculator(), publicKey, lockingScript);
+
+		RegularTransaction transaction = new RegularTransaction(); 
+		transaction.addOutput(output);
+		return transaction;
+	}
+	
+	
+	private int rewardCalculator(){
+		
+		//TODO[Vitali] Glak
+		
+		return 10;
+	}
+	
+	
+	/**
+	 * Bitcoin explanation: Mastering Bitcoin 195
+	 * Every 2,016 blocks, all nodes retarget the proof-of-work difficulty. The
+	 * equation for retargeding difficulty measures the time it took to find the
+	 * last 2,016 blocks and compares that to the expected time of 20,160 minutes.
+	 * 
+	 * New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
+	 * */
+	//TODO [Vitali] Einigen ob Bits oder Difficulty, damit es einheitlich bleibt!!!
+	private Block retargedBits(Block newBlock) {
+		
+		if(this.blockCounter == CHECK_AFTER_BLOCKS){
+			long currentTime = System.currentTimeMillis();
+			long allBlocksSinceLastTime = this.previousBlock.getTime();
+			BigDecimal oldDifficulty = new BigDecimal(new BigInteger(this.previousBlock.getBits(), HEX)).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
+			BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
+			
+			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
+			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME), BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
+			
+			newBlock.setBits(newDifficulty.toBigInteger().toString(HEX));			
+			newBlock.setTime(currentTime);
+			this.blockCounter = RESET_BLOCKS_COUNT;
+		}
+		else{
+			//The last time stamp since the last retargeting of the difficulty. 
+			newBlock.setTime(this.previousBlock.getTime());	
+			newBlock.setBits(this.previousBlock.getBits());	
+		}
+		this.blockCounter++;
+		return newBlock;
+	}
+	
+	
+	
+	
+	
 	
 	public boolean verifyBlock(Block testBlock) {
 
@@ -91,6 +190,11 @@ public class BlockChain implements IBlockListener {
 
 	}
 
+	
+	
+	
+	
+	
 	public boolean verifyTransaction(Transaction transaction) {
 
 		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
