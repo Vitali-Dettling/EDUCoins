@@ -26,7 +26,7 @@ public class Block {
 	private long nonce;
 	
 	private int transactionsCount;
-	private List<ATransaction> transactions;
+	private List<Transaction> transactions;
 	public Block() {
 		this.setVersion(Block.VERSION);
 		this.setHashPrevBlock(Block.HASH_PREV_BLOCK);
@@ -92,16 +92,16 @@ public class Block {
 		return this.transactionsCount;
 	}
 
-	public List<ATransaction> getTransactions() {
+	public List<Transaction> getTransactions() {
 		// [joeren]: return just a copy of the transaction list, because of
 		// potential effects with transactionsCount
 		if (this.transactions != null) {
-			return new ArrayList<ATransaction>(this.transactions);
+			return new ArrayList<Transaction>(this.transactions);
 		}
 		return null;
 	}
 
-	public void setTransactions(List<ATransaction> transactions) {
+	public void setTransactions(List<Transaction> transactions) {
 		this.transactions = transactions;
 		if (this.transactions == null) {
 			this.transactionsCount = 0;
@@ -110,7 +110,7 @@ public class Block {
 		}
 	}
 
-	public void addTransaction(ATransaction transaction) {
+	public void addTransaction(Transaction transaction) {
 		if (this.transactions == null) {
 			this.transactions = new ArrayList<>();
 		}
@@ -118,7 +118,7 @@ public class Block {
 		this.transactionsCount = this.transactions.size();
 	}
 
-	public void addTransactions(Collection<ATransaction> transactions) {
+	public void addTransactions(Collection<Transaction> transactions) {
 		if (this.transactions == null) {
 			this.transactions = new ArrayList<>();
 		}

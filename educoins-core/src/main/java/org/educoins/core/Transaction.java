@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 //TODO Herausfinden wieso es mit JSON nicht funktioniert...
-public /*abstract*/ class ATransaction {
+public class Transaction {
 
 	protected int version;
 	protected int inputsCount;
@@ -13,7 +13,7 @@ public /*abstract*/ class ATransaction {
 	protected int outputsCount;
 	protected List<Output> outputs;
 
-	public ATransaction() {
+	public Transaction() {
 		this.inputs = new ArrayList<>();
 		this.inputsCount = this.inputs.size();
 		this.outputs = new ArrayList<>();

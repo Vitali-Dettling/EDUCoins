@@ -2,7 +2,7 @@ package org.educoins.core;
 
 import java.util.List;
 
-public class RegularTransaction extends ATransaction {
+public class RegularTransaction extends Transaction {
 
 	@Override
 	public void setInputs(List<Input> vin) {

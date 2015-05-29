@@ -45,7 +45,7 @@ public abstract class Verifier {
 	
 	
 	
-	public boolean verifyTransaction(ATransaction transaction){
+	public boolean verifyTransaction(Transaction transaction){
 		
 		
 		//TODO[Vitali] Implement verification for transactions, which will be needed for the miner.

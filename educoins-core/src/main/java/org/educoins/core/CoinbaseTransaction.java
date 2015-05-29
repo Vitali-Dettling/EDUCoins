@@ -2,7 +2,7 @@ package org.educoins.core;
 
 import java.util.List;
 
-public class CoinbaseTransaction extends ATransaction {
+public class CoinbaseTransaction extends Transaction {
 
 	@Override
 	public void setOutputs(List<Output> vout) {
