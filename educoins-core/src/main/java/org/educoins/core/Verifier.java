@@ -43,7 +43,7 @@ public abstract class Verifier {
 
 	}
 
-	public boolean verifyTransaction(Transaction transaction) {
+	public static boolean verifyTransaction(Transaction transaction) {
 
 		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
 
@@ -108,7 +108,7 @@ public abstract class Verifier {
 			int amount = input.getAmount();
 			if (amount <= 0) {
 				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyTransaction: input amounts is negative");
+				System.out.println("DEBUG: verifyTransaction: input amounts is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -118,7 +118,7 @@ public abstract class Verifier {
 			int amount = output.getAmount();
 			if (amount <= 0) {
 				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyTransaction: output amount is negative");
+				System.out.println("DEBUG: verifyTransaction: output amount is negative or zero");
 				return false;
 			}
 			// sum up for case 5
