@@ -3,11 +3,13 @@ package org.educoins.demo.utils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -96,6 +98,18 @@ public class IO {
 		String string = stringBuilder.toString();
 		reader.close();
 		return string;
+	}
+	
+	public static void copyFile(String srcPath, String dstPath) throws IOException {
+		IO.copyFile(Paths.get(srcPath), Paths.get(dstPath));
+	}
+	
+	public static void copyFile(Path srcPath, Path dstPath) throws IOException {
+		if (Files.exists(dstPath)) {
+			System.out.println("IO.copyFile: file already exists");
+			return;
+		}
+		Files.copy(srcPath, dstPath);
 	}
 
 }
