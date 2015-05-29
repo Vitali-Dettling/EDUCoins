@@ -14,7 +14,7 @@ public class Block {
 	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final long TIME = System.currentTimeMillis();
 	//private static final String BITS = "1f01ff3f";
-	private static final String BITS = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+	private static final String BITS = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 	private static final long NONCE = 1114735442;
 	
 	private int version;

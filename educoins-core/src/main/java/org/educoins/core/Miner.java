@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import org.educoins.core.cryptography.ECDSA;
 import org.educoins.core.utils.ByteArray;
 
 public class Miner implements IBlockListener {
@@ -22,15 +21,14 @@ public class Miner implements IBlockListener {
 	
 	private IBlockReceiver blockReceiver;
 	private IBlockTransmitter blockTransmitter;
-	private static ECDSA ecdsa;
 	
 	private static int blockCounter;
+	private static String publicKey;
 
-
-	public Miner(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, ECDSA ecdsa) {
+	public Miner(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, Wallet wallet) {
 		this.blockReceiver = blockReceiver;
 		this.blockTransmitter = blockTransmitter;
-		Miner.ecdsa = ecdsa;
+		this.publicKey =  wallet.getPublicKey();
 		
 		this.blockReceiver.addBlockListener(this);	
 		Miner.blockCounter = RESET_BLOCKS_COUNT;
@@ -119,7 +117,7 @@ public class Miner implements IBlockListener {
 			byte[] nonce = new byte[BIT32];
 			byte[] targetThreshold = Block.getTargetThreshold(newBlock.getBits());
 			byte[] challenge;
-			byte[] test;
+			byte[] challengePositive;
 			
 			do {
 				nonceGenerator.nextBytes(nonce);
@@ -130,12 +128,12 @@ public class Miner implements IBlockListener {
 //				System.err.println("Target   : " + targetThreshold.length);
 //				System.err.println("Challenge: " + challenge.length);
 				
-				test = invertNegaitve(challenge);
+				challengePositive = invertNegaitve(challenge);
 				
 				System.out.println("Target   : " + new BigInteger(targetThreshold));
-				System.out.println("Challenge: " + new BigInteger(test));
+				System.out.println("Challenge: " + new BigInteger(challengePositive));
 
-			} while (this.active && ByteArray.compare(test, targetThreshold) > 0);
+			} while (this.active && ByteArray.compare(challengePositive, targetThreshold) > 0);
 
 			if (this.active) {
 				reward(newBlock);
@@ -159,15 +157,15 @@ public class Miner implements IBlockListener {
 		}
 
 		public void reward(Block newBlock) {
-			
+
 			//TODO [Vitali] lockingScript procedure has to be established, which fits our needs...
 			String lockingScript = EScripts.DUB.toString() + " " +
 								   EScripts.HASH160.toString() + " " +
-								   Miner.ecdsa.getPublicKey() + " " +//TODO[Vitali] Might needs to be delete after real address entry!!!
+								   Miner.publicKey + " " +//TODO[Vitali] Might needs to be delete after real address entry!!!
 								   EScripts.EQUALVERIFY.toString() + " " +
 								   EScripts.CHECKSIG.toString();
 			//Input is empty because it is a coinbase transaction.
-			Output output = new Output(10, Miner.ecdsa.getPublicKey(), lockingScript);
+			Output output = new Output(10, Miner.publicKey, lockingScript);
 			
 			RegularTransaction transaction = new RegularTransaction(); 
 			transaction.addOutput(output);

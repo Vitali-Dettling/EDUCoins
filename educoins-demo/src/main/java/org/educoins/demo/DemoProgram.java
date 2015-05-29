@@ -14,7 +14,6 @@ import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
 import org.educoins.core.Wallet;
-import org.educoins.core.cryptography.ECDSA;
 
 public class DemoProgram {
 
@@ -34,8 +33,6 @@ public class DemoProgram {
 		boolean runMiner = false;
 		boolean runWallet = false;
 		boolean init = false;
-		
-		ECDSA ecdsa = new ECDSA();
 		
 		if (args.length != 0) {
 	
@@ -95,10 +92,6 @@ public class DemoProgram {
 		} else {
 			Scanner scanner = new Scanner(System.in);
 			String input = null;
-			
-			//TODO [Vitali] Sollte durch eine GUI ersetzt werden, in dem man seinen Public key eintragen muss...
-			System.out.print("EDUCoin Address: " + ecdsa.getPublicKey() + "\n");
-			
 			
 			System.out.print("path of local storage (" + localStorage + "): ");
 			input = scanner.nextLine().trim();
@@ -182,13 +175,14 @@ public class DemoProgram {
 			}
 		}
 
+		Wallet wallet = null;
 		if (runWallet) {
 			
 			IBlockTransmitter blockTransmitterWallet = new DemoBlockTransmitterWallet(remoteStorage, walletStorage);
 			
 			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 			
-			Wallet wallet = new Wallet(blockReceiver, blockTransmitterWallet, ecdsa);
+			wallet = new Wallet(blockReceiver, blockTransmitterWallet);
 
 			blockReceiver.receiveBlocks();
 		}
@@ -198,7 +192,7 @@ public class DemoProgram {
 	
 			IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 
-			Miner miner = new Miner(blockReceiver, blockTransmitterMiner, ecdsa);//TODO[Vitali] Braucht der Miner das ecdsa oder bekommt er es von der Wallet???
+			Miner miner = new Miner(blockReceiver, blockTransmitterMiner, wallet);
 			
 			blockReceiver.receiveBlocks();
 			
