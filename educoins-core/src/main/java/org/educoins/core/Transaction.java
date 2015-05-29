@@ -8,22 +8,30 @@ import java.util.List;
 public class Transaction {
 
 	protected int version;
+	
 	protected int inputsCount;
 	protected List<Input> inputs;
+	
 	protected int outputsCount;
 	protected List<Output> outputs;
+	
+
+	protected int approvalsCount;
+	protected List<Approval> approvals;
 
 	public Transaction() {
 		this.inputs = new ArrayList<>();
 		this.inputsCount = this.inputs.size();
 		this.outputs = new ArrayList<>();
 		this.outputsCount = this.outputs.size();
+		this.approvals = new ArrayList<>();
+		this.approvalsCount = this.approvals.size();
 	}
 
 	public int getVersion() {
 		return this.version;
 	}
-
+	
 	public void setVersion(int version) {
 		this.version = version;
 	}
@@ -101,6 +109,47 @@ public class Transaction {
 		}
 		this.outputs.addAll(outputs);
 		this.outputsCount = this.outputs.size();
+	}	
+	
+	public int getApprovalsCount() {
+		return approvalsCount;
 	}
+
+	public List<Approval> getApprovals() {
+		// [joeren]: look at getInputs()
+		if (this.approvals != null) {
+			return new ArrayList<Approval>(this.approvals);
+		}
+		return null;
+	}
+	
+	public void setApprovals(List<Approval> approvals) {
+		this.approvals = approvals;
+		if (this.approvals == null) {
+			this.approvalsCount = 0;
+		} else {
+			this.approvalsCount = this.approvals.size();
+		}
+		
+	}
+	
+	public void addApproval(Approval output) {
+		if (this.approvals == null) {
+			this.approvals = new ArrayList<>();
+		}
+		this.approvals.add(output);
+		this.approvalsCount = this.approvals.size();
+	}
+
+	public void addApprovals(Collection<Approval> approvals) {
+		if (this.approvals == null) {
+			this.approvals = new ArrayList<>();
+		}
+		this.approvals.addAll(approvals);
+		this.approvalsCount = this.approvals.size();
+	}
+	
+	
+	
 
 }

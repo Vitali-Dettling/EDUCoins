@@ -24,6 +24,8 @@ public class BlockChain implements IBlockListener {
 	private static final int SCALE_DECIMAL_LENGTH = 100;
 	private static final int HEX = 16;
 	private static final int RESET_BLOCKS_COUNT = 0;
+	private static final int DEFAULT_REWARD = 10;
+	private static final int ZERO = 0;
 	private static final String GENIUSES_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 	
 	private int blockCounter;
@@ -32,6 +34,7 @@ public class BlockChain implements IBlockListener {
 	private List<IBlockListener> blockListeners;
 	private Wallet wallet;
 	private Block previousBlock;
+	private Block newBlock;
 
 	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter) {
 		
@@ -73,18 +76,18 @@ public class BlockChain implements IBlockListener {
 	public Block prepareNewBlock(Block previousBlock) {
 		
 		this.previousBlock = previousBlock;
-		Block newBlock = new Block();
+		this.newBlock = new Block();
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
-		newBlock.setVersion(this.previousBlock.getVersion());
-		newBlock.setHashPrevBlock(ByteArray.convertToString(this.previousBlock.hash(), 16));
+		this.newBlock.setVersion(this.previousBlock.getVersion());
+		this.newBlock.setHashPrevBlock(ByteArray.convertToString(this.previousBlock.hash(), 16));
 		// TODO [joeren]: calculate hash merkle root! Temporary take the
 		// hash merkle root of the previous block.
-		newBlock.setHashMerkleRoot(this.previousBlock.getHashMerkleRoot());
+		this.newBlock.setHashMerkleRoot(this.previousBlock.getHashMerkleRoot());
 		
-		newBlock.addTransaction(coinbaseTransaction());
+		this.newBlock.addTransaction(coinbaseTransaction());
 		
-		return retargedBits(newBlock);
+		return retargedBits();
 	}
 	
 	
@@ -110,9 +113,42 @@ public class BlockChain implements IBlockListener {
 	
 	private int rewardCalculator(){
 		
-		//TODO[Vitali] Glak
+		int newReward = ZERO;
+		int lastCoinbaseReward =  this.previousBlock.getLastCoinbaseReword();
+		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
 		
-		return 10;
+		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
+		if(lastCoinbaseReward == lastApprovedEDUCoins){
+			newReward = lastCoinbaseReward;
+		}else if(lastCoinbaseReward > lastApprovedEDUCoins){
+			newReward = lastApprovedEDUCoins;
+		}else if(lastCoinbaseReward < lastApprovedEDUCoins){
+			newReward = lastCoinbaseReward;
+		}
+		
+		//Especially at the beginning, if no EDUCoins had been approved that the miner would still get some reward.
+		if(newReward == ZERO){
+			newReward = DEFAULT_REWARD;
+		}
+
+		return newReward;
+	}
+	
+	
+	private int findAllApprovedEDUCoins(){
+		
+		int latestApprovedEDUCoins = ZERO;
+		List<Transaction> latestTransactions = this.previousBlock.getTransactions();
+		
+		//TODO[Vitali] Might not be 100% correct???ß
+		for(Transaction transaction : latestTransactions){
+			List<Approval> approvals = transaction.getApprovals();
+			for(Approval approval : approvals){
+				latestApprovedEDUCoins += approval.getAmount();
+			}
+		}
+		
+		return latestApprovedEDUCoins;
 	}
 	
 	
@@ -125,7 +161,7 @@ public class BlockChain implements IBlockListener {
 	 * New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 	 * */
 	//TODO [Vitali] Einigen ob Bits oder Difficulty, damit es einheitlich bleibt!!!
-	private Block retargedBits(Block newBlock) {
+	private Block retargedBits() {
 		
 		if(this.blockCounter == CHECK_AFTER_BLOCKS){
 			long currentTime = System.currentTimeMillis();
@@ -136,17 +172,17 @@ public class BlockChain implements IBlockListener {
 			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME), BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
 			
-			newBlock.setBits(newDifficulty.toBigInteger().toString(HEX));			
-			newBlock.setTime(currentTime);
+			this.newBlock.setBits(newDifficulty.toBigInteger().toString(HEX));			
+			this.newBlock.setTime(currentTime);
 			this.blockCounter = RESET_BLOCKS_COUNT;
 		}
 		else{
 			//The last time stamp since the last retargeting of the difficulty. 
-			newBlock.setTime(this.previousBlock.getTime());	
-			newBlock.setBits(this.previousBlock.getBits());	
+			this.newBlock.setTime(this.previousBlock.getTime());	
+			this.newBlock.setBits(this.previousBlock.getBits());	
 		}
 		this.blockCounter++;
-		return newBlock;
+		return this.newBlock;
 	}
 	
 	
