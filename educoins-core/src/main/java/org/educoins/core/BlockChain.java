@@ -59,6 +59,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
 	
+	public Wallet getWallet() {
+		return this.wallet;
+	}
+	
 	public void addBlockListener(IBlockListener blockListener) {
 		this.blockListeners.add(blockListener);
 	}

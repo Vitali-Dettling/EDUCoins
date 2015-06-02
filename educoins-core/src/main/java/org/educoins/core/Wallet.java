@@ -1,8 +1,10 @@
 package org.educoins.core;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -127,9 +129,16 @@ public class Wallet {
 		
 	}
 	
-	public List<String> getPublicKeys() {
-		// FIXME [joeren]: implement urgent!
-		return new ArrayList<>();
+	public List<String> getPublicKeys() throws IOException {
+		List<String> publicKeys = new ArrayList<>();
+		String keyFile = IO.readFromFile(this.directoryKeyStorage + KeyStorageFile);
+		BufferedReader reader = new BufferedReader(new StringReader(keyFile));
+		String line;
+		while ((line = reader.readLine()) != null) {
+			String publicKey = line.substring(line.indexOf(";") + 1);
+			publicKeys.add(publicKey);
+		}
+		return publicKeys;
 	}
 	
 	/**
