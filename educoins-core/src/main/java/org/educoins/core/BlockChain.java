@@ -506,7 +506,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		//Case 13:
 		//TODO [Vitali] The check is current done with the ECDSA class but actually that should be done through the script algorithm.
 		byte[] signature = null;
-		String hashedTransaction = transaction.hash().toString();
+		String hashedTransaction = ByteArray.convertToString(transaction.hash(),16);
 		for(Input input : transaction.getInputs()){
 			signature = input.getUnlockingScript(EInputUnlockingScriptSeperator.SIGNATURE);
 					

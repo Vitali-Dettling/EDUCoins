@@ -171,7 +171,7 @@ public class Transaction {
 		   getApprovals() != null && getApprovals().size() == HAS_NO_ENTRIES){
 			return ETransaction.COINBASE;
 		}
-		else if(getApprovals() == null && getApprovals().size() == HAS_NO_ENTRIES){
+		else if(getApprovals() == null || getApprovals().size() == HAS_NO_ENTRIES){
 			return ETransaction.REGULAR;
 		}
 		else if(getOutputs() == null && getOutputs().size() == HAS_NO_ENTRIES){
@@ -209,6 +209,7 @@ public class Transaction {
 		// hash concatenated header fields and return
 		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed));
 		return hash;
+		
 	}
 
 //TODO[Vitali] Much better implementation, with generic class and so!!!!!!!!!!!!!!!!!!! 

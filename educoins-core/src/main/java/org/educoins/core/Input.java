@@ -56,8 +56,7 @@ public class Input {
 	public byte[] getConcatedInput(){
 		
 		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
-		byte[] unlockingScript = ByteArray.convertFromString(this.unlockingScript);
-		return ByteArray.concatByteArrays(unlockingScript);
+		return this.getUnlockingScript(EInputUnlockingScriptSeperator.PUBLIC_KEY);
 		
 	}
 
