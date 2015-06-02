@@ -3,7 +3,6 @@ package org.educoins.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -13,9 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.SignatureException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.stream.Stream;
 
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.IO;
@@ -25,9 +22,6 @@ import sun.misc.BASE64Decoder;
 public class Wallet {
 
 	private static final int HEX = 16;
-	private static final String UTF_8 = "UTF-8";
-	
-	private static final String KeyStorageFile = "/wallet.keys";
 	private static final String SEPERATOR = ";";
 	
 	private ECDSA keyPair;
@@ -52,7 +46,7 @@ public class Wallet {
 		}
 	}
 
-//TODO [Vitali] Delete is not needed!!!
+//TODO [Vitali] Delete if not needed!!!
 //	@Override
 //	public void blockReceived(Block block) {
 //		
@@ -129,38 +123,6 @@ public class Wallet {
 		
 	}
 	
-	
-	//TODO[Vitali] Delete!!!
-//	private PrintWriter createNewDirectory() throws IOException{
-//		
-//		if (Files.exists(this.walletDirectory)) {
-//			Stream<Path> localFiles = Files.list(this.walletDirectory);
-//			for (Object file : localFiles.toArray()) {
-//				Files.delete((Path) file);
-//			}
-//			localFiles.close();
-//		}
-//		
-//		if (Files.exists(this.walletDirectory) && !Files.isDirectory(this.walletDirectory)) {
-//			throw new IllegalArgumentException(this.walletDirectory.toString() + " is not a directory");
-//		}
-//
-//		if (!Files.exists(this.walletDirectory)) {
-//			Files.createDirectories(this.walletDirectory);
-//		}
-//		
-//		return new PrintWriter(this.walletDirectory.toString() + KeyStorageFile, UTF_8);
-//	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	/**
 	 * Nested calls that just the wallet class can use it. 
 	 * This is important because only the wallet is managing keys and verifications etc.
@@ -184,6 +146,7 @@ public class Wallet {
 		private KeyPairGenerator keyPairGenerator;
 		private KeyPair keyPair;
 		private Signature signature;
+		private KeyFactory keyFactory;
 
 		/**
 		 * Public/private key verification for the Elliptic Curve Digital Signature
@@ -202,6 +165,9 @@ public class Wallet {
 						
 				this.keyPairGenerator.initialize(ADDRESS_SPACE_256, new SecureRandom());
 				this.keyPair = this.keyPairGenerator.generateKeyPair();
+				
+				this.keyFactory = KeyFactory.getInstance(ECDSA);
+				
 			
 			} catch (NoSuchAlgorithmException e) {
 				// TODO Auto-generated catch block
@@ -227,7 +193,6 @@ public class Wallet {
 			return ByteArray.convertToString(this.keyPair.getPrivate().getEncoded(), HEX);
 		}
 
-
 		/**
 		 * Verify the signature with a hashed transaction.
 		 * 
@@ -242,11 +207,9 @@ public class Wallet {
 			if (message == null || signature == null) {
 				throw new Exception("EXCEPTION: [Class ECDSA] The signature or the transaction hash value cannot be null.");
 			}
-			
-			KeyFactory keyFactory = KeyFactory.getInstance(ECDSA);
-			
-			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(new BASE64Decoder().decodeBuffer(publicKey));
-			PublicKey orgPublicKey = keyFactory.generatePublic(publicKeySpec);
+			byte[] decodedPublicKexString = new BASE64Decoder().decodeBuffer(publicKey);
+			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(decodedPublicKexString);
+			PublicKey orgPublicKey = this.keyFactory.generatePublic(publicKeySpec);
 
 			this.signature.initVerify(orgPublicKey);
 			this.signature.update(message.getBytes());

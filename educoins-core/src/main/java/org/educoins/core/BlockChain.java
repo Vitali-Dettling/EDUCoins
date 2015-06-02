@@ -28,7 +28,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private static final int DEFAULT_REWARD = 10;
 	private static final int ZERO = 0;
 	private static final int NO_COINS_APPROVED = 0;
-	private static final int HAS_ENTRIES = 0;
 	private static final int HAS_NO_ENTRIES = 0;
 	private static final int ONLY_ONE_COINBASE_TRANSACTION = 1;
 	private static final String GENIUSES_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -284,9 +283,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	}
 	
-
-	//TODO[Vitali] Change to verify input, output or approved, because the approvals are all the same.
-	
 	private boolean verifyApprovedTransaction(Transaction transaction){
 		
 		//TODO [Vitali] Find out whether all checks are included? 
@@ -333,10 +329,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 		
 		
-		//TODO [Vitali] Implement rest of the verification, if some.
-		//TODO [Vitali] Implement rest of the verification, if some.
-		//TODO [Vitali] Implement rest of the verification, if some.
-		//TODO [Vitali] Implement rest of the verification, if some.
+		
+		
 		
 		return true;
 		
@@ -488,13 +482,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return true;
 	}
 	
-	
-	
-	
-	
-	
-	
-//TODO[Vitali] Kann das funktionieren??? -> Jören fragen???
 	private Block getPreviousBlock(Block currentBlock) {
 		try {
 

@@ -130,7 +130,7 @@ public class DemoProgram {
 		IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 		
 		
-		BlockChain blockChain = new BlockChain(blockReceiver, blockTransmitter);
+		BlockChain blockChain = new BlockChain(blockReceiver, blockTransmitter, null, null);
 		
 		
 		if (runMiner) {

@@ -5,7 +5,7 @@ import org.educoins.core.utils.ByteArray;
 public class Input {
 
 	private static final int HEX = 16;
-	private static final String SEPERATOR = " ";
+	private static final String SEPERATOR = ";";
 	
 	private int index;
 	private int amount;
@@ -45,7 +45,6 @@ public class Input {
 	}
 	
 	public byte[] getUnlockingScript(EInputUnlockingScriptSeperator seperator) {
-		//TODO [Vitali] Mit Jören klären ob das OK is.
 		String[] scriptContent = this.unlockingScript.split(SEPERATOR);
 		return ByteArray.convertFromString(scriptContent[EInputUnlockingScriptSeperator.SIGNATURE.getNumVal()], HEX);
 	}
@@ -66,7 +65,7 @@ public class Input {
 	public enum EInputUnlockingScriptSeperator{
 		
 		SIGNATURE(0),
-		publicKEy(1);
+		PUBLIC_KEY(1);
 		
 		private int enumVal;
 
