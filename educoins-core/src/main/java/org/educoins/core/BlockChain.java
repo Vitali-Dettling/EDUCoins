@@ -77,6 +77,12 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		if(verifyBlock(block)){
 			Block newBlock = prepareNewBlock(block);
 			notifyBlockReceived(newBlock);
+			List<Transaction> transactions = block.getTransactions();
+			if (transactions != null) {
+				for (Transaction transaction : transactions) {
+					notifyTransactionReceived(transaction);
+				}
+			}
 		}
 	}
 	
