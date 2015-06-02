@@ -43,7 +43,7 @@ public class Client extends Thread implements ITransactionListener {
 		transaction.setVersion(1);
 		transaction.setInputs(inputs);
 		transaction.setOutputs(outputs);
-//		this.blockChain.sendTransaction(transaction);
+		this.blockChain.sendTransaction(transaction);
 		this.inputs.clear();
 	}
 

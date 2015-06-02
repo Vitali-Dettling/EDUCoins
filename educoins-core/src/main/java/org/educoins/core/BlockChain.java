@@ -39,6 +39,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private ITransactionReceiver transactionReceiver;
 	private ITransactionTransmitter transactionTransmitter;
 	private List<ITransactionListener> transactionListeners;
+	private List<Transaction> transactions;
 	private Wallet wallet;
 	private Block newBlock;
 
@@ -52,6 +53,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.transactionListeners = new ArrayList<>();
 		this.transactionReceiver = transactionReceiver;
 		this.transactionTransmitter = transactionTransmitter;
+		this.transactionReceiver.addTransactionListener(this);
+		this.transactions = new ArrayList<>();
 	
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
@@ -99,9 +102,22 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 	}
 	
+	public void sendTransaction(Transaction transaction) {
+		this.transactionTransmitter.transmitTransaction(transaction);
+	}
+	
 	@Override
 	public void transactionReceived(Transaction transaction) {
-		
+		ETransaction type = transaction.whichTransaction();
+		if (type == ETransaction.REGULAR) {
+			if (verifyRegularTransaction(transaction)) {
+				this.transactions.add(transaction);
+			}
+		} else if (type == ETransaction.APPROVED) {
+			if (verifyApprovedTransaction(transaction)) {
+				this.transactions.add(transaction);
+			}
+		}
 	}
 	
 	@Override
@@ -121,6 +137,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.newBlock.setHashMerkleRoot(currentBlock.getHashMerkleRoot());
 		
 		this.newBlock.addTransaction(coinbaseTransaction(currentBlock));
+		this.newBlock.addTransactions(this.transactions);
+		this.transactions.clear();
 		
 		return retargedBits(currentBlock);
 	}
@@ -222,7 +240,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	
 	
-	public boolean verifyBlock(Block toVerifyBlock) {
+	private boolean verifyBlock(Block toVerifyBlock) {
 		
 		// 0. If geniuses block return true, because there no other block before.
 		if (toVerifyBlock.getHashPrevBlock().equals(GENIUSES_BLOCK)) {
