@@ -1,5 +1,6 @@
 package org.educoins.core;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ public class Miner implements IBlockListener {
 			this.block = block;
 			this.active = true;
 		}
-
+		
 
 		@Override
 		public void run() {
@@ -75,8 +76,8 @@ public class Miner implements IBlockListener {
 				
 				challengePositive = invertNegaitve(challenge);
 				
-//				System.out.println("Target   : " + new BigInteger(targetThreshold));
-//				System.out.println("Challenge: " + new BigInteger(challengePositive));
+				System.out.println("Target   : " + new BigInteger(targetThreshold));
+				System.out.println("Challenge: " + new BigInteger(challengePositive));
 
 			} while (this.active && ByteArray.compare(challengePositive, targetThreshold) > 0);
 

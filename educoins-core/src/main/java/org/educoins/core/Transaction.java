@@ -10,7 +10,7 @@ import org.educoins.core.utils.ByteArray;
 //TODO Herausfinden wieso es mit JSON nicht funktioniert...
 public class Transaction {
 
-	private static final int HAS_ENTRIES = 0;
+	private static final int HAS_NO_ENTRIES = 0;
 	
 	protected int version;
 	
@@ -167,14 +167,14 @@ public class Transaction {
 	public ETransaction whichTransaction(){
 		
 		//Check for transaction type.
-		if(getInputs() != null && getInputs().size() > HAS_ENTRIES &&
-		   getApprovals() != null && getApprovals().size() > HAS_ENTRIES){
+		if(getInputs() != null && getInputs().size() == HAS_NO_ENTRIES &&
+		   getApprovals() != null && getApprovals().size() == HAS_NO_ENTRIES){
+			return ETransaction.COINBASE;
+		}
+		else if(getApprovals() == null && getApprovals().size() == HAS_NO_ENTRIES){
 			return ETransaction.REGULAR;
 		}
-		else if(getApprovals() == null && getApprovals().size() == HAS_ENTRIES){
-			return ETransaction.REGULAR;
-		}
-		else if(getOutputs() == null && getOutputs().size() == HAS_ENTRIES){
+		else if(getOutputs() == null && getOutputs().size() == HAS_NO_ENTRIES){
 			return ETransaction.APPROVED;
 		}
 		return null;

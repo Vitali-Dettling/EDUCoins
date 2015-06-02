@@ -11,9 +11,13 @@ import java.util.stream.Stream;
 
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
+import org.educoins.core.EScripts;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
+import org.educoins.core.Output;
+import org.educoins.core.RegularTransaction;
+import org.educoins.core.Transaction;
 
 public class DemoProgram {
 
@@ -133,12 +137,17 @@ public class DemoProgram {
 		BlockChain blockChain = new BlockChain(blockReceiver, blockTransmitter, null, null);
 		
 		
+		
+		
 		if (runMiner) {
 			new Miner(blockChain);
 		}
 	
 		blockReceiver.receiveBlocks();
+		Block block = new Block();
+		block.addTransaction(coinbaseTransaction());
 		blockTransmitter.transmitBlock(new Block());
+		
 		
 //		// Temporary
 //		IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
@@ -148,6 +157,22 @@ public class DemoProgram {
 //		ATransaction tx = new RegularTransaction();
 //		block.addTransaction(tx);
 //		blockTransmitter.transmitBlock(block);
+	}
+	
+	//TODO [Vitali] Delete
+	private static Transaction coinbaseTransaction() {
+
+		String burnedBublicKey = "00000000000000000000000000000000000000000000";
+		
+		//TODO [Vitali] lockingScript procedure has to be established, which fits our needs...
+		String lockingScript = burnedBublicKey;//TODO[Vitali] Modify that it can be changed on or more addresses???
+		
+		//Input is empty because it is a coinbase transaction.
+		Output output = new Output(10, burnedBublicKey, lockingScript);
+
+		RegularTransaction transaction = new RegularTransaction(); 
+		transaction.addOutput(output);
+		return transaction;
 	}
 
 	

@@ -27,7 +27,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private static final int RESET_BLOCKS_COUNT = 0;
 	private static final int DEFAULT_REWARD = 10;
 	private static final int ZERO = 0;
-	private static final int NO_COINS_APPROVED = 0;
+	private static final int NO_COINS = 0;
 	private static final int HAS_NO_ENTRIES = 0;
 	private static final int ONLY_ONE_COINBASE_TRANSACTION = 1;
 	private static final String GENIUSES_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -40,7 +40,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private ITransactionTransmitter transactionTransmitter;
 	private List<ITransactionListener> transactionListeners;
 	private Wallet wallet;
-	private Block previousBlock;
 	private Block newBlock;
 
 	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter) {
@@ -110,37 +109,32 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.blockTransmitter.transmitBlock(block);
 	}
 	
-	public Block prepareNewBlock(Block previousBlock) {
+	public Block prepareNewBlock(Block currentBlock) {
 		
-		this.previousBlock = previousBlock;
 		this.newBlock = new Block();
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
-		this.newBlock.setVersion(this.previousBlock.getVersion());
-		this.newBlock.setHashPrevBlock(ByteArray.convertToString(this.previousBlock.hash(), 16));
+		this.newBlock.setVersion(currentBlock.getVersion());
+		this.newBlock.setHashPrevBlock(ByteArray.convertToString(currentBlock.hash(), 16));
 		// TODO [joeren]: calculate hash merkle root! Temporary take the
 		// hash merkle root of the previous block.
-		this.newBlock.setHashMerkleRoot(this.previousBlock.getHashMerkleRoot());
+		this.newBlock.setHashMerkleRoot(currentBlock.getHashMerkleRoot());
 		
-		this.newBlock.addTransaction(coinbaseTransaction());
+		this.newBlock.addTransaction(coinbaseTransaction(currentBlock));
 		
-		return retargedBits();
+		return retargedBits(currentBlock);
 	}
 	
 	
-	private Transaction coinbaseTransaction() {
+	private Transaction coinbaseTransaction(Block currentBlock) {
 
 		String publicKey = this.wallet.getPublicKey();
 		
 		//TODO [Vitali] lockingScript procedure has to be established, which fits our needs...
-		String lockingScript = EScripts.DUB.toString() + " " +
-							   EScripts.HASH160.toString() + " " +
-							   publicKey + " " +//TODO[Vitali] Modify that it can be changed on or more addresses???
-							   EScripts.EQUALVERIFY.toString() + " " +
-							   EScripts.CHECKSIG.toString();
+		String lockingScript = publicKey;		
 		
 		//Input is empty because it is a coinbase transaction.
-		Output output = new Output(rewardCalculator(this.previousBlock), publicKey, lockingScript);
+		Output output = new Output(rewardCalculator(currentBlock), publicKey, lockingScript);
 
 		RegularTransaction transaction = new RegularTransaction(); 
 		transaction.addOutput(output);
@@ -148,11 +142,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 	
 	
-	private int rewardCalculator(Block lastBlock){
+	private int rewardCalculator(Block currentBlock){
 		
 		int newReward = ZERO;
-		int lastCoinbaseReward =  lastBlock.getLastCoinbaseReword();
-		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
+		int lastCoinbaseReward =  currentBlock.getLastCoinbaseReword();
+		int lastApprovedEDUCoins = findAllApprovedEDUCoins(currentBlock);
 		
 		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
 		if(lastCoinbaseReward == lastApprovedEDUCoins){
@@ -170,12 +164,12 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		return newReward;
 	}
+		
 	
-	
-	private int findAllApprovedEDUCoins(){
+	private int findAllApprovedEDUCoins(Block currentBlock){
 		
 		int latestApprovedEDUCoins = ZERO;
-		List<Transaction> latestTransactions = this.previousBlock.getTransactions();
+		List<Transaction> latestTransactions = currentBlock.getTransactions();
 		
 		//TODO[Vitali] Might not be 100% correct???ß
 		for(Transaction transaction : latestTransactions){
@@ -197,12 +191,12 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	 * 
 	 * New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 	 * */
-	private Block retargedBits() {
+	private Block retargedBits(Block previousBlock) {
 		
 		if(this.blockCounter == CHECK_AFTER_BLOCKS){
 			long currentTime = System.currentTimeMillis();
-			long allBlocksSinceLastTime = this.previousBlock.getTime();
-			BigDecimal oldDifficulty = new BigDecimal(new BigInteger(this.previousBlock.getBits(), HEX)).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
+			long allBlocksSinceLastTime = previousBlock.getTime();
+			BigDecimal oldDifficulty = new BigDecimal(new BigInteger(previousBlock.getBits(), HEX)).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
 			BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
 			
 			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
@@ -214,8 +208,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 		else{
 			//The last time stamp since the last retargeting of the difficulty. 
-			this.newBlock.setTime(this.previousBlock.getTime());	
-			this.newBlock.setBits(this.previousBlock.getBits());	
+			this.newBlock.setTime(previousBlock.getTime());	
+			this.newBlock.setBits(previousBlock.getBits());	
 		}
 		this.blockCounter++;
 		return this.newBlock;
@@ -229,10 +223,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	
 	public boolean verifyBlock(Block toVerifyBlock) {
-
+		
 		// 0. If geniuses block return true, because there no other block before.
-		if (!toVerifyBlock.getHashPrevBlock().equals(GENIUSES_BLOCK)) {
-			return false;
+		if (toVerifyBlock.getHashPrevBlock().equals(GENIUSES_BLOCK)) {
+			return true;
 		}
 
 		// 1. Find the previous block.
@@ -262,7 +256,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	    	
 			//5.1 Check for transaction type.
 			if(transaction.whichTransaction() == ETransaction.COINBASE){
-				isTransactionValid = verifyCoinbaseTransaction(transaction);
+				isTransactionValid = verifyCoinbaseTransaction(transaction, toVerifyBlock);
 			}
 			else if(transaction.whichTransaction() == ETransaction.REGULAR){
 				isTransactionValid = verifyRegularTransaction(transaction);
@@ -300,12 +294,14 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			System.out.println("DEBUG: verifyRegularTransaction: inputs is null");
 			return false;
 		}
+
+		int sumInputsAmount = 0;
+		int sumApprovalAmount = 0;
 		
 		// Case 4:
-		int sumInputsAmount = 0;
 		for (Input input : inputs) {
 			int amount = input.getAmount();
-			if (amount <= 0) {
+			if (amount <= NO_COINS) {
 				// TODO [joeren]: remove debug output
 				System.out.println("DEBUG: verifyRegularTransaction: input amounts is negative or zero");
 				return false;
@@ -313,31 +309,52 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			// sum up for case 5
 			sumInputsAmount += amount;
 		}
-		
-		
+				
 		for(Approval approval : approvals){
-			if(approval.getAmount() <= NO_COINS_APPROVED){
+			if(approval.getAmount() <= NO_COINS){
 				System.out.println("DEBUG: verifyApprovedTransaction: approved amound is 0");
 				return false;
 			}
 			
-			if(approval.getHashPrevOutput() != null){
-				System.out.println("DEBUG: verifyApprovedTransaction: No previos output allowed.");
+			int amount = approval.getAmount();
+			if (amount <= NO_COINS) {
+				// TODO [joeren]: remove debug output
+				System.out.println("DEBUG: verifyRegularTransaction: output amount is negative or zero");
 				return false;
 			}
-			
+			// sum up for case 5
+			sumApprovalAmount += amount;
+		}
+		
+		// Case 5:
+		// TODO [joeren]: implementation of approval-exception
+		if (sumApprovalAmount > sumInputsAmount) {
+			// TODO [joeren]: remove debug output
+			System.out.println("DEBUG: verifyRegularTransaction: more output than input");
+			return false;
+		}
+		
+		//Case 13:
+		//TODO [Vitali] Implement the check for the lock script as soon as the Revoke class was introduced. 
+		//Till then there is no use in implementing it. 
+		//For the time beeing it only checked that Locking Script is not empty.
+		for(Approval approval : approvals){
+			String lockingScript = approval.getLockingScript();
+			if(lockingScript.isEmpty()){
+				System.out.println("DEBUG: verifyRegularTransaction: locking script is empty.");
+				return false;
+			}
 		}
 		
 		
-		
-		
+		//TODO [Vitali] Implement rest of the verification, if some.
 		
 		return true;
 		
 		
 	}
 	
-	private boolean verifyCoinbaseTransaction(Transaction transaction){
+	private boolean verifyCoinbaseTransaction(Transaction transaction, Block toVerifyBlock){
 		
 		//TODO [Vitali] Find out whether all checks are included? 
 		
@@ -354,7 +371,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			return false;
 		}
 		
-		if(coinBases.size() == ONLY_ONE_COINBASE_TRANSACTION){
+		if(coinBases.size() != ONLY_ONE_COINBASE_TRANSACTION){
 			// TODO [joeren]: remove debug output
 			System.out.println("DEBUG: verifyCoinbaseTransaction: More then one coinbase transaction.");
 			return false;
@@ -363,7 +380,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		Output coinBase = coinBases.iterator().next();
 		
 		int currentReward = coinBase.getAmount();
-		Block previousBlock = getPreviousBlock(this.previousBlock);
+		Block previousBlock = getPreviousBlock(toVerifyBlock);
 		int trueReward = rewardCalculator(previousBlock);
 		if(trueReward != currentReward){
 			System.out.println("DEBUG: verifyCoinbaseTransaction: reward cannot be zero.");
@@ -393,7 +410,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		int realInputsCount = inputs.size();
 
-		if (realInputsCount == 0) {
+		if (realInputsCount == ZERO) {
 			// TODO [joeren]: remove debug output
 			System.out.println("DEBUG: verifyRegularTransaction: realInputsCount is 0");
 			return false;
@@ -417,7 +434,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		int realOutputsCount = outputs.size();
 
-		if (realOutputsCount == 0) {
+		if (realOutputsCount == ZERO) {
 			// TODO [joeren]: remove debug output
 			System.out.println("DEBUG: verifyRegularTransaction: realOutputsCount is 0");
 			return false;
@@ -431,13 +448,13 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			return false;
 		}
 		
-		int sumInputsAmount = 0;
-		int sumOutputsAmount = 0;
+		int sumInputsAmount = NO_COINS;
+		int sumOutputsAmount = NO_COINS;
 		
 		// Case 4:
 		for (Input input : inputs) {
 			int amount = input.getAmount();
-			if (amount <= 0) {
+			if (amount <= NO_COINS) {
 				// TODO [joeren]: remove debug output
 				System.out.println("DEBUG: verifyRegularTransaction: input amounts is negative or zero");
 				return false;
@@ -447,7 +464,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 		for (Output output : outputs) {
 			int amount = output.getAmount();
-			if (amount <= 0) {
+			if (amount <= NO_COINS) {
 				// TODO [joeren]: remove debug output
 				System.out.println("DEBUG: verifyRegularTransaction: output amount is negative or zero");
 				return false;
@@ -472,6 +489,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			signature = input.getUnlockingScript(EInputUnlockingScriptSeperator.SIGNATURE);
 					
 			if(!this.wallet.checkSignature(hashedTransaction, signature)){
+				System.out.println("DEBUG: verifyRegularTransaction: Signature is not correct.");
 				return false;
 			}
 					
@@ -482,6 +500,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return true;
 	}
 	
+	
+	//TODO [Vitali] Method needs to be deleted as soon as the DB will be introduced.
 	private Block getPreviousBlock(Block currentBlock) {
 		try {
 
@@ -493,6 +513,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 					+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
 
 			return Deserializer.deserialize(remoteStoragePath, lastBlockName);
+			
 		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
 			System.out.println("ERROR: Class Verifier: " + e.getMessage());
 			e.printStackTrace();

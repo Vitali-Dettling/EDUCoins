@@ -5,15 +5,13 @@ import org.educoins.core.utils.ByteArray;
 public class Approval {
 
 	private int amount;
-	private String hashPrevOutput;
 	private String holderSignature;
 	private String ownerAddress;
 	private String lockingScript;
 	
-	public Approval(int amount, String hashPrevOutput, String ownerAddress, String holderSignature, String lockingScript){
+	public Approval(int amount, String ownerAddress, String holderSignature, String lockingScript){
 		
 		this.amount = amount;
-		this.hashPrevOutput = hashPrevOutput;
 		this.holderSignature = holderSignature;
 		this.ownerAddress = ownerAddress;
 		this.lockingScript = lockingScript;
@@ -25,14 +23,6 @@ public class Approval {
 
 	public void setAmount(int amount) {
 		this.amount = amount;
-	}
-
-	public String getHashPrevOutput() {
-		return this.hashPrevOutput;
-	}
-
-	public void setHashPrevOutput(String hashPrevOutput) {
-		this.hashPrevOutput = hashPrevOutput;
 	}
 
 	public String getHolderSignature() {
