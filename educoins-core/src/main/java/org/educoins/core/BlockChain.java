@@ -7,6 +7,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.educoins.core.Input.EInputUnlockingScriptSeperator;
+import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Deserializer;
 
@@ -19,13 +21,16 @@ public class BlockChain implements IBlockListener {
 	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
 	private static final int IN_SECONDS = 1000;
-	//TODO aus irgend einem Grund funktioniert die Desired Time nicht? Um so höcher diese ist um so unwahrscheinlicher kalibriert sich die Difficulty???
 	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * IN_SECONDS * CHECK_AFTER_BLOCKS;
 	private static final int SCALE_DECIMAL_LENGTH = 100;
 	private static final int HEX = 16;
 	private static final int RESET_BLOCKS_COUNT = 0;
 	private static final int DEFAULT_REWARD = 10;
 	private static final int ZERO = 0;
+	private static final int NO_COINS_APPROVED = 0;
+	private static final int HAS_ENTRIES = 0;
+	private static final int HAS_NO_ENTRIES = 0;
+	private static final int ONLY_ONE_COINBASE_TRANSACTION = 1;
 	private static final String GENIUSES_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 	
 	private int blockCounter;
@@ -38,7 +43,7 @@ public class BlockChain implements IBlockListener {
 
 	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter) {
 		
-		this.wallet = new Wallet(this);
+		this.wallet = new Wallet();
 		this.blockListeners = new ArrayList<>();
 		this.blockReceiver = blockReceiver;
 		this.blockTransmitter = blockTransmitter;
@@ -103,7 +108,7 @@ public class BlockChain implements IBlockListener {
 							   EScripts.CHECKSIG.toString();
 		
 		//Input is empty because it is a coinbase transaction.
-		Output output = new Output(rewardCalculator(), publicKey, lockingScript);
+		Output output = new Output(rewardCalculator(this.previousBlock), publicKey, lockingScript);
 
 		RegularTransaction transaction = new RegularTransaction(); 
 		transaction.addOutput(output);
@@ -111,10 +116,10 @@ public class BlockChain implements IBlockListener {
 	}
 	
 	
-	private int rewardCalculator(){
+	private int rewardCalculator(Block lastBlock){
 		
 		int newReward = ZERO;
-		int lastCoinbaseReward =  this.previousBlock.getLastCoinbaseReword();
+		int lastCoinbaseReward =  lastBlock.getLastCoinbaseReword();
 		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
 		
 		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
@@ -160,7 +165,6 @@ public class BlockChain implements IBlockListener {
 	 * 
 	 * New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 	 * */
-	//TODO [Vitali] Einigen ob Bits oder Difficulty, damit es einheitlich bleibt!!!
 	private Block retargedBits() {
 		
 		if(this.blockCounter == CHECK_AFTER_BLOCKS){
@@ -190,15 +194,17 @@ public class BlockChain implements IBlockListener {
 	
 	
 	
-	public boolean verifyBlock(Block testBlock) {
+	
+	
+	public boolean verifyBlock(Block toVerifyBlock) {
 
 		// 0. If geniuses block return true, because there no other block before.
-		if (testBlock.getHashPrevBlock().equals(GENIUSES_BLOCK)) {
-			return true;
+		if (!toVerifyBlock.getHashPrevBlock().equals(GENIUSES_BLOCK)) {
+			return false;
 		}
 
 		// 1. Find the previous block.
-		Block lastBlock = getPreviousBlock(testBlock);
+		Block lastBlock = getPreviousBlock(toVerifyBlock);
 
 		// 2. Does the previous block exist?
 		if (lastBlock == null) {
@@ -206,45 +212,155 @@ public class BlockChain implements IBlockListener {
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
-		byte[] testBlockHash = testBlock.hash();
+		byte[] testBlockHash = toVerifyBlock.hash();
 		byte[] lastBlockHash = lastBlock.getHashPrevBlock().getBytes();
 		if (ByteArray.compare(testBlockHash, lastBlockHash) == TRUE) {
 			return false;
 		}
 		
-		//4. Verification of all transactions in a block.
-		List<Transaction> transactions = testBlock.getTransactions();
-		if (transactions != null) {
-			for (Transaction transaction : transactions) {
-				verifyTransaction(transaction);
+		//4. At least one transaction has to be in the block, namely the coinbase transaction.
+		if(toVerifyBlock.getTransactions().size() <=  HAS_NO_ENTRIES){
+			return false;
+		}
+		
+		//5. Verification of all transactions in a block.
+		boolean isTransactionValid = true;
+		List<Transaction> transactions = toVerifyBlock.getTransactions();
+	    for (Transaction transaction : transactions) {
+	    	
+			//5.1 Check for transaction type.
+			if(transaction.whichTransaction() == ETransaction.COINBASE){
+				isTransactionValid = verifyCoinbaseTransaction(transaction);
+			}
+			else if(transaction.whichTransaction() == ETransaction.REGULAR){
+				isTransactionValid = verifyRegularTransaction(transaction);
+			}
+			else if(transaction.whichTransaction() == ETransaction.APPROVED){
+				isTransactionValid = verifyApprovedTransaction(transaction);
+			}
+			
+			//As soon as a transaction is not valid, the loop will be cancelled.
+			if(!isTransactionValid){
+				return false;
 			}
 		}
-
+		
 		// TODO[Vitali] Überlegen ob weitere Test von nöten wären???
 
 		return true;
 
 	}
+	
 
+	//TODO[Vitali] Change to verify input, output or approved, because the approvals are all the same.
 	
+	private boolean verifyApprovedTransaction(Transaction transaction){
+		
+		//TODO [Vitali] Find out whether all checks are included? 
+		
+		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
+
+		// Case 1:
+		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
+		
+		List<Input> inputs = transaction.getInputs();
+		List<Approval> approvals = transaction.getApprovals();
+		
+		if (approvals == null) {
+			// TODO [joeren]: remove debug output
+			System.out.println("DEBUG: verifyRegularTransaction: inputs is null");
+			return false;
+		}
+		
+		// Case 4:
+		int sumInputsAmount = 0;
+		for (Input input : inputs) {
+			int amount = input.getAmount();
+			if (amount <= 0) {
+				// TODO [joeren]: remove debug output
+				System.out.println("DEBUG: verifyRegularTransaction: input amounts is negative or zero");
+				return false;
+			}
+			// sum up for case 5
+			sumInputsAmount += amount;
+		}
+		
+		
+		for(Approval approval : approvals){
+			if(approval.getAmount() <= NO_COINS_APPROVED){
+				System.out.println("DEBUG: verifyApprovedTransaction: approved amound is 0");
+				return false;
+			}
+			
+			if(approval.getHashPrevOutput() != null){
+				System.out.println("DEBUG: verifyApprovedTransaction: No previos output allowed.");
+				return false;
+			}
+			
+		}
+		
+		
+		//TODO [Vitali] Implement rest of the verification, if some.
+		//TODO [Vitali] Implement rest of the verification, if some.
+		//TODO [Vitali] Implement rest of the verification, if some.
+		//TODO [Vitali] Implement rest of the verification, if some.
+		
+		return true;
+		
+		
+	}
 	
+	private boolean verifyCoinbaseTransaction(Transaction transaction){
+		
+		//TODO [Vitali] Find out whether all checks are included? 
+		
+		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
+
+		// Case 1:
+		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
+
+		List<Output> coinBases = transaction.getOutputs();
+		
+		if(coinBases == null){
+			// TODO [joeren]: remove debug output
+			System.out.println("DEBUG: verifyCoinbaseTransaction: output is null");
+			return false;
+		}
+		
+		if(coinBases.size() == ONLY_ONE_COINBASE_TRANSACTION){
+			// TODO [joeren]: remove debug output
+			System.out.println("DEBUG: verifyCoinbaseTransaction: More then one coinbase transaction.");
+			return false;
+		}
+		
+		Output coinBase = coinBases.iterator().next();
+		
+		int currentReward = coinBase.getAmount();
+		Block previousBlock = getPreviousBlock(this.previousBlock);
+		int trueReward = rewardCalculator(previousBlock);
+		if(trueReward != currentReward){
+			System.out.println("DEBUG: verifyCoinbaseTransaction: reward cannot be zero.");
+			return false;
+		}
+		
+		//TODO [Vitali] Implement rest of the verification, if some.
+		
+		return true;
+		
+	}
 	
-	
-	
-	public boolean verifyTransaction(Transaction transaction) {
+	private boolean verifyRegularTransaction(Transaction transaction) {
 
 		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
 
 		// Case 1:
 		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
 
-		// Case 2:
-		// TODO [joeren]: implementation of approval-exception
 		List<Input> inputs = transaction.getInputs();
 
 		if (inputs == null) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyTransaction: inputs is null");
+			System.out.println("DEBUG: verifyRegularTransaction: inputs is null");
 			return false;
 		}
 
@@ -252,7 +368,7 @@ public class BlockChain implements IBlockListener {
 
 		if (realInputsCount == 0) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyTransaction: realInputsCount is 0");
+			System.out.println("DEBUG: verifyRegularTransaction: realInputsCount is 0");
 			return false;
 		}
 
@@ -260,7 +376,7 @@ public class BlockChain implements IBlockListener {
 
 		if (realInputsCount != inputsCount) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyTransaction: realInputsCount does not match inputsCount");
+			System.out.println("DEBUG: verifyRegularTransaction: realInputsCount does not match inputsCount");
 			return false;
 		}
 
@@ -268,7 +384,7 @@ public class BlockChain implements IBlockListener {
 
 		if (outputs == null) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyTransaction: outputs is null");
+			System.out.println("DEBUG: verifyRegularTransaction: outputs is null");
 			return false;
 		}
 
@@ -276,7 +392,7 @@ public class BlockChain implements IBlockListener {
 
 		if (realOutputsCount == 0) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyTransaction: realOutputsCount is 0");
+			System.out.println("DEBUG: verifyRegularTransaction: realOutputsCount is 0");
 			return false;
 		}
 
@@ -284,7 +400,7 @@ public class BlockChain implements IBlockListener {
 
 		if (realOutputsCount != outputsCount) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyTransaction: realOutputsCount does not match outputsCount");
+			System.out.println("DEBUG: verifyRegularTransaction: realOutputsCount does not match outputsCount");
 			return false;
 		}
 		
@@ -296,7 +412,7 @@ public class BlockChain implements IBlockListener {
 			int amount = input.getAmount();
 			if (amount <= 0) {
 				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyTransaction: input amounts is negative or zero");
+				System.out.println("DEBUG: verifyRegularTransaction: input amounts is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -306,7 +422,7 @@ public class BlockChain implements IBlockListener {
 			int amount = output.getAmount();
 			if (amount <= 0) {
 				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyTransaction: output amount is negative or zero");
+				System.out.println("DEBUG: verifyRegularTransaction: output amount is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -317,18 +433,39 @@ public class BlockChain implements IBlockListener {
 		// TODO [joeren]: implementation of approval-exception
 		if (sumOutputsAmount > sumInputsAmount) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyTransaction: more output than input");
+			System.out.println("DEBUG: verifyRegularTransaction: more output than input");
 			return false;
 		}
-
+		
+		//Case 13:
+		//TODO [Vitali] The check is current done with the ECDSA class but actually that should be done through the script algorithm.
+		byte[] signature = null;
+		String hashedTransaction = transaction.hash().toString();
+		for(Input input : transaction.getInputs()){
+			signature = input.getUnlockingScript(EInputUnlockingScriptSeperator.SIGNATURE);
+					
+			if(!this.wallet.checkSignature(hashedTransaction, signature)){
+				return false;
+			}
+					
+		}
+		
+		//TODO [Vitali] Implement rest of the verification, if some.
+		
 		return true;
-
 	}
-
-	private Block getPreviousBlock(Block testblock) {
+	
+	
+	
+	
+	
+	
+	
+//TODO[Vitali] Kann das funktionieren??? -> Jören fragen???
+	private Block getPreviousBlock(Block currentBlock) {
 		try {
 
-			String lastBlockName = testblock.getHashPrevBlock();
+			String lastBlockName = currentBlock.getHashPrevBlock();
 
 			// TODO[Vitali] Der remoteStorage String ist nur für den Prototypen, sollte geändert werden sobal eine
 			// levelDB eingeführt wird!!!

@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.educoins.core.cryptography.SHA256Hasher;
+import org.educoins.core.utils.ByteArray;
+
 //TODO Herausfinden wieso es mit JSON nicht funktioniert...
 public class Transaction {
 
+	private static final int HAS_ENTRIES = 0;
+	
 	protected int version;
 	
 	protected int inputsCount;
@@ -74,6 +79,10 @@ public class Transaction {
 		this.inputsCount = this.inputs.size();
 	}
 
+	
+	
+	
+	
 	public int getOutputsCount() {
 		return this.outputsCount;
 	}
@@ -114,6 +123,11 @@ public class Transaction {
 	public int getApprovalsCount() {
 		return approvalsCount;
 	}
+	
+	
+	
+	
+	
 
 	public List<Approval> getApprovals() {
 		// [joeren]: look at getInputs()
@@ -148,6 +162,110 @@ public class Transaction {
 		this.approvals.addAll(approvals);
 		this.approvalsCount = this.approvals.size();
 	}
+	
+	
+	public ETransaction whichTransaction(){
+		
+		//Check for transaction type.
+		if(getInputs() != null && getInputs().size() > HAS_ENTRIES &&
+		   getApprovals() != null && getApprovals().size() > HAS_ENTRIES){
+			return ETransaction.REGULAR;
+		}
+		else if(getApprovals() == null && getApprovals().size() == HAS_ENTRIES){
+			return ETransaction.REGULAR;
+		}
+		else if(getOutputs() == null && getOutputs().size() == HAS_ENTRIES){
+			return ETransaction.APPROVED;
+		}
+		return null;
+	}
+	
+	
+	
+	
+	public byte[] hash() {
+		return Transaction.hash(this);
+	}
+
+	public static byte[] hash(Transaction transaction) {
+		
+		byte[] toBeHashed = null;
+		//Check for transaction type.
+		if(transaction.whichTransaction() == ETransaction.COINBASE){
+			toBeHashed = getByteArrayOutput(transaction);
+		}
+		else if(transaction.whichTransaction() == ETransaction.REGULAR){
+			
+			byte[] input = getByteArrayInput(transaction);
+			byte[] output =  getByteArrayOutput(transaction);
+			toBeHashed = ByteArray.concatByteArrays(input, output);
+		}
+		else if(transaction.whichTransaction() == ETransaction.APPROVED){
+			byte[] input = getByteArrayInput(transaction);
+			byte[] approved =  getByteArrayApproved(transaction);
+			toBeHashed = ByteArray.concatByteArrays(input, approved);
+		}
+
+		// hash concatenated header fields and return
+		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed));
+		return hash;
+	}
+
+//TODO[Vitali] Much better implementation, with generic class and so!!!!!!!!!!!!!!!!!!! 
+	private static byte[] getByteArrayInput(Transaction transaction){
+		int length = 0;
+		for (Input input : transaction.getInputs()) {
+			length += input.getConcatedInput().length;
+		}
+		byte[] byteArray = new byte[length];
+		int index = 0;
+		for(Input input : transaction.getInputs()){
+
+			System.arraycopy(input.getConcatedInput(), 0, byteArray, index, input.getConcatedInput().length);
+			index += input.getConcatedInput().length;
+		}
+		return byteArray;
+	}
+	//TODO[Vitali] Much better implementation, with generic class and so!!!!!!!!!!!!!!!!!!! 
+	private static byte[] getByteArrayOutput(Transaction transaction){
+		int length = 0;
+		for (Output output : transaction.getOutputs()) {
+			length += output.getConcatedOutput().length;
+		}
+		byte[] byteArray = new byte[length];
+		int index = 0;
+		for(Output output : transaction.getOutputs()){
+			
+			System.arraycopy(output.getConcatedOutput(), 0, byteArray, index, output.getConcatedOutput().length);
+			index += output.getConcatedOutput().length;
+		}
+		return byteArray;
+	}
+	//TODO[Vitali] Much better implementation, with generic class and so!!!!!!!!!!!!!!!!!!! 
+	private static byte[] getByteArrayApproved(Transaction transaction){
+		int length = 0;
+		for (Approval approval : transaction.getApprovals()) {
+			length += approval.getConcatedApproval().length;
+		}
+		byte[] byteArray = new byte[length];
+		int index = 0;
+		for(Approval approval : transaction.getApprovals()){
+			
+			System.arraycopy(approval.getConcatedApproval(), 0, byteArray, index, approval.getConcatedApproval().length);
+			index += approval.getConcatedApproval().length;
+		}
+		return byteArray;
+	}
+	
+	
+	public enum ETransaction {
+		
+		APPROVED,
+		COINBASE,
+		REGULAR,
+
+	}
+
 	
 	
 	

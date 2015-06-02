@@ -1,5 +1,7 @@
 package org.educoins.core;
 
+import org.educoins.core.utils.ByteArray;
+
 public class Output {
 
 	private int amount;
@@ -35,6 +37,15 @@ public class Output {
 
 	public void setLockingScript(String lockingScript) {
 		this.lockingScript = lockingScript;
+	}
+	
+	
+	public byte[] getConcatedOutput(){
+		
+		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
+		byte[] lockingScript = ByteArray.convertFromString(getLockingScript());
+		return ByteArray.concatByteArrays(lockingScript);
+		
 	}
 
 }

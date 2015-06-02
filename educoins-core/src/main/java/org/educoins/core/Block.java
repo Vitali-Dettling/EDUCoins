@@ -170,7 +170,6 @@ public class Block {
 //		byte[] expandedBits = product.toByteArray();
 //		return expandedBits;
 //	}
-	
 
 
 	public static byte[] hash(Block block) {
