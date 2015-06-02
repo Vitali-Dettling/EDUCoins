@@ -42,6 +42,9 @@ public class IO {
 	}
 
 	public static void deleteDirectory(Path path) throws IOException {
+		if (!Files.exists(path)) {
+			return;
+		}
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
