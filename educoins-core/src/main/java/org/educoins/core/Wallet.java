@@ -13,6 +13,8 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.IO;
@@ -123,6 +125,11 @@ public class Wallet {
 
 		return publicKey;
 		
+	}
+	
+	public List<String> getPublicKeys() {
+		// FIXME [joeren]: implement urgent!
+		return new ArrayList<>();
 	}
 	
 	/**

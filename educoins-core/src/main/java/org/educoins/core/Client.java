@@ -53,7 +53,7 @@ public class Client extends Thread implements ITransactionListener {
 	}
 
 	private void generateInputs(Transaction transaction) {
-		List<String> publicKeys = new ArrayList<>(); //this.wallet.getPublicKeys();
+		List<String> publicKeys = this.wallet.getPublicKeys();
 		List<Output> availableOutputs = transaction.getOutputs();
 		if (availableOutputs == null) {
 			return;
