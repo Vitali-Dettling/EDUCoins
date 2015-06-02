@@ -23,6 +23,7 @@ public class Wallet {
 
 	private static final int HEX = 16;
 	private static final String SEPERATOR = ";";
+	private static final String KeyStorageFile = "/wallet.keys";
 	
 	private ECDSA keyPair;
 	private PrintWriter walletKeysStorage; 
@@ -37,9 +38,10 @@ public class Wallet {
 		
 			IO.deleteDirectory(directoryKeyStorage);
 			IO.createDirectory(directoryKeyStorage);
+			IO.createFile(this.directoryKeyStorage  + KeyStorageFile);
+			
+			this.walletKeysStorage = new PrintWriter(this.directoryKeyStorage + KeyStorageFile);
 		
-			
-			
 		} catch (IOException e) {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
 			e.printStackTrace();
@@ -115,7 +117,7 @@ public class Wallet {
 		String privateKey = this.keyPair.getPrivateKey();
 		String publicKey = this.keyPair.getPublicKey();
 
-		this.walletKeysStorage.println(privateKey + publicKey);
+		this.walletKeysStorage.println(privateKey + SEPERATOR + publicKey);
 		this.walletKeysStorage.println();
 		this.walletKeysStorage.flush();
 
