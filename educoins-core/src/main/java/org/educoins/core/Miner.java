@@ -1,6 +1,8 @@
 package org.educoins.core;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.educoins.core.utils.ByteArray;
 
@@ -8,23 +10,39 @@ public class Miner implements IBlockListener {
 
 	private static final int BIT32 = 32;
 	
-	private static BlockChain blockChain;
+	private BlockChain blockChain;
+	private List<IPoWListener> powListeners;
 
 	public Miner(BlockChain blockChain) {
 		
-		Miner.blockChain = blockChain;
-		Miner.blockChain.addBlockListener(this);
+		this.blockChain = blockChain;
+		this.blockChain.addBlockListener(this);
+		this.powListeners = new ArrayList<>();
+		this.addPoWListener(this.blockChain);
 	}
-
+	
+	public void addPoWListener(IPoWListener powListener) {
+		this.powListeners.add(powListener);
+	}
+	
+	public void removePoWListener(IPoWListener powListener) {
+		this.powListeners.remove(powListener);
+	}
+	
+	public void notifyFoundPoW(Block block) {
+		for (int i = 0; i < this.powListeners.size(); i++) {
+			IPoWListener listener = this.powListeners.get(i);
+			listener.foundPoW(block);
+		}
+	}
 
 	@Override
 	public void blockReceived(Block block) {
 		Thread powThread = new PoWThread(block);
 		powThread.start();
 	}
-
 	
-	private static class PoWThread extends Thread implements IBlockListener {
+	private class PoWThread extends Thread implements IBlockListener {
 		
 		private boolean active;
 		private Block block;
@@ -38,7 +56,7 @@ public class Miner implements IBlockListener {
 		@Override
 		public void run() {
 			
-			Miner.blockChain.addBlockListener(this);
+			blockChain.addBlockListener(this);
 			
 			SecureRandom nonceGenerator = new SecureRandom();
 			byte[] nonce = new byte[BIT32];
@@ -65,17 +83,17 @@ public class Miner implements IBlockListener {
 			if (this.active) {
 				// TODO [joeren]: delete output message
 				System.out.println("Won :-)");
-				Miner.blockChain.transmitBlock(this.block);
+				notifyFoundPoW(block);
 				
 			} else {
 				// TODO [joeren]: delete output message
 				System.out.println("Loose :-(");
 			}
 			
-			Miner.blockChain.removeBlockListener(this);
+			blockChain.removeBlockListener(this);
 		}
 		
-		private static byte[] invertNegaitve(byte[] toInvertBitInteger) {
+		private byte[] invertNegaitve(byte[] toInvertBitInteger) {
 			boolean isNegative = (toInvertBitInteger[0] & 0x80) == 0x80;
 			if (isNegative)
 				toInvertBitInteger[0] &= 0x7f;

@@ -15,7 +15,7 @@ import org.educoins.core.utils.Deserializer;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-public class BlockChain implements IBlockListener {
+public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
 	private static final int TRUE = 0;
 	private static final int CHECK_AFTER_BLOCKS = 10;
@@ -37,17 +37,23 @@ public class BlockChain implements IBlockListener {
 	private IBlockReceiver blockReceiver;
 	private IBlockTransmitter blockTransmitter;
 	private List<IBlockListener> blockListeners;
+	private ITransactionReceiver transactionReceiver;
+	private ITransactionTransmitter transactionTransmitter;
+	private List<ITransactionListener> transactionListeners;
 	private Wallet wallet;
 	private Block previousBlock;
 	private Block newBlock;
 
-	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter) {
+	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter) {
 		
 		this.wallet = new Wallet();
 		this.blockListeners = new ArrayList<>();
 		this.blockReceiver = blockReceiver;
 		this.blockTransmitter = blockTransmitter;
-		this.blockReceiver.addBlockListener(this);	
+		this.blockReceiver.addBlockListener(this);
+		this.transactionListeners = new ArrayList<>();
+		this.transactionReceiver = transactionReceiver;
+		this.transactionTransmitter = transactionTransmitter;
 	
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
@@ -74,7 +80,28 @@ public class BlockChain implements IBlockListener {
 		}
 	}
 	
-	public void transmitBlock(Block block){
+	public void addTransactionListener(ITransactionListener transactionListener) {
+		this.transactionListeners.add(transactionListener);
+	}
+	
+	public void removeTransactionListener(ITransactionListener transactionListener) {
+		this.transactionListeners.remove(transactionListener);
+	}
+	
+	public void notifyTransactionReceived(Transaction transaction) {
+		for (int i = 0; i < this.transactionListeners.size(); i++) {
+			ITransactionListener listener = this.transactionListeners.get(i);
+			listener.transactionReceived(transaction);
+		}
+	}
+	
+	@Override
+	public void transactionReceived(Transaction transaction) {
+		
+	}
+	
+	@Override
+	public void foundPoW(Block block) {
 		this.blockTransmitter.transmitBlock(block);
 	}
 	
