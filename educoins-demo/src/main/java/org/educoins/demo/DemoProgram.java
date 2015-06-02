@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
-import org.educoins.core.EScripts;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.Miner;
@@ -133,11 +132,7 @@ public class DemoProgram {
 		IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
 		IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
 		
-		
 		BlockChain blockChain = new BlockChain(blockReceiver, blockTransmitter, null, null);
-		
-		
-		
 		
 		if (runMiner) {
 			new Miner(blockChain);
