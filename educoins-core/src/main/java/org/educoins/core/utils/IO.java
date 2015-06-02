@@ -1,4 +1,4 @@
-package org.educoins.demo.utils;
+package org.educoins.core.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
