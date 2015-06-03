@@ -9,7 +9,7 @@ import org.educoins.core.utils.ByteArray;
 
 public class Block {
 	
-	private static final int VERSION = 2;//TODO [vitali] Change the version.
+	private static final int VERSION = -1;//-1 if no version is set and also an error.
 	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final long TIME = System.currentTimeMillis();

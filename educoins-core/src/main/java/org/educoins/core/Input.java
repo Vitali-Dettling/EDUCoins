@@ -5,14 +5,13 @@ import org.educoins.core.utils.ByteArray;
 public class Input {
 
 	private static final int HEX = 16;
-	private static final String SEPERATOR = ";";
 	
 	private int index;
 	private int amount;
 	private String hashPrevOutput;
-	private String unlockingScript;
+	private String[] unlockingScript;
 	
-	public Input(int amount, String hashPrevOutput, int index, String unlockingScript){
+	public Input(int amount, String hashPrevOutput, int index, String[] unlockingScript){
 		
 		this.amount = amount;
 		this.hashPrevOutput = hashPrevOutput;
@@ -44,31 +43,30 @@ public class Input {
 		this.index = n;
 	}
 	
-	public byte[] getUnlockingScript(EInputUnlockingScriptSeperator seperator) {
-		String[] scriptContent = this.unlockingScript.split(SEPERATOR);
-		return ByteArray.convertFromString(scriptContent[EInputUnlockingScriptSeperator.SIGNATURE.getNumVal()], HEX);
+	public byte[] getUnlockingScript(EInputUnlockingScript signatureOrPublicKey) {	
+		return ByteArray.convertFromString(this.unlockingScript[signatureOrPublicKey.getNumVal()], HEX);
 	}
 
-	public void setUnlockingScript(String unlockingScript) {
-		this.unlockingScript = unlockingScript;
+	public void setUnlockingScript(EInputUnlockingScript signatureOrPublicKey, String value) {		
+		this.unlockingScript[signatureOrPublicKey.getNumVal()] = value;	
 	}
 	
 	public byte[] getConcatedInput(){
 		
 		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
-		return this.getUnlockingScript(EInputUnlockingScriptSeperator.PUBLIC_KEY);
+		return this.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY);
 		
 	}
 
 	
-	public enum EInputUnlockingScriptSeperator{
+	public enum EInputUnlockingScript{
 		
 		SIGNATURE(0),
 		PUBLIC_KEY(1);
 		
 		private int enumVal;
 
-		EInputUnlockingScriptSeperator(int enumVal) {
+		EInputUnlockingScript(int enumVal) {
 	        this.enumVal = enumVal;
 	    }
 

@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.educoins.core.Input.EInputUnlockingScriptSeperator;
+import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Deserializer;
@@ -508,7 +508,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		byte[] signature = null;
 		String hashedTransaction = ByteArray.convertToString(transaction.hash(),16);
 		for(Input input : transaction.getInputs()){
-			signature = input.getUnlockingScript(EInputUnlockingScriptSeperator.SIGNATURE);
+			signature = input.getUnlockingScript(EInputUnlockingScript.SIGNATURE);
 					
 			if(!this.wallet.checkSignature(hashedTransaction, signature)){
 				System.out.println("DEBUG: verifyRegularTransaction: Signature is not correct.");

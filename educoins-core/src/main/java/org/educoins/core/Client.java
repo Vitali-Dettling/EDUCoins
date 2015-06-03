@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.educoins.core.Input.EInputUnlockingScriptSeperator;
+import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.utils.ByteArray;
 
 public class Client extends Thread implements ITransactionListener {
@@ -48,7 +48,7 @@ public class Client extends Thread implements ITransactionListener {
 		String signature = this.wallet.getSignature(ByteArray.convertToString(transaction.hash(), 16));
 		for (Input input : this.inputs) {
 			// TODO [joeren] @ [vitali]: hier muss ich die Signatur anhängen, da brauch ich irgendwas, wie ich das UNFERTIG auslesen kann
-			input.setUnlockingScript(input.getUnlockingScript(EInputUnlockingScriptSeperator.PUBLIC_KEY) + signature);
+			input.setUnlockingScript((input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY) + signature));
 		}
 		transaction.setInputs(inputs);
 		this.blockChain.sendTransaction(transaction);

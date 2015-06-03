@@ -78,6 +78,7 @@ public class Wallet {
 	public String getSignature(String hashedTranscation){
 		
 		try {
+				
 			return ByteArray.convertToString(this.keyPair.getSignature(hashedTranscation));
 		} catch (Exception e) {
 			System.err.println("ERROR: Class Wallet. Creating of the Signature.");
@@ -117,6 +118,7 @@ public class Wallet {
 			String publicKey = line.substring(line.indexOf(";") + 1);
 			publicKeys.add(publicKey);
 		}
+		
 		return publicKeys;
 	}
 	

@@ -4,6 +4,8 @@ import org.educoins.core.utils.ByteArray;
 
 public class Output {
 
+	private static final int HEX = 16;
+	
 	private int amount;
 	private String dstPublicKey;
 	private String lockingScript;
@@ -38,12 +40,11 @@ public class Output {
 	public void setLockingScript(String lockingScript) {
 		this.lockingScript = lockingScript;
 	}
-	
-	
+		
 	public byte[] getConcatedOutput(){
 		
 		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
-		byte[] lockingScript = ByteArray.convertFromString(getLockingScript(), 16);
+		byte[] lockingScript = ByteArray.convertFromString(getLockingScript(), HEX);
 		return ByteArray.concatByteArrays(lockingScript);
 		
 	}
