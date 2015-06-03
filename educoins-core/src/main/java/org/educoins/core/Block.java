@@ -144,7 +144,7 @@ public class Block {
 	}
 	
 	
-// TODO Ist der richtige code, um exponenden und Mantise zu trennen und damit rechnen...
+// TODO [Vitali] Ist der richtige code, um exponenden und Mantise zu trennen und damit rechnen...
 //	public static byte[] getTargetThreshold(String bits) {
 //		byte[] convertedBits = ByteArray.convertFromString(bits, 16);
 //		

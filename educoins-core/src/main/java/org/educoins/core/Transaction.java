@@ -7,7 +7,6 @@ import java.util.List;
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 
-//TODO Herausfinden wieso es mit JSON nicht funktioniert...
 public class Transaction {
 
 	private static final int HAS_NO_ENTRIES = 0;

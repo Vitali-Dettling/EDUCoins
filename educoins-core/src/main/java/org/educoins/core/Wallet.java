@@ -47,29 +47,8 @@ public class Wallet {
 			e.printStackTrace();
 		}
 	}
-
-//TODO [Vitali] Delete if not needed!!!
-//	@Override
-//	public void blockReceived(Block block) {
-//		
-//		if(this.blockChain.verifyBlock(block)){
-//			
-//			//TODO[Vitali] Hier Implementierung wo und wie die BlockChain lokal gespeichert werden soll. 
-//			//P.s. Die jetztige Implemtierung ist nur zum veranschaulichen.
-//			//What to do here???
-//			System.out.println("INFO: Block is verified correct, what now???");
-//			
-//			
-//		}
-//		else
-//		{
-//			System.err.println("INFO: Block was rejected!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Class Wallet");
-//			
-//		}
-//		
-//	}
 	
-	//TODO [Vitali] Bad performance becaute the whole file will be checked over and over again. Will be better with the DB.
+	//TODO [Vitali] Bad performance because the whole file will be checked over and over again. Will be better with the DB.
 	public boolean checkSignature(String hashedTranscation, byte[] signature){
 		
 		try {
@@ -172,7 +151,7 @@ public class Wallet {
 				
 			
 			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
+				System.out.println("Class ECDSA: Constructor: " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
