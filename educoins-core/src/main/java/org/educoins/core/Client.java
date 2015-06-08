@@ -52,7 +52,7 @@ public class Client extends Thread implements ITransactionListener {
 		}
 		transaction.setInputs(inputs);
 		this.blockChain.sendTransaction(transaction);
-		this.inputs.clear();
+		this.inputs = new ArrayList<>();
 	}
 
 	@Override
@@ -101,9 +101,7 @@ public class Client extends Thread implements ITransactionListener {
 				int amount = Integer.valueOf(unparsedAmount);
 				System.out.print("Type in dstPublicKey: ");
 				String dstPublicKey = scanner.nextLine();
-				String lockingScript = this.wallet.getPublicKey();
-				System.out.println("Generated lockingScript: " + lockingScript);
-				this.sendRegularTransaction(amount, dstPublicKey, lockingScript);
+				this.sendRegularTransaction(amount, dstPublicKey, dstPublicKey);
 				break;
 			default:
 			}
