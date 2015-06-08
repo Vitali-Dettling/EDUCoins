@@ -35,7 +35,6 @@ public class Wallet {
 	private static final String KeyStorageFile = "/wallet.keys";
 	
 	private ECDSA keyPair;
-//	private PrintWriter walletKeysStorage; 
 	private Path directoryKeyStorage;
 	
 	public Wallet(){
@@ -48,8 +47,6 @@ public class Wallet {
 			IO.deleteDirectory(directoryKeyStorage);
 			IO.createDirectory(directoryKeyStorage);
 			IO.createFile(this.directoryKeyStorage  + KeyStorageFile);
-			
-//			this.walletKeysStorage = new PrintWriter(this.directoryKeyStorage + KeyStorageFile);
 		
 		} catch (IOException e) {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
@@ -62,17 +59,8 @@ public class Wallet {
 		
 		try {
 			
-//			String fullKeyStorage = IO.readFromFile(this.directoryKeyStorage + KeyStorageFile);
-//
-//			for(String oneKey : fullKeyStorage.split(SEPERATOR)){
-//				boolean rightKey = this.keyPair.verifySignature(hashedTranscation, signature, oneKey);
-//				if(rightKey){
-//					return true; 	
-//				}
-//			}
-			
 			List<String> publicKeys = this.getPublicKeys();
-			for (String publicKey : publicKeys) {
+			for (String publicKey : publicKeys) {	
 				boolean rightKey = this.keyPair.verifySignature(hashedTranscation, signature, publicKey);
 				if (rightKey) {
 					return true;
@@ -80,7 +68,7 @@ public class Wallet {
 			}
 
 		} catch (Exception e) {
-			System.err.println("ERROR: Class Wallet. Verification of the Signature.");
+			System.err.println("ERROR: Class Wallet. Verification of the Signature." + e.getMessage());
 			e.printStackTrace();
 		}
 		return false;
@@ -92,7 +80,7 @@ public class Wallet {
 		
 		try {
 				
-			return ByteArray.convertToString(this.keyPair.getSignature(hashedTranscation));
+			return ByteArray.convertToString(this.keyPair.getSignature(hashedTranscation), HEX);
 		} catch (Exception e) {
 			System.err.println("ERROR: Class Wallet. Creating of the Signature.");
 			e.printStackTrace();
@@ -120,10 +108,6 @@ public class Wallet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-//		this.walletKeysStorage.println(privateKey + SEPERATOR + publicKey);
-//		this.walletKeysStorage.println();
-//		this.walletKeysStorage.flush();
 
 		return publicKey;
 		
@@ -226,12 +210,6 @@ public class Wallet {
 			if (message == null || signature == null) {
 				throw new Exception("EXCEPTION: [Class ECDSA] The signature or the transaction hash value cannot be null.");
 			}
-//			byte[] decodedPublicKexString = new BASE64Decoder().decodeBuffer(publicKey);
-//			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(decodedPublicKexString);
-//			PublicKey orgPublicKey = this.keyFactory.generatePublic(publicKeySpec);
-//
-//			this.signature.initVerify(orgPublicKey);
-//			this.signature.update(message.getBytes());
 			
 			byte[] encodedPublicKey = ByteArray.convertFromString(publicKey, 16);
 			KeySpec publicKeySpec = new X509EncodedKeySpec(encodedPublicKey);
