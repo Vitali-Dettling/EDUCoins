@@ -48,7 +48,7 @@ public class Client extends Thread implements ITransactionListener {
 		String signature = this.wallet.getSignature(ByteArray.convertToString(transaction.hash(), 16));
 		for (Input input : this.inputs) {
 			// TODO [joeren] @ [vitali]: hier muss ich die Signatur anhängen, da brauch ich irgendwas, wie ich das UNFERTIG auslesen kann
-			input.setUnlockingScript((input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY) + signature));
+			input.setUnlockingScript(EInputUnlockingScript.SIGNATURE, signature);
 		}
 		transaction.setInputs(inputs);
 		this.blockChain.sendTransaction(transaction);
@@ -75,10 +75,10 @@ public class Client extends Thread implements ITransactionListener {
 						int amount = output.getAmount();
 						String hashPrevOutput = ByteArray.convertToString(transaction.hash(), 16);
 						// TODO [joeren] @ [vitali]: Wenn ich hier ";" bereits anhänge, knallts bei irgendeinem Konvertiervorgang
-						String unlockingScript = publicKey + ";";
-						Input input = new Input(amount, hashPrevOutput, index, unlockingScript);
+						Input input = new Input(amount, hashPrevOutput, index);
+						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, publicKey);
 						this.inputs.add(input);
-						// System.out.println("Received " + amount);
+						System.out.println("Received " + amount);
 					}
 				}
 			}
@@ -104,7 +104,6 @@ public class Client extends Thread implements ITransactionListener {
 				String lockingScript = this.wallet.getPublicKey();
 				System.out.println("Generated lockingScript: " + lockingScript);
 				this.sendRegularTransaction(amount, dstPublicKey, lockingScript);
-				System.err.println("Input was invalid: " + unparsedAmount);
 				break;
 			default:
 			}

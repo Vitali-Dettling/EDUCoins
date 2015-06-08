@@ -14,6 +14,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,8 @@ import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.IO;
 
 import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+import sun.security.ec.ECKeyFactory;
 
 public class Wallet {
 
@@ -30,7 +35,7 @@ public class Wallet {
 	private static final String KeyStorageFile = "/wallet.keys";
 	
 	private ECDSA keyPair;
-	private PrintWriter walletKeysStorage; 
+//	private PrintWriter walletKeysStorage; 
 	private Path directoryKeyStorage;
 	
 	public Wallet(){
@@ -44,7 +49,7 @@ public class Wallet {
 			IO.createDirectory(directoryKeyStorage);
 			IO.createFile(this.directoryKeyStorage  + KeyStorageFile);
 			
-			this.walletKeysStorage = new PrintWriter(this.directoryKeyStorage + KeyStorageFile);
+//			this.walletKeysStorage = new PrintWriter(this.directoryKeyStorage + KeyStorageFile);
 		
 		} catch (IOException e) {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
@@ -57,12 +62,20 @@ public class Wallet {
 		
 		try {
 			
-			String fullKeyStorage = IO.readFromFile(this.directoryKeyStorage);
-
-			for(String oneKey : fullKeyStorage.split(SEPERATOR)){
-				boolean rightKey = this.keyPair.verifySignature(hashedTranscation, signature, oneKey);
-				if(rightKey){
-					return true; 	
+//			String fullKeyStorage = IO.readFromFile(this.directoryKeyStorage + KeyStorageFile);
+//
+//			for(String oneKey : fullKeyStorage.split(SEPERATOR)){
+//				boolean rightKey = this.keyPair.verifySignature(hashedTranscation, signature, oneKey);
+//				if(rightKey){
+//					return true; 	
+//				}
+//			}
+			
+			List<String> publicKeys = this.getPublicKeys();
+			for (String publicKey : publicKeys) {
+				boolean rightKey = this.keyPair.verifySignature(hashedTranscation, signature, publicKey);
+				if (rightKey) {
+					return true;
 				}
 			}
 
@@ -100,10 +113,17 @@ public class Wallet {
 		
 		String privateKey = this.keyPair.getPrivateKey();
 		String publicKey = this.keyPair.getPublicKey();
+		
+		try {
+			IO.appendToFile(this.directoryKeyStorage + KeyStorageFile, privateKey + SEPERATOR + publicKey + "\r\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		this.walletKeysStorage.println(privateKey + SEPERATOR + publicKey);
-		this.walletKeysStorage.println();
-		this.walletKeysStorage.flush();
+//		this.walletKeysStorage.println(privateKey + SEPERATOR + publicKey);
+//		this.walletKeysStorage.println();
+//		this.walletKeysStorage.flush();
 
 		return publicKey;
 		
@@ -206,13 +226,20 @@ public class Wallet {
 			if (message == null || signature == null) {
 				throw new Exception("EXCEPTION: [Class ECDSA] The signature or the transaction hash value cannot be null.");
 			}
-			byte[] decodedPublicKexString = new BASE64Decoder().decodeBuffer(publicKey);
-			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(decodedPublicKexString);
+//			byte[] decodedPublicKexString = new BASE64Decoder().decodeBuffer(publicKey);
+//			X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(decodedPublicKexString);
+//			PublicKey orgPublicKey = this.keyFactory.generatePublic(publicKeySpec);
+//
+//			this.signature.initVerify(orgPublicKey);
+//			this.signature.update(message.getBytes());
+			
+			byte[] encodedPublicKey = ByteArray.convertFromString(publicKey, 16);
+			KeySpec publicKeySpec = new X509EncodedKeySpec(encodedPublicKey);
 			PublicKey orgPublicKey = this.keyFactory.generatePublic(publicKeySpec);
-
+			
 			this.signature.initVerify(orgPublicKey);
-			this.signature.update(message.getBytes());
-
+			this.signature.update(ByteArray.convertFromString(message, 16));
+			
 			return this.signature.verify(signature);
 		}
 

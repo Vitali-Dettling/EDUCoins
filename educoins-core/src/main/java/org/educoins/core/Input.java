@@ -11,12 +11,13 @@ public class Input {
 	private String hashPrevOutput;
 	private String[] unlockingScript;
 	
-	public Input(int amount, String hashPrevOutput, int index, String[] unlockingScript){
+	public Input(int amount, String hashPrevOutput, int index){
 		
 		this.amount = amount;
 		this.hashPrevOutput = hashPrevOutput;
 		this.index = index;
-		this.unlockingScript = unlockingScript;
+		//this.unlockingScript = unlockingScript;
+		this.unlockingScript = new String[2];
 	}
 
 	public int getAmount() {
