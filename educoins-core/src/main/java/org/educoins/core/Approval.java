@@ -52,7 +52,8 @@ public class Approval {
 	public byte[] getConcatedApproval(){
 		
 		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
-		byte[] lockingScript = ByteArray.convertFromString(getLockingScript(), 16);
+		// TODO [joeren]: Decrease or remove radix of string to byte array conversion when the locking script is a real locking script
+		byte[] lockingScript = ByteArray.convertFromString(getLockingScript(), Character.MAX_RADIX);
 		return ByteArray.concatByteArrays(lockingScript);
 		
 	}

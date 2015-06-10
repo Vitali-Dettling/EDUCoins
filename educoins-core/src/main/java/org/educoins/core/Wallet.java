@@ -210,13 +210,13 @@ public class Wallet {
 //			KeyFactory keyFactory = KeyFactory.getInstance(ECDSA);
 //			PublicKey orgPublicKey = keyFactory.generatePublic(publicKeySpec);
 
-			byte[] encodedPublicKey = ByteArray.convertFromString(publicKey, 16);
+			byte[] encodedPublicKey = ByteArray.convertFromString(publicKey);
 			KeySpec publicKeySpec = new X509EncodedKeySpec(encodedPublicKey);
 			KeyFactory keyFactory = KeyFactory.getInstance(ECDSA);
 			PublicKey orgPublicKey = keyFactory.generatePublic(publicKeySpec);
 			
 			this.signature.initVerify(orgPublicKey);
-			this.signature.update(ByteArray.convertFromString(message, HEX));
+			this.signature.update(ByteArray.convertFromString(message));
 			
 			return this.signature.verify(signature);
 		}
@@ -234,7 +234,7 @@ public class Wallet {
 				throw new Exception("EXCEPTION: [Class ECDSA] The signature transaction hash value cannot be null.");
 			}
 				
-			byte[] privateKey = ByteArray.convertFromString(getPrivateKey(publicKey), 16);
+			byte[] privateKey = ByteArray.convertFromString(getPrivateKey(publicKey));
 						
 			// Only ECPrivateKeySpec and PKCS8EncodedKeySpec supported for EC private keys
 			KeyFactory keyFactory = KeyFactory.getInstance(ECDSA);
@@ -245,7 +245,7 @@ public class Wallet {
 			
 			
 			this.signature.initSign(orgPrivateKey);
-			this.signature.update(ByteArray.convertFromString(message, HEX));
+			this.signature.update(ByteArray.convertFromString(message));
 			
 			return this.signature.sign();
 		}

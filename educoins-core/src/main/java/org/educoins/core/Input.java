@@ -45,7 +45,7 @@ public class Input {
 	}
 	
 	public byte[] getUnlockingScript(EInputUnlockingScript signatureOrPublicKey) {	
-		return ByteArray.convertFromString(this.unlockingScript[signatureOrPublicKey.getNumVal()], HEX);
+		return ByteArray.convertFromString(this.unlockingScript[signatureOrPublicKey.getNumVal()]);
 	}
 
 	public void setUnlockingScript(EInputUnlockingScript signatureOrPublicKey, String value) {		

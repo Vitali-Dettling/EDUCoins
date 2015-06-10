@@ -129,7 +129,7 @@ public class Block {
 	}
 
 	public static byte[] getTargetThreshold(String bits){
-		return ByteArray.convertFromString(bits, 16);
+		return ByteArray.convertFromString(bits);
 	}
 	
 	
@@ -164,10 +164,10 @@ public class Block {
 	public static byte[] hash(Block block) {
 		// specify used header fields (in byte arrays)
 		byte[] version = ByteArray.convertFromLong(block.version);
-		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock, 16);
-		byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot, 16);
+		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
+		byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot);
 		byte[] time = ByteArray.convertFromLong(block.time);
-		byte[] bits = ByteArray.convertFromString(block.bits, 16);
+		byte[] bits = ByteArray.convertFromString(block.bits);
 		byte[] nonce = ByteArray.convertFromLong(block.nonce);
 
 		// concatenate used header fields

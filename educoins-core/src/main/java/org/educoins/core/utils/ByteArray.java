@@ -148,7 +148,7 @@ public final class ByteArray {
 	 * @return The byte array of the value.
 	 */
 	public static final byte[] convertFromString(String value) {
-		return convertFromString(value, 10);
+		return convertFromString(value, 16);
 	}
 
 	/**

@@ -142,8 +142,12 @@ public class Client extends Thread implements ITransactionListener {
 						} else {
 							typeString = "Unknown Transaction";
 						}
-						System.out.println(String.format("Info: Received %d EDUCoins from a %s with LockingScript %s",
-								amount, typeString, output.getLockingScript()));
+						int availableAmount = 0;
+						for (Input tmpInput : this.inputs) {
+							availableAmount += tmpInput.getAmount();
+						}
+						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
+								amount, availableAmount, typeString, output.getLockingScript()));
 					}
 				}
 			}
@@ -175,13 +179,12 @@ public class Client extends Thread implements ITransactionListener {
 				System.out.print("Type in amount: ");
 				unparsedAmount = scanner.nextLine();
 				amount = Integer.valueOf(unparsedAmount);
-				String owner = "HS-Karlsruhe";
-				System.out.println("Owner is: " + owner);
-				String holder = "Bob";
-				System.out.println("Holder is: " + holder);
-				String lockingScript = ByteArray.convertToString(
-						ByteArray.convertFromInt((owner + ";" + holder).hashCode()), 16);
-				System.out.println("LockingScript is: " + lockingScript);
+				System.out.print("Type in owner: ");
+				String owner = scanner.nextLine();
+				System.out.print("Type in holder: ");
+				String holder = scanner.nextLine();
+				System.out.print("Type in LockingScript: ");
+				String lockingScript = scanner.nextLine();
 				this.sendApprovedTransaction(amount, owner, holder, lockingScript);
 				break;
 			default:

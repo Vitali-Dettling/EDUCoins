@@ -44,7 +44,7 @@ public class Output {
 	public byte[] getConcatedOutput(){
 		
 		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
-		byte[] lockingScript = ByteArray.convertFromString(getLockingScript(), HEX);
+		byte[] lockingScript = ByteArray.convertFromString(getLockingScript());
 		return ByteArray.concatByteArrays(lockingScript);
 		
 	}
