@@ -161,9 +161,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		String lockingScript = publicKey;		
 		
 		//Input is empty because it is a coinbase transaction.
-		Output output = new Output(rewardCalculator(currentBlock), publicKey, lockingScript);
-
-		RegularTransaction transaction = new RegularTransaction(); 
+		int newReward = rewardCalculator(currentBlock);
+		Output output = new Output(newReward, publicKey, lockingScript);
+		
+		CoinbaseTransaction transaction = new CoinbaseTransaction(); 
 		transaction.addOutput(output);
 		return transaction;
 	}
@@ -172,22 +173,16 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private int rewardCalculator(Block currentBlock){
 		
 		int newReward = ZERO;
-		int lastCoinbaseReward =  currentBlock.getLastCoinbaseReword();
 		int lastApprovedEDUCoins = findAllApprovedEDUCoins(currentBlock);
 		
 		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
-		if(lastCoinbaseReward == lastApprovedEDUCoins){
-			newReward = lastCoinbaseReward;
-		}else if(lastCoinbaseReward > lastApprovedEDUCoins){
-			newReward = lastApprovedEDUCoins;
-		}else if(lastCoinbaseReward < lastApprovedEDUCoins){
-			newReward = lastCoinbaseReward;
-		}
-		
-		//Especially at the beginning, if no EDUCoins had been approved that the miner would still get some reward.
-		if(newReward == ZERO){
+		if(DEFAULT_REWARD == lastApprovedEDUCoins){
 			newReward = DEFAULT_REWARD;
-		}
+		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
+			newReward = lastApprovedEDUCoins + 2;
+		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD - 2;
+		}		
 
 		return newReward;
 	}

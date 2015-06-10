@@ -16,7 +16,6 @@ public class Block {
 	//private static final String BITS = "1f01ff3f";
 	private static final String BITS = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 	private static final long NONCE = 1114735442;
-	private static final int ZERO = 0;
 	
 	private int version;
 	private String hashPrevBlock;
@@ -24,7 +23,6 @@ public class Block {
 	private long time;
 	private String bits;
 	private long nonce;
-	private int lastCoinbaseReword;
 	private int transactionsCount;
 	private List<Transaction> transactions;
 		
@@ -35,18 +33,9 @@ public class Block {
 		this.setTime(Block.TIME);
 		this.setBits(Block.BITS);
 		this.setNonce(Block.NONCE);
-		this.setLastCoinbaseReword(Block.ZERO);
 		
 		this.transactions = new ArrayList<>();
 		this.transactionsCount = this.transactions.size();
-	}
-
-	public int getLastCoinbaseReword(){
-		return this.lastCoinbaseReword;
-	}
-	
-	public void setLastCoinbaseReword(int lastCoinbaseReword){
-		this.lastCoinbaseReword = lastCoinbaseReword;
 	}
 
 	public int getVersion() {
