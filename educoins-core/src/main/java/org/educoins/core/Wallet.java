@@ -3,7 +3,6 @@ package org.educoins.core;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,22 +10,18 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
 import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.IO;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-import sun.security.ec.ECKeyFactory;
 
 public class Wallet {
 
@@ -76,11 +71,12 @@ public class Wallet {
 	
 	
 	
-	public String getSignature(String hashedTranscation){
+	public String getSignature(String publicKey, String hashedTranscation){
 		
 		try {
-				
-			return ByteArray.convertToString(this.keyPair.getSignature(hashedTranscation), HEX);
+			
+			byte[] signature = this.keyPair.getSignature(publicKey, hashedTranscation);
+			return ByteArray.convertToString(signature, HEX);
 		} catch (Exception e) {
 			System.err.println("ERROR: Class Wallet. Creating of the Signature.");
 			e.printStackTrace();
@@ -149,7 +145,7 @@ public class Wallet {
 		private KeyPairGenerator keyPairGenerator;
 		private KeyPair keyPair;
 		private Signature signature;
-		private KeyFactory keyFactory;
+
 
 		/**
 		 * Public/private key verification for the Elliptic Curve Digital Signature
@@ -162,14 +158,12 @@ public class Wallet {
 		public ECDSA() {
 
 			try {
-			
+
 				this.signature = Signature.getInstance(SHA256_WITH_ECDSA);
 				this.keyPairGenerator = KeyPairGenerator.getInstance(ECDSA);
 						
 				this.keyPairGenerator.initialize(ADDRESS_SPACE_256, new SecureRandom());
 				this.keyPair = this.keyPairGenerator.generateKeyPair();
-				
-				this.keyFactory = KeyFactory.getInstance(ECDSA);
 				
 			
 			} catch (NoSuchAlgorithmException e) {
@@ -211,12 +205,18 @@ public class Wallet {
 				throw new Exception("EXCEPTION: [Class ECDSA] The signature or the transaction hash value cannot be null.");
 			}
 			
+//			byte[] encodedPublicKey = ByteArray.convertFromString(publicKey, 16);
+//			KeySpec publicKeySpec = new X509EncodedKeySpec(encodedPublicKey);
+//			KeyFactory keyFactory = KeyFactory.getInstance(ECDSA);
+//			PublicKey orgPublicKey = keyFactory.generatePublic(publicKeySpec);
+
 			byte[] encodedPublicKey = ByteArray.convertFromString(publicKey, 16);
 			KeySpec publicKeySpec = new X509EncodedKeySpec(encodedPublicKey);
-			PublicKey orgPublicKey = this.keyFactory.generatePublic(publicKeySpec);
+			KeyFactory keyFactory = KeyFactory.getInstance(ECDSA);
+			PublicKey orgPublicKey = keyFactory.generatePublic(publicKeySpec);
 			
 			this.signature.initVerify(orgPublicKey);
-			this.signature.update(ByteArray.convertFromString(message, 16));
+			this.signature.update(ByteArray.convertFromString(message, HEX));
 			
 			return this.signature.verify(signature);
 		}
@@ -228,17 +228,112 @@ public class Wallet {
 		 * 
 		 * @warning For verification purpose one need to initial the signature each time.
 		 * */
-		public byte[] getSignature(String message) throws Exception {
+		public byte[] getSignature(String publicKey, String message) throws Exception {
 			
 			if (message == null) {
 				throw new Exception("EXCEPTION: [Class ECDSA] The signature transaction hash value cannot be null.");
 			}
-
-			this.signature.initSign(this.keyPair.getPrivate());
-			this.signature.update(message.getBytes());
+				
+			byte[] privateKey = ByteArray.convertFromString(getPrivateKey(publicKey), 16);
+						
+			// Only ECPrivateKeySpec and PKCS8EncodedKeySpec supported for EC private keys
+			KeyFactory keyFactory = KeyFactory.getInstance(ECDSA);
+			KeySpec PrivateKeySpec = new PKCS8EncodedKeySpec(privateKey);
+			
+			
+			PrivateKey orgPrivateKey = keyFactory.generatePrivate(PrivateKeySpec);
+			
+			
+			this.signature.initSign(orgPrivateKey);
+			this.signature.update(ByteArray.convertFromString(message, HEX));
 			
 			return this.signature.sign();
 		}
+		
+	
+		
+		
+		public String getPrivateKey(String publicKey) throws IOException {
+			
+			String keyFile = IO.readFromFile(directoryKeyStorage + KeyStorageFile);
+			BufferedReader reader = new BufferedReader(new StringReader(keyFile));
+			String line;
+			String privateKey = null;
+			while ((line = reader.readLine()) != null) {
+				String publicKeyStore = line.substring(line.indexOf(";") + 1);
+				
+				if(publicKeyStore.equals(publicKey)){
+					privateKey = line.substring(0, line.indexOf(";"));
+					break;
+				}	
+			}
+			
+	
+			return privateKey;
+		}
+		
+		//TODO[Vitali] Adub this to the ECDSA class is preaty goot... -> When Time
+//		public static PrivateKey loadPrivateKey(String key64) throws GeneralSecurityException {
+//		    byte[] clear = ByteArray.convertFromString(key64, 16);
+//		    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
+//		    KeyFactory fact = KeyFactory.getInstance("DSA");
+//		    PrivateKey priv = fact.generatePrivate(keySpec);
+//		    Arrays.fill(clear, (byte) 0);
+//		    return priv;
+//		}
+//
+//
+//		public static PublicKey loadPublicKey(String stored) throws GeneralSecurityException {
+//		    byte[] data = ByteArray.convertFromString(stored, 16);
+//		    X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
+//		    KeyFactory fact = KeyFactory.getInstance("DSA");
+//		    return fact.generatePublic(spec);
+//		}
+//
+//		public static String savePrivateKey(PrivateKey priv) throws GeneralSecurityException {
+//		    KeyFactory fact = KeyFactory.getInstance("DSA");
+//		    PKCS8EncodedKeySpec spec = fact.getKeySpec(priv,
+//		            PKCS8EncodedKeySpec.class);
+//		    byte[] packed = spec.getEncoded();
+//		    String key64 = ByteArray.convertToString(packed, 16);
+//
+//		    Arrays.fill(packed, (byte) 0);
+//		    return key64;
+//		}
+//
+//
+//		public static String savePublicKey(PublicKey publ) throws GeneralSecurityException {
+//		    KeyFactory fact = KeyFactory.getInstance("DSA");
+//		    X509EncodedKeySpec spec = fact.getKeySpec(publ,
+//		            X509EncodedKeySpec.class);
+//		    return ByteArray.convertToString(spec.getEncoded(), 16);
+//		}
+//		
+//		
+//		public static void main(String[] args) throws Exception{
+//
+//			
+//		
+//			 KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+//		    KeyPair pair = gen.generateKeyPair();
+//
+//		    String pubKey = savePublicKey(pair.getPublic());
+//		    PublicKey pubSaved = loadPublicKey(pubKey);
+//		    System.out.println(pair.getPublic()+"\n"+pubSaved);
+//
+//		    String privKey = savePrivateKey(pair.getPrivate());
+//		    PrivateKey privSaved = loadPrivateKey(privKey);
+//		    System.out.println(pair.getPrivate()+"\n"+privSaved);
+//			
+//			
+//			    
+//			   System.out.println(); 
+//			
+//
+//		}
+		
+		
+		
 	
 	}
 	

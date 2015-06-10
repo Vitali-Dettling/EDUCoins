@@ -45,10 +45,16 @@ public class Client extends Thread implements ITransactionListener {
 		transaction.setVersion(1);
 		transaction.setInputs(new ArrayList<>(this.inputs));
 		transaction.setOutputs(outputs);
-		String signature = this.wallet.getSignature(ByteArray.convertToString(transaction.hash(), 16));
+		
 		for (Input input : this.inputs) {
+			
+			String publicKey = ByteArray.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
+			String message = ByteArray.convertToString(transaction.hash(), 16);
+			String signature = this.wallet.getSignature(publicKey, message);
+			
 			// TODO [joeren] @ [vitali]: hier muss ich die Signatur anhängen, da brauch ich irgendwas, wie ich das UNFERTIG auslesen kann
 			input.setUnlockingScript(EInputUnlockingScript.SIGNATURE, signature);
+
 		}
 		transaction.setInputs(inputs);
 		this.blockChain.sendTransaction(transaction);
@@ -76,9 +82,10 @@ public class Client extends Thread implements ITransactionListener {
 						String hashPrevOutput = ByteArray.convertToString(transaction.hash(), 16);
 						// TODO [joeren] @ [vitali]: Wenn ich hier ";" bereits anhänge, knallts bei irgendeinem Konvertiervorgang
 						Input input = new Input(amount, hashPrevOutput, index);
-						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, publicKey);
+						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, this.wallet.getPublicKey());
 						this.inputs.add(input);
-						System.out.println("Received " + amount);
+						//TODO[Vitali] Einkommentieren wieder!!!
+						//System.out.println("Received " + amount);
 					}
 				}
 			}

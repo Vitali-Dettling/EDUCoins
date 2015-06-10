@@ -42,6 +42,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private List<Transaction> transactions;
 	private Wallet wallet;
 	private Block newBlock;
+	
+	private String publicKey;
 
 	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter) {
 		
@@ -150,7 +152,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	private Transaction coinbaseTransaction(Block currentBlock) {
 
-		String publicKey = this.wallet.getPublicKey();
+		//TODO [Vitali] Needs to be changes just for testing.
+		if(this.publicKey == null){
+			this.publicKey = this.wallet.getPublicKey();
+		}
 		
 		//TODO [Vitali] lockingScript procedure has to be established, which fits our needs...
 		String lockingScript = publicKey;		
@@ -359,7 +364,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		//Case 13:
 		//TODO [Vitali] Implement the check for the lock script as soon as the Revoke class was introduced. 
 		//Till then there is no use in implementing it. 
-		//For the time beeing it only checked that Locking Script is not empty.
+		//For the time being it only checked that Locking Script is not empty.
 		for(Approval approval : approvals){
 			String lockingScript = approval.getLockingScript();
 			if(lockingScript.isEmpty()){
@@ -504,15 +509,17 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 		
 		//Case 13:
-		//TODO [Vitali] The check is current done with the ECDSA class but actually that should be done through the script algorithm.
+		//TODO [Vitali] The check is current done with the ECDSA class but actually that should be done through the script language.
+		//Currently it check just whether the signature corresponds with one public key in the wallet file. 
 		byte[] signature = null;
-		String hashedTransaction = ByteArray.convertToString(transaction.hash(),16);
+		String hashedTransaction = ByteArray.convertToString(transaction.hash(), HEX);
 		for(Input input : transaction.getInputs()){
+			
 			signature = input.getUnlockingScript(EInputUnlockingScript.SIGNATURE);
-					
-			if(!this.wallet.checkSignature(hashedTransaction, signature)){
-				System.out.println("DEBUG: verifyRegularTransaction: Signature is not correct.");
-				return false;
+				
+			if(this.wallet.checkSignature(hashedTransaction, signature)){
+				System.out.println("INFO: verifyRegularTransaction: Signature is correct.");
+				break; 
 			}
 					
 		}
