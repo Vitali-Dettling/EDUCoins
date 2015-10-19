@@ -12,6 +12,7 @@ public class Block {
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
 	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
+	//TODO: really?!
 	private static final long TIME = System.currentTimeMillis();
 	//private static final String BITS = "1f01ff3f";
 	private static final String BITS = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";

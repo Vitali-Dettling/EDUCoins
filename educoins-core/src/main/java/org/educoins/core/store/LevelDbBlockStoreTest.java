@@ -19,17 +19,13 @@ public class LevelDbBlockStoreTest extends TestCase {
 
     @Before
     public void setup() {
-        try {
-            File file = File.createTempFile("blockStore", null);
-            file.mkdir();
-            store = new LevelDbBlockStore(file, JniDBFactory.factory);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        File directory = new File("/tmp/blockstore");
+        if (directory.mkdir() || directory.exists() && directory.isDirectory())
+            store = new LevelDbBlockStore(directory, JniDBFactory.factory);
 
         block = new Block();
-        block.setBits("blablabla");
-        block.setHashMerkleRoot("bla");
+        block.setBits("0101010101010111101");
+        block.setHashMerkleRoot("01234125125");
         block.setNonce(12314);
         block.setVersion(2);
     }
@@ -39,11 +35,14 @@ public class LevelDbBlockStoreTest extends TestCase {
         setup();
 
         store.put(block);
-        assertEquals(block, store.get(block.getHashMerkleRoot()));
-    }
+        Block actual = store.get(block.getHashMerkleRoot());
+        byte[] expected = Block.hash(block);
+        byte[] actualBytes = Block.hash(actual);
 
-    @Test
-    public void testGet() throws Exception {
+        assertEquals(expected.length, actualBytes.length);
 
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i], actualBytes[i]);
+        }
     }
 }
