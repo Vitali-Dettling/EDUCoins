@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class LevelDbBlockStoreTest {
 
-    private BlockStore store;
+    private IBlockStore store;
     private Block block;
 
     @Before
@@ -40,7 +40,7 @@ public class LevelDbBlockStoreTest {
     @Test
     public void testPut() throws Exception {
         store.put(block);
-        Block actual = store.get(block.getHashMerkleRoot());
+        Block actual = store.get(Block.hash(block));
         byte[] expected = Block.hash(block);
         byte[] actualBytes = Block.hash(actual);
 

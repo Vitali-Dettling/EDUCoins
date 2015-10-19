@@ -10,10 +10,10 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * The default implementation of a {@link BlockStore} using Google Level Db as storage-backend.
+ * The default implementation of a {@link IBlockStore} using Google Level Db as storage-backend.
  * Created by typus on 10/18/15.
  */
-public class LevelDbBlockStore implements BlockStore {
+public class LevelDbBlockStore implements IBlockStore {
 
     private final byte[] anchor = "anchor".getBytes();
     private final File path;
@@ -36,7 +36,8 @@ public class LevelDbBlockStore implements BlockStore {
         }
     }
 
-    private synchronized void tryOpen(File directory, DBFactory dbFactory, Options options) throws IOException, BlockStoreException {
+    private synchronized void tryOpen(File directory, DBFactory dbFactory, Options options)
+            throws IOException, BlockStoreException {
         database = dbFactory.open(directory, options);
         initStoreIfNeeded();
     }
@@ -54,14 +55,16 @@ public class LevelDbBlockStore implements BlockStore {
 
     @Override
     public void put(Block block) {
-        //TODO: Merkle Root the right one?!
-        database.put(block.getHashMerkleRoot().getBytes(), getJson(block).getBytes());
+        database.put(Block.hash(block), getJson(block).getBytes());
     }
 
 
     @Override
-    public Block get(String hash) {
-        return getBlock(new String(database.get(hash.getBytes())));
+    public Block get(byte[] hash) {
+        if (database.get(hash) == null) {
+            throw new BlockNotFoundException(hash);
+        }
+        return getBlock(database.get(hash));
     }
 
     @Override
@@ -77,7 +80,7 @@ public class LevelDbBlockStore implements BlockStore {
         return new Gson().toJson(block);
     }
 
-    private Block getBlock(String jsonblock) {
-        return new Gson().fromJson(jsonblock, Block.class);
+    private Block getBlock(byte[] jsonblock) {
+        return new Gson().fromJson(new String(jsonblock), Block.class);
     }
 }

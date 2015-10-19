@@ -1,7 +1,7 @@
 package org.educoins.core.store;
 
 /**
- * The Exception thrown by a  {@link BlockStore}.
+ * The Exception thrown by a  {@link IBlockStore}.
  * Created by typus on 10/18/15.
  */
 public class BlockStoreException extends RuntimeException {

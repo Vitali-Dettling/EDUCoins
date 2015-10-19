@@ -1,0 +1,34 @@
+package org.educoins.core.store;
+
+import org.educoins.core.Block;
+
+/**
+ * The interface representing all logic necessary to store {@link Block}s.
+ * Created by typus on 10/18/15.
+ */
+public interface IBlockStore {
+    /**
+     * Save a {@link Block} in the IBlockStore. This put-action is also used to update a block.
+     *
+     * @param block the {@link Block} to store.
+     * @throws BlockStoreException whenever something goes wrong.
+     */
+    void put(Block block) throws BlockStoreException;
+
+    /**
+     * Retrieves a {@link Block} identified by the given hash.
+     *
+     * @param hash the identification for the {@link Block}
+     * @return the Block if found.
+     * @throws BlockStoreException
+     * @throws BlockNotFoundException if the {@link Block} could not be found.
+     */
+    Block get(byte[] hash) throws BlockStoreException;
+
+    /**
+     * Closes the Store.
+     *
+     * @throws BlockStoreException
+     */
+    void destroy() throws BlockStoreException;
+}
