@@ -1,6 +1,5 @@
 package org.educoins.core.store;
 
-import junit.framework.TestCase;
 import org.educoins.core.Block;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.junit.After;
@@ -9,10 +8,13 @@ import org.junit.Test;
 
 import java.io.File;
 
+import static org.junit.Assert.assertEquals;
+
 /**
+ * Default test for {@link LevelDbBlockStore}
  * Created by typus on 10/19/15.
  */
-public class LevelDbBlockStoreTest extends TestCase {
+public class LevelDbBlockStoreTest {
 
     private BlockStore store;
     private Block block;
