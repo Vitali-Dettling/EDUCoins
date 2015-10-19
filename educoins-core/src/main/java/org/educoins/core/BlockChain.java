@@ -17,7 +17,7 @@ import com.google.gson.JsonSyntaxException;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
-	private static final int TRUE = 0;
+	private static final int COMPARE_EQUAL = 0;
 	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
 	private static final int IN_SECONDS = 1000;
@@ -132,7 +132,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 	
 	public Block prepareNewBlock(Block currentBlock) {
-		
 		this.newBlock = new Block();
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
@@ -208,7 +207,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	/**
 	 * Bitcoin explanation: Mastering Bitcoin 195
 	 * Every 2,016 blocks, all nodes retarget the proof-of-work difficulty. The
-	 * equation for retargeding difficulty measures the time it took to find the
+	 * equation for retargeting difficulty measures the time it took to find the
 	 * last 2,016 blocks and compares that to the expected time of 20,160 minutes.
 	 * 
 	 * New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
@@ -222,7 +221,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
 			
 			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
-			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME), BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
+			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME),
+					BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
 			
 			this.newBlock.setBits(newDifficulty.toBigInteger().toString(HEX));			
 			this.newBlock.setTime(currentTime);
@@ -236,14 +236,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.blockCounter++;
 		return this.newBlock;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
 	private boolean verifyBlock(Block toVerifyBlock) {
 		
 		// 0. If geniuses block return true, because there no other block before.
@@ -262,7 +255,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		// 3. Are the hashes equal of the current block and the previous one?
 		byte[] testBlockHash = toVerifyBlock.hash();
 		byte[] lastBlockHash = lastBlock.getHashPrevBlock().getBytes();
-		if (ByteArray.compare(testBlockHash, lastBlockHash) == TRUE) {
+		if (ByteArray.compare(testBlockHash, lastBlockHash) == COMPARE_EQUAL) {
 			return false;
 		}
 		
