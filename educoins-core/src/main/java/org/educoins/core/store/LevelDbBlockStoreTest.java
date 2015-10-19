@@ -3,11 +3,11 @@ package org.educoins.core.store;
 import junit.framework.TestCase;
 import org.educoins.core.Block;
 import org.fusesource.leveldbjni.JniDBFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by typus on 10/19/15.
@@ -30,10 +30,13 @@ public class LevelDbBlockStoreTest extends TestCase {
         block.setVersion(2);
     }
 
+    @After
+    public void tearDown() {
+        store.destroy();
+    }
+
     @Test
     public void testPut() throws Exception {
-        setup();
-
         store.put(block);
         Block actual = store.get(block.getHashMerkleRoot());
         byte[] expected = Block.hash(block);
