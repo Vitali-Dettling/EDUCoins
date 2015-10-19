@@ -8,3 +8,8 @@ target
 
 # Log-Files
 .log
+
+
+#Jetbrains Files
+.idea/
+*.iml
