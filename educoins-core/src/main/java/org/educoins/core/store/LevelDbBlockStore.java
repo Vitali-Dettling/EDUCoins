@@ -3,6 +3,7 @@ package org.educoins.core.store;
 import com.google.gson.Gson;
 import org.educoins.core.Block;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
 
@@ -15,9 +16,12 @@ import java.io.IOException;
  */
 public class LevelDbBlockStore implements IBlockStore {
 
-    private final byte[] anchor = "anchor".getBytes();
+    private final byte[] LATEST_KEY = "latest".getBytes();
+
     private final File path;
+
     private DB database;
+    private byte[] latest;
 
     public LevelDbBlockStore(File directory, DBFactory dbFactory) throws BlockStoreException {
         this.path = directory;
@@ -39,32 +43,42 @@ public class LevelDbBlockStore implements IBlockStore {
     private synchronized void tryOpen(File directory, DBFactory dbFactory, Options options)
             throws IOException, BlockStoreException {
         database = dbFactory.open(directory, options);
-        initStoreIfNeeded();
     }
 
-    private void initStoreIfNeeded() {
-        // Store already up.
-        if (database.get(anchor) != null)
-            return;
-        addGenesisBlock();
-    }
-
-    private void addGenesisBlock() {
-        //TODO: think about + implement
-    }
 
     @Override
     public void put(Block block) {
-        database.put(Block.hash(block), getJson(block).getBytes());
+        byte[] key = Block.hash(block);
+        database.put(key, getJson(block).getBytes());
+        latest = key;
+        database.put(LATEST_KEY, latest);
     }
 
 
     @Override
-    public Block get(byte[] hash) {
+    public Block get(byte[] hash) throws BlockNotFoundException {
         if (database.get(hash) == null) {
             throw new BlockNotFoundException(hash);
         }
         return getBlock(database.get(hash));
+    }
+
+    @Override
+    public Block getLatest() {
+        if (isEmpty()) return null;
+
+        try {
+            return getBlock(database.get(latest));
+        } catch (DBException ex) {
+            return null;
+        }
+    }
+
+    private boolean isEmpty() {
+        if (latest == null)
+            latest = database.get(LATEST_KEY);
+
+        return latest == null;
     }
 
     @Override

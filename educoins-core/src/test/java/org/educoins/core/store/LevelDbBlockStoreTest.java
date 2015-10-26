@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Default test for {@link LevelDbBlockStore}
@@ -16,14 +17,13 @@ import static org.junit.Assert.assertEquals;
  */
 public class LevelDbBlockStoreTest {
 
+    public static final File DIRECTORY = new File("/tmp/blockstore");
     private IBlockStore store;
     private Block block;
 
     @Before
     public void setup() {
-        File directory = new File("/tmp/blockstore");
-        if (directory.mkdir() || directory.exists() && directory.isDirectory())
-            store = new LevelDbBlockStore(directory, JniDBFactory.factory);
+        store = new LevelDbBlockStore(DIRECTORY, JniDBFactory.factory);
 
         block = new Block();
         block.setBits("0101010101010111101");
@@ -35,13 +35,19 @@ public class LevelDbBlockStoreTest {
     @After
     public void tearDown() {
         store.destroy();
+        boolean delete = deleteDir(DIRECTORY);
+        System.out.println("Deleted? " + delete);
     }
 
     @Test
     public void testPut() throws Exception {
-        store.put(block);
-        Block actual = store.get(Block.hash(block));
-        byte[] expected = Block.hash(block);
+        Block b1 = getRandomBlock();
+        store.put(b1);
+
+        fillRandom();
+
+        Block actual = store.get(Block.hash(b1));
+        byte[] expected = Block.hash(b1);
         byte[] actualBytes = Block.hash(actual);
 
         assertEquals(expected.length, actualBytes.length);
@@ -49,5 +55,55 @@ public class LevelDbBlockStoreTest {
         for (int i = 0; i < expected.length; i++) {
             assertEquals(expected[i], actualBytes[i]);
         }
+    }
+
+    @Test
+    public void testGetLatest() {
+        Block latest = store.getLatest();
+        assertNull(latest);
+
+        fillRandom();
+
+        Block b1 = getRandomBlock();
+        store.put(b1);
+
+        Block actual = store.getLatest();
+
+        byte[] expected = Block.hash(b1);
+        byte[] actualBytes = Block.hash(actual);
+
+        assertEquals(expected.length, actualBytes.length);
+
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i], actualBytes[i]);
+        }
+    }
+
+    private void fillRandom() {
+        for (int i = 0; i < 23; i++) {
+            store.put(getRandomBlock());
+        }
+    }
+
+    private Block getRandomBlock() {
+        Block toReturn = new Block();
+        toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
+        toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
+        toReturn.setBits((int) (Math.random() * Integer.MAX_VALUE) + "");
+        toReturn.setHashMerkleRoot((int) (Math.random() * Integer.MAX_VALUE) + "");
+        return toReturn;
+    }
+
+    private boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (String aChildren : children) {
+                boolean success = deleteDir(new File(dir, aChildren));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return dir.delete();
     }
 }
