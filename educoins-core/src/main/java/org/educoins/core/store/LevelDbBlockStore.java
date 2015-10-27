@@ -1,7 +1,9 @@
 package org.educoins.core.store;
 
 import com.google.gson.Gson;
+import com.sun.istack.internal.Nullable;
 import org.educoins.core.Block;
+import org.educoins.core.utils.ByteArray;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
@@ -52,7 +54,9 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     public synchronized void put(@NotNull Block block) {
-        byte[] key = Block.hash(block);
+//        TODO: would be a lot nicer?! byte[] key = Block.hash(block);
+        byte[] key = ByteArray.convertToString(block.hash(), 16).getBytes();
+
         database.put(key, getJson(block).getBytes());
         latest = key;
         database.put(LATEST_KEY, latest);
@@ -60,6 +64,7 @@ public class LevelDbBlockStore implements IBlockStore {
 
 
     @Override
+    @Nullable
     public synchronized Block get(byte[] hash) throws BlockNotFoundException {
         if (database.get(hash) == null) {
             throw new BlockNotFoundException(hash);
@@ -68,6 +73,7 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     @Override
+    @Nullable
     public synchronized Block getLatest() {
         if (isEmpty()) return null;
 
