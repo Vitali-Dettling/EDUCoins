@@ -1,7 +1,6 @@
 package org.educoins.core.store;
 
 import org.educoins.core.Block;
-import org.fusesource.leveldbjni.JniDBFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +22,7 @@ public class LevelDbBlockStoreTest {
 
     @Before
     public void setup() {
-        store = new LevelDbBlockStore(DIRECTORY, JniDBFactory.factory);
+        store = new LevelDbBlockStore(DIRECTORY);
 
         block = new Block();
         block.setBits("0101010101010111101");
@@ -36,7 +35,9 @@ public class LevelDbBlockStoreTest {
     public void tearDown() {
         store.destroy();
         boolean delete = deleteDir(DIRECTORY);
-        System.out.println("Deleted? " + delete);
+
+        if (!delete)
+            throw new IllegalStateException("Db could not be deleted!");
     }
 
     @Test
