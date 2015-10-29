@@ -49,21 +49,23 @@ public class DemoBlockTransmitter implements IBlockTransmitter {
 
 	@Override
 	public void transmitBlock(Block block) {
-		Path fileName = Paths.get(ByteArray.convertToString(block.hash(), 16) + ".json");
+		try {
+			Thread.sleep(100); //TODO: this sucks.
+		byte[] hash = block.hash();
+		System.out.println("Hash: " + ByteArray.convertToString(hash, 16) + ": Id: " + block.toString());
+		Path fileName = Paths.get(ByteArray.convertToString(hash, 16) + ".json");
 		
 		Path localBlockFile = this.localStorage.resolve(fileName);
 		Path remoteBlockFile = this.remoteStorage.resolve(fileName);
-		try {
+
 			Files.createFile(localBlockFile);
 			String json = this.gson.toJson(block);
 			FileWriter writer = new FileWriter(localBlockFile.toFile());
 			writer.write(json);
 			writer.close();
-			Thread.sleep(5);
+			Thread.sleep(15);
 			Files.copy(localBlockFile, remoteBlockFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 

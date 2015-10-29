@@ -67,10 +67,10 @@ public class DemoProgram {
 				case "-init":
 					if (init) {
 						System.err.println("init can only set once");
-						;
 						return;
 					}
 					init = true;
+					break;
 				default:
 					System.err.println("illegal argument " + args[i]);
 					return;

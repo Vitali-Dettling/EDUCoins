@@ -16,7 +16,7 @@ public class Block {
 	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final long TIME = System.currentTimeMillis();
 
-	private static final String BITS = "1dffffff";
+	private static final String BITS = "3dffffff";
 	private static final long NONCE = 1114735442;
 
 	private int version;
@@ -191,6 +191,7 @@ public class Block {
 		// concatenate used header fields
 		byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
 				bits, nonce);
+
 
 		// hash concatenated header fields and return
 		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));

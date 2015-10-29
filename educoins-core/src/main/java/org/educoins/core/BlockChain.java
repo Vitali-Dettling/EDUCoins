@@ -524,7 +524,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 			String lastBlockName = currentBlock.getHashPrevBlock();
 
-			// TODO[Vitali] Der remoteStorage String ist nur für den Prototypen, sollte geändert werden sobal eine
+			// TODO[Vitali] Der remoteStorage String ist nur für den Prototypen, sollte geändert werden sobald eine
 			// levelDB eingeführt wird!!!
 			String remoteStoragePath = System.getProperty("user.home") + File.separator + "documents" + File.separator
 					+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
