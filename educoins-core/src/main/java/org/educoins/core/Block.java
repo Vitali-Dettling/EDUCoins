@@ -1,5 +1,7 @@
 package org.educoins.core;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,10 +15,10 @@ public class Block {
 	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final long TIME = System.currentTimeMillis();
-	//private static final String BITS = "1f01ff3f";
-	private static final String BITS = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
+	private static final String BITS = "1dffffff";
 	private static final long NONCE = 1114735442;
-	
+
 	private int version;
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
@@ -27,12 +29,12 @@ public class Block {
 	private List<Transaction> transactions;
 		
 	public Block() {
-		this.setVersion(Block.VERSION);
-		this.setHashPrevBlock(Block.HASH_PREV_BLOCK);
-		this.setHashMerkleRoot(Block.HASH_MERKLE_ROOT);
-		this.setTime(Block.TIME);
-		this.setBits(Block.BITS);
-		this.setNonce(Block.NONCE);
+		this.setVersion(VERSION);
+		this.setHashPrevBlock(HASH_PREV_BLOCK);
+		this.setHashMerkleRoot(HASH_MERKLE_ROOT);
+		this.setTime(TIME);
+		bits = BITS;
+		this.setNonce(NONCE);
 		
 		this.transactions = new ArrayList<>();
 		this.transactionsCount = this.transactions.size();
@@ -71,11 +73,27 @@ public class Block {
 	}
 
 	public String getBits() {
-		return this.bits;
+		String mantisse = bits.substring(2,8);
+		String exponent = bits.substring(0,2);
+		int expInt = Integer.parseInt(exponent, 16) - 3;
+		StringBuilder resultString = new StringBuilder();
+		resultString.append(mantisse);
+		for (int i = 0; i < expInt; i++){
+			resultString.append("0");
+		}
+		return resultString.toString();
 	}
 
 	public void setBits(String bits) {
-		this.bits = bits;
+		while (bits.charAt(0) == '0'){
+			bits = bits.substring(1, bits.length() - 1);
+		}
+		String exponent = Integer.toHexString(bits.length() - 3);
+		if (exponent.length() < 2){
+			exponent = "0" + exponent;
+		}
+		String mantisse = bits.substring(0,6);
+		this.bits = exponent + mantisse;
 	}
 
 	public long getNonce() {
@@ -167,7 +185,7 @@ public class Block {
 		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
 		byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot);
 		byte[] time = ByteArray.convertFromLong(block.time);
-		byte[] bits = ByteArray.convertFromString(block.bits);
+		byte[] bits = ByteArray.convertFromString(block.getBits());
 		byte[] nonce = ByteArray.convertFromLong(block.nonce);
 
 		// concatenate used header fields
