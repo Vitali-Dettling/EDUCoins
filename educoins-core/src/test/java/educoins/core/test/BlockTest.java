@@ -1,4 +1,5 @@
 package educoins.core.test;
+import junit.framework.TestCase;
 import org.junit.*;
 import org.educoins.core.*;
 
@@ -26,9 +27,29 @@ public class BlockTest{
     }
 
     @Test
+    public void BitsSetter64Test() {
+        String input = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"; //64
+        String expectedCompact = "3dffffff";
+        Block b = new Block();
+        b.setBits(input);
+        try {
+            Field f = b.getClass().getDeclaredField("bits"); //NoSuchFieldException
+            f.setAccessible(true);
+            String compactBits = (String) f.get(b);
+            Assert.assertEquals(expectedCompact, compactBits);
+        }
+        catch (NoSuchFieldException ex){
+            Assert.fail();
+        }
+        catch (IllegalAccessException ex){
+            Assert.fail();
+        }
+    }
+
+    @Test
     public void BitsGetterTest(){
-        String input = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-        String expec = "ffffff0000000000000000000000000000000000000000000000000000000";
+        String input = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        String expec = "ffffff0000000000000000000000000000000000000000000000000000000000";
         Block b = new Block();
         b.setBits(input);
         Assert.assertEquals(expec, b.getBits());
@@ -50,6 +71,17 @@ public class BlockTest{
         Block b = new Block();
         b.setBits(input);
         Assert.assertEquals(expec, b.getBits());
+    }
+
+    @Test
+    public void BitsAsByte(){
+        String input = "ffffffffffffffffffffffffffffffff";
+        String expec = "ffffff00000000000000000000000000";
+        Block b = new Block();
+        b.setBits(input);
+        Assert.assertEquals(expec, b.getBits());
+        byte[] byteArray = Block.getTargetThreshold(expec);
+        Assert.assertArrayEquals(new byte[]{ -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0 }, byteArray);
     }
 }
 

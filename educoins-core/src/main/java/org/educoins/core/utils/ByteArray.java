@@ -1,7 +1,11 @@
 package org.educoins.core.utils;
 
+
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.*;
+import java.lang.*;
 
 public final class ByteArray {
 
@@ -164,6 +168,9 @@ public final class ByteArray {
 	public static final byte[] convertFromString(String value, int radix) {
 		BigInteger convertedValue = new BigInteger(value, radix);
 		byte[] byteArray = convertedValue.toByteArray();
+		if (byteArray.length > 1 && byteArray[0] == 0){
+			byteArray = Arrays.copyOfRange(byteArray, 1, byteArray.length);
+		}
 		return byteArray;
 	}
 
@@ -205,7 +212,7 @@ public final class ByteArray {
 	 * @return 0 if the byte arrays are equal, 1 if the first byte array is
 	 *         greater or -1 if the second byte array is greater.
 	 */
-	public static final int compare(byte[] x, byte[] y) {
+	public final static int compare(byte[] x, byte[] y) {
 		if (x == null && y == null) {
 			return 0;
 		} else if (y == null) {
@@ -214,10 +221,29 @@ public final class ByteArray {
 			return -1;
 		}
 
-		BigInteger convertedX = new BigInteger(1,x);
-		BigInteger convertedY = new BigInteger(1,y);
-		int result =  convertedX.compareTo(convertedY);
-		return result;
+		int indexX = 0;
+		int indexY = 0;
+		int maxIndex = Math.min(x.length, y.length);
+
+		if (x.length > y.length){
+			for(byte c : Arrays.copyOfRange(x, 0, x.length - y.length)){
+				if (c != 0)
+					return 1;
+			}
+			indexX = x.length - y.length;
+		}
+		if (x.length < y.length){
+			for(byte c : Arrays.copyOfRange(y, 0, y.length - x.length)){
+				if (c != 0)
+					return -1;
+			}
+			indexY = y.length - x.length;
+		}
+		for (int i = 0; i < maxIndex; i++){
+			int a = Byte.compare(x[i+indexX], y[i+indexY]);
+			if (a != 0) return Integer.compare(a, 0);
+		}
+		return 0;
 	}
 
 	/**
@@ -240,5 +266,4 @@ public final class ByteArray {
 		}
 		return byteArray;
 	}
-
 }

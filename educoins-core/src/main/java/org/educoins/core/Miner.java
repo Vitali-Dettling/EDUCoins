@@ -1,5 +1,6 @@
 package org.educoins.core;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,15 +72,15 @@ public class Miner implements IBlockListener {
 				
 				challenge = this.block.hash();
 				//TODO [Vitali] Delete after testing.
-//				System.err.println("Target   : " + targetThreshold.length);
-//				System.err.println("Challenge: " + challenge.length);
+				//System.out.println("Target   : " + targetThreshold.length);
+				//System.out.println("Challenge: " + challenge.length);
 				
-				challengePositive = invertNegaitve(challenge);
+				//challengePositive = invertNegative(challenge);
 				
-//				System.out.println("Target   : " + new BigInteger(targetThreshold));
-//				System.out.println("Challenge: " + new BigInteger(challengePositive));
+				//System.out.println("Target   : " + new BigInteger(targetThreshold));
+				//System.out.println("Challenge: " + new BigInteger(challenge));
 
-			} while (this.active && ByteArray.compare(challengePositive, targetThreshold) > 0);
+			} while (this.active && ByteArray.compare(challenge, targetThreshold) > 0);
 
 			if (this.active) {
 				// TODO [joeren]: delete output message
@@ -94,7 +95,7 @@ public class Miner implements IBlockListener {
 			blockChain.removeBlockListener(this);
 		}
 		
-		private byte[] invertNegaitve(byte[] toInvertBitInteger) {
+		private byte[] invertNegative(byte[] toInvertBitInteger) {
 			boolean isNegative = (toInvertBitInteger[0] & 0x80) == 0x80;
 			if (isNegative)
 				toInvertBitInteger[0] &= 0x7f;
