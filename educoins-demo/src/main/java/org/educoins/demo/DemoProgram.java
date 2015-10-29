@@ -40,8 +40,8 @@ public class DemoProgram {
 		if (args.length != 0) {
 
 			for (int i = 0; i < args.length; i++) {
-				switch (args[i]) {
-				case "-localStorage":
+				switch (args[i].toLowerCase()) {
+				case "-localstorage":
 					if (localStorageSet) {
 						System.err.println("local storage can only set once");
 						return;
@@ -49,7 +49,7 @@ public class DemoProgram {
 					localStorage = args[++i];
 					localStorageSet = true;
 					break;
-				case "-remoteStorage":
+				case "-remotestorage":
 					if (remoteStorageSet) {
 						System.err.println("remote storage can only set once");
 						return;
@@ -57,7 +57,7 @@ public class DemoProgram {
 					remoteStorage = args[++i];
 					remoteStorageSet = true;
 					break;
-				case "-runMiner":
+				case "-runminer":
 					if (runMiner) {
 						System.err.println("runMiner can only set once");
 						return;
