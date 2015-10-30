@@ -69,27 +69,19 @@ public class Miner implements IBlockListener {
 			do {
 				nonceGenerator.nextBytes(nonce);
 				this.block.setNonce(ByteArray.convertToInt(nonce));
-				
-				challenge = this.block.hash();
-				//TODO [Vitali] Delete after testing.
-				//System.out.println("Target   : " + targetThreshold.length);
-				//System.out.println("Challenge: " + challenge.length);
-				
-				//challengePositive = invertNegative(challenge);
-				
-				//System.out.println("Target   : " + new BigInteger(targetThreshold));
-				//System.out.println("Challenge: " + new BigInteger(challenge));
 
+				challenge = this.block.hash();
+//				challengePositive = invertNegative(challenge); //TODO
+//				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge)
+//						+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold));
 			} while (this.active && ByteArray.compare(challenge, targetThreshold) > 0);
 
 			if (this.active) {
-				// TODO [joeren]: delete output message
-//				System.out.println("Won :-)");
-				notifyFoundPoW(block);
-				
+				// synchronzie PoWThreads to avoid FileNotFoundException
+				synchronized (this) {
+					notifyFoundPoW(block);
+				}
 			} else {
-				// TODO [joeren]: delete output message
-//				System.out.println("Loose :-(");
 			}
 			
 			blockChain.removeBlockListener(this);

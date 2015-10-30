@@ -50,7 +50,6 @@ public class DemoBlockTransmitter implements IBlockTransmitter {
 	@Override
 	public void transmitBlock(Block block) {
 		try {
-			Thread.sleep(100); //TODO: this sucks.
 		byte[] hash = block.hash();
 		System.out.println("Hash: " + ByteArray.convertToString(hash, 16) + ": Id: " + block.toString());
 		Path fileName = Paths.get(ByteArray.convertToString(hash, 16) + ".json");
