@@ -1,6 +1,7 @@
 package org.educoins.core.p2p;
 
 import com.sun.istack.internal.NotNull;
+import org.educoins.core.Block;
 import org.educoins.core.IBlockListener;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.p2p.discovery.DiscoveryStrategy;
@@ -8,6 +9,8 @@ import org.educoins.core.p2p.nodes.Peer;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,11 +42,27 @@ public class P2pBlockReceiver implements IBlockReceiver {
 
     @Override
     public void receiveBlocks() {
+        Collection<Block> blockList = new ArrayList<>();
+
         for (Peer peer : discovery.getPeers()) {
-            peer.getBlocks().forEach(block -> {
-                Threading.run(() -> blockStore.put(block));
-                blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block));
-            });
+            mergeBlocks(peer.getBlocks(), blockList);
         }
+
+        blockList.forEach(block -> {
+            Threading.run(() -> blockStore.put(block));
+            blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block));
+        });
+    }
+
+
+    private void mergeBlocks(Collection<Block> newBlocks, Collection<Block> globalBlocks) {
+//        for (Block block : newBlocks) {
+//            if (globalBlocks.contains(block)) {
+//
+//            }
+//        }
+
+        //TODO: replace this by meaningful branching/merging logic.
+        globalBlocks.addAll(newBlocks);
     }
 }

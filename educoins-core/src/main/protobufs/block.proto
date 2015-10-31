@@ -1,0 +1,16 @@
+package messages;
+
+option java_package = "org.educoins.core.p2p.messages";
+
+option java_outer_classname = "MessageProtos";
+
+message Block {
+    required int32 version = 1;
+    required string prev_block = 2;
+    required string merkle_root = 3;
+    required int64 timestamp = 4;
+    required uint32 bits = 5;
+    required uint32 nonce = 6;
+    required int64 txn_count = 7;
+    repeated int32 txns = 8;
+}

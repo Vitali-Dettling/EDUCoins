@@ -22,6 +22,9 @@ public class LocalDiscovery implements DiscoveryStrategy {
 
     @Override
     public Collection<Peer> getPeers() {
+        /**
+         * So far, it doesn't make sense to add more than one local peer.
+         */
         Collection<Peer> remoteNodes = new ArrayList<>();
         remoteNodes.add(new LocalPeer(blockStore));
         return remoteNodes;

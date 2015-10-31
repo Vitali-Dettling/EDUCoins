@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Simulation of a Remote Peer.
+ * Simulating a Remote Peer.
  * Created by typus on 10/27/15.
  */
 public class LocalPeer implements Peer {
