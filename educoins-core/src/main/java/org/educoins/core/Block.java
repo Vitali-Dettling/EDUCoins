@@ -1,64 +1,51 @@
 package org.educoins.core;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.p2p.messages.MessageProtos;
+//import org.educoins.core.p2p.messages.MessageProtos;
 import org.educoins.core.utils.ByteArray;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.educoins.core.cryptography.SHA256Hasher;
+import org.educoins.core.utils.ByteArray;
+
 public class Block {
+	
+	private static final int VERSION = -1;//-1 if no version is set and also an error.
+	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
+	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
+	private static final long TIME = System.currentTimeMillis();
 
-    private static final int VERSION = -1;//-1 if no version is set and also an error.
-    private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
-    private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
-    private static final long TIME = System.currentTimeMillis();
-    //private static final String BITS = "1f01ff3f";
-    private static final String BITS = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-    private static final long NONCE = 1114735442;
+	private static final String BITS = "3dffffff";
+	private static final long NONCE = 1114735442;
 
-    private int version;
-    private String hashPrevBlock;
-    private String hashMerkleRoot;
-    private long time;
-    private String bits;
-    private long nonce;
-    private int transactionsCount;
-    private List<Transaction> transactions;
+	private int version;
+	private String hashPrevBlock;
+	private String hashMerkleRoot;
+	private long time;
+	private String bits;
+	private long nonce;
+	private int transactionsCount;
+	private List<Transaction> transactions;
 
-    public Block() {
-        this.setVersion(Block.VERSION);
-        this.setHashPrevBlock(Block.HASH_PREV_BLOCK);
-        this.setHashMerkleRoot(Block.HASH_MERKLE_ROOT);
-        this.setTime(Block.TIME);
-        this.setBits(Block.BITS);
-        this.setNonce(Block.NONCE);
-
-        this.transactions = new ArrayList<>();
-        this.transactionsCount = this.transactions.size();
-    }
+	public Block() {
+		this.setVersion(VERSION);
+		this.setHashPrevBlock(HASH_PREV_BLOCK);
+		this.setHashMerkleRoot(HASH_MERKLE_ROOT);
+		this.setTime(TIME);
+		bits = BITS;
+		this.setNonce(NONCE);
+		
+		this.transactions = new ArrayList<>();
+		this.transactionsCount = this.transactions.size();
+	}
 
     public static byte[] getTargetThreshold(String bits) {
         return ByteArray.convertFromString(bits);
-    }
-
-    public static byte[] hash(Block block) {
-        // specify used header fields (in byte arrays)
-        byte[] version = ByteArray.convertFromLong(block.version);
-        byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
-        byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot);
-        byte[] time = ByteArray.convertFromLong(block.time);
-        byte[] bits = ByteArray.convertFromString(block.bits);
-        byte[] nonce = ByteArray.convertFromLong(block.nonce);
-
-        // concatenate used header fields
-        byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
-                bits, nonce);
-
-        // hash concatenated header fields and return
-        byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
-        return hash;
     }
 
     public int getVersion() {
@@ -93,13 +80,29 @@ public class Block {
         this.time = time;
     }
 
-    public String getBits() {
-        return this.bits;
-    }
+	public String getBits() {
+		String mantisse = bits.substring(2,8);
+		String exponent = bits.substring(0,2);
+		int expInt = Integer.parseInt(exponent, 16) - 3;
+		StringBuilder resultString = new StringBuilder();
+		resultString.append(mantisse);
+		for (int i = 0; i < expInt; i++){
+			resultString.append("0");
+		}
+		return resultString.toString();
+	}
 
-    public void setBits(String bits) {
-        this.bits = bits;
-    }
+	public void setBits(String bits) {
+		while (bits.charAt(0) == '0'){
+			bits = bits.substring(1, bits.length() - 1);
+		}
+		String exponent = Integer.toHexString(bits.length() - 3);
+		if (exponent.length() < 2){
+			exponent = "0" + exponent;
+		}
+		String mantisse = bits.substring(0,6);
+		this.bits = exponent + mantisse;
+	}
 
     public long getNonce() {
         return this.nonce;
@@ -179,7 +182,7 @@ public class Block {
         return Block.hash(this);
     }
 
-    public MessageProtos.Block toProto() {
+    /*public MessageProtos.Block toProto() {
         MessageProtos.Block.Builder builder = MessageProtos.Block.newBuilder();
         builder.setBits(Integer.parseInt(getBits()));
         builder.setVersion(getVersion());
@@ -192,24 +195,44 @@ public class Block {
         transactions.forEach(tnx -> builder.setTxns(index, tnx.getApprovalsCount()));
 
         return builder.build();
-    }
+    }*/
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+    public static byte[] hash(Block block) {
+		// specify used header fields (in byte arrays)
+		byte[] version = ByteArray.convertFromLong(block.version);
+		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
+		byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot);
+		byte[] time = ByteArray.convertFromLong(block.time);
+		byte[] bits = ByteArray.convertFromString(block.bits);
+		byte[] nonce = ByteArray.convertFromLong(block.nonce);
 
-		Block block = (Block) o;
+		// concatenate used header fields
+		byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
+				bits, nonce);
 
-		if (version != block.version) return false;
-		if (time != block.time) return false;
-		if (nonce != block.nonce) return false;
-		if (!hashPrevBlock.equals(block.hashPrevBlock)) return false;
-		if (!hashMerkleRoot.equals(block.hashMerkleRoot)) return false;
-		return bits.equals(block.bits);
+
+		// hash concatenated header fields and return
+		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
+		return hash;
 	}
 
-	@Override
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Block block = (Block) o;
+
+        if (version != block.version) return false;
+        if (time != block.time) return false;
+        if (nonce != block.nonce) return false;
+        if (!hashPrevBlock.equals(block.hashPrevBlock)) return false;
+        if (!hashMerkleRoot.equals(block.hashMerkleRoot)) return false;
+        return bits.equals(block.bits);
+    }
+
+
+    @Override
 	public int hashCode() {
 		int result = version;
 		result = 31 * result + hashPrevBlock.hashCode();

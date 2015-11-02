@@ -8,11 +8,11 @@ target
 
 # Log-Files
 .log
+/bin/
 
-
-#Jetbrains Files
-.idea/
+#IntelliJ
 *.iml
+.idea/
 
 #protos
 educoins-core/src/main/java/org/educoins/core/p2p/messages/*

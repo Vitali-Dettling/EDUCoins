@@ -31,43 +31,43 @@ public class DemoProgram {
 
         if (args.length != 0) {
 
-            for (int i = 0; i < args.length; i++) {
-                switch (args[i]) {
-                    case "-localStorage":
-                        if (localStorageSet) {
-                            System.err.println("local storage can only set once");
-                            return;
-                        }
-                        localStorage = args[++i];
-                        localStorageSet = true;
-                        break;
-                    case "-remoteStorage":
-                        if (remoteStorageSet) {
-                            System.err.println("remote storage can only set once");
-                            return;
-                        }
-                        remoteStorage = args[++i];
-                        remoteStorageSet = true;
-                        break;
-                    case "-runMiner":
-                        if (runMiner) {
-                            System.err.println("runMiner can only set once");
-                            return;
-                        }
-                        runMiner = true;
-                        break;
-                    case "-init":
-                        if (init) {
-                            System.err.println("init can only set once");
-                            ;
-                            return;
-                        }
-                        init = true;
-                    default:
-                        System.err.println("illegal argument " + args[i]);
-                        return;
-                }
-            }
+			for (int i = 0; i < args.length; i++) {
+				switch (args[i].toLowerCase()) {
+				case "-localstorage":
+					if (localStorageSet) {
+						System.err.println("local storage can only set once");
+						return;
+					}
+					localStorage = args[++i];
+					localStorageSet = true;
+					break;
+				case "-remotestorage":
+					if (remoteStorageSet) {
+						System.err.println("remote storage can only set once");
+						return;
+					}
+					remoteStorage = args[++i];
+					remoteStorageSet = true;
+					break;
+				case "-runminer":
+					if (runMiner) {
+						System.err.println("runMiner can only set once");
+						return;
+					}
+					runMiner = true;
+					break;
+				case "-init":
+					if (init) {
+						System.err.println("init can only set once");
+						return;
+					}
+					init = true;
+					break;
+				default:
+					System.err.println("illegal argument " + args[i]);
+					return;
+				}
+			}
 
         } else {
             Scanner scanner = new Scanner(System.in);

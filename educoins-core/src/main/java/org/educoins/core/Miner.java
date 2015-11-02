@@ -1,5 +1,6 @@
 package org.educoins.core;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,33 +69,25 @@ public class Miner implements IBlockListener {
 			do {
 				nonceGenerator.nextBytes(nonce);
 				this.block.setNonce(ByteArray.convertToInt(nonce));
-				
-				challenge = this.block.hash();
-				//TODO [Vitali] Delete after testing.
-//				System.err.println("Target   : " + targetThreshold.length);
-//				System.err.println("Challenge: " + challenge.length);
-				
-				challengePositive = invertNegaitve(challenge);
-				
-//				System.out.println("Target   : " + new BigInteger(targetThreshold));
-//				System.out.println("Challenge: " + new BigInteger(challengePositive));
 
-			} while (this.active && ByteArray.compare(challengePositive, targetThreshold) > 0);
+				challenge = this.block.hash();
+//				challengePositive = invertNegative(challenge); //TODO
+//				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge)
+//						+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold));
+			} while (this.active && ByteArray.compare(challenge, targetThreshold) > 0);
 
 			if (this.active) {
-				// TODO [joeren]: delete output message
-//				System.out.println("Won :-)");
-				notifyFoundPoW(block);
-				
+				// synchronzie PoWThreads to avoid FileNotFoundException
+				synchronized (this) {
+					notifyFoundPoW(block);
+				}
 			} else {
-				// TODO [joeren]: delete output message
-//				System.out.println("Loose :-(");
 			}
 			
 			blockChain.removeBlockListener(this);
 		}
 		
-		private byte[] invertNegaitve(byte[] toInvertBitInteger) {
+		private byte[] invertNegative(byte[] toInvertBitInteger) {
 			boolean isNegative = (toInvertBitInteger[0] & 0x80) == 0x80;
 			if (isNegative)
 				toInvertBitInteger[0] &= 0x7f;
