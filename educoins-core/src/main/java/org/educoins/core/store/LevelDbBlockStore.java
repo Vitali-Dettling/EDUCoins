@@ -1,11 +1,15 @@
 package org.educoins.core.store;
 
 import com.google.gson.Gson;
+import com.sun.istack.internal.Nullable;
 import org.educoins.core.Block;
+import org.educoins.core.utils.ByteArray;
+import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +27,9 @@ public class LevelDbBlockStore implements IBlockStore {
     private DB database;
     private byte[] latest;
 
-    public LevelDbBlockStore(File directory, DBFactory dbFactory) throws BlockStoreException {
+    public LevelDbBlockStore(File directory) throws BlockStoreException {
+        DBFactory dbFactory = JniDBFactory.factory;
+
         this.path = directory;
         Options options = new Options();
         options.createIfMissing();
@@ -47,8 +53,10 @@ public class LevelDbBlockStore implements IBlockStore {
 
 
     @Override
-    public void put(Block block) {
-        byte[] key = Block.hash(block);
+    public synchronized void put(@NotNull Block block) {
+//        TODO: would be a lot nicer?! byte[] key = Block.hash(block);
+        byte[] key = ByteArray.convertToString(block.hash(), 16).getBytes();
+
         database.put(key, getJson(block).getBytes());
         latest = key;
         database.put(LATEST_KEY, latest);
@@ -56,7 +64,8 @@ public class LevelDbBlockStore implements IBlockStore {
 
 
     @Override
-    public Block get(byte[] hash) throws BlockNotFoundException {
+    @Nullable
+    public synchronized Block get(byte[] hash) throws BlockNotFoundException {
         if (database.get(hash) == null) {
             throw new BlockNotFoundException(hash);
         }
@@ -64,7 +73,8 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     @Override
-    public Block getLatest() {
+    @Nullable
+    public synchronized Block getLatest() {
         if (isEmpty()) return null;
 
         try {

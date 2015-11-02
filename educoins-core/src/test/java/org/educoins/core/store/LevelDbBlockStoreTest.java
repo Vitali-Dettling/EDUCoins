@@ -26,7 +26,7 @@ public class LevelDbBlockStoreTest {
 
     @Before
     public void setup() {
-        store = new LevelDbBlockStore(DIRECTORY, JniDBFactory.factory);
+        store = new LevelDbBlockStore(DIRECTORY);
 
         block = new Block();
         block.setBits("0101010101010111101");
@@ -39,7 +39,9 @@ public class LevelDbBlockStoreTest {
     public void tearDown() {
         store.destroy();
         boolean delete = deleteDir(DIRECTORY);
-        System.out.println("Deleted? " + delete);
+
+        if (!delete)
+            throw new IllegalStateException("Db could not be deleted!");
     }
 
     @Test

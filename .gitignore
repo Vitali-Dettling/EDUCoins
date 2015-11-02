@@ -13,3 +13,6 @@ target
 #Jetbrains Files
 .idea/
 *.iml
+
+#protos
+educoins-core/src/main/java/org/educoins/core/p2p/messages/*

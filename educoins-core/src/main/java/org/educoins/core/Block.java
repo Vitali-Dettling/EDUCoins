@@ -1,139 +1,153 @@
 package org.educoins.core;
 
+import org.educoins.core.cryptography.SHA256Hasher;
+import org.educoins.core.p2p.messages.MessageProtos;
+import org.educoins.core.utils.ByteArray;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.utils.ByteArray;
-
 public class Block {
-	
-	private static final int VERSION = -1;//-1 if no version is set and also an error.
-	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
-	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
-	//TODO: really?!
-	private static final long TIME = System.currentTimeMillis();
-	//private static final String BITS = "1f01ff3f";
-	private static final String BITS = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-	private static final long NONCE = 1114735442;
-	
-	private int version;
-	private String hashPrevBlock;
-	private String hashMerkleRoot;
-	private long time;
-	private String bits;
-	private long nonce;
-	private int transactionsCount;
-	private List<Transaction> transactions;
-		
-	public Block() {
-		this.setVersion(Block.VERSION);
-		this.setHashPrevBlock(Block.HASH_PREV_BLOCK);
-		this.setHashMerkleRoot(Block.HASH_MERKLE_ROOT);
-		this.setTime(Block.TIME);
-		this.setBits(Block.BITS);
-		this.setNonce(Block.NONCE);
-		
-		this.transactions = new ArrayList<>();
-		this.transactionsCount = this.transactions.size();
-	}
 
-	public int getVersion() {
-		return this.version;
-	}
+    private static final int VERSION = -1;//-1 if no version is set and also an error.
+    private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
+    private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
+    private static final long TIME = System.currentTimeMillis();
+    //private static final String BITS = "1f01ff3f";
+    private static final String BITS = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+    private static final long NONCE = 1114735442;
 
-	public void setVersion(int version) {
-		this.version = version;
-	}
+    private int version;
+    private String hashPrevBlock;
+    private String hashMerkleRoot;
+    private long time;
+    private String bits;
+    private long nonce;
+    private int transactionsCount;
+    private List<Transaction> transactions;
 
-	public String getHashPrevBlock() {
-		return this.hashPrevBlock;
-	}
+    public Block() {
+        this.setVersion(Block.VERSION);
+        this.setHashPrevBlock(Block.HASH_PREV_BLOCK);
+        this.setHashMerkleRoot(Block.HASH_MERKLE_ROOT);
+        this.setTime(Block.TIME);
+        this.setBits(Block.BITS);
+        this.setNonce(Block.NONCE);
 
-	public void setHashPrevBlock(String hashPrevBlock) {
-		this.hashPrevBlock = hashPrevBlock;
-	}
+        this.transactions = new ArrayList<>();
+        this.transactionsCount = this.transactions.size();
+    }
 
-	public String getHashMerkleRoot() {
-		return this.hashMerkleRoot;
-	}
+    public static byte[] getTargetThreshold(String bits) {
+        return ByteArray.convertFromString(bits);
+    }
 
-	public void setHashMerkleRoot(String hashMerkleRoot) {
-		this.hashMerkleRoot = hashMerkleRoot;
-	}
+    public static byte[] hash(Block block) {
+        // specify used header fields (in byte arrays)
+        byte[] version = ByteArray.convertFromLong(block.version);
+        byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
+        byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot);
+        byte[] time = ByteArray.convertFromLong(block.time);
+        byte[] bits = ByteArray.convertFromString(block.bits);
+        byte[] nonce = ByteArray.convertFromLong(block.nonce);
 
-	public long getTime() {
-		return this.time;
-	}
+        // concatenate used header fields
+        byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
+                bits, nonce);
 
-	public void setTime(long time) {
-		this.time = time;
-	}
+        // hash concatenated header fields and return
+        byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
+        return hash;
+    }
 
-	public String getBits() {
-		return this.bits;
-	}
+    public int getVersion() {
+        return this.version;
+    }
 
-	public void setBits(String bits) {
-		this.bits = bits;
-	}
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
-	public long getNonce() {
-		return this.nonce;
-	}
+    public String getHashPrevBlock() {
+        return this.hashPrevBlock;
+    }
 
-	public void setNonce(long nonce) {
-		this.nonce = nonce;
-	}
+    public void setHashPrevBlock(String hashPrevBlock) {
+        this.hashPrevBlock = hashPrevBlock;
+    }
 
-	public int getTransactionsCount() {
-		return this.transactionsCount;
-	}
+    public String getHashMerkleRoot() {
+        return this.hashMerkleRoot;
+    }
 
-	public List<Transaction> getTransactions() {
-		// [joeren]: return just a copy of the transaction list, because of
-		// potential effects with transactionsCount
-		if (this.transactions != null) {
-			return new ArrayList<Transaction>(this.transactions);
-		}
-		return null;
-	}
+    public void setHashMerkleRoot(String hashMerkleRoot) {
+        this.hashMerkleRoot = hashMerkleRoot;
+    }
 
-	public void setTransactions(List<Transaction> transactions) {
-		this.transactions = transactions;
-		if (this.transactions == null) {
-			this.transactionsCount = 0;
-		} else {
-			this.transactionsCount = this.transactions.size();
-		}
-	}
+    public long getTime() {
+        return this.time;
+    }
 
-	public void addTransaction(Transaction transaction) {
-		if (this.transactions == null) {
-			this.transactions = new ArrayList<>();
-		}
-		this.transactions.add(transaction);
-		this.transactionsCount = this.transactions.size();
-	}
+    public void setTime(long time) {
+        this.time = time;
+    }
 
-	public void addTransactions(Collection<Transaction> transactions) {
-		if (this.transactions == null) {
-			this.transactions = new ArrayList<>();
-		}
-		this.transactions.addAll(transactions);
-		this.transactionsCount = this.transactions.size();
-	}
+    public String getBits() {
+        return this.bits;
+    }
 
-	public byte[] hash() {
-		return Block.hash(this);
-	}
+    public void setBits(String bits) {
+        this.bits = bits;
+    }
 
-	public static byte[] getTargetThreshold(String bits){
-		return ByteArray.convertFromString(bits);
-	}
-	
-	
+    public long getNonce() {
+        return this.nonce;
+    }
+
+    public void setNonce(long nonce) {
+        this.nonce = nonce;
+    }
+
+    public int getTransactionsCount() {
+        return this.transactionsCount;
+    }
+
+    public List<Transaction> getTransactions() {
+        // [joeren]: return just a copy of the transaction list, because of
+        // potential effects with transactionsCount
+        if (this.transactions != null) {
+            return new ArrayList<Transaction>(this.transactions);
+        }
+        return null;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+        if (this.transactions == null) {
+            this.transactionsCount = 0;
+        } else {
+            this.transactionsCount = this.transactions.size();
+        }
+    }
+
+    public void addTransaction(Transaction transaction) {
+        if (this.transactions == null) {
+            this.transactions = new ArrayList<>();
+        }
+        this.transactions.add(transaction);
+        this.transactionsCount = this.transactions.size();
+    }
+
+    public void addTransactions(Collection<Transaction> transactions) {
+        if (this.transactions == null) {
+            this.transactions = new ArrayList<>();
+        }
+        this.transactions.addAll(transactions);
+        this.transactionsCount = this.transactions.size();
+    }
+
+
 // TODO [Vitali] Ist der richtige code, um exponenden und Mantise zu trennen und damit rechnen...
 //	public static byte[] getTargetThreshold(String bits) {
 //		byte[] convertedBits = ByteArray.convertFromString(bits, 16);
@@ -161,24 +175,24 @@ public class Block {
 //		return expandedBits;
 //	}
 
+    public byte[] hash() {
+        return Block.hash(this);
+    }
 
-	public static byte[] hash(Block block) {
-		// specify used header fields (in byte arrays)
-		byte[] version = ByteArray.convertFromLong(block.version);
-		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
-		byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot);
-		byte[] time = ByteArray.convertFromLong(block.time);
-		byte[] bits = ByteArray.convertFromString(block.bits);
-		byte[] nonce = ByteArray.convertFromLong(block.nonce);
+    public MessageProtos.Block toProto() {
+        MessageProtos.Block.Builder builder = MessageProtos.Block.newBuilder();
+        builder.setBits(Integer.parseInt(getBits()));
+        builder.setVersion(getVersion());
+        builder.setMerkleRoot(getHashMerkleRoot());
+        builder.setPrevBlock(getHashPrevBlock());
+        builder.setNonce((int) getNonce());
+        builder.setTimestamp(getTime());
+        builder.setTxnCount(getTransactionsCount());
+        int index = 0;
+        transactions.forEach(tnx -> builder.setTxns(index, tnx.getApprovalsCount()));
 
-		// concatenate used header fields
-		byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
-				bits, nonce);
-
-		// hash concatenated header fields and return
-		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
-		return hash;
-	}
+        return builder.build();
+    }
 
 	@Override
 	public boolean equals(Object o) {

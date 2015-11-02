@@ -1,6 +1,8 @@
 package org.educoins.core.store;
 
 import org.educoins.core.Block;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The interface representing all logic necessary to store {@link Block}s.
@@ -13,7 +15,7 @@ public interface IBlockStore {
      * @param block the {@link Block} to store.
      * @throws BlockStoreException whenever something goes wrong.
      */
-    void put(/*@NotNull*/ Block block);
+    void put(@NotNull Block block);
 
     /**
      * Retrieves a {@link Block} identified by the given hash.
@@ -23,7 +25,7 @@ public interface IBlockStore {
      * @throws BlockStoreException
      * @throws BlockNotFoundException if the {@link Block} could not be found.
      */
-//    @Nullable
+    @Nullable
     Block get(byte[] hash) throws BlockNotFoundException;
 
     /**
@@ -32,7 +34,7 @@ public interface IBlockStore {
      * @return the latest Block.
      * @throws BlockStoreException
      */
-//    @Nullable
+    @Nullable
     Block getLatest();
 
     /**
