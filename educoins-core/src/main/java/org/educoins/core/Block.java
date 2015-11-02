@@ -180,4 +180,29 @@ public class Block {
 		return hash;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Block block = (Block) o;
+
+		if (version != block.version) return false;
+		if (time != block.time) return false;
+		if (nonce != block.nonce) return false;
+		if (!hashPrevBlock.equals(block.hashPrevBlock)) return false;
+		if (!hashMerkleRoot.equals(block.hashMerkleRoot)) return false;
+		return bits.equals(block.bits);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = version;
+		result = 31 * result + hashPrevBlock.hashCode();
+		result = 31 * result + hashMerkleRoot.hashCode();
+		result = 31 * result + (int) (time ^ (time >>> 32));
+		result = 31 * result + bits.hashCode();
+		result = 31 * result + (int) (nonce ^ (nonce >>> 32));
+		return result;
+	}
 }

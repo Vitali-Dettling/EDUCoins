@@ -1,12 +1,15 @@
 package org.educoins.core.store;
 
 import org.educoins.core.Block;
+import org.educoins.core.Transaction;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -55,6 +58,27 @@ public class LevelDbBlockStoreTest {
         for (int i = 0; i < expected.length; i++) {
             assertEquals(expected[i], actualBytes[i]);
         }
+    }
+
+    @Test
+    public void testPutWithTransaction() throws Exception {
+        Transaction transaction = new Transaction();
+        transaction.setVersion(100);
+
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(transaction);
+
+        Block b1 = getRandomBlock();
+        b1.addTransactions(transactions);
+
+        store.put(b1);
+
+        Block b2 = store.get(Block.hash(b1));
+        assertEquals(1, b2.getTransactionsCount());
+
+        Transaction persisted = b2.getTransactions().get(0);
+
+        assertEquals(transaction.getVersion(), persisted.getVersion());
     }
 
     @Test
