@@ -50,11 +50,10 @@ public class DemoBlockTransmitter implements IBlockTransmitter {
 	@Override
 	public void transmitBlock(Block block) {
 		try {
-			Thread.sleep(100); //TODO: this sucks. there is some threading issue here, where files are read before they are written.
 		byte[] hash = block.hash();
 		//System.out.println("Hash: " + ByteArray.convertToString(hash, 16) + ": Id: " + block.toString());
 		Path fileName = Paths.get(ByteArray.convertToString(hash, 16) + ".json");
-		
+
 		Path localBlockFile = this.localStorage.resolve(fileName);
 		Path remoteBlockFile = this.remoteStorage.resolve(fileName);
 
