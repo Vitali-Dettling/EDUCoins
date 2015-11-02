@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
@@ -48,7 +49,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter) {
 		
 		this.wallet = new Wallet();
-		this.blockListeners = new ArrayList<>();
+		this.blockListeners = new CopyOnWriteArrayList<>();
 		this.blockReceiver = blockReceiver;
 		this.blockTransmitter = blockTransmitter;
 		this.blockReceiver.addBlockListener(this);
@@ -74,8 +75,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 	
 	public void notifyBlockReceived(Block newBlock) {
-		for (IBlockListener blockListener : blockListeners) {
-			blockListener.blockReceived(newBlock);
+		synchronized (this) {
+			for (IBlockListener blockListener : blockListeners) {
+				blockListener.blockReceived(newBlock);
+			}
 		}
 	}
 	
