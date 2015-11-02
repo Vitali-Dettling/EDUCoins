@@ -133,7 +133,6 @@ public class Transaction {
 		} else {
 			this.approvalsCount = this.approvals.size();
 		}
-
 	}
 
 	public void addApproval(Approval output) {
@@ -158,10 +157,12 @@ public class Transaction {
 		// inputs = 0;
 		// outputs > 0;
 		// approvals = 0;
+		
 		// Regular:
 		// inputs > 0;
 		// outputs > 0;
 		// approvals = 0;
+		
 		// Approval:
 		// inputs > 0;
 		// outputs = 0 || > 0
@@ -179,8 +180,8 @@ public class Transaction {
 			return ETransaction.REGULAR;
 		}
 		if ((this.getInputs() != null && this.getInputs().size() > 0)
-				&& ((this.getOutputs() == null || this.getOutputs().size() == 0) || (this.getOutputs() != null && this
-						.getOutputs().size() > 0)) && (this.getApprovals() != null && this.getApprovals().size() > 0)) {
+				&& ((this.getOutputs() == null || this.getOutputs().size() == 0) || (this.getOutputs() != null 
+				&& this.getOutputs().size() > 0)) && (this.getApprovals() != null && this.getApprovals().size() > 0)) {
 			return ETransaction.APPROVED;
 		}
 		return null;
@@ -197,7 +198,6 @@ public class Transaction {
 		if (transaction.whichTransaction() == ETransaction.COINBASE) {
 			toBeHashed = getByteArrayOutput(transaction);
 		} else if (transaction.whichTransaction() == ETransaction.REGULAR) {
-
 			byte[] input = getByteArrayInput(transaction);
 			byte[] output = getByteArrayOutput(transaction);
 			toBeHashed = ByteArray.concatByteArrays(input, output);

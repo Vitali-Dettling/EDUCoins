@@ -9,6 +9,8 @@ import org.educoins.core.utils.ByteArray;
 
 public class Block {
 	
+	private static final int DEFAULT_REWARD = 10;
+	private static final int ZERO = 0;
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
 	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -131,6 +133,40 @@ public class Block {
 	public static byte[] getTargetThreshold(String bits){
 		return ByteArray.convertFromString(bits);
 	}
+	
+	public int rewardCalculator(){
+		
+		int newReward = ZERO;
+		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
+		
+		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
+		if(DEFAULT_REWARD == lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD;
+		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
+			newReward = lastApprovedEDUCoins + 2;
+		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD - 2;
+		}		
+
+		return newReward;
+	}
+		
+	private int findAllApprovedEDUCoins(){
+		
+		int latestApprovedEDUCoins = ZERO;
+		List<Transaction> latestTransactions = this.getTransactions();
+		
+		//TODO[Vitali] Might not be 100% correct???ß
+		for(Transaction transaction : latestTransactions){
+			List<Approval> approvals = transaction.getApprovals();
+			for(Approval approval : approvals){
+				latestApprovedEDUCoins += approval.getAmount();
+			}
+		}
+		
+		return latestApprovedEDUCoins;
+	}
+	
 	
 	
 // TODO [Vitali] Ist der richtige code, um exponenden und Mantise zu trennen und damit rechnen...

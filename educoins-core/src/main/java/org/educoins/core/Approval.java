@@ -52,7 +52,8 @@ public class Approval {
 	public byte[] getConcatedApproval(){
 		
 		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
-		// TODO [joeren]: Decrease or remove radix of string to byte array conversion when the locking script is a real locking script
+		//TODO [joeren]: Decrease or remove radix of string to byte array conversion when the locking script is a real locking script
+		//TODO [Vitali] Character.MAX_RADIX => That all characters can be stored. As soon as the script verification  works it will be obsolete.
 		byte[] lockingScript = ByteArray.convertFromString(getLockingScript(), Character.MAX_RADIX);
 		return ByteArray.concatByteArrays(lockingScript);
 		

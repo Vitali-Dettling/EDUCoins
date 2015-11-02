@@ -49,10 +49,16 @@ public class DemoBlockTransmitter implements IBlockTransmitter {
 
 	@Override
 	public void transmitBlock(Block block) {
-		Path fileName = Paths.get(ByteArray.convertToString(block.hash(), 16) + ".json");
 		
-		Path localBlockFile = this.localStorage.resolve(fileName);
-		Path remoteBlockFile = this.remoteStorage.resolve(fileName);
+		Path localBlockFile = null;
+		Path remoteBlockFile = null;
+		if(block != null){
+			Path fileName = Paths.get(ByteArray.convertToString(block.hash(), 16) + ".json");
+			
+			localBlockFile = this.localStorage.resolve(fileName);
+			remoteBlockFile = this.remoteStorage.resolve(fileName);
+		}
+		
 		try {
 			Files.createFile(localBlockFile);
 			String json = this.gson.toJson(block);
