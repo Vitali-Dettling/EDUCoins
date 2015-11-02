@@ -1,10 +1,13 @@
-package org.educoins.core;
+package org.educoins.miner;
+
+
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.educoins.core.*;
 import org.educoins.core.utils.ByteArray;
 
 public class Miner implements IBlockListener {

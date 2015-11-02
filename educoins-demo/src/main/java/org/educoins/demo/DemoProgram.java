@@ -17,7 +17,7 @@ import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
-import org.educoins.core.Miner;
+import org.educoins.miner.*;
 import org.educoins.core.Output;
 import org.educoins.core.RegularTransaction;
 import org.educoins.core.Transaction;
