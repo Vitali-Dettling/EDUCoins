@@ -64,12 +64,14 @@ public class LevelDbBlockStore implements IBlockStore {
 
 
     @Override
-    @Nullable
+    @NotNull
     public synchronized Block get(byte[] hash) throws BlockNotFoundException {
-        if (database.get(hash) == null) {
+        byte[] byteBlock = database.get(hash);
+
+        if (byteBlock == null) {
             throw new BlockNotFoundException(hash);
         }
-        return getBlock(database.get(hash));
+        return getBlock(byteBlock);
     }
 
     @Override

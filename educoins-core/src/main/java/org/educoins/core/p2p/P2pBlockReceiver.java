@@ -4,8 +4,9 @@ import com.sun.istack.internal.NotNull;
 import org.educoins.core.Block;
 import org.educoins.core.IBlockListener;
 import org.educoins.core.IBlockReceiver;
+import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.p2p.discovery.DiscoveryStrategy;
-import org.educoins.core.p2p.nodes.Peer;
+import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
 
@@ -44,24 +45,27 @@ public class P2pBlockReceiver implements IBlockReceiver {
     public void receiveBlocks() {
         Collection<Block> blockList = new ArrayList<>();
 
-        for (Peer peer : discovery.getPeers()) {
-            mergeBlocks(peer.getBlocks(), blockList);
+        try {
+
+            //only FullPeers are allowed to change data also they are the only Peers to provide block data.
+            for (Peer peer : discovery.getFullPeers()) {
+                mergeBlocks(peer.getBlocks(), blockList);
+            }
+
+            blockList.forEach(block -> {
+                Threading.run(() -> blockStore.put(block));
+                blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block));
+            });
+
+        } catch (DiscoveryException e) {
+            //TODO: catch or throw?
+            e.printStackTrace();
         }
 
-        blockList.forEach(block -> {
-            Threading.run(() -> blockStore.put(block));
-            blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block));
-        });
     }
 
 
     private void mergeBlocks(Collection<Block> newBlocks, Collection<Block> globalBlocks) {
-//        for (Block block : newBlocks) {
-//            if (globalBlocks.contains(block)) {
-//
-//            }
-//        }
-
         //TODO: replace this by meaningful branching/merging logic.
         globalBlocks.addAll(newBlocks);
     }

@@ -10,10 +10,6 @@ public class BlockNotFoundException extends BlockStoreException {
     public BlockNotFoundException() {
     }
 
-    public BlockNotFoundException(byte[] hash) {
-        super("Block with Hash '" + new String(hash) + "' could not be found!");
-    }
-
     public BlockNotFoundException(String message) {
         super(message);
     }
@@ -26,7 +22,7 @@ public class BlockNotFoundException extends BlockStoreException {
         super(cause);
     }
 
-    public BlockNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    public BlockNotFoundException(byte[] hash) {
+        super("Block with Hash '" + new String(hash) + "' could not be found!");
     }
 }
