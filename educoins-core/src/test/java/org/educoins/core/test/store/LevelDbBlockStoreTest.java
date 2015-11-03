@@ -1,22 +1,20 @@
-package org.educoins.core.store;
-
-import org.educoins.core.Block;
-import org.educoins.core.Transaction;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.IO;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+package org.educoins.core.test.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.educoins.core.Block;
+import org.educoins.core.Transaction;
+import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.LevelDbBlockStore;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Default test for {@link LevelDbBlockStore}

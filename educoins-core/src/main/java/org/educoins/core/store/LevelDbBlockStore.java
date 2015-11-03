@@ -1,7 +1,8 @@
 package org.educoins.core.store;
 
-import com.google.gson.Gson;
-import com.sun.istack.internal.Nullable;
+import java.io.File;
+import java.io.IOException;
+
 import org.educoins.core.Block;
 import org.educoins.core.utils.ByteArray;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -11,8 +12,8 @@ import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
+import com.google.gson.Gson;
+import com.sun.istack.internal.Nullable;
 
 /**
  * The default implementation of a {@link IBlockStore} using Google Level Db as storage-backend.

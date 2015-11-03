@@ -1,7 +1,5 @@
 package org.educoins.core;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -10,10 +8,6 @@ import java.util.List;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Deserializer;
-
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
@@ -29,7 +23,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	private int blockCounter;
 	private IBlockReceiver blockReceiver;
-	private IBlockTransmitter blockTransmitter;
 	private List<IBlockListener> blockListeners;
 	private ITransactionReceiver transactionReceiver;
 	private ITransactionTransmitter transactionTransmitter;
@@ -42,12 +35,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	private String publicKey;
 
-	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
+	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
 		
 		this.wallet = new Wallet();
 		this.blockListeners = new ArrayList<>();
 		this.blockReceiver = blockReceiver;
-		this.blockTransmitter = blockTransmitter;
 		this.blockReceiver.addBlockListener(this);
 		this.transactionListeners = new ArrayList<>();
 		this.transactionReceiver = transactionReceiver;
@@ -240,11 +232,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	//TODO [Vitali] Method needs to be deleted as soon as the DB will be introduced.
 	public Block getPreviousBlock(Block currentBlock) {
-
-		String previousBlockHash = currentBlock.getHashPrevBlock();
-		byte[] previousBlock = ByteArray.convertFromString(previousBlockHash);
 		return this.store.get(currentBlock);
-		
 	}
 
 }

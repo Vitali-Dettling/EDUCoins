@@ -2,25 +2,17 @@ package org.educoins.demo;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
 import org.educoins.core.IBlockReceiver;
-import org.educoins.core.IBlockTransmitter;
 import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
 import org.educoins.core.Miner;
-import org.educoins.core.Output;
-import org.educoins.core.RegularTransaction;
-import org.educoins.core.Transaction;
 import org.educoins.core.p2p.P2pBlockReceiver;
 import org.educoins.core.p2p.discovery.LocalDiscovery;
 import org.educoins.core.store.IBlockStore;
@@ -108,21 +100,18 @@ public class DemoProgram {
         
         IBlockStore senderBlockStore = new LevelDbBlockStore(new File(localDBStorage));
 
-        //region P2pBlockReceiver
-        IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(senderBlockStore);
-
         IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
         blockReceiver.addBlockListener(senderBlockStore::put);
 
         IBlockReceiver p2pBlockReceiver =
-                new P2pBlockReceiver(
+                		new P2pBlockReceiver(
                         new LevelDbBlockStore(new File(localDBStorage)),
                         new LocalDiscovery(senderBlockStore));
 
         ITransactionReceiver txReceiver = new DemoTransactionReceiver();
         ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
 
-        BlockChain blockChain = new BlockChain(blockReceiver, blockTransmitter, txReceiver, txTransmitter, senderBlockStore);
+        BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
 
         if (runMiner) {
             new Miner(blockChain);
@@ -135,5 +124,4 @@ public class DemoProgram {
         p2pBlockReceiver.receiveBlocks();
         txReceiver.receiveTransactions();
     }
-
 }
