@@ -127,7 +127,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	@Override
 	public void foundPoW(Block block) {
-		System.out.println("Block: " + block.getHashPrevBlock());
 		this.store.put(block);
 		//this.blockTransmitter.transmitBlock(block);
 		this.blockReceiver.receiveBlocks();
@@ -244,7 +243,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		String previousBlockHash = currentBlock.getHashPrevBlock();
 		byte[] previousBlock = ByteArray.convertFromString(previousBlockHash);
-		System.out.println("Get:   " + previousBlockHash);
 		return this.store.get(currentBlock);
 		
 	}
