@@ -146,8 +146,9 @@ public class Client extends Thread implements ITransactionListener {
 						for (Input tmpInput : this.inputs) {
 							availableAmount += tmpInput.getAmount();
 						}
-						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
-								amount, availableAmount, typeString, output.getLockingScript()));
+						//TODO[Vitali] Testing
+//						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
+//								amount, availableAmount, typeString, output.getLockingScript()));
 					}
 				}
 			}

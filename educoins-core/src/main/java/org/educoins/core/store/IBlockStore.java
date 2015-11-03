@@ -16,17 +16,17 @@ public interface IBlockStore {
      * @throws BlockStoreException whenever something goes wrong.
      */
     void put(@NotNull Block block);
-
+    
     /**
      * Retrieves a {@link Block} identified by the given hash.
      *
-     * @param hash the identification for the {@link Block}
+     * @param block the identification for the {@link Block}
      * @return the Block if found.
      * @throws BlockStoreException
      * @throws BlockNotFoundException if the {@link Block} could not be found.
      */
     @Nullable
-    Block get(byte[] hash) throws BlockNotFoundException;
+	Block get(@NotNull Block block) throws BlockNotFoundException;
 
     /**
      * Retrieves the latest {@link Block} stored in the {@link IBlockStore}. Or Null if there is none.
@@ -43,4 +43,6 @@ public interface IBlockStore {
      * @throws BlockStoreException
      */
     void destroy() throws BlockStoreException;
+
+
 }

@@ -1,18 +1,15 @@
-package educoins.core.test;
+package org.educoins.core.test.utils;
 
-import org.educoins.core.Block;
 import org.educoins.core.utils.ByteArray;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.lang.reflect.Field;
 
 /**
  * Created by Marvin on 29.10.2015.
  */
 public class ByteArrayTest {
     @Test
-    public void compare1Test() {
+    public void testCompare1() {
         byte[] a = new byte[]{ 4, 5, 6};
         byte[] b = new byte[]{ 3, 5, 6};
         Assert.assertEquals(1, ByteArray.compare(a, b));
@@ -20,7 +17,7 @@ public class ByteArrayTest {
     }
 
     @Test
-    public void compareEqualsTest() {
+    public void testCompareEquals() {
         byte[] a = new byte[]{ 4, 5, 6};
         byte[] b = new byte[]{ 4, 5, 6};
         Assert.assertEquals(0, ByteArray.compare(a, b));
@@ -28,7 +25,7 @@ public class ByteArrayTest {
     }
 
     @Test
-    public void compareDiffLengthTest() {
+    public void testCompareDiffLength() {
         byte[] a = new byte[]{ 0,0,0,0, 5, 6};
         byte[] b = new byte[]{ 4, 5, 6};
         Assert.assertEquals(-1, ByteArray.compare(a, b));

@@ -1,6 +1,5 @@
 package org.educoins.core;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,14 +63,13 @@ public class Miner implements IBlockListener {
 			byte[] nonce = new byte[BIT32];
 			byte[] targetThreshold = Block.getTargetThreshold(this.block.getBits());
 			byte[] challenge;
-			byte[] challengePositive;
 			
 			do {
 				nonceGenerator.nextBytes(nonce);
 				this.block.setNonce(ByteArray.convertToInt(nonce));
 
 				challenge = this.block.hash();
-//				challengePositive = invertNegative(challenge); //TODO
+			
 //				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge)
 //						+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold));
 			} while (this.active && ByteArray.compare(challenge, targetThreshold) > 0);
@@ -85,13 +83,6 @@ public class Miner implements IBlockListener {
 			}
 			
 			blockChain.removeBlockListener(this);
-		}
-		
-		private byte[] invertNegative(byte[] toInvertBitInteger) {
-			boolean isNegative = (toInvertBitInteger[0] & 0x80) == 0x80;
-			if (isNegative)
-				toInvertBitInteger[0] &= 0x7f;
-			return toInvertBitInteger;
 		}
 		
 		@Override

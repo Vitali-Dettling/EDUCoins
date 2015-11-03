@@ -16,17 +16,22 @@ public abstract class Deserializer {
 
 	private static final Gson GSON_DESERIALIZER = new Gson();
 
+
+    private Block deserialize(byte[] jsonblock) {
+        return new Gson().fromJson(new String(jsonblock), Block.class);
+    }
+	
 	public static Block deserialize(String blockChainPath, String fileHashName) throws FileNotFoundException,
 			JsonIOException, JsonSyntaxException {
 
-		Path remoteStorage = Paths.get(blockChainPath);
+		Path localStorage = Paths.get(blockChainPath);
 
-		if (Files.exists(remoteStorage) && !Files.isDirectory(remoteStorage)) {
-			throw new IllegalArgumentException(remoteStorage.toString() + " is not a directory");
+		if (Files.exists(localStorage) && !Files.isDirectory(localStorage)) {
+			throw new IllegalArgumentException(localStorage.toString() + " is not a directory");
 		}
 
 		Path fileName = Paths.get(fileHashName + ".json");
-		Path remoteBlockFile = remoteStorage.resolve(fileName);
+		Path remoteBlockFile = localStorage.resolve(fileName);
 
 		FileReader reader = new FileReader(remoteBlockFile.toFile());
 		Gson gson = new Gson();

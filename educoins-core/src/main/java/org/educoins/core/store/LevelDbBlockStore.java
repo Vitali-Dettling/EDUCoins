@@ -55,25 +55,31 @@ public class LevelDbBlockStore implements IBlockStore {
     @Override
     public synchronized void put(@NotNull Block block) {
 //        TODO: would be a lot nicer?! byte[] key = Block.hash(block);
+        //byte[] key = block.hash();
         byte[] key = ByteArray.convertToString(block.hash(), 16).getBytes();
-
+        
         database.put(key, getJson(block).getBytes());
         latest = key;
         database.put(LATEST_KEY, latest);
     }
 
 
-    @Override
+    @SuppressWarnings("restriction")
+	@Override
     @Nullable
-    public synchronized Block get(byte[] hash) throws BlockNotFoundException {
+    public synchronized Block get(@NotNull Block block) throws BlockNotFoundException {
+        
+    	byte[] hash = ByteArray.convertToString(block.hash(), 16).getBytes();
+    	
         if (database.get(hash) == null) {
             throw new BlockNotFoundException(hash);
         }
         return getBlock(database.get(hash));
     }
 
-    @Override
+	@Override
     @Nullable
+    @SuppressWarnings("restriction")
     public synchronized Block getLatest() {
         if (isEmpty()) return null;
 

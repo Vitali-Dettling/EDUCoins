@@ -1,11 +1,11 @@
 package org.educoins.core.p2p.nodes;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.educoins.core.Block;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockStore;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Simulating a Remote Peer.
@@ -27,7 +27,7 @@ public class LocalPeer implements Peer {
         while (anchorBlock != null) {
             allBlocks.add(anchorBlock);
             try {
-                anchorBlock = blockStore.get(anchorBlock.getHashPrevBlock().getBytes());
+                anchorBlock = blockStore.get(anchorBlock);
             } catch (BlockNotFoundException ex) {
                 anchorBlock = null;
             }

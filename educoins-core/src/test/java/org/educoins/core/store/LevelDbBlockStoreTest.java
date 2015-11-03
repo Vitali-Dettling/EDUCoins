@@ -2,12 +2,16 @@ package org.educoins.core.store;
 
 import org.educoins.core.Block;
 import org.educoins.core.Transaction;
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.IO;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,12 +24,16 @@ import static org.junit.Assert.assertNull;
  */
 public class LevelDbBlockStoreTest {
 
-    public static final File DIRECTORY = new File("/tmp/blockstore");
+    private static String tempStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
+            + "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore";
+	
+    public static final File DIRECTORY = new File(tempStorage);
     private IBlockStore store;
     private Block block;
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
+    	
         store = new LevelDbBlockStore(DIRECTORY);
 
         block = new Block();
@@ -47,11 +55,12 @@ public class LevelDbBlockStoreTest {
     @Test
     public void testPut() throws Exception {
         Block b1 = getRandomBlock();
-        store.put(b1);
+        this.store.put(b1);
 
         fillRandom();
-
-        Block actual = store.get(Block.hash(b1));
+        
+        Block actual = this.store.get(b1);
+       
         byte[] expected = Block.hash(b1);
         byte[] actualBytes = Block.hash(actual);
 
@@ -75,7 +84,7 @@ public class LevelDbBlockStoreTest {
 
         store.put(b1);
 
-        Block b2 = store.get(Block.hash(b1));
+        Block b2 = store.get(b1);
         assertEquals(1, b2.getTransactionsCount());
 
         Transaction persisted = b2.getTransactions().get(0);
