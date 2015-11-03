@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.educoins.core.cryptography.SHA256Hasher;
+//import org.educoins.core.p2p.messages.MessageProtos;
 import org.educoins.core.utils.ByteArray;
 
 public class Block {
@@ -15,10 +16,10 @@ public class Block {
 	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
 	private static final long TIME = System.currentTimeMillis();
-	//private static final String BITS = "1f01ff3f";
-	private static final String BITS = "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
+	private static final String BITS = "3dffffff";
 	private static final long NONCE = 1114735442;
-	
+
 	private int version;
 	private String hashPrevBlock;
 	private String hashMerkleRoot;
@@ -27,108 +28,125 @@ public class Block {
 	private long nonce;
 	private int transactionsCount;
 	private List<Transaction> transactions;
-		
+
 	public Block() {
-		this.setVersion(Block.VERSION);
-		this.setHashPrevBlock(Block.HASH_PREV_BLOCK);
-		this.setHashMerkleRoot(Block.HASH_MERKLE_ROOT);
-		this.setTime(Block.TIME);
+		this.setVersion(VERSION);
+		this.setHashPrevBlock(HASH_PREV_BLOCK);
+		this.setHashMerkleRoot(HASH_MERKLE_ROOT);
+		this.setTime(TIME);
 		this.setBits(Block.BITS);
-		this.setNonce(Block.NONCE);
+		this.setNonce(NONCE);
 		
 		this.transactions = new ArrayList<>();
 		this.transactionsCount = this.transactions.size();
 	}
 
-	public int getVersion() {
-		return this.version;
-	}
+    public static byte[] getTargetThreshold(String bits) {
+        return ByteArray.convertFromString(bits);
+    }
 
-	public void setVersion(int version) {
-		this.version = version;
-	}
+    public int getVersion() {
+        return this.version;
+    }
 
-	public String getHashPrevBlock() {
-		return this.hashPrevBlock;
-	}
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
-	public void setHashPrevBlock(String hashPrevBlock) {
-		this.hashPrevBlock = hashPrevBlock;
-	}
+    public String getHashPrevBlock() {
+        return this.hashPrevBlock;
+    }
 
-	public String getHashMerkleRoot() {
-		return this.hashMerkleRoot;
-	}
+    public void setHashPrevBlock(String hashPrevBlock) {
+        this.hashPrevBlock = hashPrevBlock;
+    }
 
-	public void setHashMerkleRoot(String hashMerkleRoot) {
-		this.hashMerkleRoot = hashMerkleRoot;
-	}
+    public String getHashMerkleRoot() {
+        return this.hashMerkleRoot;
+    }
 
-	public long getTime() {
-		return this.time;
-	}
+    public void setHashMerkleRoot(String hashMerkleRoot) {
+        this.hashMerkleRoot = hashMerkleRoot;
+    }
 
-	public void setTime(long time) {
-		this.time = time;
-	}
+    public long getTime() {
+        return this.time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 
 	public String getBits() {
-		return this.bits;
+		String mantisse = bits.substring(2,8);
+		String exponent = bits.substring(0,2);
+		int expInt = Integer.parseInt(exponent, 16) - 3;
+		StringBuilder resultString = new StringBuilder();
+		resultString.append(mantisse);
+		for (int i = 0; i < expInt; i++){
+			resultString.append("0");
+		}
+		return resultString.toString();
 	}
 
 	public void setBits(String bits) {
-		this.bits = bits;
-	}
-
-	public long getNonce() {
-		return this.nonce;
-	}
-
-	public void setNonce(long nonce) {
-		this.nonce = nonce;
-	}
-
-	public int getTransactionsCount() {
-		return this.transactionsCount;
-	}
-
-	public List<Transaction> getTransactions() {
-		// [joeren]: return just a copy of the transaction list, because of
-		// potential effects with transactionsCount
-		if (this.transactions != null) {
-			return new ArrayList<Transaction>(this.transactions);
+		while (bits.charAt(0) == '0'){
+			bits = bits.substring(1, bits.length() - 1);
 		}
-		return null;
-	}
-
-	public void setTransactions(List<Transaction> transactions) {
-		this.transactions = transactions;
-		if (this.transactions == null) {
-			this.transactionsCount = 0;
-		} else {
-			this.transactionsCount = this.transactions.size();
+		String exponent = Integer.toHexString(bits.length() - 3);
+		if (exponent.length() < 2){
+			exponent = "0" + exponent;
 		}
+		String mantisse = bits.substring(0,6);
+		this.bits = exponent + mantisse;
 	}
 
-	public void addTransaction(Transaction transaction) {
-		if (this.transactions == null) {
-			this.transactions = new ArrayList<>();
-		}
-		this.transactions.add(transaction);
-		this.transactionsCount = this.transactions.size();
-	}
+    public long getNonce() {
+        return this.nonce;
+    }
 
-	public void addTransactions(Collection<Transaction> transactions) {
-		if (this.transactions == null) {
-			this.transactions = new ArrayList<>();
-		}
-		this.transactions.addAll(transactions);
-		this.transactionsCount = this.transactions.size();
-	}
+    public void setNonce(long nonce) {
+        this.nonce = nonce;
+    }
 
-	public byte[] hash() {
-		return Block.hash(this);
-	}
+    public int getTransactionsCount() {
+        return this.transactionsCount;
+    }
+
+    public List<Transaction> getTransactions() {
+        // [joeren]: return just a copy of the transaction list, because of
+        // potential effects with transactionsCount
+        if (this.transactions != null) {
+            return new ArrayList<Transaction>(this.transactions);
+        }
+        return null;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+        if (this.transactions == null) {
+            this.transactionsCount = 0;
+        } else {
+            this.transactionsCount = this.transactions.size();
+        }
+    }
+
+    public void addTransaction(Transaction transaction) {
+        if (this.transactions == null) {
+            this.transactions = new ArrayList<>();
+        }
+        this.transactions.add(transaction);
+        this.transactionsCount = this.transactions.size();
+    }
+
+    public void addTransactions(Collection<Transaction> transactions) {
+        if (this.transactions == null) {
+            this.transactions = new ArrayList<>();
+        }
+        this.transactions.addAll(transactions);
+        this.transactionsCount = this.transactions.size();
+    }
+
 
 	public static byte[] getTargetThreshold(String bits){
 		return ByteArray.convertFromString(bits);
@@ -196,8 +214,58 @@ public class Block {
 //		return expandedBits;
 //	}
 
+    public byte[] hash() {
+        return Block.hash(this);
+    }
 
-	public static byte[] hash(Block block) {
+    /*public MessageProtos.Block toProto() {
+        MessageProtos.Block.Builder builder = MessageProtos.Block.newBuilder();
+        builder.setBits(Integer.parseInt(getBits()));
+        builder.setVersion(getVersion());
+        builder.setMerkleRoot(getHashMerkleRoot());
+        builder.setPrevBlock(getHashPrevBlock());
+        builder.setNonce((int) getNonce());
+        builder.setTimestamp(getTime());
+        builder.setTxnCount(getTransactionsCount());
+        int index = 0;
+        transactions.forEach(tnx -> builder.setTxns(index, tnx.getApprovalsCount()));
+
+        return builder.build();
+    }*/
+    
+	public int rewardCalculator(){
+		
+		int newReward = ZERO;
+		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
+		
+		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
+		if(DEFAULT_REWARD == lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD;
+		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
+			newReward = lastApprovedEDUCoins + 2;
+		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD - 2;
+		}		
+
+		return newReward;
+	}
+	
+	private int findAllApprovedEDUCoins(){
+		
+		int latestApprovedEDUCoins = ZERO;
+		List<Transaction> latestTransactions = this.getTransactions();
+		
+		//TODO[Vitali] Might not be 100% correct???ß
+		for(Transaction transaction : latestTransactions){
+			List<Approval> approvals = transaction.getApprovals();
+			for(Approval approval : approvals){
+				latestApprovedEDUCoins += approval.getAmount();
+			}
+		}
+		
+		return latestApprovedEDUCoins;
+	}
+    public static byte[] hash(Block block) {
 		// specify used header fields (in byte arrays)
 		byte[] version = ByteArray.convertFromLong(block.version);
 		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
@@ -210,9 +278,36 @@ public class Block {
 		byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
 				bits, nonce);
 
+
 		// hash concatenated header fields and return
 		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
 		return hash;
 	}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Block block = (Block) o;
+
+        if (version != block.version) return false;
+        if (time != block.time) return false;
+        if (nonce != block.nonce) return false;
+        if (!hashPrevBlock.equals(block.hashPrevBlock)) return false;
+        if (!hashMerkleRoot.equals(block.hashMerkleRoot)) return false;
+        return bits.equals(block.bits);
+    }
+
+
+    @Override
+	public int hashCode() {
+		int result = version;
+		result = 31 * result + hashPrevBlock.hashCode();
+		result = 31 * result + hashMerkleRoot.hashCode();
+		result = 31 * result + (int) (time ^ (time >>> 32));
+		result = 31 * result + bits.hashCode();
+		result = 31 * result + (int) (nonce ^ (nonce >>> 32));
+		return result;
+	}
 }

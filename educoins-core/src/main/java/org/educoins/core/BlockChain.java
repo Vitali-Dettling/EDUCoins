@@ -1,19 +1,13 @@
 package org.educoins.core;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Deserializer;
-
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
@@ -24,10 +18,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private static final int SCALE_DECIMAL_LENGTH = 100;
 	private static final int HEX = 16;
 	private static final int RESET_BLOCKS_COUNT = 0;
+	private static final int DEFAULT_REWARD = 10;
+	private static final int ZERO = 0;
 
 	private int blockCounter;
 	private IBlockReceiver blockReceiver;
-	private IBlockTransmitter blockTransmitter;
 	private List<IBlockListener> blockListeners;
 	private ITransactionReceiver transactionReceiver;
 	private ITransactionTransmitter transactionTransmitter;
@@ -36,15 +31,15 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private Wallet wallet;
 	private Block newBlock;
 	private Verification verification;
+	private IBlockStore store;
 	
 	private String publicKey;
 
-	public BlockChain(IBlockReceiver blockReceiver, IBlockTransmitter blockTransmitter, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter) {
+	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
 		
 		this.wallet = new Wallet();
 		this.blockListeners = new ArrayList<>();
 		this.blockReceiver = blockReceiver;
-		this.blockTransmitter = blockTransmitter;
 		this.blockReceiver.addBlockListener(this);
 		this.transactionListeners = new ArrayList<>();
 		this.transactionReceiver = transactionReceiver;
@@ -52,6 +47,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.transactionReceiver.addTransactionListener(this);
 		this.transactions = new ArrayList<>();
 		this.verification = new Verification(this.wallet, this);
+		this.store = senderBlockStore;
 		
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
@@ -123,11 +119,12 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	@Override
 	public void foundPoW(Block block) {
-		this.blockTransmitter.transmitBlock(block);
+		this.store.put(block);
+		//this.blockTransmitter.transmitBlock(block);
+		this.blockReceiver.receiveBlocks();
 	}
 	
 	public Block prepareNewBlock(Block currentBlock) {
-		
 		this.newBlock = new Block();
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
@@ -181,7 +178,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
 			
 			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
-			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME), BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
+			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME),
+					BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
 			
 			this.newBlock.setBits(newDifficulty.toBigInteger().toString(HEX));			
 			this.newBlock.setTime(currentTime);
@@ -198,24 +196,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	//TODO [Vitali] Method needs to be deleted as soon as the DB will be introduced.
 	public Block getPreviousBlock(Block currentBlock) {
-		try {
-
-			String lastBlockName = currentBlock.getHashPrevBlock();
-
-			// TODO[Vitali] Der remoteStorage String ist nur für den Prototypen, sollte geändert werden sobal eine
-			// levelDB eingeführt wird!!!
-			String remoteStoragePath = System.getProperty("user.home") + File.separator + "documents" + File.separator
-					+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
-
-			return Deserializer.deserialize(remoteStoragePath, lastBlockName);
-			
-		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
-			System.out.println("ERROR: Class Verifier: " + e.getMessage());
-			e.printStackTrace();
-			return null;
-		}
-
+		return this.store.get(currentBlock);
 	}
-
 
 }
