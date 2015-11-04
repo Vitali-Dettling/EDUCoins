@@ -1,16 +1,10 @@
 package org.educoins.core;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Deserializer;
-
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 
 public class Verification {
 	
@@ -44,7 +38,7 @@ public class Verification {
 
 		// 1. Find the previous block.
 		Block lastBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
-
+		
 		// 2. Does the previous block exist?
 		if (lastBlock == null) {
 			return false;

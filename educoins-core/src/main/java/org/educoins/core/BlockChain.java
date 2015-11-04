@@ -18,8 +18,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private static final int SCALE_DECIMAL_LENGTH = 100;
 	private static final int HEX = 16;
 	private static final int RESET_BLOCKS_COUNT = 0;
-	private static final int DEFAULT_REWARD = 10;
-	private static final int ZERO = 0;
 
 	private int blockCounter;
 	private IBlockReceiver blockReceiver;
@@ -159,7 +157,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		CoinbaseTransaction transaction = new CoinbaseTransaction(); 
 		transaction.addOutput(output);
 		return transaction;
-	}
+	}	
 	
 	/**
 	 * Bitcoin explanation: Mastering Bitcoin 195
