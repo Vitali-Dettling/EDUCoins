@@ -18,8 +18,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private static final int SCALE_DECIMAL_LENGTH = 100;
 	private static final int HEX = 16;
 	private static final int RESET_BLOCKS_COUNT = 0;
-	private static final int DEFAULT_REWARD = 10;
-	private static final int ZERO = 0;
 
 	private int blockCounter;
 	private IBlockReceiver blockReceiver;
@@ -153,49 +151,13 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		String lockingScript = publicKey;		
 		
 		//Input is empty because it is a coinbase transaction.
-		int newReward = rewardCalculator(currentBlock);
+		int newReward = currentBlock.rewardCalculator();
 		Output output = new Output(newReward, publicKey, lockingScript);
 		
 		CoinbaseTransaction transaction = new CoinbaseTransaction(); 
 		transaction.addOutput(output);
 		return transaction;
 	}
-	
-	
-	private int rewardCalculator(Block currentBlock){
-		
-		int newReward = ZERO;
-		int lastApprovedEDUCoins = findAllApprovedEDUCoins(currentBlock);
-		
-		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
-		if(DEFAULT_REWARD == lastApprovedEDUCoins){
-			newReward = DEFAULT_REWARD;
-		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
-			newReward = lastApprovedEDUCoins + 2;
-		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
-			newReward = DEFAULT_REWARD - 2;
-		}		
-
-		return newReward;
-	}
-		
-	
-	private int findAllApprovedEDUCoins(Block currentBlock){
-		
-		int latestApprovedEDUCoins = ZERO;
-		List<Transaction> latestTransactions = currentBlock.getTransactions();
-		
-		//TODO[Vitali] Might not be 100% correct???ß
-		for(Transaction transaction : latestTransactions){
-			List<Approval> approvals = transaction.getApprovals();
-			for(Approval approval : approvals){
-				latestApprovedEDUCoins += approval.getAmount();
-			}
-		}
-		
-		return latestApprovedEDUCoins;
-	}
-	
 	
 	/**
 	 * Bitcoin explanation: Mastering Bitcoin 195
