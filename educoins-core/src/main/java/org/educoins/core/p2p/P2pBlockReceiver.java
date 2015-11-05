@@ -9,7 +9,10 @@ import org.educoins.core.p2p.discovery.DiscoveryStrategy;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,6 +23,8 @@ import java.util.Set;
  * Created by typus on 10/27/15.
  */
 public class P2pBlockReceiver implements IBlockReceiver {
+
+    private final Logger logger = LoggerFactory.getLogger(P2pBlockReceiver.class);
 
     private final IBlockStore blockStore;
     private final Set<IBlockListener> blockListeners = new HashSet<>();
@@ -43,13 +48,20 @@ public class P2pBlockReceiver implements IBlockReceiver {
 
     @Override
     public void receiveBlocks() {
+        logger.info("Fetching blocks.");
         Collection<Block> blockList = new ArrayList<>();
 
         try {
 
             //only FullPeers are allowed to change data also they are the only Peers to provide block data.
             for (Peer peer : discovery.getFullPeers()) {
-                mergeBlocks(peer.getBlocks(), blockList);
+                try {
+
+                    mergeBlocks(peer.getBlocks(), blockList);
+
+                } catch (IOException e) {
+                    logger.warn("One of the peers retrieved via discovery did not respond properly", e);
+                }
             }
 
             blockList.forEach(block -> {
@@ -58,8 +70,7 @@ public class P2pBlockReceiver implements IBlockReceiver {
             });
 
         } catch (DiscoveryException e) {
-            //TODO: catch or throw?
-            e.printStackTrace();
+            logger.error("Peer discovery failed! We are now in an invalid state!", e);
         }
 
     }

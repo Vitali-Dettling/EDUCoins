@@ -3,7 +3,6 @@ package org.educoins.core.store;
 import com.google.gson.Gson;
 import com.sun.istack.internal.Nullable;
 import org.educoins.core.Block;
-import org.educoins.core.utils.ByteArray;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
@@ -21,8 +20,9 @@ import java.io.IOException;
 public class LevelDbBlockStore implements IBlockStore {
 
     private final byte[] LATEST_KEY = "latest".getBytes();
-
     private final File path;
+
+    private byte[] genesisHash = null;
 
     private DB database;
     private byte[] latest;
@@ -54,11 +54,14 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     public synchronized void put(@NotNull Block block) {
-//        TODO: would be a lot nicer?! byte[] key = Block.hash(block);
-        byte[] key = ByteArray.convertToString(block.hash(), 16).getBytes();
+        byte[] hash = block.hash();
+        if (genesisHash == null) {
+            genesisHash = hash;
+        }
+//        byte[] key = ByteArray.convertToString(block.hash(), 16).getBytes();
 
-        database.put(key, getJson(block).getBytes());
-        latest = key;
+        database.put(hash, getJson(block).getBytes());
+        latest = block.hash();
         database.put(LATEST_KEY, latest);
     }
 
@@ -104,7 +107,7 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     public IBlockIterator iterator() {
-        return new BlockIterator(this);
+        return new BlockIterator(this, genesisHash);
     }
 
     private String getJson(Block block) {

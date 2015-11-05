@@ -1,6 +1,10 @@
 package org.educoins.core.p2p.discovery;
 
-import org.educoins.core.p2p.peers.*;
+import org.educoins.core.p2p.peers.FullPeer;
+import org.educoins.core.p2p.peers.Peer;
+import org.educoins.core.p2p.peers.ReadOnlyPeer;
+import org.educoins.core.p2p.peers.remote.HttpNode;
+import org.educoins.core.p2p.peers.remote.RemoteNode;
 import org.educoins.core.utils.RestClient;
 
 import java.io.IOException;

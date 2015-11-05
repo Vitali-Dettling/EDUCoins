@@ -2,7 +2,6 @@ package org.educoins.core.store;
 
 import org.educoins.core.Block;
 import org.educoins.core.Transaction;
-import org.fusesource.leveldbjni.JniDBFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,8 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Default test for {@link LevelDbBlockStore}
@@ -22,22 +20,24 @@ public class LevelDbBlockStoreTest {
 
     public static final File DIRECTORY = new File("/tmp/blockstore");
     private IBlockStore store;
-    private Block block;
 
     @Before
     public void setup() {
-        store = new LevelDbBlockStore(DIRECTORY);
+        try {
+            store = new LevelDbBlockStore(DIRECTORY);
+        } catch (BlockStoreException e) {
+            fail();
+        }
 
-        block = new Block();
-        block.setBits("0101010101010111101");
-        block.setHashMerkleRoot("01234125125");
-        block.setNonce(12314);
-        block.setVersion(2);
     }
 
     @After
     public void tearDown() {
-        store.destroy();
+        try {
+            store.destroy();
+        } catch (BlockStoreException e) {
+            throw new IllegalStateException("Db could not be deleted!");
+        }
         boolean delete = deleteDir(DIRECTORY);
 
         if (!delete)
@@ -51,7 +51,7 @@ public class LevelDbBlockStoreTest {
 
         fillRandom();
 
-        Block actual = store.get(Block.hash(b1));
+        Block actual = store.get(b1.hash());
         byte[] expected = Block.hash(b1);
         byte[] actualBytes = Block.hash(actual);
 
@@ -60,6 +60,20 @@ public class LevelDbBlockStoreTest {
         for (int i = 0; i < expected.length; i++) {
             assertEquals(expected[i], actualBytes[i]);
         }
+    }
+
+    @Test
+    public void testIterator() throws BlockNotFoundException {
+        fillRandomTree();
+
+        int itemCount = 1;
+        IBlockIterator iterator = store.iterator();
+        while (iterator.hasNext()) {
+            iterator.next();
+            itemCount++;
+        }
+
+        assertTrue(itemCount == 23);
     }
 
     @Test
@@ -76,6 +90,7 @@ public class LevelDbBlockStoreTest {
         store.put(b1);
 
         Block b2 = store.get(Block.hash(b1));
+        assert b2 != null;
         assertEquals(1, b2.getTransactionsCount());
 
         Transaction persisted = b2.getTransactions().get(0);
@@ -111,12 +126,30 @@ public class LevelDbBlockStoreTest {
         }
     }
 
+    private void fillRandomTree() {
+        Block previous = getRandomBlock();
+        for (int i = 0; i < 23; i++) {
+            previous = getRandomBlock(previous);
+            store.put(previous);
+        }
+    }
+
+    private Block getRandomBlock(Block block) {
+        Block toReturn = new Block();
+        toReturn.setHashPrevBlock(block.hash());
+        toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
+        toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
+        toReturn.setBits((int) (Math.random() * Integer.MAX_VALUE) + "");
+        toReturn.setHashMerkleRoot(((Math.random() * Integer.MAX_VALUE) + "").getBytes());
+        return toReturn;
+    }
+
     private Block getRandomBlock() {
         Block toReturn = new Block();
         toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setBits((int) (Math.random() * Integer.MAX_VALUE) + "");
-        toReturn.setHashMerkleRoot((int) (Math.random() * Integer.MAX_VALUE) + "");
+        toReturn.setHashMerkleRoot(((Math.random() * Integer.MAX_VALUE) + "").getBytes());
         return toReturn;
     }
 

@@ -1,7 +1,9 @@
 package org.educoins.core.p2p.peers;
 
 import org.educoins.core.Block;
+import org.educoins.core.p2p.peers.remote.RemoteNode;
 
+import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -16,7 +18,7 @@ public abstract class Peer {
         this.remoteNode = remoteNode;
     }
 
-    public Collection<Block> getBlocks() {
+    public Collection<Block> getBlocks() throws IOException {
         return remoteNode.getBlocks();
     }
 

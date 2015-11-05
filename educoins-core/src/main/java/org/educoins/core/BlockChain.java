@@ -1,19 +1,18 @@
 package org.educoins.core;
 
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import org.educoins.core.Input.EInputUnlockingScript;
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Deserializer;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Deserializer;
-
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
@@ -102,8 +101,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 	
 	public void notifyTransactionReceived(Transaction transaction) {
-		for (int i = 0; i < this.transactionListeners.size(); i++) {
-			ITransactionListener listener = this.transactionListeners.get(i);
+		for (ITransactionListener listener : this.transactionListeners) {
 			listener.transactionReceived(transaction);
 		}
 	}
@@ -136,7 +134,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
 		this.newBlock.setVersion(currentBlock.getVersion());
-		this.newBlock.setHashPrevBlock(ByteArray.convertToString(currentBlock.hash(), 16));
+		this.newBlock.setHashPrevBlock(currentBlock.hash());
 		// TODO [joeren]: calculate hash merkle root! Temporary take the
 		// hash merkle root of the previous block.
 		this.newBlock.setHashMerkleRoot(currentBlock.getHashMerkleRoot());
@@ -254,7 +252,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		// 3. Are the hashes equal of the current block and the previous one?
 		byte[] testBlockHash = toVerifyBlock.hash();
-		byte[] lastBlockHash = lastBlock.getHashPrevBlock().getBytes();
+		byte[] lastBlockHash = lastBlock.getHashPrevBlock();
 		if (ByteArray.compare(testBlockHash, lastBlockHash) == COMPARE_EQUAL) {
 			return false;
 		}
@@ -522,14 +520,14 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private Block getPreviousBlock(Block currentBlock) {
 		try {
 
-			String lastBlockName = currentBlock.getHashPrevBlock();
+			byte[] lastBlockName = currentBlock.getHashPrevBlock();
 
 			// TODO[Vitali] Der remoteStorage String ist nur für den Prototypen, sollte geändert werden sobald eine
 			// levelDB eingeführt wird!!!
 			String remoteStoragePath = System.getProperty("user.home") + File.separator + "documents" + File.separator
 					+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
 
-			return Deserializer.deserialize(remoteStoragePath, lastBlockName);
+			return Deserializer.deserialize(remoteStoragePath, ByteArray.convertToString(lastBlockName));
 			
 		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
 			System.out.println("ERROR: Class Verifier: " + e.getMessage());
