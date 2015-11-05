@@ -47,7 +47,7 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     private synchronized void tryOpen(File directory, DBFactory dbFactory, Options options)
-            throws IOException, BlockStoreException {
+            throws IOException {
         database = dbFactory.open(directory, options);
     }
 
@@ -100,6 +100,11 @@ public class LevelDbBlockStore implements IBlockStore {
         } catch (IOException e) {
             throw new BlockStoreException(e);
         }
+    }
+
+    @Override
+    public IBlockIterator iterator() {
+        return new BlockIterator(this);
     }
 
     private String getJson(Block block) {

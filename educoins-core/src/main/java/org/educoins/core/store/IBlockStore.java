@@ -13,7 +13,6 @@ public interface IBlockStore {
      * Save a {@link Block} in the IBlockStore. This put-action is also used to update a block.
      *
      * @param block the {@link Block} to store.
-     * @throws BlockStoreException whenever something goes wrong.
      */
     void put(@NotNull Block block);
 
@@ -22,20 +21,16 @@ public interface IBlockStore {
      *
      * @param hash the identification for the {@link Block}
      * @return the Block if found.
-     * @throws BlockStoreException
      * @throws BlockNotFoundException if the {@link Block} could not be found.
      */
-    @Nullable
-    Block get(byte[] hash) throws BlockNotFoundException;
+    @Nullable Block get(byte[] hash) throws BlockNotFoundException;
 
     /**
      * Retrieves the latest {@link Block} stored in the {@link IBlockStore}. Or Null if there is none.
      *
      * @return the latest Block.
-     * @throws BlockStoreException
      */
-    @Nullable
-    Block getLatest();
+    @Nullable Block getLatest();
 
     /**
      * Closes the Store.
@@ -43,4 +38,11 @@ public interface IBlockStore {
      * @throws BlockStoreException
      */
     void destroy() throws BlockStoreException;
+
+    /**
+     * Initializes an {@link IBlockIterator} pointing to the latest {@link Block} stored in the {@link IBlockStore}.
+     *
+     * @return the initialized {@link IBlockIterator}.
+     */
+    IBlockIterator iterator();
 }

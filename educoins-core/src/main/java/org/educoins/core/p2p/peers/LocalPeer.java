@@ -2,6 +2,7 @@ package org.educoins.core.p2p.peers;
 
 import org.educoins.core.Block;
 import org.educoins.core.store.BlockNotFoundException;
+import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
 
 import java.util.ArrayList;
@@ -24,13 +25,13 @@ public class LocalPeer extends Peer {
     public Collection<Block> getBlocks() {
         Collection<Block> allBlocks = new ArrayList<>();
 
-        Block anchorBlock = blockStore.getLatest();
-        while (anchorBlock != null) {
-            allBlocks.add(anchorBlock);
+        IBlockIterator iterator = blockStore.iterator();
+
+        while (iterator.hasNext()) {
             try {
-                anchorBlock = blockStore.get(anchorBlock.getHashPrevBlock().getBytes());
-            } catch (BlockNotFoundException ex) {
-                anchorBlock = null;
+                allBlocks.add(iterator.next());
+            } catch (BlockNotFoundException e) {
+                //TODO: errorhandling
             }
         }
 
