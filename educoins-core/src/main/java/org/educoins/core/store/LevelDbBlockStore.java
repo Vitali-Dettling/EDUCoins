@@ -1,7 +1,6 @@
 package org.educoins.core.store;
 
 import com.google.gson.Gson;
-import com.sun.istack.internal.Nullable;
 import org.educoins.core.Block;
 import org.educoins.core.utils.ByteArray;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -10,6 +9,7 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
