@@ -1,9 +1,18 @@
 package org.educoins.core.store;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.educoins.core.Block;
 import org.educoins.core.Transaction;
 import org.educoins.core.utils.ByteArray;
-import org.fusesource.leveldbjni.JniDBFactory;
+import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.utils.ByteArray;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +61,7 @@ public class LevelDbBlockStoreTest {
 
         fillRandom();
 
-        Block actual = store.get(Block.hash(b1));
+        Block actual = store.get(ByteArray.convertToString(b1.hash(), 16).getBytes());
         byte[] expected = Block.hash(b1);
         byte[] actualBytes = Block.hash(actual);
 
@@ -76,7 +85,7 @@ public class LevelDbBlockStoreTest {
 
         store.put(b1);
 
-        Block b2 = store.get(Block.hash(b1));
+        Block b2 = store.get(ByteArray.convertToString(b1.hash(), 16).getBytes());
         assertEquals(1, b2.getTransactionsCount());
 
         Transaction persisted = b2.getTransactions().get(0);
