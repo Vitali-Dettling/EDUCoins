@@ -59,6 +59,14 @@
             <artifactId>jetty-servlet</artifactId>
             <version>9.3.5.v20151012</version>
         </dependency>
+
+        <!--Google Guava-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        
         <!--TESTING-->
         <dependency>
             <groupId>org.mockito</groupId>
