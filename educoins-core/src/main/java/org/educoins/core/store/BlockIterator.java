@@ -16,7 +16,7 @@ public class BlockIterator implements IBlockIterator {
     private final byte[] genesisHash;
     private Block currentElement;
 
-    public BlockIterator(IBlockStore blockStore, byte[] genesisHash) {
+    public BlockIterator(@NotNull IBlockStore blockStore, @NotNull byte[] genesisHash) {
         this.blockStore = blockStore;
         this.genesisHash = genesisHash;
         currentElement = blockStore.getLatest();

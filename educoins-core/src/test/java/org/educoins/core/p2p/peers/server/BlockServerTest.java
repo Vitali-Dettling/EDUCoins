@@ -3,30 +3,38 @@ package org.educoins.core.p2p.peers.server;
 import org.educoins.core.Block;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockStore;
-import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.testutils.BlockStoreFactory;
 import org.educoins.core.utils.IO;
+import org.educoins.core.utils.RestClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
+import java.net.URI;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
+ * Tests the {@link BlockServer}.
  * Created by typus on 11/5/15.
  */
 public class BlockServerTest {
 
-    private IBlockStore store;
-    private String DIRECTORY;
+    protected IBlockStore store;
+    protected RestClient<Block[]> restClient;
+    protected int port = 8090;
+    protected String blocksResourcePath = "http://localhost:" + port + BlockServer.BLOCKS_RESOURCE_PATH;
+    protected String blockHeadersResourcePath = "http://localhost:" + port + BlockServer.BLOCK_HEADERS_RESOURCE_PATH;
+    protected BlockServer server;
 
     @Before
     public void setup() {
         try {
-            DIRECTORY = "/tmp/blocks";
-            store = new LevelDbBlockStore(new File(DIRECTORY));
+            store = BlockStoreFactory.getBlockStore();
+            BlockStoreFactory.fillRandomTree(store);
+            restClient = new RestClient<>();
+            server = new BlockServer(store, port);
         } catch (BlockStoreException e) {
             fail();
         }
@@ -40,38 +48,15 @@ public class BlockServerTest {
         } catch (BlockStoreException e) {
             throw new IllegalStateException("Db could not be deleted!");
         }
-        boolean delete = false;
-        try {
-            IO.deleteDirectory(DIRECTORY);
-        } catch (IOException e) {
+        if (!IO.deleteDefaultBlockStoreFile())
             throw new IllegalStateException("Db could not be deleted!");
-        }
     }
 
     @Test
     public void testStart() throws Exception {
-        fillRandomTree(store);
-        BlockServer server = new BlockServer(store, 8090);
         server.start();
-        server.join();
-    }
-
-    private void fillRandomTree(IBlockStore store) {
-        Block previous = getRandomBlock(null);
-        for (int i = 0; i < 23; i++) {
-            previous = getRandomBlock(previous);
-            store.put(previous);
-        }
-    }
-
-    private Block getRandomBlock(Block block) {
-        Block toReturn = new Block();
-        if (block != null)
-            toReturn.setHashPrevBlock(block.hash());
-        toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
-        toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
-        toReturn.setBits((int) (Math.random() * Integer.MAX_VALUE) + "");
-        toReturn.setHashMerkleRoot(((Math.random() * Integer.MAX_VALUE) + "").getBytes());
-        return toReturn;
+        assertNotNull(restClient.get(URI.create(blocksResourcePath), Block[].class));
+        assertNotNull(restClient.get(URI.create(blockHeadersResourcePath), Block[].class));
+        server.stop();
     }
 }
