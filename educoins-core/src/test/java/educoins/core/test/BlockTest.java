@@ -1,5 +1,4 @@
 package educoins.core.test;
-import junit.framework.TestCase;
 import org.educoins.core.utils.ByteArray;
 import org.junit.*;
 import org.educoins.core.*;
@@ -64,6 +63,15 @@ public class BlockTest{
     public void BitsGetter3Test(){
         byte[] input = ByteArray.convertFromString("fffffffffffffffffff");
         byte[] expec = ByteArray.convertFromString("fffff00000000000000");
+        Block b = new Block();
+        b.setBits(input);
+        Assert.assertArrayEquals(expec, b.getBits());
+    }
+    
+    @Test
+    public void BitsGetter4Test(){
+        byte[] input = ByteArray.convertFromString("1bc330123456789abcde");
+        byte[] expec = ByteArray.convertFromString("1bc33000000000000000");
         Block b = new Block();
         b.setBits(input);
         Assert.assertArrayEquals(expec, b.getBits());

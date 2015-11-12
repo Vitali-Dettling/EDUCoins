@@ -90,11 +90,9 @@ public class Block {
         byte[] exponent = new byte[1];
 
         int i = 0;
-        for (i = 0; bits[i] == (byte) 0; i++);
+        for (i = 0; bits[i] == (byte) 0; i++); //count leading 0
 
         exponent[0] = (byte) ((bits.length - i) * 2 - 3);
-
-
         mantisse = Arrays.copyOfRange(bits, i, i + 3);
 
         this.bits = ByteArray.concatByteArrays(exponent, mantisse);

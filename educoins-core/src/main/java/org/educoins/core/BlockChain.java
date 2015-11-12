@@ -529,7 +529,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			String remoteStoragePath = System.getProperty("user.home") + File.separator + "documents" + File.separator
 					+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
 
-			return Deserializer.deserialize(remoteStoragePath, ByteArray.convertToString(lastBlockName));
+			return Deserializer.deserialize(remoteStoragePath, lastBlockName);
 			
 		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
 			System.out.println("ERROR: Class Verifier: " + e.getMessage());
