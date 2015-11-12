@@ -4,6 +4,8 @@ import org.educoins.core.Block;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
  */
 public class LocalNode extends RemoteNode {
 
+    private final Logger logger = LoggerFactory.getLogger(LocalNode.class);
     private final IBlockStore blockStore;
 
     public LocalNode(IBlockStore blockStore) {
@@ -37,7 +40,7 @@ public class LocalNode extends RemoteNode {
             try {
                 allBlocks.add(iterator.next());
             } catch (BlockNotFoundException e) {
-                //TODO: errorhandling
+                logger.error("Error while storing blocks!", e);
             }
         }
 

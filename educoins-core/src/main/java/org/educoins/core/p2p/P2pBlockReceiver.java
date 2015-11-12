@@ -38,11 +38,13 @@ public class P2pBlockReceiver implements IBlockReceiver {
 
     @Override
     public void addBlockListener(IBlockListener blockListener) {
+        logger.debug("adding bocklistener: " + blockListener.getClass().getName());
         this.blockListeners.add(blockListener);
     }
 
     @Override
     public void removeBlockListener(IBlockListener blockListener) {
+        logger.debug("removing bocklistener: " + blockListener.getClass().getName());
         this.blockListeners.remove(blockListener);
     }
 
