@@ -92,7 +92,7 @@ public class Block {
         int i = 0;
         for (i = 0; bits[i] == (byte) 0; i++);
 
-        exponent[0] = (byte) ((bits.length - i) * 2 - 6);
+        exponent[0] = (byte) ((bits.length - i) * 2 - 3);
 
 
         mantisse = Arrays.copyOfRange(bits, i, i + 3);

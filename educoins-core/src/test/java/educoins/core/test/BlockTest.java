@@ -53,7 +53,7 @@ public class BlockTest{
     @Test
     public void BitsGetter2Test(){
         byte[] input = ByteArray.convertFromString("7420dffffffffff");
-        byte[] expec = ByteArray.convertFromString("7420df000000000");
+        byte[] expec = ByteArray.convertFromString("7420d0000000000");
         Block b = new Block();
         b.setBits(input);
         byte[] bits = b.getBits();
@@ -63,7 +63,7 @@ public class BlockTest{
     @Test
     public void BitsGetter3Test(){
         byte[] input = ByteArray.convertFromString("fffffffffffffffffff");
-        byte[] expec = ByteArray.convertFromString("ffffff0000000000000");
+        byte[] expec = ByteArray.convertFromString("fffff00000000000000");
         Block b = new Block();
         b.setBits(input);
         Assert.assertArrayEquals(expec, b.getBits());
