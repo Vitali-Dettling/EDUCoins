@@ -32,4 +32,19 @@ public abstract class Peer {
     public void setRemoteNode(@NotNull RemoteNode remoteNode) {
         this.remoteNode = remoteNode;
     }
+
+    @Override
+    public int hashCode() {
+        return remoteNode != null ? remoteNode.hashCode() : 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Peer peer = (Peer) o;
+
+        return !(remoteNode != null ? !remoteNode.equals(peer.remoteNode) : peer.remoteNode != null);
+    }
 }

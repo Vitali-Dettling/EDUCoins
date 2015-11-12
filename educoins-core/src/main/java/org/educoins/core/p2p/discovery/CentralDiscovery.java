@@ -18,6 +18,7 @@ import java.util.*;
 public class CentralDiscovery implements DiscoveryStrategy {
 
     private String centralUrl;
+    private RestClient<RemoteNode[]> client;
 
     public CentralDiscovery(@NotNull String centralUrl) {
         this.centralUrl = centralUrl;
@@ -28,8 +29,9 @@ public class CentralDiscovery implements DiscoveryStrategy {
     public Collection<Peer> getFullPeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();
-            RemoteNode[] nodes = new RestClient<RemoteNode[]>()
+            RemoteNode[] nodes = client
                     .get(new URI(centralUrl + "/nodes/full"), HttpNode[].class);
+            if (nodes == null) return peers;
 
             for (RemoteNode node : nodes) {
                 peers.add(new FullPeer(node));
@@ -46,8 +48,9 @@ public class CentralDiscovery implements DiscoveryStrategy {
     public Collection<Peer> getReadOnlyPeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();
-            RemoteNode[] nodes = new RestClient<RemoteNode[]>()
+            RemoteNode[] nodes = client
                     .get(new URI(centralUrl + "/nodes/read-only"), HttpNode[].class);
+            if (nodes == null) return peers;
 
             for (RemoteNode node : nodes) {
                 peers.add(new ReadOnlyPeer(node));

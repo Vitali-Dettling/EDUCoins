@@ -4,10 +4,7 @@ import com.google.gson.Gson;
 import com.sun.istack.internal.Nullable;
 import org.educoins.core.Block;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBException;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.Options;
+import org.iq80.leveldb.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -20,7 +17,6 @@ import java.io.IOException;
 public class LevelDbBlockStore implements IBlockStore {
 
     private final byte[] LATEST_KEY = "latest".getBytes();
-    private final File path;
 
     private byte[] genesisHash = null;
 
@@ -30,7 +26,7 @@ public class LevelDbBlockStore implements IBlockStore {
     public LevelDbBlockStore(File directory) throws BlockStoreException {
         DBFactory dbFactory = JniDBFactory.factory;
 
-        this.path = directory;
+        File path = directory;
         Options options = new Options();
         options.createIfMissing();
 
@@ -89,13 +85,6 @@ public class LevelDbBlockStore implements IBlockStore {
         }
     }
 
-    private boolean isEmpty() {
-        if (latest == null)
-            latest = database.get(LATEST_KEY);
-
-        return latest == null;
-    }
-
     @Override
     public void destroy() throws BlockStoreException {
         try {
@@ -108,6 +97,13 @@ public class LevelDbBlockStore implements IBlockStore {
     @Override
     public IBlockIterator iterator() {
         return new BlockIterator(this, genesisHash);
+    }
+
+    private boolean isEmpty() {
+        if (latest == null)
+            latest = database.get(LATEST_KEY);
+
+        return latest == null;
     }
 
     private String getJson(Block block) {

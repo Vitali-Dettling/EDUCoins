@@ -59,6 +59,11 @@
             <artifactId>jetty-servlet</artifactId>
             <version>9.3.5.v20151012</version>
         </dependency>
-
+        <!--TESTING-->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+        </dependency>
     </dependencies>
 </project>
