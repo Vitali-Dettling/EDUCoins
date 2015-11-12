@@ -62,7 +62,7 @@ public class Miner implements IBlockListener {
 			
 			SecureRandom nonceGenerator = new SecureRandom();
 			byte[] nonce = new byte[BIT32];
-			byte[] targetThreshold = Block.getTargetThreshold(this.block.getBits());
+			byte[] targetThreshold = this.block.getBits();
 			byte[] challenge;
 			byte[] challengePositive;
 			

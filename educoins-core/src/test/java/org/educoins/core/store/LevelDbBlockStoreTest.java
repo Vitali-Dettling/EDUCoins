@@ -2,6 +2,7 @@ package org.educoins.core.store;
 
 import org.educoins.core.Block;
 import org.educoins.core.Transaction;
+import org.educoins.core.utils.ByteArray;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -29,8 +30,8 @@ public class LevelDbBlockStoreTest {
         store = new LevelDbBlockStore(DIRECTORY);
 
         block = new Block();
-        block.setBits("0101010101010111101");
-        block.setHashMerkleRoot("01234125125");
+        block.setBits(ByteArray.convertFromString("0101010101010111101"));
+        block.setHashMerkleRoot(ByteArray.convertFromString("01234125125"));
         block.setNonce(12314);
         block.setVersion(2);
     }
@@ -115,8 +116,8 @@ public class LevelDbBlockStoreTest {
         Block toReturn = new Block();
         toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
-        toReturn.setBits((int) (Math.random() * Integer.MAX_VALUE) + "");
-        toReturn.setHashMerkleRoot((int) (Math.random() * Integer.MAX_VALUE) + "");
+        toReturn.setBits(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE)));
+        toReturn.setHashMerkleRoot(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE)));
         return toReturn;
     }
 

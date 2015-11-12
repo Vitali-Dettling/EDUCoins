@@ -136,7 +136,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
 		this.newBlock.setVersion(currentBlock.getVersion());
-		this.newBlock.setHashPrevBlock(ByteArray.convertToString(currentBlock.hash(), 16));
+		this.newBlock.setHashPrevBlock(currentBlock.hash());
 		// TODO [joeren]: calculate hash merkle root! Temporary take the
 		// hash merkle root of the previous block.
 		this.newBlock.setHashMerkleRoot(currentBlock.getHashMerkleRoot());
@@ -217,14 +217,14 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		if(this.blockCounter == CHECK_AFTER_BLOCKS){
 			long currentTime = System.currentTimeMillis();
 			long allBlocksSinceLastTime = previousBlock.getTime();
-			BigDecimal oldDifficulty = new BigDecimal(new BigInteger(previousBlock.getBits(), HEX)).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
+			BigDecimal oldDifficulty = new BigDecimal(new BigInteger(previousBlock.getBits())).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
 			BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
 			
 			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME),
 					BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
 			
-			this.newBlock.setBits(newDifficulty.toBigInteger().toString(HEX));			
+			this.newBlock.setBits(newDifficulty.toBigInteger().toByteArray());
 			this.newBlock.setTime(currentTime);
 			this.blockCounter = RESET_BLOCKS_COUNT;
 		}
@@ -254,7 +254,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		// 3. Are the hashes equal of the current block and the previous one?
 		byte[] testBlockHash = toVerifyBlock.hash();
-		byte[] lastBlockHash = lastBlock.getHashPrevBlock().getBytes();
+		byte[] lastBlockHash = lastBlock.getHashPrevBlock();
 		if (ByteArray.compare(testBlockHash, lastBlockHash) == COMPARE_EQUAL) {
 			return false;
 		}
@@ -522,14 +522,14 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private Block getPreviousBlock(Block currentBlock) {
 		try {
 
-			String lastBlockName = currentBlock.getHashPrevBlock();
+			byte[] lastBlockName = currentBlock.getHashPrevBlock();
 
 			// TODO[Vitali] Der remoteStorage String ist nur für den Prototypen, sollte geändert werden sobald eine
 			// levelDB eingeführt wird!!!
 			String remoteStoragePath = System.getProperty("user.home") + File.separator + "documents" + File.separator
 					+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
 
-			return Deserializer.deserialize(remoteStoragePath, lastBlockName);
+			return Deserializer.deserialize(remoteStoragePath, ByteArray.convertToString(lastBlockName));
 			
 		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
 			System.out.println("ERROR: Class Verifier: " + e.getMessage());
