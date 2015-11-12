@@ -1,22 +1,17 @@
 package org.educoins.core.p2p;
 
-import com.sun.istack.internal.NotNull;
-import org.educoins.core.Block;
-import org.educoins.core.IBlockListener;
-import org.educoins.core.IBlockReceiver;
+import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.p2p.discovery.DiscoveryStrategy;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The P2p specific implementation of an {@link IBlockReceiver}.
@@ -37,13 +32,13 @@ public class P2pBlockReceiver implements IBlockReceiver {
     }
 
     @Override
-    public void addBlockListener(IBlockListener blockListener) {
+    public void addBlockListener(@NotNull IBlockListener blockListener) {
         logger.debug("adding bocklistener: " + blockListener.getClass().getName());
         this.blockListeners.add(blockListener);
     }
 
     @Override
-    public void removeBlockListener(IBlockListener blockListener) {
+    public void removeBlockListener(@NotNull IBlockListener blockListener) {
         logger.debug("removing bocklistener: " + blockListener.getClass().getName());
         this.blockListeners.remove(blockListener);
     }
@@ -78,7 +73,7 @@ public class P2pBlockReceiver implements IBlockReceiver {
     }
 
 
-    private void mergeBlocks(Collection<Block> newBlocks, Collection<Block> globalBlocks) {
+    private void mergeBlocks(@NotNull Collection<Block> newBlocks, @NotNull Collection<Block> globalBlocks) {
         //TODO: replace this by meaningful branching/merging logic.
         globalBlocks.addAll(newBlocks);
     }

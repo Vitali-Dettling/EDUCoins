@@ -2,6 +2,7 @@ package org.educoins.core.p2p.peers;
 
 import org.educoins.core.Block;
 import org.educoins.core.p2p.peers.remote.RemoteNode;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -14,19 +15,21 @@ public abstract class Peer {
 
     protected RemoteNode remoteNode;
 
-    public Peer(RemoteNode remoteNode) {
+    public Peer(@NotNull RemoteNode remoteNode) {
         this.remoteNode = remoteNode;
     }
 
+    @NotNull
     public Collection<Block> getBlocks() throws IOException {
         return remoteNode.getBlocks();
     }
 
+    @NotNull
     public RemoteNode getRemoteNode() {
         return remoteNode;
     }
 
-    public void setRemoteNode(RemoteNode remoteNode) {
+    public void setRemoteNode(@NotNull RemoteNode remoteNode) {
         this.remoteNode = remoteNode;
     }
 }

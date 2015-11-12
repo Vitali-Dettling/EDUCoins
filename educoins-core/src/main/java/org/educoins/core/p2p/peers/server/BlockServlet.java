@@ -1,18 +1,14 @@
 package org.educoins.core.p2p.peers.server;
 
 import com.google.gson.Gson;
-import com.sun.istack.internal.NotNull;
 import org.educoins.core.Block;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.*;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +28,7 @@ public class BlockServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(@NotNull HttpServletRequest req, @NotNull HttpServletResponse resp) throws ServletException, IOException {
         logger.info("Received request: {} {}", req.getMethod(), req.getRequestURI());
         resp.setContentType(BlockServer.contentType);
         resp.setStatus(HttpServletResponse.SC_OK);

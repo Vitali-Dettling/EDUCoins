@@ -1,6 +1,7 @@
 package org.educoins.core.p2p.discovery;
 
 import org.educoins.core.p2p.peers.Peer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
@@ -16,7 +17,7 @@ public interface DiscoveryStrategy {
      * @return a {@link Collection} of {@link org.educoins.core.p2p.peers.FullPeer}s.
      * @throws DiscoveryException whenever the discovery failed.
      */
-    Collection<Peer> getFullPeers() throws DiscoveryException;
+    @NotNull Collection<Peer> getFullPeers() throws DiscoveryException;
 
     /**
      * Discovers the specific {@link org.educoins.core.p2p.peers.ReadOnlyPeer}s.
@@ -24,5 +25,5 @@ public interface DiscoveryStrategy {
      * @return {@link Collection} of {@link org.educoins.core.p2p.peers.ReadOnlyPeer}s.
      * @throws DiscoveryException whenever the discovery failed.
      */
-    Collection<Peer> getReadOnlyPeers() throws DiscoveryException;
+    @NotNull Collection<Peer> getReadOnlyPeers() throws DiscoveryException;
 }

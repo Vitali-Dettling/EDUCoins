@@ -1,18 +1,15 @@
 package org.educoins.core.p2p.discovery;
 
-import org.educoins.core.p2p.peers.FullPeer;
-import org.educoins.core.p2p.peers.Peer;
-import org.educoins.core.p2p.peers.ReadOnlyPeer;
+import org.educoins.core.p2p.peers.*;
 import org.educoins.core.p2p.peers.remote.HttpNode;
 import org.educoins.core.p2p.peers.remote.RemoteNode;
 import org.educoins.core.utils.RestClient;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * The {@link DiscoveryStrategy} using the <code>educoins-central</code>-Webservice to find appropriate {@link Peer}s.
@@ -22,11 +19,12 @@ public class CentralDiscovery implements DiscoveryStrategy {
 
     private String centralUrl;
 
-    public CentralDiscovery(String centralUrl) {
+    public CentralDiscovery(@NotNull String centralUrl) {
         this.centralUrl = centralUrl;
     }
 
     @Override
+    @NotNull
     public Collection<Peer> getFullPeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();
@@ -44,6 +42,7 @@ public class CentralDiscovery implements DiscoveryStrategy {
     }
 
     @Override
+    @NotNull
     public Collection<Peer> getReadOnlyPeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();

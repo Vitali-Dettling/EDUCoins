@@ -4,6 +4,7 @@ import org.educoins.core.p2p.peers.LocalPeer;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.p2p.peers.remote.LocalNode;
 import org.educoins.core.store.IBlockStore;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +22,18 @@ public class LocalDiscovery implements DiscoveryStrategy {
         this.blockStore = blockStore;
     }
 
+    @Override
+    @NotNull
+    public Collection<Peer> getFullPeers() throws DiscoveryException {
+        return getPeers();
+    }
+
+    @Override
+    @NotNull
+    public Collection<Peer> getReadOnlyPeers() throws DiscoveryException {
+        return getPeers();
+    }
+
     public Collection<Peer> getPeers() {
         /**
          * So far, it doesn't make sense to add more than one local peer.
@@ -30,13 +43,5 @@ public class LocalDiscovery implements DiscoveryStrategy {
         return remoteNodes;
     }
 
-    @Override
-    public Collection<Peer> getFullPeers() throws DiscoveryException {
-        return getPeers();
-    }
 
-    @Override
-    public Collection<Peer> getReadOnlyPeers() throws DiscoveryException {
-        return getPeers();
-    }
 }

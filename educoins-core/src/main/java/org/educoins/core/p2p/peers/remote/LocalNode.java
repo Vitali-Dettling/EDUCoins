@@ -1,9 +1,8 @@
 package org.educoins.core.p2p.peers.remote;
 
 import org.educoins.core.Block;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.*;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +25,13 @@ public class LocalNode extends RemoteNode {
     }
 
     @Override
+    @NotNull
     public Collection<Block> getHeaders() throws IOException {
         return getBlocks().stream().map(Block::getHeader).collect(Collectors.toList());
     }
 
     @Override
+    @NotNull
     public Collection<Block> getBlocks() {
         Collection<Block> allBlocks = new ArrayList<>();
 

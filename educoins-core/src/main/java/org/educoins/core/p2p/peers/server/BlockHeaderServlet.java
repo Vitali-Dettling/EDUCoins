@@ -1,10 +1,8 @@
 package org.educoins.core.p2p.peers.server;
 
-import com.sun.istack.internal.NotNull;
 import org.educoins.core.Block;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.*;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
