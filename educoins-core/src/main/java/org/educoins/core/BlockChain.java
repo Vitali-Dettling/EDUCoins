@@ -11,6 +11,7 @@ import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Deserializer;
+import org.educoins.core.utils.Sha256Hash;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -217,14 +218,14 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		if(this.blockCounter == CHECK_AFTER_BLOCKS){
 			long currentTime = System.currentTimeMillis();
 			long allBlocksSinceLastTime = previousBlock.getTime();
-			BigDecimal oldDifficulty = new BigDecimal(new BigInteger(previousBlock.getBits())).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
+			BigDecimal oldDifficulty = new BigDecimal(previousBlock.getBits().toBigInteger()).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
 			BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
 			
 			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME),
 					BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
 			
-			this.newBlock.setBits(newDifficulty.toBigInteger().toByteArray());
+			this.newBlock.setBits(Sha256Hash.wrap(newDifficulty.toBigInteger().toByteArray()));
 			this.newBlock.setTime(currentTime);
 			this.blockCounter = RESET_BLOCKS_COUNT;
 		}
@@ -253,9 +254,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
-		byte[] testBlockHash = toVerifyBlock.hash();
-		byte[] lastBlockHash = lastBlock.getHashPrevBlock();
-		if (ByteArray.compare(testBlockHash, lastBlockHash) == COMPARE_EQUAL) {
+		Sha256Hash testBlockHash = toVerifyBlock.hash();
+		Sha256Hash lastBlockHash = lastBlock.getHashPrevBlock();
+		if (testBlockHash.compareTo(lastBlockHash) == COMPARE_EQUAL) {
 			return false;
 		}
 		
@@ -522,14 +523,14 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private Block getPreviousBlock(Block currentBlock) {
 		try {
 
-			byte[] lastBlockName = currentBlock.getHashPrevBlock();
+			Sha256Hash lastBlockName = currentBlock.getHashPrevBlock();
 
 			// TODO[Vitali] Der remoteStorage String ist nur für den Prototypen, sollte geändert werden sobald eine
 			// levelDB eingeführt wird!!!
 			String remoteStoragePath = System.getProperty("user.home") + File.separator + "documents" + File.separator
 					+ "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
 
-			return Deserializer.deserialize(remoteStoragePath, lastBlockName);
+			return Deserializer.deserialize(remoteStoragePath, lastBlockName.getBytes());
 			
 		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
 			System.out.println("ERROR: Class Verifier: " + e.getMessage());

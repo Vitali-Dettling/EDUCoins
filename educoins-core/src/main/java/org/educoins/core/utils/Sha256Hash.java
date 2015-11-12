@@ -82,11 +82,11 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
         return bytes;
     }
 
-
+    //TODO testcase
     @Override
     public int compareTo(Sha256Hash o) {
         // note that in this implementation compareTo() is not consistent with equals()
-        return this.hashCode() - o.hashCode(); // arbitrary but consistent
+    	return ByteArray.compare(o.getBytes(), this.getBytes());// arbitrary but consistent
     }
 }
 

@@ -27,7 +27,7 @@ public class LocalPeer implements Peer {
         while (anchorBlock != null) {
             allBlocks.add(anchorBlock);
             try {
-                anchorBlock = blockStore.get(anchorBlock.getHashPrevBlock());
+                anchorBlock = blockStore.get(anchorBlock.getHashPrevBlock().getBytes());
             } catch (BlockNotFoundException ex) {
                 anchorBlock = null;
             }
