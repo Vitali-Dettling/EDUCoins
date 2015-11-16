@@ -16,7 +16,7 @@ public abstract class Deserializer {
 
 	private static final Gson GSON_DESERIALIZER = new Gson();
 
-	public static Block deserialize(String blockChainPath, String fileHashName) throws FileNotFoundException,
+	public static Block deserialize(String blockChainPath, byte[] fileHashName) throws FileNotFoundException,
 			JsonIOException, JsonSyntaxException {
 
 		Path remoteStorage = Paths.get(blockChainPath);
@@ -25,7 +25,7 @@ public abstract class Deserializer {
 			throw new IllegalArgumentException(remoteStorage.toString() + " is not a directory");
 		}
 
-		Path fileName = Paths.get(fileHashName + ".json");
+		Path fileName = Paths.get(ByteArray.convertToString(fileHashName) + ".json");
 		Path remoteBlockFile = remoteStorage.resolve(fileName);
 
 		FileReader reader = new FileReader(remoteBlockFile.toFile());

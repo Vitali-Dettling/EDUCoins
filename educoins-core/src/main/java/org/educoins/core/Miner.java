@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
 
 public class Miner implements IBlockListener {
 
@@ -62,8 +63,8 @@ public class Miner implements IBlockListener {
 			
 			SecureRandom nonceGenerator = new SecureRandom();
 			byte[] nonce = new byte[BIT32];
-			byte[] targetThreshold = Block.getTargetThreshold(this.block.getBits());
-			byte[] challenge;
+			Sha256Hash targetThreshold = this.block.getBits();
+			Sha256Hash challenge;
 			byte[] challengePositive;
 			
 			do {
@@ -74,7 +75,7 @@ public class Miner implements IBlockListener {
 //				challengePositive = invertNegative(challenge); //TODO
 //				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge)
 //						+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold));
-			} while (this.active && ByteArray.compare(challenge, targetThreshold) > 0);
+			} while (this.active && challenge.compareTo(targetThreshold) > 0);
 
 			if (this.active) {
 				// synchronzie PoWThreads to avoid FileNotFoundException
