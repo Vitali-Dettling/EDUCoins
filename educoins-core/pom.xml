@@ -39,7 +39,14 @@
             <artifactId>protobuf-java</artifactId>
             <version>2.6.1</version>
         </dependency>
-
+        
+        <!-- Mockito Obejct Mockup framework -->
+	    <dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.5</version>
+			<scope>test</scope>
+		</dependency>
 
         <!--Google Guava-->
         <dependency>

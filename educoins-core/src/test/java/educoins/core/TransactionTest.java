@@ -1,4 +1,4 @@
-package org.educoins.core.test;
+package educoins.core;
 
 import static org.junit.Assert.assertEquals;
 

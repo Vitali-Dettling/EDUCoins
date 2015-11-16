@@ -1,4 +1,4 @@
-package org.educoins.core.test.utils;
+package educoins.core.utils;
 
 import org.educoins.core.utils.ByteArray;
 import org.junit.Assert;

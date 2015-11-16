@@ -7,7 +7,7 @@ import java.util.Set;
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
-import org.jetbrains.annotations.NotNull;
+import org.educoins.core.utils.Sha256Hash;
 
 public class Verification {
 	
@@ -60,11 +60,12 @@ public class Verification {
 		}
 		
 		// 0. If geniuses block return true, because there no other block before.
-		if (toVerifyBlock.getHashPrevBlock().equals(GENESIS_BLOCK)) {
+		if (toVerifyBlock.getHashPrevBlock().equals(Sha256Hash.wrap(GENESIS_BLOCK))) {
 			return true;
 		}
 
 		// 1. Find the previous block.
+		//TODO: Check naming of lastBlock / getPreviousBlock()
 		Block lastBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		
 		// 2. Does the previous block exist?
@@ -73,12 +74,10 @@ public class Verification {
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
-		byte[] testBlockHash = toVerifyBlock.hash();
-		byte[] lastBlockHash = lastBlock.getHashPrevBlock().getBytes();
-		if (ByteArray.compare(testBlockHash, lastBlockHash) == TRUE) {
+		if (toVerifyBlock.hash().compareTo(lastBlock.getHashPrevBlock()) == TRUE) {
 			return false;
 		}
-		
+
 		//4. At least one transaction has to be in the block, namely the coinbase transaction.
 		if(toVerifyBlock.getTransactions().size() <=  HAS_NO_ENTRIES){
 			return false;
@@ -215,7 +214,6 @@ public class Verification {
 		Output coinBase = coinBases.iterator().next();
 		
 		int currentReward = coinBase.getAmount();
-		Block previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		int trueReward = toVerifyBlock.rewardCalculator();
 		if(trueReward != currentReward){
 			System.out.println("DEBUG: verifyCoinbaseTransaction: reward cannot be zero.");

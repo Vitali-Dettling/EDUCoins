@@ -1,10 +1,8 @@
-package org.educoins.core.test.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,21 +21,11 @@ import org.junit.Test;
  */
 public class LevelDbBlockStoreTest {
 
-    private static String tempStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
-            + "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore";
-	
-    public static final File DIRECTORY = new File(tempStorage);
     private IBlockStore store;
-    private Block block;
 
     @Before
-    public void setup() throws IOException {
-    	
         store = new LevelDbBlockStore(DIRECTORY);
 
-        block = new Block();
-        block.setBits("0101010101010111101");
-        block.setHashMerkleRoot("01234125125");
         block.setNonce(12314);
         block.setVersion(2);
     }
@@ -54,18 +42,9 @@ public class LevelDbBlockStoreTest {
     @Test
     public void testPut() throws Exception {
         Block b1 = getRandomBlock();
-        store.put(b1);
-        ByteArray.convertToString(block.hash(), 16).getBytes();
-        this.store.put(b1);
-
-        fillRandom();
-
-        Block actual = store.get(Block.hash(b1));
-        
-        Block actual = this.store.get(b1);
-       
-        byte[] expected = Block.hash(b1);
-        byte[] actualBytes = Block.hash(actual);
+        Block actual = store.get(b1);
+        byte[] expected = Block.hash(b1).getBytes();
+        byte[] actualBytes = Block.hash(actual).getBytes();
 
         assertEquals(expected.length, actualBytes.length);
 
@@ -87,8 +66,6 @@ public class LevelDbBlockStoreTest {
 
         store.put(b1);
 
-        Block b2 = store.get(Block.hash(b1));
-        Block b2 = store.get(ByteArray.convertToString(b1.hash(), 16).getBytes());
         Block b2 = store.get(b1);
         assertEquals(1, b2.getTransactionsCount());
 
@@ -109,8 +86,6 @@ public class LevelDbBlockStoreTest {
 
         Block actual = store.getLatest();
 
-        byte[] expected = Block.hash(b1);
-        byte[] actualBytes = Block.hash(actual);
 
         assertEquals(expected.length, actualBytes.length);
 
@@ -129,8 +104,8 @@ public class LevelDbBlockStoreTest {
         Block toReturn = new Block();
         toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
-        toReturn.setBits((int) (Math.random() * Integer.MAX_VALUE) + "");
-        toReturn.setHashMerkleRoot((int) (Math.random() * Integer.MAX_VALUE) + "");
+        toReturn.setBits(Sha256Hash.wrap(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE))));
+        toReturn.setHashMerkleRoot(Sha256Hash.wrap(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE))));
         return toReturn;
     }
 

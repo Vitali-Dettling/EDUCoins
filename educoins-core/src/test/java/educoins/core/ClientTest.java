@@ -1,6 +1,4 @@
-package org.educoins.core.test;
-
-import static org.junit.Assert.fail;
+package educoins.core;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -28,8 +26,6 @@ public class ClientTest {
 
 	@Test
 	public void test() {
-		
-		fail("Not yet implemented");
 	}
 	
 	//TODO [Vitali] sendRegularTransaction -> Write integration test.  
