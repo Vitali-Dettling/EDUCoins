@@ -1,6 +1,9 @@
 package org.educoins.core.utils;
 
 
+import com.google.common.io.BaseEncoding;
+import com.google.common.io.ByteStreams;
+import org.educoins.core.cryptography.SHA256Hasher;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,11 +11,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Arrays;
-
-import com.google.common.io.BaseEncoding;
-import com.google.common.io.ByteStreams;
-import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.utils.ByteArray;
 
 /**
  * A Sha256Hash just wraps a byte[] so that equals and hashcode work correctly, allowing it to be used as keys in a
@@ -27,6 +25,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
 	private static final long serialVersionUID = -9086690286714208838L;
 	private final byte[] bytes;
     public static final Sha256Hash ZERO_HASH = wrap(new byte[32]);
+    public static final Sha256Hash MAX_HASH = wrap(ByteArray.convertFromString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
 
     
 

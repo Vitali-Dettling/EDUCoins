@@ -1,8 +1,10 @@
 package educoins.core;
+
+import org.educoins.core.Block;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
-import org.junit.*;
-import org.educoins.core.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 

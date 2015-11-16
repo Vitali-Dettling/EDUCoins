@@ -2,7 +2,6 @@ package org.educoins.core.store;
 
 import com.google.gson.Gson;
 import org.educoins.core.Block;
-import org.educoins.core.utils.ByteArray;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
@@ -64,11 +63,8 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     @Nullable
-    public synchronized Block get(byte[] hash) throws BlockNotFoundException {
-        if (database.get(hash) == null) {
-            throw new BlockNotFoundException(hash);
-        }
-        return getBlock(database.get(hash));
+    public synchronized Block get(@NotNull Block block) throws BlockNotFoundException {
+        return getBlock(database.get(block.hash().getBytes()));
     }
 
     @Override

@@ -1,16 +1,11 @@
 package org.educoins.miner;
 
 
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.educoins.core.*;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Sha256Hash;
+import org.educoins.core.utils.*;
+
+import java.security.SecureRandom;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Miner implements IBlockListener {
 
@@ -51,10 +46,8 @@ public class Miner implements IBlockListener {
 		Thread powThread = new PoWThread(block.copy());
 		powThread.start();
 
-		Thread powThread2 = new PoWThread(block.copy());
-		powThread2.start();
-
-
+		//Thread powThread2 = new PoWThread(block.copy());
+		//powThread2.start();
 	}
 	
 	private class PoWThread extends Thread implements IBlockListener {
@@ -79,13 +72,13 @@ public class Miner implements IBlockListener {
 
 			Sha256Hash targetThreshold = this.block.getBits();
 			Sha256Hash challenge;
-			byte[] challengePositive;
 			
 			do {
 				nonceGenerator.nextBytes(nonce);
 				this.block.setNonce(ByteArray.convertToInt(nonce));
 
 				challenge = this.block.hash();
+			
 //				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge)
 //						+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold));
 			} while (this.active && challenge.compareTo(targetThreshold) > 0);
@@ -95,7 +88,6 @@ public class Miner implements IBlockListener {
 				synchronized (this) {
 					notifyFoundPoW(block);
 				}
-			} else {
 			}
 			
 			blockChain.removeBlockListener(this);

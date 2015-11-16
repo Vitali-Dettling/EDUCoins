@@ -1,11 +1,11 @@
 package org.educoins.demo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.Transaction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DemoTransactionReceiver implements ITransactionListener, ITransactionReceiver {
 
