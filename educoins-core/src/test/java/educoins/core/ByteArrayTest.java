@@ -1,4 +1,4 @@
-package educoins.core.test;
+package educoins.core;
 
 import org.educoins.core.Block;
 import org.educoins.core.utils.ByteArray;

@@ -2,10 +2,16 @@ package org.educoins.core.utils;
 
 
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import com.google.common.io.BaseEncoding;
+import com.google.common.io.ByteStreams;
+import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 
 /**
@@ -13,6 +19,8 @@ import org.educoins.core.utils.ByteArray;
  * map. It also checks that the length is correct and provides a bit more type safety.
  */
 public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
+
+    static BaseEncoding Hex = BaseEncoding.base16().lowerCase();
     /**
 	 * 
 	 */
@@ -27,7 +35,36 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
 	}
 
 
-	/**
+    /**
+     * Calculates the (one-time) hash of contents and returns it as a new wrapped hash.
+     */
+    public static Sha256Hash create(byte[] contents) {
+        return new Sha256Hash(SHA256Hasher.hash(contents));
+    }
+
+    /**
+     * Calculates the hash of the hash of the contents. This is a standard operation in Bitcoin.
+     */
+    public static Sha256Hash createDouble(byte[] contents) {
+        return new Sha256Hash(SHA256Hasher.hash(SHA256Hasher.hash(contents)));
+    }
+
+    /**
+     * Returns a hash of the given files contents. Reads the file fully into memory before hashing so only use with
+     * small files.
+     * @throws IOException
+     */
+    public static Sha256Hash hashFileContents(File f) throws IOException {
+        FileInputStream in = new FileInputStream(f);
+        try {
+            return create(ByteStreams.toByteArray(in));
+        } finally {
+            in.close();
+        }
+    }
+
+
+    /**
      * Creates a new instance that wraps the given hash value (represented as a hex string).
      *
      * @param hexString a hash value represented as a hex string
@@ -65,7 +102,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
 
     @Override
     public String toString() {
-        return ByteArray.convertToString(bytes);
+        return Hex.encode(bytes);
     }
 
     /**
@@ -82,7 +119,10 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
         return bytes;
     }
 
-    //TODO testcase
+    public Sha256Hash duplicate() {
+        return new Sha256Hash(Arrays.copyOf(bytes, bytes.length));
+    }
+
     @Override
     public int compareTo(Sha256Hash o) {
         // note that in this implementation compareTo() is not consistent with equals()

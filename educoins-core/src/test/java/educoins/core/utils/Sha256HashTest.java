@@ -1,12 +1,13 @@
-package org.educoins.core.p2p.cryptography;
+package educoins.core.utils;
 
 import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.cryptography.Sha256Hash;
+import org.educoins.core.utils.Sha256Hash;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -27,7 +28,7 @@ public class Sha256HashTest {
         Sha256Hash hash = Sha256Hash.wrap(hexString);
         byte[] expected = new byte[32]; // initialized with zero
         byte[] actual = hash.getBytes();
-        assertTrue(Arrays.equals(expected, actual));
+        assertArrayEquals(expected, actual);
     }
 
     @Test
