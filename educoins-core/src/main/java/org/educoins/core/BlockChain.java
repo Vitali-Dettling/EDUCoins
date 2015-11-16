@@ -168,7 +168,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		CoinbaseTransaction transaction = new CoinbaseTransaction(); 
 		transaction.addOutput(output);
 		return transaction;
-	}	
+	}
 	
 	/**
 	 * Bitcoin explanation: Mastering Bitcoin 195
