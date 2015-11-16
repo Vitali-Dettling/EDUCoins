@@ -1,8 +1,19 @@
 package org.educoins.core.store;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.educoins.core.Block;
 import org.educoins.core.Transaction;
-import org.fusesource.leveldbjni.JniDBFactory;
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
+import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.utils.ByteArray;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,8 +40,8 @@ public class LevelDbBlockStoreTest {
         store = new LevelDbBlockStore(DIRECTORY);
 
         block = new Block();
-        block.setBits("0101010101010111101");
-        block.setHashMerkleRoot("01234125125");
+        block.setBits(Sha256Hash.wrap(ByteArray.convertFromString("0101010101010111101")));
+        block.setHashMerkleRoot(Sha256Hash.wrap(ByteArray.convertFromString("01234125125")));
         block.setNonce(12314);
         block.setVersion(2);
     }
@@ -51,9 +62,9 @@ public class LevelDbBlockStoreTest {
 
         fillRandom();
 
-        Block actual = store.get(Block.hash(b1));
-        byte[] expected = Block.hash(b1);
-        byte[] actualBytes = Block.hash(actual);
+        Block actual = store.get(b1.hash().getBytes());
+        byte[] expected = Block.hash(b1).getBytes();
+        byte[] actualBytes = Block.hash(actual).getBytes();
 
         assertEquals(expected.length, actualBytes.length);
 
@@ -75,7 +86,7 @@ public class LevelDbBlockStoreTest {
 
         store.put(b1);
 
-        Block b2 = store.get(Block.hash(b1));
+        Block b2 = store.get(b1.hash().getBytes());
         assertEquals(1, b2.getTransactionsCount());
 
         Transaction persisted = b2.getTransactions().get(0);
@@ -95,8 +106,8 @@ public class LevelDbBlockStoreTest {
 
         Block actual = store.getLatest();
 
-        byte[] expected = Block.hash(b1);
-        byte[] actualBytes = Block.hash(actual);
+        byte[] expected = Block.hash(b1).getBytes();
+        byte[] actualBytes = Block.hash(actual).getBytes();
 
         assertEquals(expected.length, actualBytes.length);
 
@@ -115,8 +126,8 @@ public class LevelDbBlockStoreTest {
         Block toReturn = new Block();
         toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
-        toReturn.setBits((int) (Math.random() * Integer.MAX_VALUE) + "");
-        toReturn.setHashMerkleRoot((int) (Math.random() * Integer.MAX_VALUE) + "");
+        toReturn.setBits(Sha256Hash.wrap(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE))));
+        toReturn.setHashMerkleRoot(Sha256Hash.wrap(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE))));
         return toReturn;
     }
 

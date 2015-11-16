@@ -1,33 +1,31 @@
 package org.educoins.core;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import org.educoins.core.cryptography.SHA256Hasher;
-//import org.educoins.core.p2p.messages.MessageProtos;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.utils.ByteArray;
+//import org.educoins.core.p2p.messages.MessageProtos;
 
 public class Block {
 	
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
-	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
-	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
+	private static final Sha256Hash HASH_PREV_BLOCK  = Sha256Hash.ZERO_HASH;
+	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
 	private static final long TIME = System.currentTimeMillis();
 
-	private static final String BITS = "3dffffff";
+	private static final byte[] BITS = ByteArray.convertFromString("3dffffff");
 	private static final long NONCE = 1114735442;
 
 	private int version;
-	private String hashPrevBlock;
-	private String hashMerkleRoot;
+	private Sha256Hash hashPrevBlock;
+	private Sha256Hash hashMerkleRoot;
 	private long time;
-	private String bits;
+	private byte[] bits;
 	private long nonce;
 	private int transactionsCount;
 	private List<Transaction> transactions;
@@ -43,10 +41,6 @@ public class Block {
 		this.transactions = new ArrayList<>();
 		this.transactionsCount = this.transactions.size();
 	}
-
-    public static byte[] getTargetThreshold(String bits) {
-        return ByteArray.convertFromString(bits);
-    }
 
 	public Block copy(){
 		Block b = new Block();
@@ -67,19 +61,19 @@ public class Block {
         this.version = version;
     }
 
-    public String getHashPrevBlock() {
+    public Sha256Hash getHashPrevBlock() {
         return this.hashPrevBlock;
     }
 
-    public void setHashPrevBlock(String hashPrevBlock) {
+    public void setHashPrevBlock(Sha256Hash hashPrevBlock) {
         this.hashPrevBlock = hashPrevBlock;
     }
 
-    public String getHashMerkleRoot() {
+    public Sha256Hash getHashMerkleRoot() {
         return this.hashMerkleRoot;
     }
 
-    public void setHashMerkleRoot(String hashMerkleRoot) {
+    public void setHashMerkleRoot(Sha256Hash hashMerkleRoot) {
         this.hashMerkleRoot = hashMerkleRoot;
     }
 
@@ -91,28 +85,30 @@ public class Block {
         this.time = time;
     }
 
-	public String getBits() {
-		String mantisse = bits.substring(2,8);
-		String exponent = bits.substring(0,2);
-		int expInt = Integer.parseInt(exponent, 16) - 3;
-		StringBuilder resultString = new StringBuilder();
-		resultString.append(mantisse);
-		for (int i = 0; i < expInt; i++){
-			resultString.append("0");
-		}
-		return resultString.toString();
+	public Sha256Hash getBits() {
+        byte[] mantisse = Arrays.copyOfRange(bits, 1, 4);
+        byte exponent = bits[0];
+
+        int expInt = ((int) exponent) - 3;
+        byte[] result = new byte[mantisse.length + expInt / 2];
+        Arrays.fill(result, (byte) 0);
+        System.arraycopy(mantisse, 0, result, 0, mantisse.length);
+
+        return Sha256Hash.wrap(result);
 	}
 
-	public void setBits(String bits) {
-		while (bits.charAt(0) == '0'){
-			bits = bits.substring(1, bits.length() - 1);
-		}
-		String exponent = Integer.toHexString(bits.length() - 3);
-		if (exponent.length() < 2){
-			exponent = "0" + exponent;
-		}
-		String mantisse = bits.substring(0,6);
-		this.bits = exponent + mantisse;
+	public void setBits(Sha256Hash inBits) {
+		byte[] bits = inBits.getBytes();
+        byte[] mantisse;
+        byte[] exponent = new byte[1];
+
+        int i = 0;
+        for (i = 0; bits[i] == (byte) 0; i++); //count leading 0
+
+        exponent[0] = (byte) ((bits.length - i) * 2 - 3);
+        mantisse = Arrays.copyOfRange(bits, i, i + 3);
+
+        this.bits = ByteArray.concatByteArrays(exponent, mantisse);
 	}
 
     public long getNonce() {
@@ -189,7 +185,7 @@ public class Block {
 //		return expandedBits;
 //	}
 
-    public byte[] hash() {
+    public Sha256Hash hash() {
         return Block.hash(this);
     }
 
@@ -208,13 +204,13 @@ public class Block {
         return builder.build();
     }*/
 
-    public static byte[] hash(Block block) {
+    public static Sha256Hash hash(Block block) {
 		// specify used header fields (in byte arrays)
 		byte[] version = ByteArray.convertFromLong(block.version);
-		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
-		byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot);
+		byte[] hashPrevBlock = block.hashPrevBlock.getBytes();
+		byte[] hashMerkleRoot = block.hashMerkleRoot.getBytes();
 		byte[] time = ByteArray.convertFromLong(block.time);
-		byte[] bits = ByteArray.convertFromString(block.bits);
+		byte[] bits = block.bits;
 		byte[] nonce = ByteArray.convertFromLong(block.nonce);
 
 		// concatenate used header fields
@@ -224,7 +220,7 @@ public class Block {
 
 		// hash concatenated header fields and return
 		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
-		return hash;
+		return Sha256Hash.wrap(hash);
 	}
 
     @Override
