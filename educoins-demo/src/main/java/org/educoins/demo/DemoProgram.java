@@ -110,7 +110,7 @@ public class DemoProgram {
 
         ITransactionReceiver txReceiver = new DemoTransactionReceiver();
         ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
-
+        
         BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
 
         if (runMiner) {

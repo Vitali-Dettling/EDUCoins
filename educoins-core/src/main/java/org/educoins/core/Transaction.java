@@ -21,6 +21,11 @@ public class Transaction {
 
 	protected int approvalsCount;
 	protected List<Approval> approvals;
+	
+	protected int gatewaysCount;
+	protected List<Gateway> gateways;
+	
+	protected Gate gate;
 
 	public Transaction() {
 		this.inputs = new ArrayList<>();
@@ -29,6 +34,9 @@ public class Transaction {
 		this.outputsCount = this.outputs.size();
 		this.approvals = new ArrayList<>();
 		this.approvalsCount = this.approvals.size();
+		this.gateways = new ArrayList<>();
+		this.gatewaysCount = this.gateways.size();		
+		this.gate = null;
 	}
 
 	public int getVersion() {
@@ -151,7 +159,55 @@ public class Transaction {
 		this.approvals.addAll(approvals);
 		this.approvalsCount = this.approvals.size();
 	}
+	
+	public Gate getGate() {
+		return this.gate;
+	}
 
+	public void setGate(Gate gate) {
+		this.gate = gate;
+	}
+	
+	
+	
+	
+	
+	public int getGatewaysCount() {
+		return this.gatewaysCount;
+	}
+
+	public List<Gateway> getGateways() {
+		// [joeren]: look at getInputs()
+		if (this.gateways != null) {
+			return new ArrayList<Gateway>(this.gateways);
+		}
+		return null;
+	}
+
+	public void setGateways(List<Gateway> gateways) {
+		this.gateways = gateways;
+		if (this.gateways == null) {
+			this.gatewaysCount = 0;
+		} else {
+			this.gatewaysCount = this.gateways.size();
+		}
+	}
+
+	public void addGateway(Gateway gateway) {
+		if (this.gateways == null) {
+			this.gateways = new ArrayList<>();
+		}
+		this.gateways.add(gateway);
+		this.gatewaysCount = this.gateways.size();
+	}
+
+	public void addGateways(Collection<Gateway> gateways) {
+		if (this.gateways == null) {
+			this.gateways = new ArrayList<>();
+		}
+		this.gateways.addAll(gateways);
+		this.gatewaysCount = this.gateways.size();
+	}
 	public ETransaction whichTransaction() {
 
 		// Coinbase:
@@ -166,6 +222,10 @@ public class Transaction {
 		// inputs > 0;
 		// outputs = 0 || > 0
 		// approvals > 0
+		// Gate:
+		// Gate > 0
+		// Gateway:
+		// Gateway > 0
 
 		// Check for transaction type.
 		if ((this.getInputs() == null || this.getInputs().size() == 0)
@@ -182,7 +242,13 @@ public class Transaction {
 				&& ((this.getOutputs() == null || this.getOutputs().size() == 0) || (this.getOutputs() != null && this
 						.getOutputs().size() > 0)) && (this.getApprovals() != null && this.getApprovals().size() > 0)) {
 			return ETransaction.APPROVED;
-		}
+		}	
+		if (this.gate != null){
+			return ETransaction.GATE;
+		}	
+		if (this.getGate() != null && this.getGatewaysCount() != 0){
+			return ETransaction.GATEWAY;
+		}	
 		return null;
 	}
 
@@ -197,7 +263,6 @@ public class Transaction {
 		if (transaction.whichTransaction() == ETransaction.COINBASE) {
 			toBeHashed = getByteArrayOutput(transaction);
 		} else if (transaction.whichTransaction() == ETransaction.REGULAR) {
-
 			byte[] input = getByteArrayInput(transaction);
 			byte[] output = getByteArrayOutput(transaction);
 			toBeHashed = ByteArray.concatByteArrays(input, output);
@@ -205,6 +270,9 @@ public class Transaction {
 			byte[] input = getByteArrayInput(transaction);
 			byte[] approved = getByteArrayApproved(transaction);
 			toBeHashed = ByteArray.concatByteArrays(input, approved);
+		}else if(transaction.whichTransaction() == ETransaction.GATE){
+			byte[] gate = getByteArrayGate(transaction);
+			toBeHashed = gate;
 		}
 
 		// hash concatenated header fields and return
@@ -212,7 +280,22 @@ public class Transaction {
 		return hash;
 
 	}
-
+	
+	// TODO[Vitali] Much better implementation, with generic class and
+	// so!!!!!!!!!!!!!!!!!!!
+	private static byte[] getByteArrayGate(Transaction transaction) {
+		
+		final int index = 0;
+		
+		Gate gate = transaction.getGate();
+		
+		final int length = gate.getConcatedGate().length;
+		byte[] byteArray = new byte[length];
+		System.arraycopy(gate.getConcatedGate(), 0, byteArray, index, length);
+		
+		return byteArray;
+	}
+	
 	// TODO[Vitali] Much better implementation, with generic class and
 	// so!!!!!!!!!!!!!!!!!!!
 	private static byte[] getByteArrayInput(Transaction transaction) {
@@ -266,7 +349,7 @@ public class Transaction {
 
 	public enum ETransaction {
 
-		APPROVED, COINBASE, REGULAR,
+		APPROVED, COINBASE, REGULAR, GATE, GATEWAY,
 
 	}
 

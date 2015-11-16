@@ -1,10 +1,13 @@
 package org.educoins.core;
 
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
+import org.jetbrains.annotations.NotNull;
 
 public class Verification {
 	
@@ -22,6 +25,31 @@ public class Verification {
 	public Verification(Wallet wallet, BlockChain blockChain){
 		this.blockChain = blockChain;
 		this.wallet = wallet;	
+	}
+	
+	public boolean verifyGate(@NotNull Transaction transaction){
+
+		Gate gate = transaction.getGate();
+		
+		byte[] messageByte = transaction.hash();
+		String message = ByteArray.convertToString(messageByte, HEX);
+		String signature = gate.getSignature();
+		String publicKey = gate.getPublicKey();
+		
+		//Check whether the gateway was already sign by itself.
+		boolean compared = this.wallet.compare(message, signature, publicKey);
+		
+		if(compared){
+			return true;
+		} 
+		
+		return false;
+	}
+	
+	public boolean verifyGateway(@NotNull Gateway gateway){
+		
+		//TODO [Vitali] Implement the whole verification.
+		return true;
 	}
 	
 	

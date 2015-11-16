@@ -72,6 +72,29 @@ public class WalletTest {
 		assertEquals(countHits, KEYS);
 	}
 	
+	@Test
+	public void testVerifySignaturek(){
+		final String publicKey = this.wallet.getPublicKey();
+		final String message = "ABCDEF";
+		final String signature = this.wallet.getSignature(publicKey, message);
+		
+		boolean testResult = this.wallet.compare(message, signature, publicKey);
+		assertTrue(testResult);
+	}
+	
+	
+	@Test
+	public void testSignatureCheck(){
+		final String publicKey = this.wallet.getPublicKey();
+		final String message = "ABC";
+		final String signature = this.wallet.getSignature(publicKey, message);
+		
+		byte[] sign = ByteArray.convertFromString(signature, HEX);
+		
+		boolean testResult = this.wallet.checkSignature(message, sign);
+		assertTrue(testResult);
+	}
+	
 	
 	
 	

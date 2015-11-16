@@ -30,6 +30,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private Block newBlock;
 	private Verification verification;
 	private IBlockStore store;
+	private List<Gateway> externGateways;
+	private Gateway myGateway;
 	
 	private String publicKey;
 
@@ -46,6 +48,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.transactions = new ArrayList<>();
 		this.verification = new Verification(this.wallet, this);
 		this.store = senderBlockStore;
+		this.externGateways = new ArrayList<Gateway>();
+		this.myGateway = new Gateway();
 		
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
@@ -112,13 +116,16 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			if (this.verification.verifyApprovedTransaction(transaction)) {
 				this.transactions.add(transaction);
 			}
-		}
+		}else if (type == ETransaction.GATE) {
+			if (this.verification.verifyGate(transaction)) {
+				createGateway(transaction);
+			}
+		} 		
 	}
 	
 	@Override
 	public void foundPoW(Block block) {
 		this.store.put(block);
-		//this.blockTransmitter.transmitBlock(block);
 		this.blockReceiver.receiveBlocks();
 	}
 	
@@ -135,6 +142,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.newBlock.addTransaction(coinbaseTransaction(currentBlock));
 		this.newBlock.addTransactions(this.transactions);
 		this.transactions.clear();
+		
+		if(!this.externGateways.isEmpty()){
+			this.newBlock.addAllGateways(this.externGateways);
+		}
 		
 		return retargedBits(currentBlock);
 	}
@@ -192,9 +203,29 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return this.newBlock;
 	}
 	
-	//TODO [Vitali] Method needs to be deleted as soon as the DB will be introduced.
 	public Block getPreviousBlock(Block currentBlock) {
 		return this.store.get(currentBlock);
 	}
+	
+	private void createGateway(Transaction transaction){
+		
+		Gate gate = transaction.getGate();	
+		if(this.verification.verifyGate(transaction)){
+			this.myGateway.addGate(gate);
+			//When all signatures of the other gateways have been collected.
+			//Then it will continue transmit the created new gateway.
+			if(allGatesSigned()){
+				this.sendTransaction(transaction);
+			}
+		}
+	}
+		
+	private boolean allGatesSigned(){
+		
+		//TODO [Vitali] Check the BC who many gateways are existing and how many have already singed. 
+		return true;
+	}
+
+
 
 }

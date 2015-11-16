@@ -124,18 +124,27 @@ public class BlockTest{
 	@SuppressWarnings("static-access")
 	public void testgetTargetThreshold(){
 		
-		String randomNumber = this.randomNumber.getSecureRandomString256HEX(); 
-		byte[] rantomTestee = this.block.getTargetThreshold(randomNumber);
-		String exactNumber = EXACT_EXAMPEL;
-		byte[] exactTestee = this.block.getTargetThreshold(exactNumber);
+		byte[] exactTestee = this.block.getTargetThreshold(EXACT_EXAMPEL);
 		byte[] resultTestee = ByteArray.convertFromString(EXPECTED_EXAMPEL);
 		
-		assertNotNull(rantomTestee);
 		assertNotNull(exactTestee);
-		//The returning byte array should never be negativ. 
-		assertTrue("First number should not be ziro: ", rantomTestee[FIRST_INDEX] >= ZIRO);	
+		assertNotNull(resultTestee);
+
 		//EXACT_EXAMPEL should be converted into RESULT_EXAMPEL as one can see at the top of the class. 
 		assertEquals(exactTestee, resultTestee);		
 	}
+	
+	@Test
+	@SuppressWarnings("static-access")
+	public void testTargetThresholdNotNegative(){
+		
+		String randomNumber = this.randomNumber.getSecureRandomString256HEX(); 
+		byte[] rantomTestee = this.block.getTargetThreshold(randomNumber);
+		
+		assertNotNull(rantomTestee);
+		//The returning byte array should never be negative. 
+		assertTrue("First number should not be ziro: ", rantomTestee[FIRST_INDEX] >= ZIRO);		
+	}
+	
 }
 

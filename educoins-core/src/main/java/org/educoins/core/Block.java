@@ -28,6 +28,7 @@ public class Block {
 	private long nonce;
 	private int transactionsCount;
 	private List<Transaction> transactions;
+	private List<Gateway> gateways;
 
 	public Block() {
 		this.setVersion(VERSION);
@@ -39,6 +40,8 @@ public class Block {
 		
 		this.transactions = new ArrayList<>();
 		this.transactionsCount = this.transactions.size();
+		
+		this.gateways = new ArrayList<>();
 	}
 
     public static byte[] getTargetThreshold(String bits) {
@@ -147,34 +150,14 @@ public class Block {
         this.transactionsCount = this.transactions.size();
     }
 
-
-// TODO [Vitali] Ist der richtige code, um exponenden und Mantise zu trennen und damit rechnen...
-//	public static byte[] getTargetThreshold(String bits) {
-//		byte[] convertedBits = ByteArray.convertFromString(bits, 16);
-//		
-//		// split the bits byte array into variables
-//		byte[] var1 = new byte[convertedBits.length - 1];
-//		System.arraycopy(convertedBits, 1, var1, 0, convertedBits.length - 1);
-//		byte[] var2 = { convertedBits[0] };
-//
-//		// define factor 1 (h2h3h4h5h6h7)
-//		BigInteger factor1 = new BigInteger(1, var1);
-//
-//		// calculate exponent
-//		BigInteger exponent = new BigInteger(1, var2);
-//		//exponent = exponent.subtract(new BigInteger("3"));
-//		exponent = exponent.multiply(new BigInteger("8"));
-//
-//		// calculate factor 2 (2^exponent)
-//		BigInteger factor2 = new BigInteger("2");
-//		factor2 = factor2.pow(exponent.intValue());
-//
-//		// calculate product (factor1 * factor2) and return
-//		BigInteger product = factor1.multiply(factor2);
-//		byte[] expandedBits = product.toByteArray();
-//		return expandedBits;
-//	}
-
+    public List<Gateway> getGateways() {
+		return this.gateways;
+	}
+    
+    public void addAllGateways(Collection<Gateway> gateways) {
+		this.gateways.addAll(gateways);
+	}
+    
     public byte[] hash() {
         return Block.hash(this);
     }

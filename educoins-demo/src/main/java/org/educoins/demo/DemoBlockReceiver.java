@@ -12,6 +12,7 @@ import org.educoins.core.utils.Threading;
 
 import com.sun.istack.internal.NotNull;
 
+@SuppressWarnings("restriction")
 public class DemoBlockReceiver implements IBlockReceiver {
 
 	private IBlockStore blockStore;
@@ -34,9 +35,10 @@ public class DemoBlockReceiver implements IBlockReceiver {
 
 	@Override
 	public void receiveBlocks() {
-			
+		
 			Block latestBlock = this.blockStore.getLatest();
             Threading.run(() -> 
-            blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(latestBlock)));
+            this.blockListeners.forEach((iBlockListener) -> iBlockListener.blockReceived(latestBlock)));
+            
 	}	
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Threading;
 
 public class Miner implements IBlockListener {
 
@@ -78,7 +79,7 @@ public class Miner implements IBlockListener {
 				// synchronzie PoWThreads to avoid FileNotFoundException
 				synchronized (this) {
 					notifyFoundPoW(block);
-				}
+			}
 			} else {
 			}
 			

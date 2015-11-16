@@ -17,6 +17,7 @@ public class Generator {
 	
 	public String getSecureRandomString256HEX(){
 		byte[] nextByte = new byte[randomNumberLength256]; 
+		this.secureRandom.nextBytes(nextByte);
 		return ByteArray.convertToString(nextByte, HEX);
 	}
 	

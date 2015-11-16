@@ -106,6 +106,23 @@ public class Client extends Thread implements ITransactionListener {
 		this.inputs = new ArrayList<>();
 	}
 
+	public void sendGatewayTransaction(String publicKey){
+		Transaction transaction = new Transaction();
+		transaction.setVersion(1);
+		
+		Gate gate = new Gate(null, publicKey);
+		transaction.setGate(gate);
+		
+		byte[] hash = transaction.hash();
+		String hashedTranscation = ByteArray.convertToString(hash, 16);
+		
+		String signature = this.wallet.getSignature(publicKey, hashedTranscation);
+		gate.setSignature(signature);
+		
+		transaction.setGate(gate);
+		this.blockChain.sendTransaction(transaction);
+	}
+	
 	@Override
 	public void transactionReceived(Transaction transaction) {
 		generateInputs(transaction);
@@ -164,6 +181,7 @@ public class Client extends Thread implements ITransactionListener {
 			System.out.println("Select action:");
 			System.out.println("\t - (R)egular transaction");
 			System.out.println("\t - (A)pproved transaction");
+			System.out.println("\t - (G)ateway transaction");
 			String action = scanner.nextLine();
 			String unparsedAmount = null;
 			int amount = -1;
@@ -187,6 +205,12 @@ public class Client extends Thread implements ITransactionListener {
 				System.out.print("Type in LockingScript: ");
 				String lockingScript = scanner.nextLine();
 				this.sendApprovedTransaction(amount, owner, holder, lockingScript);
+				break;
+			case "g":
+				System.out.print("Gate is broadcasted.");
+				System.out.print("Type in your public key: ");
+				String publicKey = scanner.nextLine();
+				this.sendGatewayTransaction(publicKey);
 				break;
 			default:
 			}

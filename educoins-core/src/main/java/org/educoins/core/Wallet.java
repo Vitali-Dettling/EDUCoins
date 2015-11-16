@@ -29,13 +29,15 @@ public class Wallet {
 	private static final String SEPERATOR = ";";
 	private static final String KeyStorageFile = "/wallet.keys";
 	
+	
 	private ECDSA keyPair;
 	private Path directoryKeyStorage;
 	
 	public Wallet(){
-		
+		//Warning: ECDSA cannot be initialized here, because it will tricker a very weird bug. 
+		//The bug has something to do with the finding of new blocks. 
+		//this.keyPair = new ECDSA();
 		try {
-			
 			this.directoryKeyStorage = Paths.get(System.getProperty("user.home") + File.separator + "documents" + File.separator
 					+ "educoins" + File.separator + "demo" + File.separator + "wallet");
 		
@@ -47,6 +49,23 @@ public class Wallet {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean compare(String message, String signature, String publicKey){
+		
+		this.keyPair = new ECDSA();
+		try{
+			
+			byte[] sign = ByteArray.convertFromString(signature, HEX);
+			if(this.keyPair.verifySignature(message, sign, publicKey)){
+				return true;
+			}
+		} catch (Exception e) {
+			System.err.println("ERROR: Class Wallet. Verification of the Signature." + e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 	
 	//TODO [Vitali] Bad performance because the whole file will be checked over and over again. Will be better with the DB.
@@ -74,9 +93,10 @@ public class Wallet {
 	public String getSignature(String publicKey, String hashedTranscation){
 		
 		try {
-			
+						
 			byte[] signature = this.keyPair.getSignature(publicKey, hashedTranscation);
-			return ByteArray.convertToString(signature, HEX);
+			String sig = ByteArray.convertToString(signature, HEX);
+			return sig;
 		} catch (Exception e) {
 			System.err.println("ERROR: Class Wallet. Creating of the Signature.");
 			e.printStackTrace();
@@ -271,69 +291,6 @@ public class Wallet {
 	
 			return privateKey;
 		}
-		
-		//TODO[Vitali] Adub this to the ECDSA class is preaty goot... -> When Time
-//		public static PrivateKey loadPrivateKey(String key64) throws GeneralSecurityException {
-//		    byte[] clear = ByteArray.convertFromString(key64, 16);
-//		    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
-//		    KeyFactory fact = KeyFactory.getInstance("DSA");
-//		    PrivateKey priv = fact.generatePrivate(keySpec);
-//		    Arrays.fill(clear, (byte) 0);
-//		    return priv;
-//		}
-//
-//
-//		public static PublicKey loadPublicKey(String stored) throws GeneralSecurityException {
-//		    byte[] data = ByteArray.convertFromString(stored, 16);
-//		    X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
-//		    KeyFactory fact = KeyFactory.getInstance("DSA");
-//		    return fact.generatePublic(spec);
-//		}
-//
-//		public static String savePrivateKey(PrivateKey priv) throws GeneralSecurityException {
-//		    KeyFactory fact = KeyFactory.getInstance("DSA");
-//		    PKCS8EncodedKeySpec spec = fact.getKeySpec(priv,
-//		            PKCS8EncodedKeySpec.class);
-//		    byte[] packed = spec.getEncoded();
-//		    String key64 = ByteArray.convertToString(packed, 16);
-//
-//		    Arrays.fill(packed, (byte) 0);
-//		    return key64;
-//		}
-//
-//
-//		public static String savePublicKey(PublicKey publ) throws GeneralSecurityException {
-//		    KeyFactory fact = KeyFactory.getInstance("DSA");
-//		    X509EncodedKeySpec spec = fact.getKeySpec(publ,
-//		            X509EncodedKeySpec.class);
-//		    return ByteArray.convertToString(spec.getEncoded(), 16);
-//		}
-//		
-//		
-//		public static void main(String[] args) throws Exception{
-//
-//			
-//		
-//			 KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
-//		    KeyPair pair = gen.generateKeyPair();
-//
-//		    String pubKey = savePublicKey(pair.getPublic());
-//		    PublicKey pubSaved = loadPublicKey(pubKey);
-//		    System.out.println(pair.getPublic()+"\n"+pubSaved);
-//
-//		    String privKey = savePrivateKey(pair.getPrivate());
-//		    PrivateKey privSaved = loadPrivateKey(privKey);
-//		    System.out.println(pair.getPrivate()+"\n"+privSaved);
-//			
-//			
-//			    
-//			   System.out.println(); 
-//			
-//
-//		}
-		
-		
-		
 	
 	}
 	
