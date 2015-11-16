@@ -42,9 +42,20 @@ public class Block {
 		this.transactionsCount = this.transactions.size();
 	}
 
-    public int getVersion() {
-        return this.version;
-    }
+	public Block copy(){
+		Block b = new Block();
+		b.setBits(this.getBits());
+		b.setTime(this.getTime());
+		b.setHashMerkleRoot(this.getHashMerkleRoot());
+		b.setHashPrevBlock(this.getHashPrevBlock());
+		b.setNonce(this.getNonce());
+		b.setTransactions(new ArrayList<Transaction>(this.getTransactions()));
+		return b;
+	}
+
+	public int getVersion() {
+		return this.version;
+	}
 
     public void setVersion(int version) {
         this.version = version;

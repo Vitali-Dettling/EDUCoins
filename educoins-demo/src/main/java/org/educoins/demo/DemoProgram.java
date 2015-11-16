@@ -4,6 +4,7 @@ import org.educoins.core.*;
 import org.educoins.core.p2p.P2pBlockReceiver;
 import org.educoins.core.p2p.discovery.LocalDiscovery;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.miner.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 import java.util.stream.Stream;
+
 
 public class DemoProgram {
 
