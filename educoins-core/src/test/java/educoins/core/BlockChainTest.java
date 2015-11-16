@@ -29,7 +29,6 @@ public class BlockChainTest {
 	
 	@Test
 	public void testPrepareNewBlock() {
-
 		
 		Block lastBlock = new Block();
 		Block newBlock = this.mockedBlockchain.prepareNewBlock(lastBlock);

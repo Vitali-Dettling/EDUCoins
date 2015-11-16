@@ -209,6 +209,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return this.store.get(currentBlock);
 	}
 	
+	
+	
 	private void createGateway(Transaction transaction){
 		
 		Gate gate = transaction.getGate();	

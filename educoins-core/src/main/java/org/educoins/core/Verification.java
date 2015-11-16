@@ -1,13 +1,12 @@
 package org.educoins.core;
 
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
+import org.jetbrains.annotations.NotNull;
 
 public class Verification {
 	

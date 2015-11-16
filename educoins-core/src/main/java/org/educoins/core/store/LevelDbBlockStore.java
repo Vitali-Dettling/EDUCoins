@@ -12,9 +12,6 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import com.google.gson.Gson;
 
 /**
  * The default implementation of a {@link IBlockStore} using Google Level Db as storage-backend.
@@ -56,17 +53,22 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     public synchronized void put(@NotNull Block block) {
+    	byte[] key = block.hash().getBytes();
+
         database.put(key, getJson(block).getBytes());
         latest = key;
         database.put(LATEST_KEY, latest);
     }
 
 
-    @Nullable
+    @SuppressWarnings("restriction")
+	@Nullable
     public synchronized Block get(@NotNull Block block) throws BlockNotFoundException {
+    	return getBlock(database.get(block.hash().getBytes()));
     }
 
-    @Nullable
+    @SuppressWarnings("restriction")
+	@Nullable
     public synchronized Block getLatest() {
         if (isEmpty()) return null;
 

@@ -17,18 +17,26 @@ public class Miner implements IBlockListener {
 	private static final int BIT32 = 32;
 	
 	private BlockChain blockChain;
+	private CopyOnWriteArrayList<IPoWListener> powListeners;
 
 	public Miner(BlockChain blockChain) {
 		
 		this.blockChain = blockChain;
 		this.blockChain.addBlockListener(this);
+		this.powListeners = new CopyOnWriteArrayList<>();
 		this.addPoWListener(this.blockChain);
 	}
 	
 	public void addPoWListener(IPoWListener powListener) {
+		synchronized (this) {
+			this.powListeners.add(powListener);
+		}
 	}
 	
 	public void removePoWListener(IPoWListener powListener) {
+		synchronized (this) {
+			this.powListeners.remove(powListener);
+		}
 	}
 	
 	public void notifyFoundPoW(Block block) {
@@ -40,6 +48,7 @@ public class Miner implements IBlockListener {
 
 	@Override
 	public void blockReceived(Block block) {
+		Thread powThread = new PoWThread(block.copy());
 		powThread.start();
 	}
 	
@@ -73,6 +82,7 @@ public class Miner implements IBlockListener {
 				
 //				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge.getBytes())
 //				+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold.getBytes()));
+				
 				
 			} while (this.active && challenge.compareTo(targetThreshold) > 0);
 

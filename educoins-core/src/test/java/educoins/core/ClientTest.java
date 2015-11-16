@@ -1,10 +1,13 @@
 package educoins.core;
 
+import static org.junit.Assert.fail;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.internal.runners.statements.Fail;
 
 public class ClientTest {
 
@@ -26,6 +29,7 @@ public class ClientTest {
 
 	@Test
 	public void test() {
+		fail("Not yet implemented");
 	}
 	
 	//TODO [Vitali] sendRegularTransaction -> Write integration test.  
