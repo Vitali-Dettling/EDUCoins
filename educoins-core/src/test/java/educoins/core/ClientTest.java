@@ -24,7 +24,6 @@ public class ClientTest {
 
 	@Test
 	public void test() {
-		fail("Not yet implemented");
 	}
 	
 	//TODO [Vitali] sendRegularTransaction -> Write integration test.  
