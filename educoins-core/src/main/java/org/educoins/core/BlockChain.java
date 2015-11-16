@@ -1,16 +1,17 @@
 package org.educoins.core;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.store.IBlockStore;
-import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
+	private static final int COMPARE_EQUAL = 0;
 	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
 	private static final int IN_SECONDS = 1000;
@@ -36,7 +37,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
 		
 		this.wallet = new Wallet();
-		this.blockListeners = new ArrayList<>();
+		this.blockListeners = new CopyOnWriteArrayList<>();
 		this.blockReceiver = blockReceiver;
 		this.blockReceiver.addBlockListener(this);
 		this.transactionListeners = new ArrayList<>();
@@ -63,8 +64,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 	
 	public void notifyBlockReceived(Block newBlock) {
-		for (IBlockListener blockListener : blockListeners) {
-			blockListener.blockReceived(newBlock);
+		synchronized (this) {
+			for (IBlockListener blockListener : blockListeners) {
+				blockListener.blockReceived(newBlock);
+			}
 		}
 	}
 	
@@ -127,7 +130,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
 		this.newBlock.setVersion(currentBlock.getVersion());
-		this.newBlock.setHashPrevBlock(ByteArray.convertToString(currentBlock.hash(), 16));
+		this.newBlock.setHashPrevBlock(currentBlock.hash());
 		// TODO [joeren]: calculate hash merkle root! Temporary take the
 		// hash merkle root of the previous block.
 		this.newBlock.setHashMerkleRoot(currentBlock.getHashMerkleRoot());
@@ -172,14 +175,14 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		if(this.blockCounter == CHECK_AFTER_BLOCKS){
 			long currentTime = System.currentTimeMillis();
 			long allBlocksSinceLastTime = previousBlock.getTime();
-			BigDecimal oldDifficulty = new BigDecimal(new BigInteger(previousBlock.getBits(), HEX)).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
+			BigDecimal oldDifficulty = new BigDecimal(previousBlock.getBits().toBigInteger()).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
 			BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
 			
 			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME),
 					BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
 			
-			this.newBlock.setBits(newDifficulty.toBigInteger().toString(HEX));			
+			this.newBlock.setBits(Sha256Hash.wrap(newDifficulty.toBigInteger().toByteArray()));
 			this.newBlock.setTime(currentTime);
 			this.blockCounter = RESET_BLOCKS_COUNT;
 		}

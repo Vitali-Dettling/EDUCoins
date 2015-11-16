@@ -1,19 +1,17 @@
 package org.educoins.core.store;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.google.gson.Gson;
 import org.educoins.core.Block;
-import org.educoins.core.utils.ByteArray;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.google.gson.Gson;
-import com.sun.istack.internal.Nullable;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * The default implementation of a {@link IBlockStore} using Google Level Db as storage-backend.
@@ -55,32 +53,22 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     public synchronized void put(@NotNull Block block) {
-//        TODO: would be a lot nicer?! byte[] key = Block.hash(block);
-        //byte[] key = block.hash();
-        byte[] key = ByteArray.convertToString(block.hash(), 16).getBytes();
-        
+        byte[] key = block.hash().getBytes();
+
         database.put(key, getJson(block).getBytes());
         latest = key;
         database.put(LATEST_KEY, latest);
     }
 
 
-    @SuppressWarnings("restriction")
-	@Override
+    @Override
     @Nullable
     public synchronized Block get(@NotNull Block block) throws BlockNotFoundException {
-        
-    	byte[] hash = ByteArray.convertToString(block.hash(), 16).getBytes();
-    	
-        if (database.get(hash) == null) {
-            throw new BlockNotFoundException(hash);
-        }
-        return getBlock(database.get(hash));
+        return getBlock(database.get(block.hash().getBytes()));
     }
 
-	@Override
+    @Override
     @Nullable
-    @SuppressWarnings("restriction")
     public synchronized Block getLatest() {
         if (isEmpty()) return null;
 

@@ -1,5 +1,5 @@
-package org.educoins.core.test.utils;
-
+package educoins.core.utils;
+/*
 import org.educoins.core.BlockChain;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.ITransactionReceiver;
@@ -41,4 +41,4 @@ public class MockedBlockChain {
 	
 
 
-}
+}*/

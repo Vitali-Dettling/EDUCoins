@@ -1,32 +1,37 @@
-package org.educoins.core;
+package org.educoins.miner;
+
+
+import org.educoins.core.*;
+import org.educoins.core.utils.*;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.educoins.core.utils.ByteArray;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Miner implements IBlockListener {
 
 	private static final int BIT32 = 32;
 	
 	private BlockChain blockChain;
-	private List<IPoWListener> powListeners;
+	private CopyOnWriteArrayList<IPoWListener> powListeners;
 
 	public Miner(BlockChain blockChain) {
 		
 		this.blockChain = blockChain;
 		this.blockChain.addBlockListener(this);
-		this.powListeners = new ArrayList<>();
+		this.powListeners = new CopyOnWriteArrayList<>();
 		this.addPoWListener(this.blockChain);
 	}
 	
 	public void addPoWListener(IPoWListener powListener) {
-		this.powListeners.add(powListener);
+		synchronized (this) {
+			this.powListeners.add(powListener);
+		}
 	}
 	
 	public void removePoWListener(IPoWListener powListener) {
-		this.powListeners.remove(powListener);
+		synchronized (this) {
+			this.powListeners.remove(powListener);
+		}
 	}
 	
 	public void notifyFoundPoW(Block block) {
@@ -38,8 +43,11 @@ public class Miner implements IBlockListener {
 
 	@Override
 	public void blockReceived(Block block) {
-		Thread powThread = new PoWThread(block);
+		Thread powThread = new PoWThread(block.copy());
 		powThread.start();
+
+		//Thread powThread2 = new PoWThread(block.copy());
+		//powThread2.start();
 	}
 	
 	private class PoWThread extends Thread implements IBlockListener {
@@ -61,8 +69,9 @@ public class Miner implements IBlockListener {
 			
 			SecureRandom nonceGenerator = new SecureRandom();
 			byte[] nonce = new byte[BIT32];
-			byte[] targetThreshold = Block.getTargetThreshold(this.block.getBits());
-			byte[] challenge;
+
+			Sha256Hash targetThreshold = this.block.getBits();
+			Sha256Hash challenge;
 			
 			do {
 				nonceGenerator.nextBytes(nonce);
@@ -72,14 +81,13 @@ public class Miner implements IBlockListener {
 			
 //				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge)
 //						+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold));
-			} while (this.active && ByteArray.compare(challenge, targetThreshold) > 0);
+			} while (this.active && challenge.compareTo(targetThreshold) > 0);
 
 			if (this.active) {
-				// synchronzie PoWThreads to avoid FileNotFoundException
+				// synchronize PoWThreads to avoid FileNotFoundException
 				synchronized (this) {
 					notifyFoundPoW(block);
 				}
-			} else {
 			}
 			
 			blockChain.removeBlockListener(this);

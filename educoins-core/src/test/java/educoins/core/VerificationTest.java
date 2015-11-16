@@ -1,16 +1,16 @@
-package org.educoins.core.test;
-
-import static org.junit.Assert.assertTrue;
-
+package educoins.core;
+/*
+import educoins.core.utils.MockedBlockChain;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Verification;
 import org.educoins.core.Wallet;
-import org.educoins.core.test.utils.MockedBlockChain;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.junit.Assert.assertTrue;
 
 public class VerificationTest {
 	
@@ -55,4 +55,4 @@ public class VerificationTest {
 		block.setTransactions(transactions);
 	 * */
 
-}
+//}

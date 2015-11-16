@@ -1,8 +1,8 @@
-package org.educoins.core.test.utils;
-
-import java.security.SecureRandom;
+package educoins.core.utils;
 
 import org.educoins.core.utils.ByteArray;
+
+import java.security.SecureRandom;
 
 public class Generator {
 	

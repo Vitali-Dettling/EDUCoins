@@ -1,22 +1,16 @@
 package org.educoins.demo;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Scanner;
-
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.Client;
-import org.educoins.core.IBlockReceiver;
-import org.educoins.core.ITransactionListener;
-import org.educoins.core.ITransactionReceiver;
-import org.educoins.core.ITransactionTransmitter;
-import org.educoins.core.Miner;
+import org.educoins.core.*;
 import org.educoins.core.p2p.P2pBlockReceiver;
 import org.educoins.core.p2p.discovery.LocalDiscovery;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.miner.Miner;
+
+import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Scanner;
 
 public class DemoProgram {
 

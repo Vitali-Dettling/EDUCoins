@@ -1,6 +1,4 @@
-package org.educoins.core.test;
-
-import static org.junit.Assert.assertEquals;
+package educoins.core;
 
 import org.educoins.core.Approval;
 import org.educoins.core.Input;
@@ -8,6 +6,8 @@ import org.educoins.core.Output;
 import org.educoins.core.Transaction;
 import org.educoins.core.Transaction.ETransaction;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TransactionTest {
 	
