@@ -73,7 +73,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
      *         hex string, or if it does not represent exactly 32 bytes
      */
     public static Sha256Hash wrap(String hexString) {
-        return wrap(ByteArray.convertFromString(hexString));
+        return wrap(Hex.decode(hexString));
     }
 
 
