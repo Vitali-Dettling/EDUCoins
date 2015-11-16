@@ -6,21 +6,17 @@ import org.educoins.core.store.IBlockStore;
 import org.educoins.core.testutils.BlockStoreFactory;
 import org.educoins.core.utils.IO;
 import org.educoins.core.utils.RestClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.net.URI;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Tests the {@link BlockServer}.
  * Created by typus on 11/5/15.
  */
 public class BlockServerTest {
-
     protected IBlockStore store;
     protected RestClient<Block[]> restClient;
     protected int port = 8090;

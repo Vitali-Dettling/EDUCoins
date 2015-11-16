@@ -33,11 +33,22 @@ public class BlockServlet extends HttpServlet {
         resp.setContentType(BlockServer.contentType);
         resp.setStatus(HttpServletResponse.SC_OK);
 
-        List<Block> blocks = getData();
-        if (blocks.size() == 0) {
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        String requestPath = req.getContextPath();
+        String requestHash = requestPath.substring(requestPath.lastIndexOf("/"), requestPath.length());
+        if (requestHash.length() > 0) {
+            try {
+                resp.getWriter().print(gson.toJson(blockStore.get(requestHash.getBytes())));
+            } catch (BlockNotFoundException ex) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.getWriter().print(ex.getMessage());
+            }
         } else {
-            resp.getWriter().print(gson.toJson(blocks));
+            List<Block> blocks = getData();
+            if (blocks.size() == 0) {
+                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            } else {
+                resp.getWriter().print(gson.toJson(blocks));
+            }
         }
 
         logger.info("Request answered successful.");
