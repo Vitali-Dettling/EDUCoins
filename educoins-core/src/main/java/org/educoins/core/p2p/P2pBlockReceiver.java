@@ -1,5 +1,6 @@
 package org.educoins.core.p2p;
 
+import com.sun.istack.internal.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import org.educoins.core.p2p.discovery.DiscoveryStrategy;
 import org.educoins.core.p2p.nodes.Peer;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
+import org.jetbrains.annotations.NotNull;
 
 import com.sun.istack.internal.NotNull;
 

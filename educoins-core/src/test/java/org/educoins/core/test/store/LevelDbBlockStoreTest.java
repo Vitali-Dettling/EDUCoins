@@ -12,6 +12,7 @@ import org.educoins.core.Block;
 import org.educoins.core.Transaction;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.utils.ByteArray;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,9 +54,13 @@ public class LevelDbBlockStoreTest {
     @Test
     public void testPut() throws Exception {
         Block b1 = getRandomBlock();
+        store.put(b1);
+        ByteArray.convertToString(block.hash(), 16).getBytes();
         this.store.put(b1);
 
         fillRandom();
+
+        Block actual = store.get(Block.hash(b1));
         
         Block actual = this.store.get(b1);
        
@@ -82,6 +87,8 @@ public class LevelDbBlockStoreTest {
 
         store.put(b1);
 
+        Block b2 = store.get(Block.hash(b1));
+        Block b2 = store.get(ByteArray.convertToString(b1.hash(), 16).getBytes());
         Block b2 = store.get(b1);
         assertEquals(1, b2.getTransactionsCount());
 
