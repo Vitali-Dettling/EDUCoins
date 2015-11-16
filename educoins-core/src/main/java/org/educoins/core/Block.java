@@ -1,33 +1,33 @@
 package org.educoins.core;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import org.educoins.core.cryptography.SHA256Hasher;
-//import org.educoins.core.p2p.messages.MessageProtos;
-import org.educoins.core.utils.ByteArray;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
+
+//import org.educoins.core.p2p.messages.MessageProtos;
 
 public class Block {
 	
+	private static final int DEFAULT_REWARD = 10;
+	private static final int ZERO = 0;
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
-	private static final String HASH_PREV_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
-	private static final String HASH_MERKLE_ROOT = "0000000000000000000000000000000000000000000000000000000000000000";
+	private static final Sha256Hash HASH_PREV_BLOCK  = Sha256Hash.ZERO_HASH;
+	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
 	private static final long TIME = System.currentTimeMillis();
 
-	private static final String BITS = "3dffffff";
+	private static final byte[] BITS = ByteArray.convertFromString("3dffffff");
 	private static final long NONCE = 1114735442;
 
 	private int version;
-	private String hashPrevBlock;
-	private String hashMerkleRoot;
+	private Sha256Hash hashPrevBlock;
+	private Sha256Hash hashMerkleRoot;
 	private long time;
-	private String bits;
+	private byte[] bits;
 	private long nonce;
 	private int transactionsCount;
 	private List<Transaction> transactions;
@@ -44,31 +44,38 @@ public class Block {
 		this.transactionsCount = this.transactions.size();
 	}
 
-    public static byte[] getTargetThreshold(String bits) {
-        return ByteArray.convertFromString(bits);
-    }
+	public Block copy(){
+		Block b = new Block();
+		b.setBits(this.getBits());
+		b.setTime(this.getTime());
+		b.setHashMerkleRoot(this.getHashMerkleRoot());
+		b.setHashPrevBlock(this.getHashPrevBlock());
+		b.setNonce(this.getNonce());
+		b.setTransactions(new ArrayList<Transaction>(this.getTransactions()));
+		return b;
+	}
 
-    public int getVersion() {
-        return this.version;
-    }
+	public int getVersion() {
+		return this.version;
+	}
 
     public void setVersion(int version) {
         this.version = version;
     }
 
-    public String getHashPrevBlock() {
+    public Sha256Hash getHashPrevBlock() {
         return this.hashPrevBlock;
     }
 
-    public void setHashPrevBlock(String hashPrevBlock) {
+    public void setHashPrevBlock(Sha256Hash hashPrevBlock) {
         this.hashPrevBlock = hashPrevBlock;
     }
 
-    public String getHashMerkleRoot() {
+    public Sha256Hash getHashMerkleRoot() {
         return this.hashMerkleRoot;
     }
 
-    public void setHashMerkleRoot(String hashMerkleRoot) {
+    public void setHashMerkleRoot(Sha256Hash hashMerkleRoot) {
         this.hashMerkleRoot = hashMerkleRoot;
     }
 
@@ -80,28 +87,30 @@ public class Block {
         this.time = time;
     }
 
-	public String getBits() {
-		String mantisse = bits.substring(2,8);
-		String exponent = bits.substring(0,2);
-		int expInt = Integer.parseInt(exponent, 16) - 3;
-		StringBuilder resultString = new StringBuilder();
-		resultString.append(mantisse);
-		for (int i = 0; i < expInt; i++){
-			resultString.append("0");
-		}
-		return resultString.toString();
+	public Sha256Hash getBits() {
+        byte[] mantisse = Arrays.copyOfRange(bits, 1, 4);
+        byte exponent = bits[0];
+
+        int expInt = ((int) exponent) - 3;
+        byte[] result = new byte[mantisse.length + expInt / 2];
+        Arrays.fill(result, (byte) 0);
+        System.arraycopy(mantisse, 0, result, 0, mantisse.length);
+        
+        return Sha256Hash.wrap(result);
 	}
 
-	public void setBits(String bits) {
-		while (bits.charAt(0) == '0'){
-			bits = bits.substring(1, bits.length() - 1);
-		}
-		String exponent = Integer.toHexString(bits.length() - 3);
-		if (exponent.length() < 2){
-			exponent = "0" + exponent;
-		}
-		String mantisse = bits.substring(0,6);
-		this.bits = exponent + mantisse;
+	public void setBits(Sha256Hash inBits) {
+		byte[] bits = inBits.getBytes();
+        byte[] mantisse;
+        byte[] exponent = new byte[1];
+
+        int i = 0;
+        for (i = 0; bits[i] == (byte) 0; i++); //count leading 0
+
+        exponent[0] = (byte) ((bits.length - i) * 2 - 3);
+        mantisse = Arrays.copyOfRange(bits, i, i + 3);
+
+        this.bits = ByteArray.concatByteArrays(exponent, mantisse);
 	}
 
     public long getNonce() {
@@ -150,35 +159,7 @@ public class Block {
         this.transactionsCount = this.transactions.size();
     }
 
-
-// TODO [Vitali] Ist der richtige code, um exponenden und Mantise zu trennen und damit rechnen...
-//	public static byte[] getTargetThreshold(String bits) {
-//		byte[] convertedBits = ByteArray.convertFromString(bits, 16);
-//		
-//		// split the bits byte array into variables
-//		byte[] var1 = new byte[convertedBits.length - 1];
-//		System.arraycopy(convertedBits, 1, var1, 0, convertedBits.length - 1);
-//		byte[] var2 = { convertedBits[0] };
-//
-//		// define factor 1 (h2h3h4h5h6h7)
-//		BigInteger factor1 = new BigInteger(1, var1);
-//
-//		// calculate exponent
-//		BigInteger exponent = new BigInteger(1, var2);
-//		//exponent = exponent.subtract(new BigInteger("3"));
-//		exponent = exponent.multiply(new BigInteger("8"));
-//
-//		// calculate factor 2 (2^exponent)
-//		BigInteger factor2 = new BigInteger("2");
-//		factor2 = factor2.pow(exponent.intValue());
-//
-//		// calculate product (factor1 * factor2) and return
-//		BigInteger product = factor1.multiply(factor2);
-//		byte[] expandedBits = product.toByteArray();
-//		return expandedBits;
-//	}
-
-    public byte[] hash() {
+    public Sha256Hash hash() {
         return Block.hash(this);
     }
 
@@ -196,24 +177,55 @@ public class Block {
 
         return builder.build();
     }*/
+    
+	public int rewardCalculator(){
+		
+		int newReward = ZERO;
+		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
+		
+		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
+		if(DEFAULT_REWARD == lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD;
+		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
+			newReward = lastApprovedEDUCoins + 2;
+		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD - 2;
+		}		
 
-    public static byte[] hash(Block block) {
+		return newReward;
+	}
+	
+	private int findAllApprovedEDUCoins(){
+		
+		int latestApprovedEDUCoins = ZERO;
+		List<Transaction> latestTransactions = this.getTransactions();
+		
+		//TODO[Vitali] Might not be 100% correct???ß
+		for(Transaction transaction : latestTransactions){
+			List<Approval> approvals = transaction.getApprovals();
+			for(Approval approval : approvals){
+				latestApprovedEDUCoins += approval.getAmount();
+			}
+		}
+		
+		return latestApprovedEDUCoins;
+	}
+    public static Sha256Hash hash(Block block) {
 		// specify used header fields (in byte arrays)
 		byte[] version = ByteArray.convertFromLong(block.version);
-		byte[] hashPrevBlock = ByteArray.convertFromString(block.hashPrevBlock);
-		byte[] hashMerkleRoot = ByteArray.convertFromString(block.hashMerkleRoot);
+		byte[] hashPrevBlock = block.hashPrevBlock.getBytes();
+		byte[] hashMerkleRoot = block.hashMerkleRoot.getBytes();
 		byte[] time = ByteArray.convertFromLong(block.time);
-		byte[] bits = ByteArray.convertFromString(block.bits);
+		byte[] bits = block.bits;
 		byte[] nonce = ByteArray.convertFromLong(block.nonce);
 
 		// concatenate used header fields
 		byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
 				bits, nonce);
-
-
+		
 		// hash concatenated header fields and return
 		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
-		return hash;
+		return Sha256Hash.wrap(hash);
 	}
 
     @Override

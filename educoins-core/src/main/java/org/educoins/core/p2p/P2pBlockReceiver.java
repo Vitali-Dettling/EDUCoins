@@ -1,6 +1,10 @@
 package org.educoins.core.p2p;
 
-import com.sun.istack.internal.NotNull;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.educoins.core.Block;
 import org.educoins.core.IBlockListener;
 import org.educoins.core.IBlockReceiver;
@@ -8,11 +12,7 @@ import org.educoins.core.p2p.discovery.DiscoveryStrategy;
 import org.educoins.core.p2p.nodes.Peer;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The P2p specific implementation of an {@link IBlockReceiver}.
