@@ -2,10 +2,10 @@ package org.educoins.core;
 
 import org.educoins.core.utils.ByteArray;
 
+import com.google.common.base.Objects;
+
 public class Output {
 
-	private static final int HEX = 16;
-	
 	private int amount;
 	private String dstPublicKey;
 	private String lockingScript;
@@ -47,6 +47,16 @@ public class Output {
 		byte[] lockingScript = ByteArray.convertFromString(getLockingScript());
 		return ByteArray.concatByteArrays(lockingScript);
 		
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("amount", amount)
+				.add("dstPublicKey", dstPublicKey)
+				.add("lockingScript", lockingScript)
+				.toString();
 	}
 
 }

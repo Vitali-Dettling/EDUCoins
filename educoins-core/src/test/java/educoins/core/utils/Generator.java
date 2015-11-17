@@ -9,21 +9,17 @@ public class Generator {
 	private static final int randomNumberLength256 = 256;
 	private static final int HEX = 16;
 	
-	private SecureRandom secureRandom;
+	private static SecureRandom secureRandom = new SecureRandom();
 	
-	public Generator(){
-		 this.secureRandom = new SecureRandom();
-	}
-	
-	public String getSecureRandomString256HEX(){
+	public static String getSecureRandomString256HEX(){
 		byte[] nextByte = new byte[randomNumberLength256]; 
-		this.secureRandom.nextBytes(nextByte);
+		secureRandom.nextBytes(nextByte);
 		return ByteArray.convertToString(nextByte, HEX);
 	}
 	
-	public byte[] getSecureRandomByteArray256(){
+	public static byte[] getSecureRandomByteArray256(){
 		byte[] nextByte = new byte[randomNumberLength256]; 
-		this.secureRandom.nextBytes(nextByte);
+		secureRandom.nextBytes(nextByte);
 		return nextByte;
 	}
 

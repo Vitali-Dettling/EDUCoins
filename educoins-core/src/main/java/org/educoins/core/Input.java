@@ -1,11 +1,13 @@
 package org.educoins.core;
 
+import java.util.Arrays;
+
 import org.educoins.core.utils.ByteArray;
+
+import com.google.common.base.Objects;
 
 public class Input {
 
-	private static final int HEX = 16;
-	
 	private int index;
 	private int amount;
 	private String hashPrevOutput;
@@ -74,8 +76,18 @@ public class Input {
 	    public int getNumVal() {
 	        return enumVal;
 	    }
-		
-		
+	}
+
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("index", index)
+				.add("amount", amount)
+				.add("hashPrevOutput", hashPrevOutput)
+				.add("unlockingScript", Arrays.deepToString(unlockingScript))
+				.toString();
 	} 
 	
 	

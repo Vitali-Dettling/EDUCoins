@@ -22,6 +22,7 @@ public class DemoProgram {
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
+    	//TODO Temp Delete.
         String localDBStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
                 + "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore" ;
         

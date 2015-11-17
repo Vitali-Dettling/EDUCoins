@@ -1,6 +1,8 @@
 package educoins.core.store; 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,13 +20,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import educoins.core.utils.Generator;
+import educoins.core.utils.MockedWallet;
+import educoins.core.utils.PathHandler;
+
 /**
  * Default test for {@link LevelDbBlockStore}
  * Created by typus on 10/19/15.
  */
 public class LevelDbBlockStoreTest {
 
-	public static final File DIRECTORY = new File("/tmp/blockstore");
+	private File DIRECTORY = PathHandler.DIRECTORY_DB;
+			
     private IBlockStore store;
 
     @Before
@@ -111,8 +118,9 @@ public class LevelDbBlockStoreTest {
     @Test
     public void testStoreGateway(){
     	
-    	final String publicKey = "ABC";
-    	final String signature = "ABC";
+    	String randomNumber = Generator.getSecureRandomString256HEX();
+    	final String publicKey = MockedWallet.getPublicKey();
+    	final String signature = MockedWallet.getSignature(publicKey, randomNumber);
     	
     	Gate gate = new Gate(null, publicKey);
     	Gateway gateway = new Gateway();
@@ -126,14 +134,16 @@ public class LevelDbBlockStoreTest {
 		
 		this.store.put(block);
 		Block storedBlock = this.store.get(block);
-		List<Gateway> storedGateways = storedBlock.getGateways();
 		
-		//TODO [Vitali] Finish implementing Equals -> overwrite method.
 		assertTrue(!storedBlock.getGateways().isEmpty());
-		assertEquals(block, storedBlock);	
+		
+		String originalBlock = block.toString();
+		String storedDBBlock = storedBlock.toString();
+		
+		assertEquals(originalBlock, storedDBBlock);	
     }
-
-    private void fillRandom() {
+    
+	private void fillRandom() {
         for (int i = 0; i < 23; i++) {
             store.put(getRandomBlock());
         }
@@ -144,7 +154,8 @@ public class LevelDbBlockStoreTest {
         toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setBits(Sha256Hash.wrap(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE))));
-        toReturn.setHashMerkleRoot(Sha256Hash.wrap(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE))));
+        String trueRandom =  Generator.getSecureRandomString256HEX();
+        toReturn.setHashMerkleRoot(Sha256Hash.wrap(trueRandom));
         return toReturn;
     }
 

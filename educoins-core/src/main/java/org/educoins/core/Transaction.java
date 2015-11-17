@@ -7,9 +7,9 @@ import java.util.List;
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 
-public class Transaction {
+import com.google.common.base.Objects;
 
-	private static final int HAS_NO_ENTRIES = 0;
+public class Transaction {
 
 	protected int version;
 
@@ -167,11 +167,7 @@ public class Transaction {
 	public void setGate(Gate gate) {
 		this.gate = gate;
 	}
-	
-	
-	
-	
-	
+
 	public int getGatewaysCount() {
 		return this.gatewaysCount;
 	}
@@ -352,5 +348,27 @@ public class Transaction {
 		APPROVED, COINBASE, REGULAR, GATE, GATEWAY,
 
 	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("version", version)
+				.add("inputsCount", inputsCount)
+				.add("inputs", this.inputs.toString())
+				.add("outputsCount", outputsCount)
+				.add("outputs", this.outputs.toString())
+				.add("approvalsCount", approvalsCount)
+				.add("approvals", this.approvals.toString())
+				.add("gatewaysCount", gatewaysCount)
+				.add("gateways", this.gateways.toString())
+				.add("gate", this.gate.toString())
+				.toString();
+	}
+
+
+	
+	
+	
 
 }

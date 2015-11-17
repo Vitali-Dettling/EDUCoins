@@ -3,6 +3,8 @@ package org.educoins.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Objects;
+
 public class Gateway{
 	
 	private static final int randomNumberLength256 = 256;
@@ -19,6 +21,16 @@ public class Gateway{
 		return this.gates.size();
 	}
 	
+	@SuppressWarnings("deprecation")
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("randomNumberLength256", randomNumberLength256)
+				.add("gates", this.gates.toString())
+				.toString();
+	}
+
+
 	public List<Gate> getGates() {
 		return gates;
 	}

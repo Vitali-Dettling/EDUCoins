@@ -1,11 +1,8 @@
 package org.educoins.core;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -27,23 +24,23 @@ public class Wallet {
 
 	private static final int HEX = 16;
 	private static final String SEPERATOR = ";";
-	private static final String KeyStorageFile = "/wallet.keys";
+	private static final String WALLET_FILE_NAME = "/wallet.keys";
 	
 	
 	private ECDSA keyPair;
-	private Path directoryKeyStorage;
+	private String directoryKeyStorage;
 	
-	public Wallet(){
+	public Wallet(String directory){
 		//Warning: ECDSA cannot be initialized here, because it will tricker a very weird bug. 
 		//The bug has something to do with the finding of new blocks. 
 		//this.keyPair = new ECDSA();
 		try {
-			this.directoryKeyStorage = Paths.get(System.getProperty("user.home") + File.separator + "documents" + File.separator
-					+ "educoins" + File.separator + "demo" + File.separator + "wallet");
+			this.directoryKeyStorage =  directory;
 		
+			//TODO[Vitali] Delete after the prototype works. 
 			IO.deleteDirectory(directoryKeyStorage);
 			IO.createDirectory(directoryKeyStorage);
-			IO.createFile(this.directoryKeyStorage  + KeyStorageFile);
+			IO.createFile(this.directoryKeyStorage  + WALLET_FILE_NAME);
 		
 		} catch (IOException e) {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
@@ -119,7 +116,7 @@ public class Wallet {
 		String publicKey = this.keyPair.getPublicKey();
 		
 		try {
-			IO.appendToFile(this.directoryKeyStorage + KeyStorageFile, privateKey + SEPERATOR + publicKey + "\r\n");
+			IO.appendToFile(this.directoryKeyStorage + WALLET_FILE_NAME, privateKey + SEPERATOR + publicKey + "\r\n");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -131,7 +128,7 @@ public class Wallet {
 	
 	public List<String> getPublicKeys() throws IOException {
 		List<String> publicKeys = new ArrayList<>();
-		String keyFile = IO.readFromFile(this.directoryKeyStorage + KeyStorageFile);
+		String keyFile = IO.readFromFile(this.directoryKeyStorage + WALLET_FILE_NAME);
 		BufferedReader reader = new BufferedReader(new StringReader(keyFile));
 		String line;
 		while ((line = reader.readLine()) != null) {
@@ -275,7 +272,7 @@ public class Wallet {
 		
 		public String getPrivateKey(String publicKey) throws IOException {
 			
-			String keyFile = IO.readFromFile(directoryKeyStorage + KeyStorageFile);
+			String keyFile = IO.readFromFile(directoryKeyStorage + WALLET_FILE_NAME);
 			BufferedReader reader = new BufferedReader(new StringReader(keyFile));
 			String line;
 			String privateKey = null;

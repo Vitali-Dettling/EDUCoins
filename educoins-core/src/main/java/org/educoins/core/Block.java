@@ -9,10 +9,12 @@ import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 
+import com.google.common.base.Objects;
+
 //import org.educoins.core.p2p.messages.MessageProtos;
 
 public class Block {
-	
+
 	private static final int DEFAULT_REWARD = 10;
 	private static final int ZERO = 0;
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
@@ -173,55 +175,7 @@ public class Block {
     public Sha256Hash hash() {
         return Block.hash(this);
     }
-
-    /*public MessageProtos.Block
-    /*public MessageProtos.Block toProto() {
-        MessageProtos.Block.Builder builder = MessageProtos.Block.newBuilder();
-        builder.setBits(Integer.parseInt(getBits()));
-        builder.setVersion(getVersion());
-        builder.setMerkleRoot(getHashMerkleRoot());
-        builder.setPrevBlock(getHashPrevBlock());
-        builder.setNonce((int) getNonce());
-        builder.setTimestamp(getTime());
-        builder.setTxnCount(getTransactionsCount());
-        int index = 0;
-        transactions.forEach(tnx -> builder.setTxns(index, tnx.getApprovalsCount()));
-
-        return builder.build();
-    }*/
-    
-	public int rewardCalculator(){
-		
-		int newReward = ZERO;
-		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
-		
-		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
-		if(DEFAULT_REWARD == lastApprovedEDUCoins){
-			newReward = DEFAULT_REWARD;
-		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
-			newReward = lastApprovedEDUCoins + 2;
-		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
-			newReward = DEFAULT_REWARD - 2;
-		}		
-
-		return newReward;
-	}
-	
-	private int findAllApprovedEDUCoins(){
-		
-		int latestApprovedEDUCoins = ZERO;
-		List<Transaction> latestTransactions = this.getTransactions();
-		
-		//TODO[Vitali] Might not be 100% correct???ß
-		for(Transaction transaction : latestTransactions){
-			List<Approval> approvals = transaction.getApprovals();
-			for(Approval approval : approvals){
-				latestApprovedEDUCoins += approval.getAmount();
-			}
-		}
-		
-		return latestApprovedEDUCoins;
-	}
+ 
     public static Sha256Hash hash(Block block) {
 		// specify used header fields (in byte arrays)
 		byte[] version = ByteArray.convertFromLong(block.version);
@@ -240,30 +194,85 @@ public class Block {
 		return Sha256Hash.wrap(hash);
 	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Block block = (Block) o;
-
-        if (version != block.version) return false;
-        if (time != block.time) return false;
-        if (nonce != block.nonce) return false;
-        if (!hashPrevBlock.equals(block.hashPrevBlock)) return false;
-        if (!hashMerkleRoot.equals(block.hashMerkleRoot)) return false;
-        return bits.equals(block.bits);
-    }
-
-
-    @Override
-	public int hashCode() {
-		int result = version;
-		result = 31 * result + hashPrevBlock.hashCode();
-		result = 31 * result + hashMerkleRoot.hashCode();
-		result = 31 * result + (int) (time ^ (time >>> 32));
-		result = 31 * result + bits.hashCode();
-		result = 31 * result + (int) (nonce ^ (nonce >>> 32));
-		return result;
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof Block) {
+			Block that = (Block) object;
+			return Objects.equal(this.version, that.version) && Objects.equal(this.hashPrevBlock, that.hashPrevBlock)
+					&& Objects.equal(this.hashMerkleRoot, that.hashMerkleRoot) && Objects.equal(this.time, that.time)
+					&& Arrays.deepEquals(new Object[] { this.bits }, new Object[] { that.bits })
+					&& Objects.equal(this.nonce, that.nonce)
+					&& Objects.equal(this.transactionsCount, that.transactionsCount)
+					&& Objects.equal(this.transactions, that.transactions)
+					&& Objects.equal(this.gateways, that.gateways);
+		}
+		return false;
 	}
+    
+    /*public MessageProtos.Block
+    /*public MessageProtos.Block toProto() {
+        MessageProtos.Block.Builder builder = MessageProtos.Block.newBuilder();
+        builder.setBits(Integer.parseInt(getBits()));
+        builder.setVersion(getVersion());
+        builder.setMerkleRoot(getHashMerkleRoot());
+        builder.setPrevBlock(getHashPrevBlock());
+        builder.setNonce((int) getNonce());
+        builder.setTimestamp(getTime());
+        builder.setTxnCount(getTransactionsCount());
+        int index = 0;
+        transactions.forEach(tnx -> builder.setTxns(index, tnx.getApprovalsCount()));
+
+        return builder.build();
+    }*/
+	
+	@SuppressWarnings("deprecation")
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("version", version)
+				.add("hashPrevBlock", hashPrevBlock)
+				.add("hashMerkleRoot", hashMerkleRoot)
+				.add("time", time)
+				.add("bits", Arrays.deepToString(new Object[] { bits }))
+				.add("nonce", nonce)
+				.add("transactionsCount", transactionsCount)
+				.add("transactions", this.transactions.toString())
+				.add("gateways", this.gateways.toString())
+				.toString();
+	}
+	
+	public int rewardCalculator(){
+		
+		int newReward = ZERO;
+		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
+		
+		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
+		if(DEFAULT_REWARD == lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD;
+		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
+			newReward = lastApprovedEDUCoins + 2;
+		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
+			newReward = DEFAULT_REWARD - 2;
+		}		
+
+		return newReward;
+	}
+
+	private int findAllApprovedEDUCoins(){
+		
+		int latestApprovedEDUCoins = ZERO;
+		List<Transaction> latestTransactions = this.getTransactions();
+		
+		//TODO[Vitali] Might not be 100% correct???ß
+		for(Transaction transaction : latestTransactions){
+			List<Approval> approvals = transaction.getApprovals();
+			for(Approval approval : approvals){
+				latestApprovedEDUCoins += approval.getAmount();
+			}
+		}
+		
+		return latestApprovedEDUCoins;
+	}
+
+
 }

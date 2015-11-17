@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import educoins.core.utils.MockedBlockChain;
+import educoins.core.utils.PathHandler;
 
 public class VerificationTest {
 	
@@ -23,7 +24,7 @@ public class VerificationTest {
 	@Before
 	public void setUp(){
 		
-		Wallet wallet = new Wallet();
+		Wallet wallet = new Wallet(PathHandler.DIRECTORY_WALLET);
 		MockedBlockChain mockedBlockChain = new MockedBlockChain();
 		BlockChain blockChain = mockedBlockChain.getMockedBlockChain();
 		this.verification = new Verification(wallet, blockChain);

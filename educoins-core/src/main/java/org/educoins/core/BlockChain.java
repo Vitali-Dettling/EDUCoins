@@ -1,5 +1,6 @@
 package org.educoins.core;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
 		
-		this.wallet = new Wallet();
+		//TODO Temp Delete.
+		String walletDirectory = (System.getProperty("user.home") + File.separator + "documents" + File.separator
+				+ "educoins" + File.separator + "demo" + File.separator + "wallet");
+		
+		this.wallet = new Wallet(walletDirectory);
 		this.blockListeners = new CopyOnWriteArrayList<>();
 		this.blockReceiver = blockReceiver;
 		this.blockReceiver.addBlockListener(this);
@@ -213,6 +218,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	private void createGateway(Transaction transaction){
 		
+		
+		//TODO [Vitali] How to find out about all gateways? 
+		//TODO [Vitali] Broadcast the new gateway.
 		Gate gate = transaction.getGate();	
 		if(this.verification.verifyGate(transaction)){
 			this.myGateway.addGate(gate);

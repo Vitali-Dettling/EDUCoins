@@ -2,6 +2,8 @@ package org.educoins.core;
 
 import org.educoins.core.utils.ByteArray;
 
+import com.google.common.base.Objects;
+
 public class Approval {
 
 	private int amount;
@@ -58,7 +60,16 @@ public class Approval {
 		
 	}
 	
-	
+	@SuppressWarnings("deprecation")
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("amount", amount)
+				.add("holderSignature", holderSignature)
+				.add("ownerAddress", ownerAddress)
+				.add("lockingScript", lockingScript)
+				.toString();
+	}
 	
 	
 }

@@ -4,6 +4,8 @@ import java.security.SecureRandom;
 
 import org.educoins.core.utils.ByteArray;
 
+import com.google.common.base.Objects;
+
 public class Gate {
 
 	private static final int randomNumberLength256 = 256;
@@ -51,9 +53,28 @@ public class Gate {
 	public String externSignature(String signature){
 		return this.signHere = signature;
 	}
-	
-	
-	
+
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof Gate) {
+			Gate that = (Gate) object;
+			return Objects.equal(this.signatures, that.signatures) && Objects.equal(this.publicKey, that.publicKey)
+					&& Objects.equal(this.message, that.message) && Objects.equal(this.signHere, that.signHere);
+		}
+		return false;
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this)
+				.add("signatures", signatures)
+				.add("publicKey", publicKey)
+				.add("message", message)
+				.add("signHere", signHere)
+				.toString();
+	}
+
 	public byte[] getConcatedGate(){
 		
 		byte[] message = ByteArray.convertFromString(getMessage());
