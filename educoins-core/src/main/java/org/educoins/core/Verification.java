@@ -6,7 +6,6 @@ import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
-import org.jetbrains.annotations.NotNull;
 
 public class Verification {
 	
@@ -25,7 +24,7 @@ public class Verification {
 		this.blockChain = blockChain;
 		this.wallet = wallet;	
 	}
-	
+
 	public boolean verifyGate(@NotNull Transaction transaction){
 
 		Gate gate = transaction.getGate();
@@ -42,6 +41,7 @@ public class Verification {
 			return true;
 		} 
 		
+
 		return false;
 	}
 	
