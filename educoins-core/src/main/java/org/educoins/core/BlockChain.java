@@ -211,7 +211,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 	
 	public Block getPreviousBlock(Block currentBlock) {
-		return this.store.get(currentBlock);
+		return this.store.get(currentBlock.hash().getBytes());
 	}
 	
 	

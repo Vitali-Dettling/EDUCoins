@@ -62,10 +62,15 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
 
-    @SuppressWarnings("restriction")
-	@Nullable
-    public synchronized Block get(@NotNull Block block) throws BlockNotFoundException {
-    	return getBlock(database.get(block.hash().getBytes()));
+    @Override
+    @NotNull
+    public synchronized Block get(byte[] hash) throws BlockNotFoundException {
+        byte[] byteBlock = database.get(hash);
+
+        if (byteBlock == null) {
+            throw new BlockNotFoundException(hash);
+        }
+        return getBlock(byteBlock);
     }
 
     @SuppressWarnings("restriction")

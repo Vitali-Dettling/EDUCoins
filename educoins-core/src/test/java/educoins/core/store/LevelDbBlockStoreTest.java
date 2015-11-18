@@ -30,9 +30,12 @@ import educoins.core.utils.PathHandler;
  */
 public class LevelDbBlockStoreTest {
 
+	private static final int STORED = 10;
 	private File DIRECTORY = PathHandler.DIRECTORY_DB;
 			
     private IBlockStore store;
+    
+	private static int count = 0;
 
     @Before
     public void setup() {
@@ -61,7 +64,7 @@ public class LevelDbBlockStoreTest {
 
         fillRandom();
 
-        Block actual = store.get(b1);
+        Block actual = store.get(b1.hash().getBytes());
         byte[] expected = Block.hash(b1).getBytes();
         byte[] actualBytes = Block.hash(actual).getBytes();
 
@@ -85,7 +88,7 @@ public class LevelDbBlockStoreTest {
 
         store.put(b1);
 
-        Block b2 = store.get(b1);
+        Block b2 = store.get(b1.hash().getBytes());
         assertEquals(1, b2.getTransactionsCount());
 
         Transaction persisted = b2.getTransactions().get(0);
@@ -116,6 +119,45 @@ public class LevelDbBlockStoreTest {
     }
     
     @Test
+    public void testIteratorManually() {
+
+    	count = 0;
+    	
+    	Block genesisBlock = new Block();
+		this.store.put(genesisBlock);
+		List<Block> test = new ArrayList<Block>();
+		test.add(genesisBlock);
+		List<Block> result = new ArrayList<Block>();
+		
+		for(int i = 0 ; i < STORED ; i++){
+			
+			Block latestBlock = this.store.getLatest();
+			Sha256Hash hash = latestBlock.hash();
+			Block block = getRandomBlock();
+			block.setHashPrevBlock(hash);
+			this.store.put(block);
+			test.add(block);
+		}
+
+    	Block lastBlock = test.get(STORED);
+    	Sha256Hash temp = lastBlock.hash();
+    	for(int i = 0 ; i < STORED + 1 ; i++){
+			
+    		Block block = this.store.get(temp.getBytes());
+    		result.add(block);
+    		temp = block.getHashPrevBlock();
+		}
+    	
+    	List<Block> sortResult = new ArrayList<Block>();
+		for(int i = result.size() - 1 ; i >= 0 ; i--){
+			sortResult.add(result.get(i));
+		}
+    	
+		assertEquals(sortResult.toString(), test.toString());  
+     	count = 0;  	
+    }
+    
+    @Test
     public void testStoreGateway(){
     	
     	String randomNumber = Generator.getSecureRandomString256HEX();
@@ -133,7 +175,7 @@ public class LevelDbBlockStoreTest {
 		block.addAllGateways(gateways);
 		
 		this.store.put(block);
-		Block storedBlock = this.store.get(block);
+		Block storedBlock = this.store.get(block.hash().getBytes());
 		
 		assertTrue(!storedBlock.getGateways().isEmpty());
 		
@@ -151,7 +193,7 @@ public class LevelDbBlockStoreTest {
 
     private Block getRandomBlock() {
         Block toReturn = new Block();
-        toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
+        toReturn.setVersion(count++);
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setBits(Sha256Hash.wrap(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE))));
         String trueRandom =  Generator.getSecureRandomString256HEX();
