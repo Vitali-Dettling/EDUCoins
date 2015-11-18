@@ -2,6 +2,7 @@ package org.educoins.core.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -13,6 +14,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class IO {
 
+    public static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+    public static final String FILE_SEPERATOR = System.getProperty("file.separator");
+	
 	public static void createDirectory(String path) throws IOException {
 		IO.createDirectory(Paths.get(path));
 	}
@@ -112,5 +116,18 @@ public class IO {
 		}
 		Files.copy(srcPath, dstPath);
 	}
+	
+    public static File getDefaultBlockStoreFile() {
+        return new File(TMP_DIR + FILE_SEPERATOR + "EDUCoinsBlockStore");
+    }
+
+    public static boolean deleteDefaultBlockStoreFile() {
+        try {
+            deleteDirectory(TMP_DIR + FILE_SEPERATOR + "EDUCoinsBlockStore");
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
 
 }

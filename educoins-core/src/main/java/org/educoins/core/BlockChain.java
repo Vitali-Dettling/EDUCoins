@@ -196,7 +196,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	//TODO [Vitali] Method needs to be deleted as soon as the DB will be introduced.
 	public Block getPreviousBlock(Block currentBlock) {
-		return this.store.get(currentBlock);
+		return this.store.get(currentBlock.hash().getBytes());
 	}
 
 }

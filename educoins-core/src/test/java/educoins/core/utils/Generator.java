@@ -2,28 +2,17 @@ package educoins.core.utils;
 
 import java.security.SecureRandom;
 
-import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
 
 public class Generator {
 	
-	private static final int randomNumberLength256 = 256;
-	private static final int HEX = 16;
+	private static final int BYTE_256 = 256;
 	
-	private SecureRandom secureRandom;
+	private static SecureRandom secureRandom = new SecureRandom();
 	
-	public Generator(){
-		 this.secureRandom = new SecureRandom();
+	public static String getSecureRandomString256HEX(){
+		byte[] nextByte = new byte[BYTE_256]; 
+		secureRandom.nextBytes(nextByte);
+		return Sha256Hash.wrap(nextByte).toString();
 	}
-	
-	public String getSecureRandomString256HEX(){
-		byte[] nextByte = new byte[randomNumberLength256]; 
-		return ByteArray.convertToString(nextByte, HEX);
-	}
-	
-	public byte[] getSecureRandomByteArray256(){
-		byte[] nextByte = new byte[randomNumberLength256]; 
-		this.secureRandom.nextBytes(nextByte);
-		return nextByte;
-	}
-
 }

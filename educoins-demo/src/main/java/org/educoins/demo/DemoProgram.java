@@ -12,8 +12,6 @@ import org.educoins.core.IBlockReceiver;
 import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
-import org.educoins.core.p2p.P2pBlockReceiver;
-import org.educoins.core.p2p.discovery.LocalDiscovery;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
 import org.educoins.miner.Miner;
@@ -103,11 +101,6 @@ public class DemoProgram {
         IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
         blockReceiver.addBlockListener(senderBlockStore::put);
 
-        IBlockReceiver p2pBlockReceiver =
-                		new P2pBlockReceiver(
-                        new LevelDbBlockStore(new File(localDBStorage)),
-                        new LocalDiscovery(senderBlockStore));
-
         ITransactionReceiver txReceiver = new DemoTransactionReceiver();
         ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
 
@@ -121,7 +114,6 @@ public class DemoProgram {
 
         //Kick of the system with the genesis block. 
         blockChain.foundPoW(new Block());
-        p2pBlockReceiver.receiveBlocks();
         txReceiver.receiveTransactions();
     }
 }
