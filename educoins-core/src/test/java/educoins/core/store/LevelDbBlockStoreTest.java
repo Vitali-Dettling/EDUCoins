@@ -3,8 +3,8 @@ package educoins.core.store;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,18 +16,16 @@ import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.LevelDbBlockStore;
 import org.educoins.core.utils.IO;
+import org.educoins.core.utils.Sha256Hash;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import educoins.core.utils.BlockStoreFactory;
 import educoins.core.utils.Generator;
 import educoins.core.utils.MockedWallet;
-import educoins.core.utils.PathHandler;
-
-import static org.junit.Assert.*;
 
 /**
  * Default test for {@link LevelDbBlockStore}
@@ -36,7 +34,6 @@ import static org.junit.Assert.*;
 public class LevelDbBlockStoreTest {
 
 	private static final int STORED = 10;
-	private File DIRECTORY = PathHandler.DIRECTORY_DB;
 			
     private IBlockStore store;
 
@@ -53,6 +50,7 @@ public class LevelDbBlockStoreTest {
     public void tearDown() {
         try {
             this.store.destroy();
+
         } catch (BlockStoreException e) {
             throw new IllegalStateException("Db could not be deleted!");
         }
@@ -141,8 +139,6 @@ public class LevelDbBlockStoreTest {
     
     @Test
     public void testIteratorManually() {
-
-    	count = 0;
     	
     	Block genesisBlock = new Block();
 		this.store.put(genesisBlock);
@@ -154,8 +150,9 @@ public class LevelDbBlockStoreTest {
 			
 			Block latestBlock = this.store.getLatest();
 			Sha256Hash hash = latestBlock.hash();
-			Block block = getRandomBlock();
+			Block block = BlockStoreFactory.getRandomBlock();
 			block.setHashPrevBlock(hash);
+			block.setVersion(i);
 			this.store.put(block);
 			test.add(block);
 		}
@@ -168,14 +165,13 @@ public class LevelDbBlockStoreTest {
     		result.add(block);
     		temp = block.getHashPrevBlock();
 		}
-    	
+    	    	
     	List<Block> sortResult = new ArrayList<Block>();
 		for(int i = result.size() - 1 ; i >= 0 ; i--){
 			sortResult.add(result.get(i));
 		}
-    	
-		assertEquals(sortResult.toString(), test.toString());  
-     	count = 0;  	
+		
+		assertEquals(sortResult.toString(), test.toString());  	
     }
     
     @Test
@@ -204,34 +200,5 @@ public class LevelDbBlockStoreTest {
 		String storedDBBlock = storedBlock.toString();
 		
 		assertEquals(originalBlock, storedDBBlock);	
-    }
-    
-	private void fillRandom() {
-        for (int i = 0; i < 23; i++) {
-            store.put(getRandomBlock());
-        }
-    }
-
-    private Block getRandomBlock() {
-        Block toReturn = new Block();
-        toReturn.setVersion(count++);
-        toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
-        toReturn.setBits(Sha256Hash.wrap(ByteArray.convertFromInt((int) (Math.random() * Integer.MAX_VALUE))));
-        String trueRandom =  Generator.getSecureRandomString256HEX();
-        toReturn.setHashMerkleRoot(Sha256Hash.wrap(trueRandom));
-        return toReturn;
-    }
-
-    private boolean deleteDir(File dir) {
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (String aChildren : children) {
-                boolean success = deleteDir(new File(dir, aChildren));
-                if (!success) {
-                    return false;
-                }
-            }
-        }
-        return dir.delete();
     }
 }

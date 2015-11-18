@@ -6,6 +6,7 @@ import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
+import org.jetbrains.annotations.NotNull;
 
 public class Verification {
 	
@@ -45,7 +46,7 @@ public class Verification {
 		return false;
 	}
 	
-	public boolean verifyGateway(@NotNull Gateway gateway){
+	public boolean verifyGateway(@NotNull Transaction gateway){
 		
 		//TODO [Vitali] Implement the whole verification.
 		return true;

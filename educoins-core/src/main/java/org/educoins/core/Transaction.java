@@ -239,10 +239,10 @@ public class Transaction {
 						.getOutputs().size() > 0)) && (this.getApprovals() != null && this.getApprovals().size() > 0)) {
 			return ETransaction.APPROVED;
 		}	
-		if (this.gate != null){
+		if (this.gate != null && this.getGatewaysCount() == 0){
 			return ETransaction.GATE;
 		}	
-		if (this.getGate() != null && this.getGatewaysCount() != 0){
+		if (this.getGate() != null && this.getGatewaysCount() > 0){
 			return ETransaction.GATEWAY;
 		}	
 		return null;

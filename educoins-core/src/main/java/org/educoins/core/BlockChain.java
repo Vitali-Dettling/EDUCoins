@@ -123,11 +123,15 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			if (this.verification.verifyApprovedTransaction(transaction)) {
 				this.transactions.add(transaction);
 			}
+		}else if (type == ETransaction.GATEWAY) {
+			if (this.verification.verifyGateway(transaction)) {
+				this.externGateways.add(this.myGateway);
+			}
 		}else if (type == ETransaction.GATE) {
 			if (this.verification.verifyGate(transaction)) {
 				createGateway(transaction);
 			}
-		} 		
+		}		
 	}
 	
 	@Override
@@ -210,23 +214,21 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return this.newBlock;
 	}
 	
-	public Block getPreviousBlock(Block currentBlock) {
+	public Block getPreviousBlock(Block currentBlock)  {
 		return this.store.get(currentBlock.hash().getBytes());
 	}
 	
-	
-	
 	private void createGateway(Transaction transaction){
-		
-		
+				
 		//TODO [Vitali] How to find out about all gateways? 
-		//TODO [Vitali] Broadcast the new gateway.
 		Gate gate = transaction.getGate();	
 		if(this.verification.verifyGate(transaction)){
 			this.myGateway.addGate(gate);
 			//When all signatures of the other gateways have been collected.
 			//Then it will continue transmit the created new gateway.
 			if(allGatesSigned()){
+				this.externGateways.add(this.myGateway);
+				transaction.setGateways(this.externGateways);
 				this.sendTransaction(transaction);
 			}
 		}
@@ -234,10 +236,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		
 	private boolean allGatesSigned(){
 		
-		//TODO [Vitali] Check the BC who many gateways are existing and how many have already singed. 
+		//TODO Delete
+		System.out.println("allGatesSigned: " + this.myGateway.toString());
+		//TODO [Vitali] Check the BC how many gateways are in existence and how many have already singed. 
 		return true;
 	}
-
 
 
 }

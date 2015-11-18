@@ -10,7 +10,6 @@ import org.educoins.core.IBlockListener;
 import org.educoins.core.IPoWListener;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
-import org.educoins.core.utils.Threading;
 
 public class Miner implements IBlockListener {
 
@@ -86,6 +85,13 @@ public class Miner implements IBlockListener {
 				
 			} while (this.active && challenge.compareTo(targetThreshold) > 0);
 
+			//TODO Delete
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (this.active) {
 				notifyFoundPoW(block);	
 			}

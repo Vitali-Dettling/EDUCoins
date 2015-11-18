@@ -1,15 +1,16 @@
 package org.educoins.core.store;
 
-import com.google.gson.Gson;
-import com.sun.istack.internal.Nullable;
-import org.educoins.core.Block;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.*;
-import org.jetbrains.annotations.NotNull;
-
-import com.google.gson.Gson;
 import java.io.File;
 import java.io.IOException;
+
+import org.educoins.core.Block;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.DBFactory;
+import org.iq80.leveldb.Options;
+import org.jetbrains.annotations.NotNull;
+
 import com.google.gson.Gson;
 import com.sun.istack.internal.Nullable;
 
@@ -65,16 +66,8 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     @NotNull
-    public synchronized Block get(@NotNull Block block) throws BlockNotFoundException {
-        return getBlock(database.get(block.hash().getBytes()));
     public synchronized Block get(byte[] hash) {
-    public synchronized Block get(byte[] hash) throws BlockNotFoundException {
-            try {
-				throw new BlockNotFoundException(hash);
-			} catch (BlockNotFoundException e) {
-				e.printStackTrace();
-			}
-        }
+    	byte[] byteBlock = database.get(hash);    
         return getBlock(byteBlock);
     }
 

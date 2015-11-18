@@ -1,7 +1,8 @@
 package org.educoins.core.store;
 
-import com.sun.istack.internal.NotNull;
 import org.educoins.core.Block;
+
+import com.sun.istack.internal.NotNull;
 
 /**
  * An {@link java.util.Iterator} exposed by {@link IBlockStore#iterator()}, to iterate over all {@link Block}s in certain chain.
