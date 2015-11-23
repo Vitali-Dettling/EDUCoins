@@ -143,12 +143,13 @@ public class Client extends Thread implements ITransactionListener {
 							typeString = "Unknown Transaction";
 						}
 						int availableAmount = 0;
-						for (Input tmpInput : this.inputs) {
+						List<Input> tmpInputs = new ArrayList<>(inputs);
+						for (Input tmpInput : tmpInputs) {
 							availableAmount += tmpInput.getAmount();
 						}
 						//TODO[Vitali] Testing
-//						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
-//								amount, availableAmount, typeString, output.getLockingScript()));
+						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
+								amount, availableAmount, typeString, output.getLockingScript()));
 					}
 				}
 			}

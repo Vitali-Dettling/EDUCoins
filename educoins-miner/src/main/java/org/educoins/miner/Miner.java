@@ -47,8 +47,11 @@ public class Miner implements IBlockListener {
 
 	@Override
 	public void blockReceived(Block block) {
-		Thread powThread = new PoWThread(block.copy());
-		powThread.start();
+		Thread powThread1 = new PoWThread(block.copy());
+		powThread1.start();
+
+		Thread powThread2 = new PoWThread(block.copy());
+		powThread2.start();
 	}
 	
 	private class PoWThread extends Thread implements IBlockListener {
