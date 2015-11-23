@@ -1,13 +1,13 @@
 package org.educoins.core;
 
+import org.educoins.core.Input.EInputUnlockingScript;
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.utils.ByteArray;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.utils.ByteArray;
 
 public class Client extends Thread implements ITransactionListener {
 
@@ -146,6 +146,7 @@ public class Client extends Thread implements ITransactionListener {
 						for (Input tmpInput : this.inputs) {
 							availableAmount += tmpInput.getAmount();
 						}
+						//TODO[Vitali] Testing
 						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
 								amount, availableAmount, typeString, output.getLockingScript()));
 					}

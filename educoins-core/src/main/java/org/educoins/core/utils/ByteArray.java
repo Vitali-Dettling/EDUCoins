@@ -1,11 +1,9 @@
 package org.educoins.core.utils;
 
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.*;
-import java.lang.*;
+import java.util.Arrays;
 
 public final class ByteArray {
 

@@ -1,31 +1,23 @@
 package org.educoins.demo;
 
 import org.educoins.core.*;
-import org.educoins.core.p2p.P2pBlockReceiver;
-import org.educoins.core.p2p.discovery.LocalDiscovery;
+import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.miner.Miner;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 public class DemoProgram {
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
-        String localStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
-                + "educoins" + File.separator + "demo" + File.separator + "localBlockChain";
-        String remoteStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
-                + "educoins" + File.separator + "demo" + File.separator + "remoteBlockChain";
-
+        String localDBStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
+                + "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore" ;
+        
         boolean localStorageSet = false;
-        boolean remoteStorageSet = false;
-
         boolean runMiner = false;
         boolean init = false;
 
@@ -38,16 +30,8 @@ public class DemoProgram {
 						System.err.println("local storage can only set once");
 						return;
 					}
-					localStorage = args[++i];
+					localDBStorage = args[++i];
 					localStorageSet = true;
-					break;
-				case "-remotestorage":
-					if (remoteStorageSet) {
-						System.err.println("remote storage can only set once");
-						return;
-					}
-					remoteStorage = args[++i];
-					remoteStorageSet = true;
 					break;
 				case "-runminer":
 					if (runMiner) {
@@ -73,10 +57,10 @@ public class DemoProgram {
             Scanner scanner = new Scanner(System.in);
             String input = null;
 
-            System.out.print("path of local storage (" + localStorage + "): ");
+            System.out.print("path of local storage (" + localDBStorage + "): ");
             input = scanner.nextLine().trim();
             if (!input.isEmpty()) {
-                localStorage = input;
+            	localDBStorage = input;
             }
             System.out.print("run miner [Y|n]: ");
             input = scanner.nextLine().trim();
@@ -105,42 +89,16 @@ public class DemoProgram {
 
         // make little space between input and run
         System.out.println();
+        
+        IBlockStore senderBlockStore = new LevelDbBlockStore(new File(localDBStorage));
 
-        if (init) {
-            if (Files.exists(Paths.get(localStorage))) {
-                Stream<Path> localFiles = Files.list(Paths.get(localStorage));
-                for (Object file : localFiles.toArray()) {
-                    Files.delete((Path) file);
-                }
-                localFiles.close();
-            }
-            if (Files.exists(Paths.get(remoteStorage))) {
-                Stream<Path> remoteFiles = Files.list(Paths.get(remoteStorage));
-                for (Object file : remoteFiles.toArray()) {
-                    Files.delete((Path) file);
-                }
-                remoteFiles.close();
-            }
-        }
-
-
-        //region P2pBlockReceiver
-        IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
-
-        LevelDbBlockStore senderBlockStore = new LevelDbBlockStore(new File("/tmp/senderBlocks"));
-
-        IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
+        IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
         blockReceiver.addBlockListener(senderBlockStore::put);
-
-        IBlockReceiver p2pBlockReceiver =
-                new P2pBlockReceiver(
-                        new LevelDbBlockStore(new File("/tmp/receiverBlocks")),
-                        new LocalDiscovery(senderBlockStore));
 
         ITransactionReceiver txReceiver = new DemoTransactionReceiver();
         ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
 
-        BlockChain blockChain = new BlockChain(blockReceiver, blockTransmitter, txReceiver, txTransmitter);
+        BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
 
         if (runMiner) {
             new Miner(blockChain);
@@ -148,39 +106,8 @@ public class DemoProgram {
         Thread client = new Client(blockChain);
         client.start();
 
-        blockReceiver.receiveBlocks();
-        p2pBlockReceiver.receiveBlocks();
-        //endregion
-
+        //Kick of the system with the genesis block. 
+        blockChain.foundPoW(new Block());
         txReceiver.receiveTransactions();
-        Block block = new Block();
-        block.addTransaction(coinbaseTransaction());
-        blockTransmitter.transmitBlock(new Block());
-
-        // // Temporary
-        // IBlockTransmitter blockTransmitter = new DemoBlockTransmitter(localStorage, remoteStorage);
-        // IBlockReceiver blockReceiver = new DemoBlockReceiver(remoteStorage);
-        // blockReceiver.receiveBlocks();
-        // Block block = new Block();
-        // ATransaction tx = new RegularTransaction();
-        // block.addTransaction(tx);
-        // blockTransmitter.transmitBlock(block);
     }
-
-    // TODO [Vitali] Delete
-    private static Transaction coinbaseTransaction() {
-
-        String burnedBublicKey = "00000000000000000000000000000000000000000000";
-
-        // TODO [Vitali] lockingScript procedure has to be established, which fits our needs...
-        String lockingScript = burnedBublicKey;// TODO[Vitali] Modify that it can be changed on or more addresses???
-
-        // Input is empty because it is a coinbase transaction.
-        Output output = new Output(10, burnedBublicKey, lockingScript);
-
-        RegularTransaction transaction = new RegularTransaction();
-        transaction.addOutput(output);
-        return transaction;
-    }
-
 }
