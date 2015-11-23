@@ -1,4 +1,4 @@
-package educoins.core;
+package org.educoins.core;
 
 import org.junit.*;
 

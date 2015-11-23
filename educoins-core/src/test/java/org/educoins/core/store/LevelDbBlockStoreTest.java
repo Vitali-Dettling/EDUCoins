@@ -1,12 +1,8 @@
-package educoins.core.store;
+package org.educoins.core.store;
 
-import educoins.core.utils.BlockStoreFactory;
+import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.Block;
 import org.educoins.core.Transaction;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.BlockStoreException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.IO;
 import org.junit.After;
 import org.junit.Before;

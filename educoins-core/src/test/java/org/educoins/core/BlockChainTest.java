@@ -1,8 +1,6 @@
-package educoins.core;
+package org.educoins.core;
 
-import educoins.core.utils.MockedBlockChain;
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
+import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.Before;

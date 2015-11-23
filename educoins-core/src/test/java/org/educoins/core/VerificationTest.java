@@ -1,10 +1,6 @@
-package educoins.core;
+package org.educoins.core;
 
-import educoins.core.utils.MockedBlockChain;
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.Verification;
-import org.educoins.core.Wallet;
+import org.educoins.core.utils.MockedBlockChain;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

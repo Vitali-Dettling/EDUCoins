@@ -1,4 +1,4 @@
-package educoins.core.utils;
+package org.educoins.core.utils;
 
 import org.educoins.core.utils.Sha256Hash;
 

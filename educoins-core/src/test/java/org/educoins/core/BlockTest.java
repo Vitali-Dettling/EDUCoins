@@ -1,10 +1,6 @@
-package educoins.core;
+package org.educoins.core;
 
-import educoins.core.utils.BlockStoreFactory;
-import org.educoins.core.Block;
-import org.educoins.core.Input;
-import org.educoins.core.Output;
-import org.educoins.core.Transaction;
+import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.Assert;

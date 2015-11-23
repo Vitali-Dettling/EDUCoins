@@ -1,7 +1,6 @@
-package educoins.core;
+package org.educoins.core;
 
-import educoins.core.utils.Generator;
-import org.educoins.core.Wallet;
+import org.educoins.core.utils.Generator;
 import org.educoins.core.utils.ByteArray;
 import org.junit.Before;
 import org.junit.Test;

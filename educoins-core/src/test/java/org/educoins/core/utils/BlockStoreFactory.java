@@ -1,4 +1,4 @@
-package educoins.core.utils;
+package org.educoins.core.utils;
 
 import org.educoins.core.Block;
 import org.educoins.core.Input;
@@ -7,9 +7,6 @@ import org.educoins.core.Transaction;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.IO;
-import org.educoins.core.utils.Sha256Hash;
 
 /**
  * A factory for easier testing concerning the {@link IBlockStore}.

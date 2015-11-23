@@ -1,4 +1,4 @@
-package educoins.core;
+package org.educoins.core;
 
 import org.educoins.core.Approval;
 import org.educoins.core.Input;
