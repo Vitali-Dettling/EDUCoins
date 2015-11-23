@@ -1,13 +1,13 @@
 package org.educoins.core;
 
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.store.IBlockStore;
+import org.educoins.core.utils.Sha256Hash;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.utils.Sha256Hash;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 

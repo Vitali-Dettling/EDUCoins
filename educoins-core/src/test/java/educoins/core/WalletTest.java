@@ -1,19 +1,16 @@
 package educoins.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import educoins.core.utils.Generator;
 import org.educoins.core.Wallet;
 import org.educoins.core.utils.ByteArray;
 import org.junit.Before;
 import org.junit.Test;
 
-import educoins.core.utils.Generator;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class WalletTest {
 

@@ -1,11 +1,11 @@
 package educoins.core.utils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by dacki on 12.11.15.

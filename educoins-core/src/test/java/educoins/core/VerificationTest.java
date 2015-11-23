@@ -1,7 +1,6 @@
 package educoins.core;
 
-import static org.junit.Assert.assertTrue;
-
+import educoins.core.utils.MockedBlockChain;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Verification;
@@ -11,7 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import educoins.core.utils.MockedBlockChain;
+import static org.junit.Assert.assertTrue;
 
 public class VerificationTest {
 	

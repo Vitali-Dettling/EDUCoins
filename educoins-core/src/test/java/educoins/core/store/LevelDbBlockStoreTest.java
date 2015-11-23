@@ -1,7 +1,6 @@
 package educoins.core.store;
 
 import educoins.core.utils.BlockStoreFactory;
-
 import org.educoins.core.Block;
 import org.educoins.core.Transaction;
 import org.educoins.core.store.BlockNotFoundException;

@@ -1,10 +1,13 @@
 package org.educoins.core.store;
 
 import com.google.gson.Gson;
-import com.sun.istack.internal.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.educoins.core.Block;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.*;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.DBFactory;
+import org.iq80.leveldb.Options;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

@@ -1,12 +1,12 @@
 package educoins.core;
 
-import java.lang.reflect.Field;
-
 import org.educoins.core.Block;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.lang.reflect.Field;
 
 public class BlockTest{
     @Test

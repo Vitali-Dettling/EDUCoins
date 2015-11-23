@@ -1,13 +1,13 @@
 package org.educoins.core;
 
+import org.educoins.core.cryptography.SHA256Hasher;
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Sha256Hash;
 
 //import org.educoins.core.p2p.messages.MessageProtos;
 

@@ -1,8 +1,6 @@
 package educoins.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import educoins.core.utils.MockedBlockChain;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.utils.ByteArray;
@@ -10,7 +8,8 @@ import org.educoins.core.utils.Sha256Hash;
 import org.junit.Before;
 import org.junit.Test;
 
-import educoins.core.utils.MockedBlockChain;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BlockChainTest {
 	

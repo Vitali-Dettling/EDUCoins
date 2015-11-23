@@ -1,13 +1,13 @@
 package org.educoins.core;
 
+import org.educoins.core.Input.EInputUnlockingScript;
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.utils.ByteArray;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.utils.ByteArray;
 
 public class Client extends Thread implements ITransactionListener {
 
