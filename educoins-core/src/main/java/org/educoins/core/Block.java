@@ -248,7 +248,7 @@ public class Block {
                 && nonce == block.nonce
                 && hashPrevBlock.equals(block.hashPrevBlock)
                 && hashMerkleRoot.equals(block.hashMerkleRoot)
-                && bits.equals(block.bits);
+                && Arrays.equals(bits, block.bits);
     }
 
 
