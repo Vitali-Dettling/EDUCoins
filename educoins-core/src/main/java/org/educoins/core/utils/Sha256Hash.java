@@ -4,6 +4,7 @@ package org.educoins.core.utils;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import org.educoins.core.cryptography.SHA256Hasher;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -122,8 +123,15 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
         return new Sha256Hash(Arrays.copyOf(bytes, bytes.length));
     }
 
+    public Sha256Hash concat(@NotNull Sha256Hash o) {
+        byte[] ret = new byte[this.getBytes().length + o.getBytes().length];
+        System.arraycopy(this.getBytes(), 0, ret, 0, this.getBytes().length);
+        System.arraycopy(o.getBytes(), 0, ret, this.getBytes().length, o.getBytes().length);
+        return Sha256Hash.wrap(SHA256Hasher.hash(ret));
+    }
+
     @Override
-    public int compareTo(Sha256Hash o) {
+    public int compareTo(@NotNull Sha256Hash o) {
         // note that in this implementation compareTo() is not consistent with equals()
     	return ByteArray.compare(o.getBytes(), this.getBytes());// arbitrary but consistent
     }

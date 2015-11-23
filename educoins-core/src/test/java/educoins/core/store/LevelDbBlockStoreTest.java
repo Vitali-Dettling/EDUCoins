@@ -82,7 +82,7 @@ public class LevelDbBlockStoreTest {
 
     @Test
     public void testPutWithTransaction() throws Exception {
-        Transaction transaction = new Transaction();
+        Transaction transaction = BlockStoreFactory.generateTransaction(1);
         transaction.setVersion(100);
 
         List<Transaction> transactions = new ArrayList<>();

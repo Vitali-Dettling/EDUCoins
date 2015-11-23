@@ -197,7 +197,6 @@ public class Transaction {
 		if (transaction.whichTransaction() == ETransaction.COINBASE) {
 			toBeHashed = getByteArrayOutput(transaction);
 		} else if (transaction.whichTransaction() == ETransaction.REGULAR) {
-
 			byte[] input = getByteArrayInput(transaction);
 			byte[] output = getByteArrayOutput(transaction);
 			toBeHashed = ByteArray.concatByteArrays(input, output);

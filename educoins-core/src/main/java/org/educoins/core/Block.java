@@ -4,10 +4,7 @@ import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 //import org.educoins.core.p2p.messages.MessageProtos;
 
@@ -120,6 +117,39 @@ public class Block {
         this.nonce = nonce;
     }
 
+    public void calculateMerkleRoot() {
+        if (this.getTransactionsCount() == 0) {
+            this.setHashMerkleRoot(Sha256Hash.ZERO_HASH);
+            return;
+        }
+        int next2Exp = 1;
+        while (Math.pow(2, next2Exp) < this.getTransactionsCount()) {
+            next2Exp++;
+        }
+        List<Sha256Hash> hashList = new LinkedList<>();
+        for (Transaction transaction : transactions) {
+            hashList.add(Sha256Hash.wrap(transaction.hash()));
+        }
+        int i = this.getTransactionsCount();
+        while (Math.pow(2, next2Exp) - i != 0) {
+            hashList.add(Sha256Hash.wrap(transactions.get(this.getTransactionsCount() - 1).hash()));
+            i++;
+        }
+        List<Sha256Hash> nextHashList = calculateNextLevelInBinaryTree(hashList);
+        while (nextHashList.size() != 1) {
+            nextHashList = calculateNextLevelInBinaryTree(nextHashList);
+        }
+        this.setHashMerkleRoot(nextHashList.get(0));
+    }
+
+    private List<Sha256Hash> calculateNextLevelInBinaryTree(List<Sha256Hash> initialList) {
+        List<Sha256Hash> returnList = new LinkedList<>();
+        for (int i = 0; i < initialList.size(); i += 2) {
+            returnList.add(initialList.get(i).concat(initialList.get(i + 1)));
+        }
+        return returnList;
+    }
+
     public int getTransactionsCount() {
         return this.transactionsCount;
     }
@@ -140,6 +170,7 @@ public class Block {
         } else {
             this.transactionsCount = this.transactions.size();
         }
+        calculateMerkleRoot();
     }
 
     public void addTransaction(Transaction transaction) {
@@ -148,6 +179,7 @@ public class Block {
         }
         this.transactions.add(transaction);
         this.transactionsCount = this.transactions.size();
+        calculateMerkleRoot();
     }
 
     public void addTransactions(Collection<Transaction> transactions) {
@@ -156,6 +188,7 @@ public class Block {
         }
         this.transactions.addAll(transactions);
         this.transactionsCount = this.transactions.size();
+        calculateMerkleRoot();
     }
 
     public Sha256Hash hash() {

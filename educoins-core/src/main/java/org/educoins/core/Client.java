@@ -147,8 +147,8 @@ public class Client extends Thread implements ITransactionListener {
 							availableAmount += tmpInput.getAmount();
 						}
 						//TODO[Vitali] Testing
-						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
-								amount, availableAmount, typeString, output.getLockingScript()));
+//						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
+//								amount, availableAmount, typeString, output.getLockingScript()));
 					}
 				}
 			}
