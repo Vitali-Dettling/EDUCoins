@@ -9,10 +9,11 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 
 public class BlockTest{
+
     @Test
     public void BitsSetterTest() {
         byte[] input = ByteArray.convertFromString("ffffffffffffffffffffffffffffffff"); //32
-        byte[] expectedCompact = ByteArray.convertFromString("1dffffff");
+        byte[] expectedCompact = ByteArray.convertFromString("0dffffff");
         Block b = new Block();
         b.setBits(Sha256Hash.wrap(input));
         try {
@@ -29,7 +30,7 @@ public class BlockTest{
     @Test
     public void BitsSetter64Test() {
         byte[] input = ByteArray.convertFromString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); //64
-        byte[] expectedCompact = ByteArray.convertFromString("3dffffff");
+        byte[] expectedCompact = ByteArray.convertFromString("1dffffff");
         Block b = new Block();
         b.setBits(Sha256Hash.wrap(input));
         try {

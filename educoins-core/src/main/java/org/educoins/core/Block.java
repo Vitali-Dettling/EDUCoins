@@ -20,7 +20,7 @@ public class Block {
 	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
 	private static final long TIME = System.currentTimeMillis();
 
-	private static final byte[] BITS = ByteArray.convertFromString("3dffffff");
+	private static final byte[] BITS = ByteArray.convertFromString("1dffffff");
 	private static final long NONCE = 1114735442;
 
 	private int version;
@@ -89,12 +89,11 @@ public class Block {
 
 	public Sha256Hash getBits() {
         byte[] mantisse = Arrays.copyOfRange(bits, 1, 4);
-        byte exponent = bits[0];
+        int expInt = (int) bits[0];
 
-        int expInt = ((int) exponent) - 3;
-        byte[] result = new byte[mantisse.length + expInt / 2];
+        byte[] result = new byte[3 + expInt];
         Arrays.fill(result, (byte) 0);
-        System.arraycopy(mantisse, 0, result, 0, mantisse.length);
+        System.arraycopy(mantisse, 0, result, 0, 3);
         
         return Sha256Hash.wrap(result);
 	}
@@ -107,7 +106,7 @@ public class Block {
         int i = 0;
         for (i = 0; bits[i] == (byte) 0; i++); //count leading 0
 
-        exponent[0] = (byte) ((bits.length - i) * 2 - 3);
+        exponent[0] = (byte) (bits.length - i - 3);
         mantisse = Arrays.copyOfRange(bits, i, i + 3);
 
         this.bits = ByteArray.concatByteArrays(exponent, mantisse);
