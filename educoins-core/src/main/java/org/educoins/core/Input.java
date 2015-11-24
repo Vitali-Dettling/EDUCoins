@@ -1,6 +1,7 @@
 package org.educoins.core;
 
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
 
 public class Input {
 
@@ -8,10 +9,10 @@ public class Input {
 	
 	private int index;
 	private int amount;
-	private String hashPrevOutput;
+	private Sha256Hash hashPrevOutput;
 	private String[] unlockingScript;
 	
-	public Input(int amount, String hashPrevOutput, int index){
+	public Input(int amount, Sha256Hash hashPrevOutput, int index){
 		
 		this.amount = amount;
 		this.hashPrevOutput = hashPrevOutput;
@@ -28,11 +29,11 @@ public class Input {
 		this.amount = amount;
 	}
 
-	public String getHashPrevOutput() {
+	public Sha256Hash getHashPrevOutput() {
 		return this.hashPrevOutput;
 	}
 
-	public void setHashPrevOutput(String hashPrevOutput) {
+	public void setHashPrevOutput(Sha256Hash hashPrevOutput) {
 		this.hashPrevOutput = hashPrevOutput;
 	}
 

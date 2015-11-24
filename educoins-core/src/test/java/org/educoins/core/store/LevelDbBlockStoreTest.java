@@ -1,17 +1,22 @@
 package org.educoins.core.store;
 
-import org.educoins.core.utils.BlockStoreFactory;
-import org.educoins.core.Block;
-import org.educoins.core.Transaction;
-import org.educoins.core.utils.IO;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import org.educoins.core.Block;
+import org.educoins.core.Transaction;
+import org.educoins.core.utils.BlockStoreFactory;
+import org.educoins.core.utils.IO;
+import org.educoins.core.utils.IO.EPath;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Default test for {@link LevelDbBlockStore}
@@ -37,10 +42,21 @@ public class LevelDbBlockStoreTest {
         } catch (BlockStoreException e) {
             throw new IllegalStateException("Db could not be deleted!");
         }
-        if (!IO.deleteDefaultBlockStoreFile())
+        if (!IO.deleteDefaultFileLocation(EPath.TMP, EPath.EDUCoinsBlockStore))
             throw new IllegalStateException("Db could not be deleted!");
     }
 
+    @Test
+    public void testPutGenesisBlockOnly() throws Exception {
+        
+    	Block b1 = BlockStoreFactory.getRandomBlock();
+        this.store.put(b1);
+        
+        IBlockIterator iterator = this.store.blockIterator();
+        assertFalse(iterator.hasNext());
+
+    }
+    
     @Test
     public void testPut() throws Exception {
         Block b1 = BlockStoreFactory.getRandomBlock();
@@ -67,7 +83,7 @@ public class LevelDbBlockStoreTest {
         BlockStoreFactory.fillRandomTree(this.store, filled);
 
         int itemCount = 1;
-        IBlockIterator iterator = this.store.iterator();
+        IBlockIterator iterator = this.store.blockIterator();
         while (iterator.hasNext()) {
             iterator.next();
             itemCount++;

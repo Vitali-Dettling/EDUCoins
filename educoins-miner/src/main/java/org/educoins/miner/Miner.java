@@ -1,15 +1,15 @@
 package org.educoins.miner;
 
 
+import java.security.SecureRandom;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.IBlockListener;
 import org.educoins.core.IPoWListener;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
-
-import java.security.SecureRandom;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Miner implements IBlockListener {
 

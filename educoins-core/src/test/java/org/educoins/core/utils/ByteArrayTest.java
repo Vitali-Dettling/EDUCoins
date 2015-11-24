@@ -1,6 +1,5 @@
 package org.educoins.core.utils;
 
-import org.educoins.core.utils.ByteArray;
 import org.junit.Assert;
 import org.junit.Test;
 

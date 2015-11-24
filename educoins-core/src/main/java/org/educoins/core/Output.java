@@ -1,16 +1,14 @@
 package org.educoins.core;
 
-import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
 
 public class Output {
-
-	private static final int HEX = 16;
 	
 	private int amount;
-	private String dstPublicKey;
-	private String lockingScript;
+	private Sha256Hash dstPublicKey;
+	private Sha256Hash lockingScript;
 	
-	public Output(int amount, String dstPublicKey, String lockingScript){
+	public Output(int amount, Sha256Hash dstPublicKey, Sha256Hash lockingScript){
 		
 		this.amount = amount;
 		this.dstPublicKey = dstPublicKey;
@@ -25,27 +23,27 @@ public class Output {
 		this.amount = amount;
 	}
 
-	public String getDstPublicKey() {
+	public Sha256Hash getDstPublicKey() {
 		return this.dstPublicKey;
 	}
 
-	public void setDstPublicKey(String dstPublicKey) {
+	public void setDstPublicKey(Sha256Hash dstPublicKey) {
 		this.dstPublicKey = dstPublicKey;
 	}
 
-	public String getLockingScript() {
+	public Sha256Hash getLockingScript() {
 		return this.lockingScript;
 	}
 
-	public void setLockingScript(String lockingScript) {
+	public void setLockingScript(Sha256Hash lockingScript) {
 		this.lockingScript = lockingScript;
 	}
 		
 	public byte[] getConcatedOutput(){
 		
 		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
-		byte[] lockingScript = ByteArray.convertFromString(getLockingScript());
-		return ByteArray.concatByteArrays(lockingScript);
+		byte[] lockingScript = getLockingScript().getBytes();
+		return lockingScript;
 		
 	}
 

@@ -1,6 +1,7 @@
 package org.educoins.core.store;
 
 import org.educoins.core.Block;
+import org.educoins.core.Transaction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,5 +45,12 @@ public interface IBlockStore {
      *
      * @return the initialized {@link IBlockIterator}.
      */
-    IBlockIterator iterator();
+    IBlockIterator blockIterator();
+
+    /**
+     * Initializes an {@link ITransactionIterator} pointing to the latest {@link Transaction} stored in the {@link IBlockStore}.
+     *
+     * @return the initialized {@link ITransactionIterator}.
+     */
+	ITransactionIterator transactionIterator();
 }

@@ -1,14 +1,14 @@
 package org.educoins.core;
 
+import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
 
 public class BlockTest{
 
@@ -93,7 +93,8 @@ public class BlockTest{
         }
         Block b = new Block();
         b.addTransactions(list);
-        Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("5e9dc0cb197e89a155683decb4473848e50530183845119ddd8f9d361dddea8a"));
+        String createdMerkleTree = b.getHashMerkleRoot().toString();
+        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap(createdMerkleTree).getBytes());
     }
 
     @Test
@@ -104,7 +105,8 @@ public class BlockTest{
         }
         Block b = new Block();
         b.addTransactions(list);
-        Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("c76bc870259e380e3b7ba45ef97123df9182a53af6eb6a87fe13e06274b2532e"));
+        String createdMerkleTree = b.getHashMerkleRoot().toString();
+        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap(createdMerkleTree).getBytes());
     }
 }
 
