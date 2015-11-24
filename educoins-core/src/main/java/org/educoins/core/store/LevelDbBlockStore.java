@@ -1,7 +1,8 @@
 package org.educoins.core.store;
 
 import com.google.gson.Gson;
-import com.sun.istack.internal.Nullable;
+import org.educoins.core.utils.Sha256Hash;
+import org.jetbrains.annotations.Nullable;
 import org.educoins.core.Block;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.*;
@@ -26,7 +27,6 @@ public class LevelDbBlockStore implements IBlockStore {
     public LevelDbBlockStore(File directory) throws BlockStoreException {
         DBFactory dbFactory = JniDBFactory.factory;
 
-        File path = directory;
         Options options = new Options();
         options.createIfMissing();
 
@@ -50,30 +50,34 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     public synchronized void put(@NotNull Block block) {
-        byte[] hash = block.hash();
+        byte[] hash = block.hash().getBytes();
         if (genesisHash == null) {
             genesisHash = hash;
         }
-//        byte[] key = ByteArray.convertToString(block.hash(), 16).getBytes();
 
         database.put(hash, getJson(block).getBytes());
-        latest = block.hash();
+        latest = block.hash().getBytes();
         database.put(LATEST_KEY, latest);
     }
 
 
     @Override
     @NotNull
-    public synchronized Block get(byte[] hash) throws BlockNotFoundException {
-        byte[] byteBlock = database.get(hash);
+    public synchronized Block get(Sha256Hash hash) {
+        byte[] byteBlock = database.get(hash.getBytes());
 
         if (byteBlock == null) {
-            throw new BlockNotFoundException(hash);
+            try {
+				throw new BlockNotFoundException(hash.toString());
+			} catch (BlockNotFoundException e) {
+				e.printStackTrace();
+			}
         }
         return getBlock(byteBlock);
     }
 
-    @Override
+    @SuppressWarnings("restriction")
+	@Override
     @Nullable
     public synchronized Block getLatest() {
         if (isEmpty()) return null;
@@ -111,6 +115,13 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     private Block getBlock(byte[] jsonblock) {
-        return new Gson().fromJson(new String(jsonblock), Block.class);
+    	Block block = null;
+    	try{
+    		block = new Gson().fromJson(new String(jsonblock), Block.class);
+    	}catch(Exception e){
+    		System.err.println("Not a block object, why is it stored in the DB?");
+    		block = null;
+    	}
+        return block;
     }
 }

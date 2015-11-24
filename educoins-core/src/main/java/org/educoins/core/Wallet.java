@@ -1,27 +1,20 @@
 package org.educoins.core;
 
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.IO;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
+import java.security.*;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.IO;
 
 public class Wallet {
 

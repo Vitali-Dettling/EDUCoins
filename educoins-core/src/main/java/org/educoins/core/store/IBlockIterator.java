@@ -1,6 +1,6 @@
 package org.educoins.core.store;
 
-import com.sun.istack.internal.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.educoins.core.Block;
 
 /**

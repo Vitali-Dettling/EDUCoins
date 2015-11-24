@@ -1,6 +1,7 @@
 package org.educoins.core.store;
 
 import org.educoins.core.Block;
+import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +24,7 @@ public interface IBlockStore {
      * @return the Block if found.
      * @throws BlockNotFoundException if the {@link Block} could not be found.
      */
-    @Nullable Block get(byte[] hash) throws BlockNotFoundException;
+    @NotNull Block get(Sha256Hash hash) throws BlockNotFoundException;
 
     /**
      * Retrieves the latest {@link Block} stored in the {@link IBlockStore}. Or Null if there is none.

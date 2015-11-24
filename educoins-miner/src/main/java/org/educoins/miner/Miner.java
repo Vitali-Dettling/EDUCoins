@@ -1,33 +1,41 @@
-package org.educoins.core;
+package org.educoins.miner;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.educoins.core.Block;
+import org.educoins.core.BlockChain;
+import org.educoins.core.IBlockListener;
+import org.educoins.core.IPoWListener;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
+
+import java.security.SecureRandom;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Miner implements IBlockListener {
 
 	private static final int BIT32 = 32;
 	
 	private BlockChain blockChain;
-	private List<IPoWListener> powListeners;
+	private CopyOnWriteArrayList<IPoWListener> powListeners;
 
 	public Miner(BlockChain blockChain) {
 		
 		this.blockChain = blockChain;
 		this.blockChain.addBlockListener(this);
-		this.powListeners = new ArrayList<>();
+		this.powListeners = new CopyOnWriteArrayList<>();
 		this.addPoWListener(this.blockChain);
 	}
 	
 	public void addPoWListener(IPoWListener powListener) {
-		this.powListeners.add(powListener);
+		synchronized (this) {
+			this.powListeners.add(powListener);
+		}
 	}
 	
 	public void removePoWListener(IPoWListener powListener) {
-		this.powListeners.remove(powListener);
+		synchronized (this) {
+			this.powListeners.remove(powListener);
+		}
 	}
 	
 	public void notifyFoundPoW(Block block) {
@@ -39,7 +47,7 @@ public class Miner implements IBlockListener {
 
 	@Override
 	public void blockReceived(Block block) {
-		Thread powThread = new PoWThread(block);
+		Thread powThread = new PoWThread(block.copy());
 		powThread.start();
 	}
 	
@@ -54,7 +62,6 @@ public class Miner implements IBlockListener {
 			this.active = true;
 		}
 		
-
 		@Override
 		public void run() {
 			
@@ -62,36 +69,26 @@ public class Miner implements IBlockListener {
 			
 			SecureRandom nonceGenerator = new SecureRandom();
 			byte[] nonce = new byte[BIT32];
-			byte[] targetThreshold = Block.getTargetThreshold(this.block.getBits());
-			byte[] challenge;
-			byte[] challengePositive;
+
+			Sha256Hash targetThreshold = this.block.getBits();
+			Sha256Hash challenge;
 			
 			do {
 				nonceGenerator.nextBytes(nonce);
 				this.block.setNonce(ByteArray.convertToInt(nonce));
 
 				challenge = this.block.hash();
-//				challengePositive = invertNegative(challenge); //TODO
-//				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge)
-//						+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold));
-			} while (this.active && ByteArray.compare(challenge, targetThreshold) > 0);
+				
+//				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge.getBytes())
+//				+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold.getBytes()));
+				
+			} while (this.active && challenge.compareTo(targetThreshold) < 0);
 
 			if (this.active) {
-				// synchronzie PoWThreads to avoid FileNotFoundException
-				synchronized (this) {
-					notifyFoundPoW(block);
-				}
-			} else {
+				notifyFoundPoW(block);	
 			}
 			
 			blockChain.removeBlockListener(this);
-		}
-		
-		private byte[] invertNegative(byte[] toInvertBitInteger) {
-			boolean isNegative = (toInvertBitInteger[0] & 0x80) == 0x80;
-			if (isNegative)
-				toInvertBitInteger[0] &= 0x7f;
-			return toInvertBitInteger;
 		}
 		
 		@Override

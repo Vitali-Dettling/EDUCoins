@@ -16,5 +16,4 @@ public class DemoTransactionTransmitter implements ITransactionTransmitter {
 	public void transmitTransaction(Transaction transaction) {
 		this.transactionListener.transactionReceived(transaction);
 	}
-
 }
