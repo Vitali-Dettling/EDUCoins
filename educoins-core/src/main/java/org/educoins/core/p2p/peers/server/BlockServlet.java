@@ -3,6 +3,7 @@ package org.educoins.core.p2p.peers.server;
 import com.google.gson.Gson;
 import org.educoins.core.Block;
 import org.educoins.core.store.*;
+import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +34,20 @@ public class BlockServlet extends HttpServlet {
         resp.setContentType(BlockServer.contentType);
         resp.setStatus(HttpServletResponse.SC_OK);
 
-        String requestPath = req.getContextPath();
-        String requestHash = requestPath.substring(requestPath.lastIndexOf("/"), requestPath.length());
-        if (requestHash.length() > 0) {
+        String requestPath = req.getRequestURI();
+
+        String hashString;
+        if (requestPath.contains("/"))
+            hashString = requestPath.substring(requestPath.lastIndexOf("/") + 1, requestPath.length());
+        else hashString = "";
+
+        if (hashString.length() > 0) {
             try {
-                resp.getWriter().print(gson.toJson(blockStore.get(requestHash.getBytes())));
+                Sha256Hash hash = Sha256Hash.wrap(hashString);
+                resp.getWriter().print(gson.toJson(blockStore.get(hash)));
+            } catch (IllegalArgumentException ex) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().print(ex.getMessage());
             } catch (BlockNotFoundException ex) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 resp.getWriter().print(ex.getMessage());

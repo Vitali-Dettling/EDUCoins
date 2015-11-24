@@ -3,8 +3,10 @@ package org.educoins.core.p2p.peers.remote;
 
 import org.educoins.core.Block;
 import org.educoins.core.p2p.peers.Peer;
-import org.educoins.core.utils.RestClient;
+import org.educoins.core.p2p.peers.server.BlockServer;
+import org.educoins.core.utils.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,12 +22,31 @@ public class HttpNode extends RemoteNode {
     @Override
     @NotNull
     public Collection<Block> getHeaders() throws IOException {
-        return Arrays.asList(new RestClient<Block[]>().get(URI.create(uri.toString() + "/blocks/headers"), Block[].class));
+        return Arrays.asList(
+                new RestClient<Block[]>()
+                        .get(URI.create(iNetAddress.toString() + BlockServer.BLOCK_HEADERS_RESOURCE_PATH),
+                                Block[].class));
     }
 
     @Override
     @NotNull
     public Collection<Block> getBlocks() throws IOException {
-        return Arrays.asList(new RestClient<Block[]>().get(URI.create(uri.toString() + "/blocks/"), Block[].class));
+        return Arrays.asList(
+                new RestClient<Block[]>()
+                        .get(URI.create(iNetAddress.toString() + BlockServer.BLOCKS_RESOURCE_PATH),
+                                Block[].class));
+    }
+
+    @Override
+    @Nullable
+    public Block getBlock(Sha256Hash hash) throws IOException {
+        try {
+            return new RestClient<Block>()
+                    .get(URI.create(iNetAddress.toString() + BlockServer.BLOCKS_RESOURCE_PATH + hash.toString()),
+                            Block.class);
+        } catch (HttpException ex) {
+            if (ex.getStatus() == 404) return null;
+            throw ex;
+        }
     }
 }

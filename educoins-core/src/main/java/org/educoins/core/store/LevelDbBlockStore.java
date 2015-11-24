@@ -1,12 +1,12 @@
 package org.educoins.core.store;
 
 import com.google.gson.Gson;
-import org.educoins.core.utils.Sha256Hash;
-import org.jetbrains.annotations.Nullable;
 import org.educoins.core.Block;
+import org.educoins.core.utils.Sha256Hash;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +60,6 @@ public class LevelDbBlockStore implements IBlockStore {
         database.put(LATEST_KEY, latest);
     }
 
-
     @Override
     @NotNull
     public synchronized Block get(Sha256Hash hash) {
@@ -68,10 +67,10 @@ public class LevelDbBlockStore implements IBlockStore {
 
         if (byteBlock == null) {
             try {
-				throw new BlockNotFoundException(hash.toString());
-			} catch (BlockNotFoundException e) {
-				e.printStackTrace();
-			}
+                throw new BlockNotFoundException(hash.toString());
+            } catch (BlockNotFoundException e) {
+                e.printStackTrace();
+            }
         }
         return getBlock(byteBlock);
     }
@@ -115,13 +114,13 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     private Block getBlock(byte[] jsonblock) {
-    	Block block = null;
-    	try{
-    		block = new Gson().fromJson(new String(jsonblock), Block.class);
-    	}catch(Exception e){
-    		System.err.println("Not a block object, why is it stored in the DB?");
-    		block = null;
-    	}
+        Block block;
+        try {
+            block = new Gson().fromJson(new String(jsonblock), Block.class);
+        } catch (Exception e) {
+            System.err.println("Not a block object, why is it stored in the DB?");
+            block = null;
+        }
         return block;
     }
 }

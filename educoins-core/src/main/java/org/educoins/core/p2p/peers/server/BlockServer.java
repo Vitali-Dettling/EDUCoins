@@ -14,8 +14,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class BlockServer {
     public static final String contentType = "application/json";
-    public static final String BLOCKS_RESOURCE_PATH = "/blocks/*";
-    public static final String BLOCK_HEADERS_RESOURCE_PATH = "/blocks/headers/*";
+    public static final String BLOCKS_RESOURCE_PATH = "/blocks/";
+    public static final String BLOCK_HEADERS_RESOURCE_PATH = "/blocks/headers/";
     private final Server server;
 
     public BlockServer(@NotNull IBlockStore blockStore, int port) {
@@ -25,8 +25,8 @@ public class BlockServer {
         context.setContextPath("/");
         server.setHandler(context);
 
-        context.addServlet(new ServletHolder(new BlockServlet(blockStore)), BLOCKS_RESOURCE_PATH);
-        context.addServlet(new ServletHolder(new BlockHeaderServlet(blockStore)), BLOCK_HEADERS_RESOURCE_PATH);
+        context.addServlet(new ServletHolder(new BlockServlet(blockStore)), BLOCKS_RESOURCE_PATH + '*');
+        context.addServlet(new ServletHolder(new BlockHeaderServlet(blockStore)), BLOCK_HEADERS_RESOURCE_PATH + '*');
     }
 
     /**

@@ -1,15 +1,15 @@
 package org.educoins.core.p2p.cryptography;
 
 import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.cryptography.Sha256Hash;
+import org.educoins.core.utils.Sha256Hash;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static junit.framework.TestCase.*;
 
 /**
+ * Test for the SHA class.
  * Created by dacki on 12.11.15.
  */
 public class Sha256HashTest {

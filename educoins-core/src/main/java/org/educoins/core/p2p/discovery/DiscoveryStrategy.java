@@ -1,6 +1,6 @@
 package org.educoins.core.p2p.discovery;
 
-import org.educoins.core.p2p.peers.Peer;
+import org.educoins.core.p2p.peers.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -11,19 +11,29 @@ import java.util.Collection;
  * Created by typus on 10/27/15.
  */
 public interface DiscoveryStrategy {
-    /**
-     * Discovers the specific {@link org.educoins.core.p2p.peers.FullPeer}s.
-     *
-     * @return a {@link Collection} of {@link org.educoins.core.p2p.peers.FullPeer}s.
-     * @throws DiscoveryException whenever the discovery failed.
-     */
-    @NotNull Collection<Peer> getFullPeers() throws DiscoveryException;
 
     /**
-     * Discovers the specific {@link org.educoins.core.p2p.peers.ReadOnlyPeer}s.
+     * Discovers the specific {@link ReferencePeer}s.
      *
-     * @return {@link Collection} of {@link org.educoins.core.p2p.peers.ReadOnlyPeer}s.
+     * @return a {@link Collection} of {@link ReferencePeer}s.
      * @throws DiscoveryException whenever the discovery failed.
      */
-    @NotNull Collection<Peer> getReadOnlyPeers() throws DiscoveryException;
+    @NotNull Collection<Peer> getReferencePeers() throws DiscoveryException;
+
+    /**
+     * Discovers the specific {@link FullBlockChainPeer}s.
+     *
+     * @return a {@link Collection} of {@link FullBlockChainPeer}s.
+     * @throws DiscoveryException whenever the discovery failed.
+     */
+    @NotNull Collection<Peer> getFullBlockchainPeers() throws DiscoveryException;
+
+    /**
+     * Discovers the specific {@link SoloMinerPeer}s.
+     *
+     * @return a {@link Collection} of {@link SoloMinerPeer}s.
+     * @throws DiscoveryException whenever the discovery failed.
+     */
+    @NotNull Collection<Peer> getSoloMinerPeers() throws DiscoveryException;
 }
+

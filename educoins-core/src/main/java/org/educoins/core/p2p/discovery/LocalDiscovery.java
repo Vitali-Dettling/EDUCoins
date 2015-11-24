@@ -22,17 +22,6 @@ public class LocalDiscovery implements DiscoveryStrategy {
         this.blockStore = blockStore;
     }
 
-    @Override
-    @NotNull
-    public Collection<Peer> getFullPeers() throws DiscoveryException {
-        return getPeers();
-    }
-
-    @Override
-    @NotNull
-    public Collection<Peer> getReadOnlyPeers() throws DiscoveryException {
-        return getPeers();
-    }
 
     public Collection<Peer> getPeers() {
         /**
@@ -44,4 +33,18 @@ public class LocalDiscovery implements DiscoveryStrategy {
     }
 
 
+    @Override
+    public @NotNull Collection<Peer> getReferencePeers() throws DiscoveryException {
+        return getPeers();
+    }
+
+    @Override
+    public @NotNull Collection<Peer> getFullBlockchainPeers() throws DiscoveryException {
+        return getPeers();
+    }
+
+    @Override
+    public @NotNull Collection<Peer> getSoloMinerPeers() throws DiscoveryException {
+        return getPeers();
+    }
 }

@@ -2,7 +2,9 @@ package org.educoins.core.p2p.peers.remote;
 
 import org.educoins.core.Block;
 import org.educoins.core.store.*;
+import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,5 +48,16 @@ public class LocalNode extends RemoteNode {
         }
 
         return allBlocks;
+    }
+
+    @Override
+    @Nullable
+    public Block getBlock(Sha256Hash hash) throws IOException {
+        try {
+            return blockStore.get(hash);
+        } catch (BlockNotFoundException ex) {
+            logger.debug("Block not found!", ex);
+            return null;
+        }
     }
 }

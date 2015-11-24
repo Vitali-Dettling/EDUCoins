@@ -8,6 +8,12 @@ import java.io.IOException;
 import java.util.Collection;
 
 /**
+ * Reference Client->miner,blockchain,wallet
+ * Full BlockChain->blockchain
+ * Solo Miner->miner,blockchain
+ **/
+
+/**
  * A PeerNode representation. Necessary for P2P Networking.
  * Created by typus on 10/27/15.
  */
@@ -22,6 +28,11 @@ public abstract class Peer {
     @NotNull
     public Collection<Block> getBlocks() throws IOException {
         return remoteNode.getBlocks();
+    }
+
+    @NotNull
+    public Collection<Block> getHeaders() throws IOException {
+        return remoteNode.getHeaders();
     }
 
     @NotNull

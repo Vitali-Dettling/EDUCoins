@@ -33,9 +33,10 @@ public class RestClient<T> {
 
         response = httpClient.execute(getRequest);
 
-        if (response.getStatusLine().getStatusCode() != 200) {
+        int status = response.getStatusLine().getStatusCode();
+        if (status != 200) {
             throw new HttpException(String.format("GET-Request to %s failed. Retrieved Exitcode %s",
-                    uri.toString(), response.getStatusLine().getStatusCode()));
+                    uri.toString(), status), status);
         }
 
         return extractBody(clazzOfT, response);
@@ -51,11 +52,10 @@ public class RestClient<T> {
 
         HttpResponse response = httpClient.execute(putRequest);
 
-        if (response.getStatusLine().getStatusCode() != 200
-                && response.getStatusLine().getStatusCode() != 201
-                && response.getStatusLine().getStatusCode() != 204) {
+        int status = response.getStatusLine().getStatusCode();
+        if (status != 200 && status != 201 && status != 204) {
             throw new HttpException(String.format("PUT-Request to %s failed. Retrieved Exitcode %s",
-                    uri.toString(), response.getStatusLine().getStatusCode()));
+                    uri.toString(), status), status);
         }
     }
 
@@ -68,11 +68,12 @@ public class RestClient<T> {
 
         HttpResponse response = httpClient.execute(postRequest);
 
-        if (response.getStatusLine().getStatusCode() != 200
-                && response.getStatusLine().getStatusCode() != 201
-                && response.getStatusLine().getStatusCode() != 204) {
+        int status = response.getStatusLine().getStatusCode();
+        if (status != 200
+                && status != 201
+                && status != 204) {
             throw new HttpException(String.format("POST-Request to %s failed. Retrieved Exitcode %s",
-                    uri.toString(), response.getStatusLine().getStatusCode()));
+                    uri.toString(), status), status);
         }
     }
 
@@ -83,12 +84,14 @@ public class RestClient<T> {
 
         response = httpClient.execute(deleteRequest);
 
-        if (response.getStatusLine().getStatusCode() != 200) {
+        int status = response.getStatusLine().getStatusCode();
+        if (status != 200) {
             throw new HttpException(String.format("DELETE-Request to %s failed. Retrieved Exitcode %s",
-                    uri.toString(), response.getStatusLine().getStatusCode()));
+                    uri.toString(), status), status);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private T extractBody(Class clazzOfT, HttpResponse response) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
         StringBuilder output = new StringBuilder();

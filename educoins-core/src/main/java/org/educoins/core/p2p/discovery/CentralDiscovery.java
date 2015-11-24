@@ -17,6 +17,9 @@ import java.util.*;
  */
 public class CentralDiscovery implements DiscoveryStrategy {
 
+    public static final String RESOURCE_NODES_MINER = "/nodes/miner";
+    public static final String RESOURCE_NODES_BLOCKCHAIN = "/nodes/blockchain";
+    public static final String RESOURCE_NODES_REFERENCE = "nodes/reference";
     private String centralUrl;
     private RestClient<RemoteNode[]> client;
 
@@ -25,16 +28,16 @@ public class CentralDiscovery implements DiscoveryStrategy {
     }
 
     @Override
-    @NotNull
-    public Collection<Peer> getFullPeers() throws DiscoveryException {
+    public @NotNull Collection<Peer> getReferencePeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();
             RemoteNode[] nodes = client
-                    .get(new URI(centralUrl + "/nodes/full"), HttpNode[].class);
+                    .get(new URI(centralUrl + RESOURCE_NODES_REFERENCE), HttpNode[].class);
+
             if (nodes == null) return peers;
 
             for (RemoteNode node : nodes) {
-                peers.add(new FullPeer(node));
+                peers.add(new ReferencePeer(node));
             }
 
             return peers;
@@ -44,16 +47,16 @@ public class CentralDiscovery implements DiscoveryStrategy {
     }
 
     @Override
-    @NotNull
-    public Collection<Peer> getReadOnlyPeers() throws DiscoveryException {
+    public @NotNull Collection<Peer> getFullBlockchainPeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();
             RemoteNode[] nodes = client
-                    .get(new URI(centralUrl + "/nodes/read-only"), HttpNode[].class);
+                    .get(new URI(centralUrl + RESOURCE_NODES_BLOCKCHAIN), HttpNode[].class);
+
             if (nodes == null) return peers;
 
             for (RemoteNode node : nodes) {
-                peers.add(new ReadOnlyPeer(node));
+                peers.add(new FullBlockChainPeer(node));
             }
 
             return peers;
@@ -62,4 +65,22 @@ public class CentralDiscovery implements DiscoveryStrategy {
         }
     }
 
+    @Override
+    public @NotNull Collection<Peer> getSoloMinerPeers() throws DiscoveryException {
+        try {
+            List<Peer> peers = new ArrayList<>();
+            RemoteNode[] nodes = client
+                    .get(new URI(centralUrl + RESOURCE_NODES_MINER), HttpNode[].class);
+
+            if (nodes == null) return peers;
+
+            for (RemoteNode node : nodes) {
+                peers.add(new SoloMinerPeer(node));
+            }
+
+            return peers;
+        } catch (IOException | URISyntaxException e) {
+            throw new DiscoveryException(e);
+        }
+    }
 }

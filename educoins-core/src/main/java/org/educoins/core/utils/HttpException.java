@@ -8,19 +8,28 @@ import java.io.IOException;
  */
 public class HttpException extends IOException {
 
-    public HttpException() {
+    private final int status;
+
+    public HttpException(int status) {
+        this.status = status;
     }
 
-    public HttpException(String message) {
+    public HttpException(String message, int status) {
         super(message);
+        this.status = status;
     }
 
-    public HttpException(String message, Throwable cause) {
+    public HttpException(String message, Throwable cause, int status) {
         super(message, cause);
+        this.status = status;
     }
 
-    public HttpException(Throwable cause) {
+    public HttpException(Throwable cause, int status) {
         super(cause);
+        this.status = status;
     }
 
+    public int getStatus() {
+        return status;
+    }
 }

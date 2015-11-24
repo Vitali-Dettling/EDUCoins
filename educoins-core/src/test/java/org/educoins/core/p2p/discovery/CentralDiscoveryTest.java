@@ -30,42 +30,42 @@ public class CentralDiscoveryTest {
     DiscoveryStrategy discovery = new CentralDiscovery(centralUrl);
     RestClient clientMock = Mockito.mock(RestClient.class);
     List<Peer> expectedPeers = new ArrayList<>();
-    private URI UriFull;
-    private URI UriReadOnly;
+    private URI uriBlockChain;
+    private URI uriReference;
 
     @Before
     public void setup() throws NoSuchFieldException, IllegalAccessException, IOException, URISyntaxException {
-        UriFull = new URI(centralUrl + "/nodes/full");
-        UriReadOnly = new URI(centralUrl + "/nodes/read-only");
+        uriBlockChain = new URI(centralUrl + "/nodes/blockchain");
+        uriReference = new URI(centralUrl + "/nodes/reference");
         FieldInjector.setField(discovery, clientMock, "client");
     }
 
     @Test
     public void testErrors() throws URISyntaxException, IOException {
-        when(clientMock.get(UriFull, HttpNode[].class)).thenReturn(null);
-        assertNotNull(discovery.getFullPeers());
+        when(clientMock.get(uriBlockChain, HttpNode[].class)).thenReturn(null);
+        assertNotNull(discovery.getFullBlockchainPeers());
 
-        when(clientMock.get(UriReadOnly, HttpNode[].class)).thenReturn(null);
-        assertNotNull(discovery.getReadOnlyPeers());
+        when(clientMock.get(uriReference, HttpNode[].class)).thenReturn(null);
+        assertNotNull(discovery.getReferencePeers());
 
-        when(clientMock.get(UriReadOnly, HttpNode[].class)).thenThrow(new IOException("ERROR"));
+        when(clientMock.get(uriReference, HttpNode[].class)).thenThrow(new IOException("ERROR"));
         exception.expect(DiscoveryException.class);
-        discovery.getReadOnlyPeers();
+        discovery.getReferencePeers();
 
-        when(clientMock.get(UriFull, HttpNode[].class)).thenThrow(new IOException("ERROR"));
+        when(clientMock.get(uriBlockChain, HttpNode[].class)).thenThrow(new IOException("ERROR"));
         exception.expect(DiscoveryException.class);
-        discovery.getFullPeers();
+        discovery.getFullBlockchainPeers();
     }
 
     @Test
     public void testGetFullPeers() throws Exception {
         RemoteNode[] remoteNodes = new RemoteNode[]{new HttpNode()};
         for (RemoteNode node : remoteNodes) {
-            expectedPeers.add(new FullPeer(node));
+            expectedPeers.add(new FullBlockChainPeer(node));
         }
-        when(clientMock.get(UriFull, HttpNode[].class)).thenReturn(remoteNodes);
+        when(clientMock.get(uriBlockChain, HttpNode[].class)).thenReturn(remoteNodes);
 
-        Collection<Peer> fullPeersActual = discovery.getFullPeers();
+        Collection<Peer> fullPeersActual = discovery.getFullBlockchainPeers();
         fullPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));
     }
 
@@ -73,11 +73,11 @@ public class CentralDiscoveryTest {
     public void testGetReadOnlyPeers() throws Exception {
         RemoteNode[] remoteNodes = new RemoteNode[]{new HttpNode()};
         for (RemoteNode node : remoteNodes) {
-            expectedPeers.add(new ReadOnlyPeer(node));
+            expectedPeers.add(new SoloMinerPeer(node));
         }
-        when(clientMock.get(UriReadOnly, HttpNode[].class)).thenReturn(remoteNodes);
+        when(clientMock.get(uriReference, HttpNode[].class)).thenReturn(remoteNodes);
 
-        Collection<Peer> readOnlyPeersActual = discovery.getReadOnlyPeers();
+        Collection<Peer> readOnlyPeersActual = discovery.getReferencePeers();
         readOnlyPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));
     }
 }
