@@ -1,14 +1,14 @@
 package org.educoins.central;
 
 import org.educoins.central.domain.Node;
+import org.educoins.central.domain.PeerType;
 import org.educoins.central.repositories.NodesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.annotation.PostConstruct;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.URI;
 
 @SpringBootApplication
 public class EducoinsCentralApplication {
@@ -24,13 +24,10 @@ public class EducoinsCentralApplication {
 
     @PostConstruct
     private void init() {
-        try {
-            nodesRepository.save(new Node(0, InetAddress.getByName("localhost"), "myPub1"));
-            nodesRepository.save(new Node(1, InetAddress.getByName("localhost"), "myPub2"));
-            nodesRepository.save(new Node(2, InetAddress.getByName("localhost"), "myPub3"));
-            nodesRepository.save(new Node(3, InetAddress.getByName("localhost"), "myPub4"));
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        nodesRepository.save(new Node("myPub1", URI.create("localhost:8678"), PeerType.BLOCKCHAIN));
+        nodesRepository.save(new Node("myPub2", URI.create("localhost:8679"), PeerType.BLOCKCHAIN));
+        nodesRepository.save(new Node("myPub5", URI.create("localhost:8680"), PeerType.MINER));
+        nodesRepository.save(new Node("myPub3", URI.create("localhost:8681"), PeerType.MINER));
+        nodesRepository.save(new Node("myPub4", URI.create("localhost:8682"), PeerType.REFERENCE));
     }
 }
