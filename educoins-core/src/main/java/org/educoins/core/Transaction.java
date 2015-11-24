@@ -6,8 +6,9 @@ import java.util.List;
 
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Hashable;
 
-public class Transaction {
+public class Transaction implements Hashable {
 
 	private static final int HAS_NO_ENTRIES = 0;
 
@@ -186,6 +187,7 @@ public class Transaction {
 		return null;
 	}
 
+	@Override
 	public byte[] hash() {
 		return Transaction.hash(this);
 	}
