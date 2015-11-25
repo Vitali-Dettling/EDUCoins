@@ -6,17 +6,21 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.educoins.core.Block;
 import org.educoins.core.Gate;
 import org.educoins.core.Gateway;
 import org.educoins.core.Transaction;
+import org.educoins.core.store.BlockIterator;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.ITransactionIterator;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.store.TransactionIterator;
 import org.educoins.core.utils.IO;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.After;
@@ -84,7 +88,8 @@ public class LevelDbBlockStoreTest {
         BlockStoreFactory.fillRandomTree(this.store, filled);
 
         int itemCount = 1;
-        IBlockIterator iterator = this.store.iterator();
+		IBlockIterator iterator = this.store.blockIterator();
+
         while (iterator.hasNext()) {
             iterator.next();
             itemCount++;

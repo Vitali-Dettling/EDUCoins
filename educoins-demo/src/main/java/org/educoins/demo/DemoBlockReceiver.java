@@ -9,8 +9,7 @@ import org.educoins.core.IBlockListener;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
-
-import com.sun.istack.internal.NotNull;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("restriction")
 public class DemoBlockReceiver implements IBlockReceiver {

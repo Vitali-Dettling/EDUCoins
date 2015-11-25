@@ -28,9 +28,9 @@ public class BlockIterator implements IBlockIterator {
         return !Arrays.equals(this.currentElement.hash().getBytes(), genesisHash);
     }
 
-    @Override
+	@Override
     @NotNull
-    public Block next() throws BlockNotFoundException {
+    public Block next() {
         Block elementToReturn = this.currentElement;
         byte[] currentHash = currentElement.getHashPrevBlock().getBytes();
         currentElement = blockStore.get(currentHash);
