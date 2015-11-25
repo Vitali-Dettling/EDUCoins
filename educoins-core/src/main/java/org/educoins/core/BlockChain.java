@@ -11,6 +11,8 @@ import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.utils.IO;
+import org.educoins.core.utils.IO.EPath;
 import org.educoins.core.store.ITransactionIterator;
 import org.educoins.core.utils.Sha256Hash;
 
@@ -41,14 +43,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	private String publicKey;
 
-	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver,
-			ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
-
-		// TODO Temp Delete.
-		String walletDirectory = (System.getProperty("user.home") + File.separator + "documents" + File.separator
-				+ "educoins" + File.separator + "demo" + File.separator + "wallet");
-
-		this.wallet = new Wallet(walletDirectory);
+	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
+		
+				
+		this.wallet = new Wallet(IO.getDefaultFileLocation(EPath.DEMO, EPath.WALLET));
 		this.blockListeners = new CopyOnWriteArrayList<>();
 		this.blockReceiver = blockReceiver;
 		this.blockReceiver.addBlockListener(this);
@@ -180,7 +178,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		// Input is empty because it is a coinbase transaction.
 		int newReward = currentBlock.rewardCalculator();
-		Output output = new Output(newReward, publicKey, lockingScript);
+		Output output = new Output(newReward, Sha256Hash.wrap(publicKey), Sha256Hash.wrap(lockingScript));
 
 		CoinbaseTransaction transaction = new CoinbaseTransaction();
 		transaction.addOutput(output);

@@ -1,10 +1,9 @@
-package educoins.core;
+package org.educoins.core;
 
-import org.educoins.core.BlockChain;
+import org.educoins.core.utils.MockedBlockChain;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import educoins.core.utils.MockedBlockChain;
 
 public class BlockChainTest {
 	
@@ -22,9 +21,10 @@ public class BlockChainTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testPrepareNewBlock() {
+
 		
-		//TODO [Vitali] Comment in again.
 //		Block lastBlock = new Block();
 //		Block newBlock = this.mockedBlockchain.prepareNewBlock(lastBlock);
 //		

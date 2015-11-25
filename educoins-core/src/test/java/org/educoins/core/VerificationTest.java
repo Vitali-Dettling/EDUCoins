@@ -1,18 +1,14 @@
-package educoins.core;
+package org.educoins.core;
 
 import static org.junit.Assert.assertTrue;
 
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.Verification;
-import org.educoins.core.Wallet;
+import org.educoins.core.utils.IO;
+import org.educoins.core.utils.IO.EPath;
+import org.educoins.core.utils.MockedBlockChain;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import educoins.core.utils.MockedBlockChain;
-import educoins.core.utils.PathHandler;
 
 public class VerificationTest {
 	
@@ -24,7 +20,7 @@ public class VerificationTest {
 	@Before
 	public void setUp(){
 		
-		Wallet wallet = new Wallet(PathHandler.DIRECTORY_WALLET);
+		Wallet wallet = new Wallet(IO.getDefaultFileLocation(EPath.TMP, EPath.WALLET));
 		MockedBlockChain mockedBlockChain = new MockedBlockChain();
 		BlockChain blockChain = mockedBlockChain.getMockedBlockChain();
 		this.verification = new Verification(wallet, blockChain);

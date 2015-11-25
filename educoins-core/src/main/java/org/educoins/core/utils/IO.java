@@ -14,9 +14,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class IO {
 
-    public static final String TMP_DIR = System.getProperty("java.io.tmpdir");
-    public static final String FILE_SEPERATOR = System.getProperty("file.separator");
-	
+	public static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+	public static final String FILE_SEPERATOR = System.getProperty("file.separator");
+
 	public static void createDirectory(String path) throws IOException {
 		IO.createDirectory(Paths.get(path));
 	}
@@ -116,18 +116,48 @@ public class IO {
 		}
 		Files.copy(srcPath, dstPath);
 	}
-	
-    public static File getDefaultBlockStoreFile() {
-        return new File(TMP_DIR + FILE_SEPERATOR + "EDUCoinsBlockStore");
-    }
 
-    public static boolean deleteDefaultBlockStoreFile() {
-        try {
-            deleteDirectory(TMP_DIR + FILE_SEPERATOR + "EDUCoinsBlockStore");
-        } catch (IOException e) {
-            return false;
-        }
-        return true;
-    }
+	public static File getDefaultFileLocation(EPath location, EPath name) {
+		return new File(location + FILE_SEPERATOR + name);
+	}
+
+	public static boolean deleteDefaultFileLocation(EPath location, EPath name) {
+		try {
+			deleteDirectory(location + FILE_SEPERATOR + name);
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
+
+	public enum EPath {
+
+		DEMO{
+		      public String toString() {
+		          return System.getProperty("user.home") + File.separator + "documents" + File.separator
+		  				+ "educoins" + File.separator + "demo" + File.separator + "wallet";
+		      }
+		  },
+
+		TMP {
+		      public String toString() {
+		          return System.getProperty("java.io.tmpdir");
+		      }
+		  },
+		
+		WALLET {
+		      public String toString() {
+		          return "Wallet";
+		      }
+		  },
+		
+		EDUCoinsBlockStore {
+		      public String toString() {
+		          return "EDUCoinsBlockStore";
+		      }
+		  },
+		
+		
+	}
 
 }

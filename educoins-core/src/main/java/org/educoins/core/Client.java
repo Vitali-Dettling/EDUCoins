@@ -8,6 +8,7 @@ import java.util.Scanner;
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
 
 public class Client extends Thread implements ITransactionListener {
 
@@ -33,13 +34,13 @@ public class Client extends Thread implements ITransactionListener {
 			return;
 		}
 		List<Output> outputs = new ArrayList<>();
-		Output output = new Output(amount, dstPublicKey, lockingScript);
+		Output output = new Output(amount, Sha256Hash.wrap(dstPublicKey), Sha256Hash.wrap(lockingScript));
 		outputs.add(output);
 		if (amount < availableAmount) {
 			int reverseOutputAmount = availableAmount - amount;
 			String reverseDstPublicKey = this.wallet.getPublicKey();
 			String reverseLockingScript = reverseDstPublicKey;
-			Output reverseOutput = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
+			Output reverseOutput = new Output(reverseOutputAmount, Sha256Hash.wrap(reverseDstPublicKey), Sha256Hash.wrap(reverseLockingScript));
 			outputs.add(reverseOutput);
 		}
 		Transaction transaction = new Transaction();
@@ -79,7 +80,7 @@ public class Client extends Thread implements ITransactionListener {
 			int reverseOutputAmount = availableAmount - amount;
 			String reverseDstPublicKey = this.wallet.getPublicKey();
 			String reverseLockingScript = reverseDstPublicKey;
-			output = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
+			output = new Output(reverseOutputAmount, Sha256Hash.wrap(reverseDstPublicKey), Sha256Hash.wrap(reverseLockingScript));
 		}
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
@@ -144,7 +145,7 @@ public class Client extends Thread implements ITransactionListener {
 						String hashPrevOutput = ByteArray.convertToString(transaction.hash(), 16);
 						// TODO [joeren] @ [vitali]: Wenn ich hier ";" bereits
 						// anhänge, knallts bei irgendeinem Konvertiervorgang
-						Input input = new Input(amount, hashPrevOutput, index);
+						Input input = new Input(amount, Sha256Hash.wrap(hashPrevOutput), index);
 						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, this.wallet.getPublicKey());
 						this.inputs.add(input);
 
@@ -160,12 +161,13 @@ public class Client extends Thread implements ITransactionListener {
 							typeString = "Unknown Transaction";
 						}
 						int availableAmount = 0;
-						for (Input tmpInput : this.inputs) {
+						List<Input> tmpInputs = new ArrayList<>(inputs);
+						for (Input tmpInput : tmpInputs) {
 							availableAmount += tmpInput.getAmount();
 						}
 						//TODO[Vitali] Testing
-//						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
-//								amount, availableAmount, typeString, output.getLockingScript()));
+						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
+								amount, availableAmount, typeString, output.getLockingScript()));
 					}
 				}
 			}

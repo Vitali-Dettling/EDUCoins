@@ -3,6 +3,7 @@ package org.educoins.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.educoins.core.cryptography.SHA256Hasher;
@@ -22,7 +23,7 @@ public class Block {
 	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
 	private static final long TIME = System.currentTimeMillis();
 
-	private static final byte[] BITS = ByteArray.convertFromString("3dffffff");
+	private static final byte[] BITS = ByteArray.convertFromString("1dffffff");
 	private static final long NONCE = 1114735442;
 
 	private int version;
@@ -94,12 +95,11 @@ public class Block {
 
 	public Sha256Hash getBits() {
         byte[] mantisse = Arrays.copyOfRange(bits, 1, 4);
-        byte exponent = bits[0];
+        int expInt = (int) bits[0];
 
-        int expInt = ((int) exponent) - 3;
-        byte[] result = new byte[mantisse.length + expInt / 2];
+        byte[] result = new byte[3 + expInt];
         Arrays.fill(result, (byte) 0);
-        System.arraycopy(mantisse, 0, result, 0, mantisse.length);
+        System.arraycopy(mantisse, 0, result, 0, 3);
         
         return Sha256Hash.wrap(result);
 	}
@@ -112,7 +112,7 @@ public class Block {
         int i = 0;
         for (i = 0; bits[i] == (byte) 0; i++); //count leading 0
 
-        exponent[0] = (byte) ((bits.length - i) * 2 - 3);
+        exponent[0] = (byte) (bits.length - i - 3);
         mantisse = Arrays.copyOfRange(bits, i, i + 3);
 
         this.bits = ByteArray.concatByteArrays(exponent, mantisse);
@@ -124,6 +124,39 @@ public class Block {
 
     public void setNonce(long nonce) {
         this.nonce = nonce;
+    }
+
+    public void calculateMerkleRoot() {
+        if (this.getTransactionsCount() == 0) {
+            this.setHashMerkleRoot(Sha256Hash.ZERO_HASH);
+            return;
+        }
+        int next2Exp = 1;
+        while (Math.pow(2, next2Exp) < this.getTransactionsCount()) {
+            next2Exp++;
+        }
+        List<Sha256Hash> hashList = new LinkedList<>();
+        for (Transaction transaction : transactions) {
+            hashList.add(Sha256Hash.wrap(transaction.hash()));
+        }
+        int i = this.getTransactionsCount();
+        while (Math.pow(2, next2Exp) - i != 0) {
+            hashList.add(Sha256Hash.wrap(transactions.get(this.getTransactionsCount() - 1).hash()));
+            i++;
+        }
+        List<Sha256Hash> nextHashList = calculateNextLevelInBinaryTree(hashList);
+        while (nextHashList.size() != 1) {
+            nextHashList = calculateNextLevelInBinaryTree(nextHashList);
+        }
+        this.setHashMerkleRoot(nextHashList.get(0));
+    }
+
+    private List<Sha256Hash> calculateNextLevelInBinaryTree(List<Sha256Hash> initialList) {
+        List<Sha256Hash> returnList = new LinkedList<>();
+        for (int i = 0; i < initialList.size(); i += 2) {
+            returnList.add(initialList.get(i).concat(initialList.get(i + 1)));
+        }
+        return returnList;
     }
 
     public int getTransactionsCount() {
@@ -146,6 +179,7 @@ public class Block {
         } else {
             this.transactionsCount = this.transactions.size();
         }
+        calculateMerkleRoot();
     }
 
     public void addTransaction(Transaction transaction) {
@@ -154,6 +188,7 @@ public class Block {
         }
         this.transactions.add(transaction);
         this.transactionsCount = this.transactions.size();
+        calculateMerkleRoot();
     }
 
     public void addTransactions(Collection<Transaction> transactions) {
@@ -162,6 +197,7 @@ public class Block {
         }
         this.transactions.addAll(transactions);
         this.transactionsCount = this.transactions.size();
+        calculateMerkleRoot();
     }
 
     public List<Gateway> getGateways() {

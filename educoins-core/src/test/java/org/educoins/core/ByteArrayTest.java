@@ -1,4 +1,4 @@
-package educoins.core.utils;
+package org.educoins.core;
 
 import org.educoins.core.utils.ByteArray;
 import org.junit.Assert;
@@ -9,7 +9,7 @@ import org.junit.Test;
  */
 public class ByteArrayTest {
     @Test
-    public void testCompare1() {
+    public void compare1Test() {
         byte[] a = new byte[]{ 4, 5, 6};
         byte[] b = new byte[]{ 3, 5, 6};
         Assert.assertEquals(1, ByteArray.compare(a, b));
@@ -17,7 +17,7 @@ public class ByteArrayTest {
     }
 
     @Test
-    public void testCompareEquals() {
+    public void compareEqualsTest() {
         byte[] a = new byte[]{ 4, 5, 6};
         byte[] b = new byte[]{ 4, 5, 6};
         Assert.assertEquals(0, ByteArray.compare(a, b));
@@ -25,7 +25,7 @@ public class ByteArrayTest {
     }
 
     @Test
-    public void testCompareDiffLength() {
+    public void compareDiffLengthTest() {
         byte[] a = new byte[]{ 0,0,0,0, 5, 6};
         byte[] b = new byte[]{ 4, 5, 6};
         Assert.assertEquals(-1, ByteArray.compare(a, b));

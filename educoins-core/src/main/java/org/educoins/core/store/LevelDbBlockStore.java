@@ -12,6 +12,7 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.Gson;
 
@@ -108,8 +109,14 @@ public class LevelDbBlockStore implements IBlockStore {
 		return latest == null;
 	}
 
-	private String getJson(Block block) {
-		return new Gson().toJson(block);
+    @Override
+    public IBlockIterator blockIterator() {
+        return new BlockIterator(this, genesisHash);
+    }
+    
+	@Override
+	public ITransactionIterator transactionIterator() {
+		return new TransactionIterator(this, genesisHash);
 	}
 
 	private Block getBlock(byte[] jsonblock) {

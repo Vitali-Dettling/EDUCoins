@@ -6,7 +6,6 @@ import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
-import org.jetbrains.annotations.NotNull;
 
 public class Verification {
 	

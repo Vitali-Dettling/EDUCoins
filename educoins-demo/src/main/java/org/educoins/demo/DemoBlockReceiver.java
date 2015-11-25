@@ -11,7 +11,6 @@ import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
 import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("restriction")
 public class DemoBlockReceiver implements IBlockReceiver {
 
 	private IBlockStore blockStore;

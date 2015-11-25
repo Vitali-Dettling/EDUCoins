@@ -18,17 +18,16 @@ import org.educoins.miner.Miner;
 
 public class DemoProgram {
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
+		String localDBStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
+				+ "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore";
     	//TODO Temp Delete.
-        String localDBStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
-                + "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore" ;
-        
-        boolean localStorageSet = false;
-        boolean runMiner = false;
-        boolean init = false;
 
-        if (args.length != 0) {
+		boolean localStorageSet = false;
+		boolean runMiner = false;
+		boolean init = false;
+
+		if (args.length != 0) {
 
 			for (int i = 0; i < args.length; i++) {
 				switch (args[i].toLowerCase()) {
@@ -60,61 +59,65 @@ public class DemoProgram {
 				}
 			}
 
-        } else {
-            Scanner scanner = new Scanner(System.in);
-            String input = null;
+		} else {
+			Scanner scanner = new Scanner(System.in);
+			String input = null;
 
-            System.out.print("path of local storage (" + localDBStorage + "): ");
-            input = scanner.nextLine().trim();
-            if (!input.isEmpty()) {
-            	localDBStorage = input;
-            }
-            System.out.print("run miner [Y|n]: ");
-            input = scanner.nextLine().trim();
-            if (input.isEmpty() || input.equalsIgnoreCase("y")) {
-                runMiner = true;
-            } else if (input.equalsIgnoreCase("n")) {
-                runMiner = false;
-            } else {
-                System.err.println("illegal input " + input);
-                scanner.close();
-                return;
-            }
+			System.out.print("path of local storage (" + localDBStorage + "): ");
+			input = scanner.nextLine().trim();
+			if (!input.isEmpty()) {
+				localDBStorage = input;
+			}
+			System.out.print("run miner [Y|n]: ");
+			input = scanner.nextLine().trim();
+			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
+				runMiner = true;
+			} else if (input.equalsIgnoreCase("n")) {
+				runMiner = false;
+			} else {
+				System.err.println("illegal input " + input);
+				scanner.close();
+				return;
+			}
 
-            System.out.print("initial run [Y|n]: ");
-            input = scanner.nextLine().trim();
-            if (input.isEmpty() || input.equalsIgnoreCase("y")) {
-                init = true;
-            } else if (input.equalsIgnoreCase("n")) {
-                init = false;
-            } else {
-                System.err.println("illegal input " + input);
-                scanner.close();
-                return;
-            }
-        }
+			System.out.print("initial run [Y|n]: ");
+			input = scanner.nextLine().trim();
+			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
+				init = true;
+			} else if (input.equalsIgnoreCase("n")) {
+				init = false;
+			} else {
+				System.err.println("illegal input " + input);
+				scanner.close();
+				return;
+			}
+		}
 
-        // make little space between input and run
-        System.out.println();
-        
-        IBlockStore senderBlockStore = new LevelDbBlockStore(new File(localDBStorage));
+		// make little space between input and run
+		System.out.println();
 
-        IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
-        blockReceiver.addBlockListener(senderBlockStore::put);
+		IBlockStore senderBlockStore = new LevelDbBlockStore(new File(localDBStorage));
 
         ITransactionReceiver txReceiver = new DemoTransactionReceiver();
         ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
+		IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
+		blockReceiver.addBlockListener(senderBlockStore::put);
+        ITransactionReceiver txReceiver = new DemoTransactionReceiver();
+        ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
         
-        BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
 
-        if (runMiner) {
-            new Miner(blockChain);
-        }
-        Thread client = new Client(blockChain);
-        client.start();
+		ITransactionReceiver txReceiver = new DemoTransactionReceiver();
+		ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
+		BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
 
-        //Kick of the system with the genesis block. 
-        blockChain.foundPoW(new Block());
-        txReceiver.receiveTransactions();
-    }
+		if (runMiner) {
+			new Miner(blockChain);
+		}
+		Thread client = new Client(blockChain);
+		client.start();
+
+		// Kick of the system with the genesis block.
+		blockChain.foundPoW(new Block());
+		txReceiver.receiveTransactions();
+	}
 }
