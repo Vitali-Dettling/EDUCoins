@@ -2,17 +2,14 @@ package org.educoins.core.store;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.educoins.core.Block;
-import org.educoins.core.Input;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.Gson;
 
@@ -92,16 +89,6 @@ public class LevelDbBlockStore implements IBlockStore {
 		}
 	}
 
-	@Override
-	public IBlockIterator blockIterator() {
-		return new BlockIterator(this, genesisHash);
-	}
-	
-	@Override
-	public ITransactionIterator transactionIterator() {
-		return new TransactionIterator(this, genesisHash);
-	}
-
 	private boolean isEmpty() {
 		if (latest == null)
 			latest = database.get(LATEST_KEY);
@@ -129,6 +116,10 @@ public class LevelDbBlockStore implements IBlockStore {
 		}
 		return block;
 	}
+	
+	 private String getJson(Block block) {
+	        return new Gson().toJson(block);
+	    }
 
 
 }

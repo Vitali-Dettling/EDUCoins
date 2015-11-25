@@ -1,8 +1,11 @@
 package org.educoins.core;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -39,10 +42,6 @@ public class Wallet {
 
 			IO.deleteDirectory(directoryKeyStorage);
 			IO.createDirectory(directoryKeyStorage);
-			IO.createFile(this.directoryKeyStorage  + KeyStorageFile);
-		
-			IO.createFile(this.directoryKeyStorage + KeyStorageFile);
-
 			IO.createFile(this.directoryKeyStorage  + WALLET_FILE_NAME);
 		
 		} catch (IOException e) {

@@ -2,8 +2,6 @@ package org.educoins.core;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Random;
-
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.Generator;
 import org.educoins.core.utils.Sha256Hash;

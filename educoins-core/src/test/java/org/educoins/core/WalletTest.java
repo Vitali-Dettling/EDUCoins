@@ -7,39 +7,14 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Generator;
-import org.educoins.core.utils.IO;
-import org.educoins.core.utils.IO.EPath;
-import org.junit.Before;
+import org.educoins.core.utils.MockedWallet;
+import org.educoins.core.utils.Sha256Hash;
 import org.junit.Test;
-
-import educoins.core.utils.Generator;
-import educoins.core.utils.MockedWallet;
 
 public class WalletTest {
 
-	private static final int HEX = 16;
 	private static final int KEYS = 10;
-	
-	private Generator randomNumber;
-	private Wallet wallet;
-	
-	@Before
-	public void setUp(){
-		this.randomNumber = new Generator();
-		this.wallet = new Wallet();
-	}
-	
-	private Generator randomNumber;
-	private Wallet wallet;
-	
-	@Before
-	public void setUp(){
-		this.randomNumber = new Generator();
-		this.wallet = new Wallet(IO.getDefaultFileLocation(EPath.TMP, EPath.WALLET));
-	}
-	
 
 	@Test
 	public void testSignatureVerification() {
@@ -52,7 +27,7 @@ public class WalletTest {
 		assertNotNull(pubKey);
 		assertNotNull(signature);
 		
-		byte[] sig = ByteArray.convertFromString(signature, HEX);
+		byte[] sig = Sha256Hash.wrap(signature).getBytes();
 		boolean verified = MockedWallet.checkSignature(randomNumber, sig);
 		assertTrue(verified);
 	}
@@ -99,7 +74,7 @@ public class WalletTest {
 		final String message = Generator.getSecureRandomString256HEX();
 		final String signature = MockedWallet.getSignature(publicKey, message);
 		
-		byte[] sign = ByteArray.convertFromString(signature, HEX);
+		byte[] sign = Sha256Hash.wrap(signature).getBytes();
 		
 		boolean testResult = MockedWallet.checkSignature(message, sign);
 		assertTrue(testResult);

@@ -14,14 +14,15 @@ import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.utils.IO;
+import org.educoins.core.utils.IO.EPath;
 import org.educoins.miner.Miner;
 
 public class DemoProgram {
 
+	public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
-		String localDBStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
-				+ "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore";
-    	//TODO Temp Delete.
+		File localDBStorage = IO.getDefaultFileLocation(EPath.DEMO, EPath.EDUCoinsBlockStore);
 
 		boolean localStorageSet = false;
 		boolean runMiner = false;
@@ -36,7 +37,7 @@ public class DemoProgram {
 						System.err.println("local storage can only set once");
 						return;
 					}
-					localDBStorage = args[++i];
+					localDBStorage = new File(args[++i]);
 					localStorageSet = true;
 					break;
 				case "-runminer":
@@ -66,7 +67,7 @@ public class DemoProgram {
 			System.out.print("path of local storage (" + localDBStorage + "): ");
 			input = scanner.nextLine().trim();
 			if (!input.isEmpty()) {
-				localDBStorage = input;
+				localDBStorage = new File(input);
 			}
 			System.out.print("run miner [Y|n]: ");
 			input = scanner.nextLine().trim();
@@ -96,18 +97,14 @@ public class DemoProgram {
 		// make little space between input and run
 		System.out.println();
 
-		IBlockStore senderBlockStore = new LevelDbBlockStore(new File(localDBStorage));
+		IBlockStore senderBlockStore = new LevelDbBlockStore(localDBStorage);
 
-        ITransactionReceiver txReceiver = new DemoTransactionReceiver();
-        ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
 		IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
 		blockReceiver.addBlockListener(senderBlockStore::put);
-        ITransactionReceiver txReceiver = new DemoTransactionReceiver();
-        ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
-        
 
 		ITransactionReceiver txReceiver = new DemoTransactionReceiver();
 		ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
+
 		BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
 
 		if (runMiner) {

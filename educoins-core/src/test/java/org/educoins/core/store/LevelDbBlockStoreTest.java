@@ -1,6 +1,4 @@
-package educoins.core.store;
 package org.educoins.core.store;
-package educoins.core.store; 
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -17,8 +15,10 @@ import org.educoins.core.Gate;
 import org.educoins.core.Gateway;
 import org.educoins.core.Transaction;
 import org.educoins.core.utils.BlockStoreFactory;
+import org.educoins.core.utils.Generator;
 import org.educoins.core.utils.IO;
 import org.educoins.core.utils.IO.EPath;
+import org.educoins.core.utils.MockedWallet;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.After;
 import org.junit.Before;

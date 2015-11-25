@@ -1,22 +1,16 @@
 package org.educoins.core;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.IO;
 import org.educoins.core.utils.IO.EPath;
-import org.educoins.core.store.ITransactionIterator;
 import org.educoins.core.utils.Sha256Hash;
-
-import educoins.core.utils.BlockStoreFactory;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
