@@ -1,19 +1,15 @@
 package org.educoins.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.educoins.core.utils.Generator;
+import org.educoins.core.utils.ByteArray;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Generator;
-import org.educoins.core.utils.IO;
-import org.educoins.core.utils.IO.EPath;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class WalletTest {
 
@@ -26,7 +22,7 @@ public class WalletTest {
 	@Before
 	public void setUp(){
 		this.randomNumber = new Generator();
-		this.wallet = new Wallet(IO.getDefaultFileLocation(EPath.TMP, EPath.WALLET));
+		this.wallet = new Wallet();
 	}
 	
 	@Test

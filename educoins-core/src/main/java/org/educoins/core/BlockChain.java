@@ -1,15 +1,13 @@
 package org.educoins.core;
 
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.store.IBlockStore;
+import org.educoins.core.utils.Sha256Hash;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.utils.IO;
-import org.educoins.core.utils.IO.EPath;
-import org.educoins.core.utils.Sha256Hash;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
@@ -18,6 +16,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private static final int IN_SECONDS = 1000;
 	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * IN_SECONDS * CHECK_AFTER_BLOCKS;
 	private static final int SCALE_DECIMAL_LENGTH = 100;
+	private static final int HEX = 16;
 	private static final int RESET_BLOCKS_COUNT = 0;
 
 	private int blockCounter;
@@ -36,8 +35,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
 		
-				
-		this.wallet = new Wallet(IO.getDefaultFileLocation(EPath.DEMO, EPath.WALLET));
+		this.wallet = new Wallet();
 		this.blockListeners = new CopyOnWriteArrayList<>();
 		this.blockReceiver = blockReceiver;
 		this.blockReceiver.addBlockListener(this);
@@ -156,7 +154,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		
 		//Input is empty because it is a coinbase transaction.
 		int newReward = currentBlock.rewardCalculator();
-		Output output = new Output(newReward, Sha256Hash.wrap(publicKey), Sha256Hash.wrap(lockingScript));
+		Output output = new Output(newReward, publicKey, lockingScript);
 		
 		CoinbaseTransaction transaction = new CoinbaseTransaction(); 
 		transaction.addOutput(output);

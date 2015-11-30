@@ -1,10 +1,10 @@
 package org.educoins.core.p2p.nodes;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.educoins.core.Block;
 import org.educoins.core.store.IBlockStore;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Simulating a Remote Peer.
