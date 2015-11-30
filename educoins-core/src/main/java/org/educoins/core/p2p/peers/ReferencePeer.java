@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
  * Created by typus on 11/23/15.
  */
 public class ReferencePeer extends Peer {
-
     //    private final Miner miner;
     private final BlockChain blockChain;
     private final Wallet wallet;
@@ -31,4 +30,5 @@ public class ReferencePeer extends Peer {
         this.blockChain = null;
         this.wallet = null;
     }
+
 }

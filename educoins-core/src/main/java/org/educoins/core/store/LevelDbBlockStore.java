@@ -67,16 +67,13 @@ public class LevelDbBlockStore implements IBlockStore {
 
     @Override
     @NotNull
-    public synchronized Block get(Sha256Hash hash) {
+    public synchronized Block get(Sha256Hash hash) throws BlockNotFoundException {
         byte[] byteBlock = database.get(hash.getBytes());
 
-        if (byteBlock == null) {
-            try {
-                throw new BlockNotFoundException(hash.toString());
-            } catch (BlockNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
+        if (byteBlock == null)
+            throw new BlockNotFoundException(hash.toString());
+
+
         return getBlock(byteBlock);
     }
 

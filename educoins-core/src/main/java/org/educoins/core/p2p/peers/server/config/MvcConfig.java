@@ -1,6 +1,11 @@
 package org.educoins.core.p2p.peers.server.config;
 
+import org.educoins.core.Block;
+import org.educoins.core.BlockChain;
+import org.educoins.core.p2p.peers.LocalPeer;
+import org.educoins.core.p2p.peers.remote.LocalNode;
 import org.educoins.core.store.*;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,12 +16,53 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MvcConfig {
     private IBlockStore blockStore;
+    private BlockChain blockChain;
+
+    public Block getRandomBlock(Block block) {
+        Block toReturn = getRandomBlock();
+        toReturn.setHashPrevBlock(block.hash());
+        return toReturn;
+    }
+
+    public Block getRandomBlock() {
+        Block toReturn = new Block();
+        toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
+        toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
+        return toReturn;
+    }
 
     @Bean
     public IBlockStore blockStore() throws BlockStoreException {
-        if (blockStore == null)
+        if (blockStore == null) {
             this.blockStore = new LevelDbBlockStore();
+            fillRandomTree(this.blockStore);
+        }
         return blockStore;
+    }
+
+    @NotNull
+    private Block generateBlock() {
+        Block toReturn = new Block();
+        toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
+        toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
+        return toReturn;
+    }
+
+    @Bean
+    public BlockChain blockChain() throws BlockStoreException {
+        if (blockChain == null) {
+            LocalPeer localPeer = new LocalPeer(new LocalNode(blockStore()));
+            this.blockChain = new BlockChain(localPeer, localPeer, localPeer, blockStore());
+        }
+        return blockChain;
+    }
+
+    public void fillRandomTree(IBlockStore store) {
+        Block previous = getRandomBlock();
+        for (int i = 0; i < 23; i++) {
+            previous = getRandomBlock(previous);
+            store.put(previous);
+        }
     }
 }
 

@@ -1,13 +1,18 @@
 package org.educoins.core.p2p.peers.server;
 
 import org.educoins.core.Block;
-import org.educoins.core.store.*;
+import org.educoins.core.BlockChain;
+import org.educoins.core.p2p.peers.server.exceptions.BlockChainVerificationException;
+import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Collection;
 
 /**
  * The Controller representing the REST-API for the {@link Block} resource.
@@ -17,11 +22,12 @@ import java.util.*;
 @RequestMapping("/blocks/")
 public class BlockController {
 
-    private IBlockStore blockStore;
+    private Logger logger = LoggerFactory.getLogger(BlockController.class);
+    private BlockChain blockChain;
 
     @Autowired
-    public BlockController(IBlockStore blockStore) {
-        this.blockStore = blockStore;
+    public BlockController(BlockChain blockChain) {
+        this.blockChain = blockChain;
     }
 
     /**
@@ -32,11 +38,19 @@ public class BlockController {
      */
     @RequestMapping(value = "", method = RequestMethod.GET)
     public Collection<Block> getBlocks() throws BlockNotFoundException {
-        try {
-            return aggregateBlocks();
-        } catch (BlockNotFoundException e) {
-            throw new BlockNotFoundException(e.getMessage());
-        }
+        return blockChain.getBlocks();
+    }
+
+    /**
+     * Adds the {@link Block} to the {@link BlockChain} of the {@link org.educoins.core.p2p.peers.Peer}.
+     *
+     * @param block the Block to add.
+     * @throws BlockChainVerificationException if the there was a conflict while validation.
+     */
+    @RequestMapping(value = "", method = RequestMethod.POST)
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void createBlock(@RequestBody @NotNull Block block) throws BlockChainVerificationException {
+        blockChain.blockReceived(block);
     }
 
     /**
@@ -49,11 +63,7 @@ public class BlockController {
     @RequestMapping(value = "{hash}", method = RequestMethod.GET)
     public Block getBlock(@PathVariable(value = "hash") String hash) throws
             BlockNotFoundException {
-        try {
-            return blockStore.get(Sha256Hash.wrap(hash));
-        } catch (BlockNotFoundException e) {
-            throw new BlockNotFoundException(e.getMessage());
-        }
+        return blockChain.getBlock(Sha256Hash.wrap(hash));
     }
 
     /**
@@ -64,30 +74,7 @@ public class BlockController {
      */
     @RequestMapping(value = "headers", method = RequestMethod.GET)
     public Collection<Block> getBlockHeaders() throws BlockNotFoundException {
-        try {
-            return aggregateBlockHeaders();
-        } catch (BlockNotFoundException e) {
-            throw new BlockNotFoundException(e.getMessage());
-        }
-    }
-
-    @NotNull
-    private Collection<Block> aggregateBlockHeaders() throws BlockNotFoundException {
-        List<Block> headers = new ArrayList<>();
-        IBlockIterator iterator = blockStore.iterator();
-        while (iterator.hasNext()) {
-            headers.add(iterator.next().getHeader());
-        }
-        return headers;
-    }
-
-    private @NotNull List<Block> aggregateBlocks() throws BlockNotFoundException {
-        List<Block> blocks = new ArrayList<>();
-        IBlockIterator iterator = blockStore.iterator();
-        while (iterator.hasNext()) {
-            blocks.add(iterator.next());
-        }
-        return blocks;
+        return blockChain.getBlockHeaders();
     }
 
 }
