@@ -2,6 +2,7 @@ package org.educoins.core.store;
 
 import com.google.gson.Gson;
 import org.educoins.core.Block;
+import org.educoins.core.utils.IO;
 import org.educoins.core.utils.Sha256Hash;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.*;
@@ -23,6 +24,10 @@ public class LevelDbBlockStore implements IBlockStore {
 
     private DB database;
     private byte[] latest;
+
+    public LevelDbBlockStore() throws BlockStoreException {
+        this(IO.getDefaultBlockStoreFile());
+    }
 
     public LevelDbBlockStore(File directory) throws BlockStoreException {
         DBFactory dbFactory = JniDBFactory.factory;
@@ -76,7 +81,7 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     @SuppressWarnings("restriction")
-	@Override
+    @Override
     @Nullable
     public synchronized Block getLatest() {
         if (isEmpty()) return null;
@@ -122,5 +127,11 @@ public class LevelDbBlockStore implements IBlockStore {
             block = null;
         }
         return block;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        this.destroy();
     }
 }
