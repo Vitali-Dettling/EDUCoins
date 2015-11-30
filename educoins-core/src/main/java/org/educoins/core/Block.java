@@ -7,9 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.educoins.core.cryptography.SHA256Hasher;
+import org.educoins.core.utils.BinaryTree;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 
+import java.util.*;
 import com.google.common.base.Objects;
 
 //import org.educoins.core.p2p.messages.MessageProtos;
@@ -133,32 +135,9 @@ public class Block {
             this.setHashMerkleRoot(Sha256Hash.ZERO_HASH);
             return;
         }
-        int next2Exp = 1;
-        while (Math.pow(2, next2Exp) < this.getTransactionsCount()) {
-            next2Exp++;
-        }
-        List<Sha256Hash> hashList = new LinkedList<>();
-        for (Transaction transaction : transactions) {
-            hashList.add(Sha256Hash.wrap(transaction.hash()));
-        }
-        int i = this.getTransactionsCount();
-        while (Math.pow(2, next2Exp) - i != 0) {
-            hashList.add(Sha256Hash.wrap(transactions.get(this.getTransactionsCount() - 1).hash()));
-            i++;
-        }
-        List<Sha256Hash> nextHashList = calculateNextLevelInBinaryTree(hashList);
-        while (nextHashList.size() != 1) {
-            nextHashList = calculateNextLevelInBinaryTree(nextHashList);
-        }
-        this.setHashMerkleRoot(nextHashList.get(0));
-    }
 
-    private List<Sha256Hash> calculateNextLevelInBinaryTree(List<Sha256Hash> initialList) {
-        List<Sha256Hash> returnList = new LinkedList<>();
-        for (int i = 0; i < initialList.size(); i += 2) {
-            returnList.add(initialList.get(i).concat(initialList.get(i + 1)));
-        }
-        return returnList;
+        BinaryTree<Transaction> tree = new BinaryTree<>(getTransactions());
+        setHashMerkleRoot(Sha256Hash.wrap(tree.getRoot().hash()));
     }
 
     public int getTransactionsCount() {

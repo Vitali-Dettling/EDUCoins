@@ -1,18 +1,13 @@
 package org.educoins.core.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.educoins.core.Block;
 import org.educoins.core.Gate;
 import org.educoins.core.Input;
-import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Output;
 import org.educoins.core.Transaction;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.core.utils.IO.EPath;
 
 /**
  * A factory for easier testing concerning the {@link IBlockStore}.
@@ -20,11 +15,11 @@ import org.educoins.core.utils.IO.EPath;
  */
 public class BlockStoreFactory {
     public static IBlockStore getBlockStore() throws BlockStoreException {
-        return new LevelDbBlockStore(IO.getDefaultFileLocation(EPath.TMP, EPath.EDUCoinsBlockStore));
+        return new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
     }
 
     public static IBlockStore getRandomlyFilledBlockStore() throws BlockStoreException {
-        return new LevelDbBlockStore(IO.getDefaultFileLocation(EPath.TMP, EPath.EDUCoinsBlockStore));
+        return new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
     }
 
     public static void fillRandom(IBlockStore store, int filled) {
@@ -83,41 +78,14 @@ public class BlockStoreFactory {
     public static Transaction generateTransaction(int number) {
         Transaction t = new Transaction();
         for (int i = 0; i < 2 * number; i++) {
-            Input input = new Input(5 * i * number, Sha256Hash.wrap(""), i);
+            Input input = new Input(5 * i * number, "", i);
             input.setUnlockingScript(Input.EInputUnlockingScript.PUBLIC_KEY, "12345");
             t.addInput(input);
         }
         for (int i = 0; i < 4 * number; i++) {
-            t.addOutput(new Output(5 * i * number, Sha256Hash.wrap(""), Sha256Hash.wrap("123456")));
+            t.addOutput(new Output(5 * i * number, "", "123"));
         }
         t.setApprovals(null);
         return t;
     }
-    
-    public static List<Transaction> getConnectedTransactions(){
-    	
-    	String publicKey = MockedWallet.getPublicKey();
-    	String lockingScript = MockedWallet.getPublicKey();
-    	
-    	Transaction txPrev = generateTransaction(1);
-    	
-    	Transaction txNew = new Transaction();
-    	List<Transaction> listTx = new ArrayList<Transaction>();
-    	
-    	Output outPrev = txPrev.getOutputs().get(0);
-    	Sha256Hash bytePrevOut = Sha256Hash.wrap(outPrev.getConcatedOutput());
-    
-    	Input inNew = new Input(3, bytePrevOut, 0);
-    	inNew.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, lockingScript);
-    	Output outNew = new Output(2, Sha256Hash.wrap(publicKey), Sha256Hash.wrap(lockingScript));
-    	
-    	txNew.addInput(inNew);
-    	txNew.addOutput(outNew);
-    	
-    	listTx.add(txPrev);
-    	listTx.add(txNew);
-    	
-    	return listTx;
-    }
-    
 }

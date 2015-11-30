@@ -1,19 +1,10 @@
 package org.educoins.core.store;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.Block;
 import org.educoins.core.Gate;
 import org.educoins.core.Gateway;
 import org.educoins.core.Transaction;
-import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.Generator;
 import org.educoins.core.utils.IO;
 import org.educoins.core.utils.IO.EPath;
@@ -22,6 +13,11 @@ import org.educoins.core.utils.Sha256Hash;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * Default test for {@link LevelDbBlockStore}
@@ -55,17 +51,6 @@ public class LevelDbBlockStoreTest {
     }
 
     @Test
-    public void testPutGenesisBlockOnly() throws Exception {
-        
-    	Block b1 = BlockStoreFactory.getRandomBlock();
-        this.store.put(b1);
-        
-        IBlockIterator iterator = this.store.blockIterator();
-        assertFalse(iterator.hasNext());
-
-    }
-    
-    @Test
     public void testPut() throws Exception {
         Block b1 = BlockStoreFactory.getRandomBlock();
         this.store.put(b1);
@@ -91,7 +76,7 @@ public class LevelDbBlockStoreTest {
         BlockStoreFactory.fillRandomTree(this.store, filled);
 
         int itemCount = 1;
-        IBlockIterator iterator = this.store.blockIterator();
+        IBlockIterator iterator = this.store.iterator();
         while (iterator.hasNext()) {
             iterator.next();
             itemCount++;

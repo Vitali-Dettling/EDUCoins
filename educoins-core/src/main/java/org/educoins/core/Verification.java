@@ -1,12 +1,12 @@
 package org.educoins.core;
 
-import java.util.List;
-
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class Verification {
 
@@ -17,7 +17,6 @@ public class Verification {
 	private static final int NO_COINS = 0;
 	private static final int HAS_NO_ENTRIES = 0;
 	private static final int ONLY_ONE_COINBASE_TRANSACTION = 1;
-	private static final String GENESIS_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 
 	private Wallet wallet;
 	private BlockChain blockChain;
@@ -47,7 +46,7 @@ public class Verification {
 
 		// 0. If geniuses block return true, because there no other block
 		// before.
-		if (toVerifyBlock.getHashPrevBlock().equals(Sha256Hash.wrap(GENESIS_BLOCK))) {
+		if (toVerifyBlock.getHashPrevBlock().equals(Sha256Hash.ZERO_HASH)) {
 			return true;
 		}
 

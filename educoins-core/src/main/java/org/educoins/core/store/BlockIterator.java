@@ -1,9 +1,9 @@
 package org.educoins.core.store;
 
-import java.util.Arrays;
-
 import org.educoins.core.Block;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 /**
  * An {@link IBlockIterator} exposed by {@link IBlockStore#iterator()}, to iterate over all {@link Block}s

@@ -1,14 +1,14 @@
 package org.educoins.core;
 
-import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
 
 public class BlockTest{
 

@@ -1,5 +1,7 @@
 package org.educoins.core.utils;
 
+import org.educoins.core.utils.Sha256Hash;
+
 import java.security.SecureRandom;
 
 public class Generator {

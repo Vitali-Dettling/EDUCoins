@@ -1,15 +1,16 @@
 package org.educoins.core;
 
+import org.educoins.core.cryptography.SHA256Hasher;
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Hashable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.utils.ByteArray;
 
-import com.google.common.base.Objects;
+public class Transaction implements Hashable {
 
-public class Transaction {
 
 	protected int version;
 
@@ -248,6 +249,7 @@ public class Transaction {
 		return null;
 	}
 
+	@Override
 	public byte[] hash() {
 		return Transaction.hash(this);
 	}
