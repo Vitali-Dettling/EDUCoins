@@ -3,9 +3,7 @@ package org.educoins.core.store;
 import org.educoins.core.Block;
 import org.educoins.core.Transaction;
 import org.educoins.core.testutils.BlockStoreFactory;
-import org.educoins.core.utils.IO;
 import org.educoins.core.utils.Sha256Hash;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,17 +27,6 @@ public class LevelDbBlockStoreTest {
             fail();
         }
 
-    }
-
-    @After
-    public void tearDown() {
-        try {
-            store.destroy();
-        } catch (BlockStoreException e) {
-            throw new IllegalStateException("Db could not be deleted!");
-        }
-        if (!IO.deleteDefaultBlockStoreFile())
-            throw new IllegalStateException("Db could not be deleted!");
     }
 
     @Test
@@ -109,5 +96,11 @@ public class LevelDbBlockStoreTest {
         Sha256Hash actualHash = Block.hash(actual);
 
         assertEquals(expected, actualHash);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        BlockStoreFactory.removeAllBlockStores();
     }
 }

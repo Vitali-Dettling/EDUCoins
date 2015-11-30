@@ -61,4 +61,10 @@ public class BlockServerTest {
         assertNotNull(restClient.get(URI.create(blocksResourcePath), Block[].class));
         assertNotNull(restClient.get(URI.create(blockHeadersResourcePath), Block[].class));
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        BlockStoreFactory.removeAllBlockStores();
+    }
 }

@@ -1,19 +1,31 @@
 package org.educoins.core.testutils;
 
 import org.educoins.core.Block;
-import org.educoins.core.store.BlockStoreException;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.store.*;
 import org.educoins.core.utils.IO;
-import org.educoins.core.utils.Sha256Hash;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A factory for easier testing concerning the {@link IBlockStore}.
  * Created by typus on 11/12/15.
  */
 public class BlockStoreFactory {
+    static List<File> blockStores = new ArrayList<>();
+
     public static IBlockStore getBlockStore() throws BlockStoreException {
-        return new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
+        File defaultBlockStoreFile = IO.getDefaultBlockStoreFile();
+        blockStores.add(defaultBlockStoreFile);
+        return new LevelDbBlockStore(defaultBlockStoreFile);
+    }
+
+    public static void removeAllBlockStores() throws IOException {
+        for (File file : blockStores) {
+            IO.deleteDirectory(file.getAbsolutePath());
+        }
     }
 
     public static IBlockStore getRandomlyFilledBlockStore() throws BlockStoreException {
