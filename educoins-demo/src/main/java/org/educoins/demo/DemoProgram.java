@@ -1,33 +1,27 @@
 package org.educoins.demo;
 
+import org.educoins.core.*;
+import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.miner.Miner;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.Client;
-import org.educoins.core.IBlockReceiver;
-import org.educoins.core.ITransactionListener;
-import org.educoins.core.ITransactionReceiver;
-import org.educoins.core.ITransactionTransmitter;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.miner.Miner;
-
 public class DemoProgram {
 
-	public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
-		String localDBStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
-				+ "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore";
+        String localDBStorage = System.getProperty("user.home") + File.separator + "documents" + File.separator
+                + "educoins" + File.separator + "demo" + File.separator + "BlockChain" + File.separator + "blockstore" ;
+        
+        boolean localStorageSet = false;
+        boolean runMiner = false;
+        boolean init = false;
 
-		boolean localStorageSet = false;
-		boolean runMiner = false;
-		boolean init = false;
-
-		if (args.length != 0) {
+        if (args.length != 0) {
 
 			for (int i = 0; i < args.length; i++) {
 				switch (args[i].toLowerCase()) {
@@ -59,61 +53,61 @@ public class DemoProgram {
 				}
 			}
 
-		} else {
-			Scanner scanner = new Scanner(System.in);
-			String input = null;
+        } else {
+            Scanner scanner = new Scanner(System.in);
+            String input = null;
 
-			System.out.print("path of local storage (" + localDBStorage + "): ");
-			input = scanner.nextLine().trim();
-			if (!input.isEmpty()) {
-				localDBStorage = input;
-			}
-			System.out.print("run miner [Y|n]: ");
-			input = scanner.nextLine().trim();
-			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
-				runMiner = true;
-			} else if (input.equalsIgnoreCase("n")) {
-				runMiner = false;
-			} else {
-				System.err.println("illegal input " + input);
-				scanner.close();
-				return;
-			}
+            System.out.print("path of local storage (" + localDBStorage + "): ");
+            input = scanner.nextLine().trim();
+            if (!input.isEmpty()) {
+            	localDBStorage = input;
+            }
+            System.out.print("run miner [Y|n]: ");
+            input = scanner.nextLine().trim();
+            if (input.isEmpty() || input.equalsIgnoreCase("y")) {
+                runMiner = true;
+            } else if (input.equalsIgnoreCase("n")) {
+                runMiner = false;
+            } else {
+                System.err.println("illegal input " + input);
+                scanner.close();
+                return;
+            }
 
-			System.out.print("initial run [Y|n]: ");
-			input = scanner.nextLine().trim();
-			if (input.isEmpty() || input.equalsIgnoreCase("y")) {
-				init = true;
-			} else if (input.equalsIgnoreCase("n")) {
-				init = false;
-			} else {
-				System.err.println("illegal input " + input);
-				scanner.close();
-				return;
-			}
-		}
+            System.out.print("initial run [Y|n]: ");
+            input = scanner.nextLine().trim();
+            if (input.isEmpty() || input.equalsIgnoreCase("y")) {
+                init = true;
+            } else if (input.equalsIgnoreCase("n")) {
+                init = false;
+            } else {
+                System.err.println("illegal input " + input);
+                scanner.close();
+                return;
+            }
+        }
 
-		// make little space between input and run
-		System.out.println();
+        // make little space between input and run
+        System.out.println();
+        
+        IBlockStore senderBlockStore = new LevelDbBlockStore(new File(localDBStorage));
 
-		IBlockStore senderBlockStore = new LevelDbBlockStore(new File(localDBStorage));
+        IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
+        blockReceiver.addBlockListener(senderBlockStore::put);
 
-		IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
-		blockReceiver.addBlockListener(senderBlockStore::put);
+        ITransactionReceiver txReceiver = new DemoTransactionReceiver();
+        ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
 
-		ITransactionReceiver txReceiver = new DemoTransactionReceiver();
-		ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
+        BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
 
-		BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
+        if (runMiner) {
+            new Miner(blockChain);
+        }
+        Thread client = new Client(blockChain);
+        client.start();
 
-		if (runMiner) {
-			new Miner(blockChain);
-		}
-		Thread client = new Client(blockChain);
-		client.start();
-
-		// Kick of the system with the genesis block.
-		blockChain.foundPoW(new Block());
-		txReceiver.receiveTransactions();
-	}
+        //Kick of the system with the genesis block. 
+        blockChain.foundPoW(new Block());
+        txReceiver.receiveTransactions();
+    }
 }

@@ -1,11 +1,11 @@
 package org.educoins.core.p2p.discovery;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.educoins.core.p2p.nodes.LocalPeer;
 import org.educoins.core.p2p.nodes.Peer;
 import org.educoins.core.store.IBlockStore;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * The LocalDiscovery is mostly used for demo purposes since it does only provides blocks from the local machine.

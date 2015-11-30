@@ -1,14 +1,13 @@
 package org.educoins.core;
 
+import org.educoins.core.Input.EInputUnlockingScript;
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.utils.ByteArray;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Sha256Hash;
 
 public class Client extends Thread implements ITransactionListener {
 
@@ -34,13 +33,13 @@ public class Client extends Thread implements ITransactionListener {
 			return;
 		}
 		List<Output> outputs = new ArrayList<>();
-		Output output = new Output(amount, Sha256Hash.wrap(dstPublicKey), Sha256Hash.wrap(lockingScript));
+		Output output = new Output(amount, dstPublicKey, lockingScript);
 		outputs.add(output);
 		if (amount < availableAmount) {
 			int reverseOutputAmount = availableAmount - amount;
 			String reverseDstPublicKey = this.wallet.getPublicKey();
 			String reverseLockingScript = reverseDstPublicKey;
-			Output reverseOutput = new Output(reverseOutputAmount, Sha256Hash.wrap(reverseDstPublicKey), Sha256Hash.wrap(reverseLockingScript));
+			Output reverseOutput = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
 			outputs.add(reverseOutput);
 		}
 		Transaction transaction = new Transaction();
@@ -80,7 +79,7 @@ public class Client extends Thread implements ITransactionListener {
 			int reverseOutputAmount = availableAmount - amount;
 			String reverseDstPublicKey = this.wallet.getPublicKey();
 			String reverseLockingScript = reverseDstPublicKey;
-			output = new Output(reverseOutputAmount, Sha256Hash.wrap(reverseDstPublicKey), Sha256Hash.wrap(reverseLockingScript));
+			output = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
 		}
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
@@ -128,7 +127,7 @@ public class Client extends Thread implements ITransactionListener {
 						String hashPrevOutput = ByteArray.convertToString(transaction.hash(), 16);
 						// TODO [joeren] @ [vitali]: Wenn ich hier ";" bereits
 						// anhänge, knallts bei irgendeinem Konvertiervorgang
-						Input input = new Input(amount, Sha256Hash.wrap(hashPrevOutput), index);
+						Input input = new Input(amount, hashPrevOutput, index);
 						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, this.wallet.getPublicKey());
 						this.inputs.add(input);
 

@@ -1,13 +1,13 @@
 package org.educoins.core;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Random;
-
+import org.educoins.core.Approval;
+import org.educoins.core.Input;
+import org.educoins.core.Output;
+import org.educoins.core.Transaction;
 import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.utils.Generator;
-import org.educoins.core.utils.Sha256Hash;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TransactionTest {
 	
@@ -19,12 +19,12 @@ public class TransactionTest {
 	public void testWhichTransactionCoinbase() {
 	
 		final int AMOUNT = 16;
-		final String DST_PUBLIC_KEY = Generator.getSecureRandomString256HEX();
-		final String LOCKING_SCRIPT = Generator.getSecureRandomString256HEX();
+		final String DST_PUBLIC_KEY = "ABC";
+		final String LOCKING_SCRIPT = "ABC";
 		
 		Transaction transaction = new Transaction();
 		
-		Output output = new Output(AMOUNT, Sha256Hash.wrap(DST_PUBLIC_KEY), Sha256Hash.wrap(LOCKING_SCRIPT));
+		Output output = new Output(AMOUNT, DST_PUBLIC_KEY, LOCKING_SCRIPT);
 		transaction.addOutput(output);
 		
 		ETransaction testee = transaction.whichTransaction();
@@ -40,14 +40,14 @@ public class TransactionTest {
 	
 		final int AMOUNT = 16;
 		final int index = 0;
-		final String HASH_PREVIOUS_OUTPUT= Generator.getSecureRandomString256HEX();
-		final String LOCKING_SCRIPT = Generator.getSecureRandomString256HEX();
-		final String OWNER_ADDRESS= Generator.getSecureRandomString256HEX();
-		final String HOLDER_SIGNATURE= Generator.getSecureRandomString256HEX();
+		final String HASH_PREVIOUS_OUTPUT= "ABC";
+		final String LOCKING_SCRIPT = "ABC";
+		final String OWNER_ADDRESS= "ABC";
+		final String HOLDER_SIGNATURE= "ABC";
 		
 		Transaction transaction = new Transaction();
 		
-		Input input = new Input(AMOUNT, Sha256Hash.wrap(HASH_PREVIOUS_OUTPUT), index);
+		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, index);
 		transaction.addInput(input);
 
 		Approval approval = new Approval(AMOUNT, OWNER_ADDRESS, HOLDER_SIGNATURE, LOCKING_SCRIPT);
@@ -66,18 +66,18 @@ public class TransactionTest {
 		
 		final int INDEX = 0;
 		final int AMOUNT = 16;
-		final String DST_PUBLIC_KEY = Generator.getSecureRandomString256HEX();
-		final String HASH_PREVIOUS_OUTPUT= Generator.getSecureRandomString256HEX();
-		final String LOCKING_SCRIPT = Generator.getSecureRandomString256HEX();
-		final String OWNER_ADDRESS= Generator.getSecureRandomString256HEX();
-		final String HOLDER_SIGNATURE= Generator.getSecureRandomString256HEX();
+		final String DST_PUBLIC_KEY = "ABC";
+		final String HASH_PREVIOUS_OUTPUT= "ABC";
+		final String LOCKING_SCRIPT = "ABC";
+		final String OWNER_ADDRESS= "ABC";
+		final String HOLDER_SIGNATURE= "ABC";
 		
 		Transaction transaction = new Transaction();
 		
-		Input input = new Input(AMOUNT, Sha256Hash.wrap(HASH_PREVIOUS_OUTPUT), INDEX);
+		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, INDEX);
 		transaction.addInput(input);
 		
-		Output output = new Output(AMOUNT, Sha256Hash.wrap(DST_PUBLIC_KEY), Sha256Hash.wrap(LOCKING_SCRIPT));
+		Output output = new Output(AMOUNT, DST_PUBLIC_KEY, LOCKING_SCRIPT);
 		transaction.addOutput(output);
 		
 		Approval approval = new Approval(AMOUNT, OWNER_ADDRESS, HOLDER_SIGNATURE, LOCKING_SCRIPT);
@@ -96,16 +96,16 @@ public class TransactionTest {
 	
 		final int INDEX = 0;
 		final int AMOUNT = 16;
-		final String DST_PUBLIC_KEY = Generator.getSecureRandomString256HEX();
-		final String LOCKING_SCRIPT = Generator.getSecureRandomString256HEX();
-		final String HASH_PREVIOUS_OUTPUT= Generator.getSecureRandomString256HEX();
+		final String DST_PUBLIC_KEY = "ABC";
+		final String LOCKING_SCRIPT = "ABC";
+		final String HASH_PREVIOUS_OUTPUT= "ABC";
 		
 		Transaction transaction = new Transaction();
 		
-		Input input = new Input(AMOUNT, Sha256Hash.wrap(HASH_PREVIOUS_OUTPUT), INDEX);
+		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, INDEX);
 		transaction.addInput(input);
 		
-		Output output = new Output(AMOUNT, Sha256Hash.wrap(DST_PUBLIC_KEY), Sha256Hash.wrap(LOCKING_SCRIPT));
+		Output output = new Output(AMOUNT, DST_PUBLIC_KEY, LOCKING_SCRIPT);
 		transaction.addOutput(output);
 		
 		ETransaction testee = transaction.whichTransaction();
