@@ -4,6 +4,7 @@ import org.educoins.core.BlockChain;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
+import org.educoins.core.Transaction;
 import org.educoins.core.store.IBlockStore;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -23,22 +24,26 @@ public class MockedBlockChain {
 	@Mock
 	private IBlockStore store;
 	
-	private BlockChain blockchain;
+	private static BlockChain blockchain;
 	
 	
-	public MockedBlockChain(){
+	static{
 	
 		IBlockReceiver blockReceiver = Mockito.mock(IBlockReceiver.class);
 		ITransactionReceiver txReceiver = Mockito.mock(ITransactionReceiver.class);
 		ITransactionTransmitter txTransmitter = Mockito.mock(ITransactionTransmitter.class);
 		IBlockStore store = Mockito.mock(IBlockStore.class);
 		
-		this.blockchain = new BlockChain(blockReceiver, txReceiver, txTransmitter, store);
+		blockchain = new BlockChain(blockReceiver, txReceiver, txTransmitter, store);
 		
 	}
 	
-	public BlockChain getMockedBlockChain(){
-		return this.blockchain;
+	public static BlockChain getMockedBlockChain(){
+		return blockchain;
+	}
+	
+	public static void sendTransaction(Transaction transaction){
+		blockchain.transactionReceived(transaction);
 	}
 	
 	

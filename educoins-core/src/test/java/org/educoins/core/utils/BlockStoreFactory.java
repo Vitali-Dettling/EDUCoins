@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.educoins.core.Block;
+import org.educoins.core.Gate;
 import org.educoins.core.Input;
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Output;
@@ -60,7 +61,25 @@ public class BlockStoreFactory {
         toReturn.setHashMerkleRoot(Sha256Hash.wrap(random));
         return toReturn;
     }
-
+    
+    public static Gate generateExternSignedGate(){
+    	
+    	//Create a gate
+    	Gate gate = new Gate();
+    	String publicKey = MockedWallet.getPublicKey();
+    	String signature = MockedWallet.getSignature(publicKey, gate.getMessage());
+    	gate.setPublicKey(publicKey);
+    	gate.setSignature(signature);
+    	
+    	//Simulation of letting extern person sign. 
+    	byte[] concatedMessage = gate.getConcatedGate();
+    	publicKey = MockedWallet.getPublicKey();
+    	signature = MockedWallet.getSignature(publicKey, ByteArray.convertToString(concatedMessage));	
+    	gate.externSignature(signature);
+    	
+    	return gate;
+    }
+    
     public static Transaction generateTransaction(int number) {
         Transaction t = new Transaction();
         for (int i = 0; i < 2 * number; i++) {

@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.IO;
 import org.educoins.core.utils.IO.EPath;
 import org.educoins.core.utils.Sha256Hash;
@@ -126,10 +127,28 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 				this.externGateways.add(this.myGateway);
 			}
 		} else if (type == ETransaction.GATE) {
-			if (this.verification.verifyGate(transaction)) {
+			if (isOwnGate(transaction) && this.verification.verifyGate(transaction)) {
 				createGateway(transaction);
 			}
 		}
+	}
+	
+	private boolean isOwnGate(Transaction transaction){
+		
+		Gate gate = transaction.getGate();
+
+		byte[] messageByte = transaction.hash();
+		String message = gate.getMessage();
+		String signature = gate.getSignature();
+		String publicKey = gate.getPublicKey();
+
+		// Check whether the gateway was already sign by itself.
+		boolean compared = this.wallet.compare(message, signature, publicKey);
+
+		if (compared) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -246,7 +265,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		int optainedGatewaysInBC = findAllGateway();
 		int precent = (int) (optainedGatewaysInBC * 0.8);
 
-		// TODO[Vitali] Write a test.
 		if (optainedGatewaysInBC == precent) {
 			return true;
 		} else if (optainedGatewaysInBC == notGatewayExist) {
@@ -265,12 +283,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			Block block = iterator.next();
 			for (Transaction transaction : block.getTransactions()) {
 				if (transaction.getGatewaysCount() == 0) {
-					countGateways = transaction.getGatewaysCount();
+					countGateways += transaction.getGatewaysCount();
 				}
 			}
 
 		}
-
 		return countGateways;
 	}
 

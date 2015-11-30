@@ -52,6 +52,7 @@ public class IO {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				System.out.println(file.toString());
 				Files.delete(file);
 				return FileVisitResult.CONTINUE;
 			}

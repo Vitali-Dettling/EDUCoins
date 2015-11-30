@@ -54,8 +54,9 @@ public class LevelDbBlockStore implements IBlockStore {
 		if (genesisHash == null) {
 			genesisHash = hash;
 		}
-
-		database.put(hash, getJson(block).getBytes());
+		
+		byte[] value = getJson(block).getBytes();
+		database.put(hash, value);
 		latest = block.hash().getBytes();
 		database.put(LATEST_KEY, latest);
 	}
@@ -67,7 +68,6 @@ public class LevelDbBlockStore implements IBlockStore {
 		return getBlock(byteBlock);
 	}
 
-	@SuppressWarnings("restriction")
 	@Override
 	public synchronized Block getLatest() {
 		if (isEmpty())

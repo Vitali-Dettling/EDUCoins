@@ -28,7 +28,6 @@ public class Wallet {
 	private static final int HEX = 16;
 	private static final String SEPERATOR = ";";
 	private static final String WALLET_FILE_NAME = "/wallet.keys";
-	
 
 	private ECDSA keyPair;
 	private Path directoryKeyStorage;
@@ -42,8 +41,8 @@ public class Wallet {
 
 			IO.deleteDirectory(directoryKeyStorage);
 			IO.createDirectory(directoryKeyStorage);
-			IO.createFile(this.directoryKeyStorage  + WALLET_FILE_NAME);
-		
+			IO.createFile(this.directoryKeyStorage + WALLET_FILE_NAME);
+
 		} catch (IOException e) {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
 			e.printStackTrace();
@@ -54,7 +53,6 @@ public class Wallet {
 	// and over again. Will be better with the DB.
 	public boolean checkSignature(String hashedTranscation, byte[] signature) {
 
-	
 		try {
 
 			List<String> publicKeys = this.getPublicKeys();
@@ -92,9 +90,7 @@ public class Wallet {
 	public String getSignature(String publicKey, String hashedTranscation) {
 
 		try {
-			
 
-						
 			byte[] signature = this.keyPair.getSignature(publicKey, hashedTranscation);
 			String sig = ByteArray.convertToString(signature, HEX);
 			return sig;
@@ -129,9 +125,8 @@ public class Wallet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 		return publicKey;
-
 	}
 
 	public List<String> getPublicKeys() throws IOException {
@@ -146,6 +141,7 @@ public class Wallet {
 
 		return publicKeys;
 	}
+
 
 	/**
 	 * Nested calls that just the wallet class can use it. This is important
@@ -296,7 +292,7 @@ public class Wallet {
 
 			return privateKey;
 		}
-	
+
 	}
 
 }

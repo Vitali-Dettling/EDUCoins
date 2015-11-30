@@ -111,7 +111,7 @@ public class Client extends Thread implements ITransactionListener {
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
 		
-		Gate gate = new Gate(null, publicKey);
+		Gate gate = new Gate();
 		transaction.setGate(gate);
 		
 		byte[] hash = transaction.hash();
@@ -119,6 +119,7 @@ public class Client extends Thread implements ITransactionListener {
 		
 		String signature = this.wallet.getSignature(publicKey, hashedTranscation);
 		gate.setSignature(signature);
+		gate.setPublicKey(publicKey);
 		
 		transaction.setGate(gate);
 		this.blockChain.sendTransaction(transaction);

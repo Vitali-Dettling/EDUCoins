@@ -23,6 +23,7 @@ public class DemoProgram {
 	public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
 		File localDBStorage = IO.getDefaultFileLocation(EPath.DEMO, EPath.EDUCoinsBlockStore);
+		File tempDBLocation = IO.getDefaultFileLocation(EPath.TMP, EPath.EDUCoinsBlockStore);
 
 		boolean localStorageSet = false;
 		boolean runMiner = false;
@@ -64,7 +65,8 @@ public class DemoProgram {
 			Scanner scanner = new Scanner(System.in);
 			String input = null;
 
-			System.out.print("path of local storage (" + localDBStorage + "): ");
+			System.out.println("path of local storage (" + localDBStorage + "): ");
+			System.out.println("path of local storage (" + tempDBLocation + "): ");
 			input = scanner.nextLine().trim();
 			if (!input.isEmpty()) {
 				localDBStorage = new File(input);

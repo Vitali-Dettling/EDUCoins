@@ -9,65 +9,52 @@ import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 
 public class Verification {
+
+	private static final int HEX = 16;
 	
 	private static final int TRUE = 0;
 	private static final int ZERO = 0;
-	private static final int HEX = 16;
 	private static final int NO_COINS = 0;
 	private static final int HAS_NO_ENTRIES = 0;
 	private static final int ONLY_ONE_COINBASE_TRANSACTION = 1;
 	private static final String GENESIS_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
-	
+
 	private Wallet wallet;
 	private BlockChain blockChain;
-	
-	public Verification(Wallet wallet, BlockChain blockChain){
+
+	public Verification(Wallet wallet, BlockChain blockChain) {
 		this.blockChain = blockChain;
-		this.wallet = wallet;	
+		this.wallet = wallet;
 	}
 
-	public boolean verifyGate(@NotNull Transaction transaction){
+	public boolean verifyGate(@NotNull Transaction transaction) {
 
-		Gate gate = transaction.getGate();
-		
-		byte[] messageByte = transaction.hash();
-		String message = ByteArray.convertToString(messageByte, HEX);
-		String signature = gate.getSignature();
-		String publicKey = gate.getPublicKey();
-		
-		//Check whether the gateway was already sign by itself.
-		boolean compared = this.wallet.compare(message, signature, publicKey);
-		
-		if(compared){
-			return true;
-		} 
-		
-
-		return false;
-	}
-	
-	public boolean verifyGateway(@NotNull Transaction gateway){
-		
-		//TODO [Vitali] Implement the whole verification.
+		// TODO [Vitali] Implement the whole verification.
 		return true;
 	}
-	
-	
+
+	public boolean verifyGateway(@NotNull Transaction gateway) {
+
+		// TODO [Vitali] Implement the whole verification.
+		return true;
+	}
+
 	public boolean verifyBlock(Block toVerifyBlock) {
-		
-		if(toVerifyBlock == null){
-			throw new NullPointerException("Block is null.");	
+
+		if (toVerifyBlock == null) {
+			throw new NullPointerException("Block is null.");
 		}
-		
-		// 0. If geniuses block return true, because there no other block before.
+
+		// 0. If geniuses block return true, because there no other block
+		// before.
 		if (toVerifyBlock.getHashPrevBlock().equals(Sha256Hash.wrap(GENESIS_BLOCK))) {
 			return true;
 		}
 
 		// 1. Find the previous block.
-		//TODO: Check naming of lastBlock / getPreviousBlock()
+		// TODO: Check naming of lastBlock / getPreviousBlock()
 		Block lastBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
-		
+
 		// 2. Does the previous block exist?
 		if (lastBlock == null) {
 			return false;
@@ -78,51 +65,53 @@ public class Verification {
 			return false;
 		}
 
-		//4. At least one transaction has to be in the block, namely the coinbase transaction.
-		if(toVerifyBlock.getTransactions().size() <=  HAS_NO_ENTRIES){
+		// 4. At least one transaction has to be in the block, namely the
+		// coinbase transaction.
+		if (toVerifyBlock.getTransactions().size() <= HAS_NO_ENTRIES) {
 			return false;
 		}
-		
-		//5. Verification of all transactions in a block.
+
+		// 5. Verification of all transactions in a block.
 		boolean isTransactionValid = true;
 		List<Transaction> transactions = toVerifyBlock.getTransactions();
-	    for (Transaction transaction : transactions) {
-	    	
-			//5.1 Check for transaction type.
-			if(transaction.whichTransaction() == ETransaction.COINBASE){
+		for (Transaction transaction : transactions) {
+
+			// 5.1 Check for transaction type.
+			if (transaction.whichTransaction() == ETransaction.COINBASE) {
 				isTransactionValid = verifyCoinbaseTransaction(transaction, toVerifyBlock);
-			}
-			else if(transaction.whichTransaction() == ETransaction.REGULAR){
+			} else if (transaction.whichTransaction() == ETransaction.REGULAR) {
 				isTransactionValid = verifyRegularTransaction(transaction);
-			}
-			else if(transaction.whichTransaction() == ETransaction.APPROVED){
+			} else if (transaction.whichTransaction() == ETransaction.APPROVED) {
 				isTransactionValid = verifyApprovedTransaction(transaction);
 			}
-			
-			//As soon as a transaction is not valid, the loop will be cancelled.
-			if(!isTransactionValid){
+
+			// As soon as a transaction is not valid, the loop will be
+			// cancelled.
+			if (!isTransactionValid) {
 				return false;
 			}
 		}
-		
+
 		// TODO[Vitali] Überlegen ob weitere Test von nöten wären???
 
 		return true;
 
 	}
-	
-	public boolean verifyApprovedTransaction(Transaction transaction){
-		
-		//TODO [Vitali] Find out whether all checks are included? 
-		
-		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
+
+	public boolean verifyApprovedTransaction(Transaction transaction) {
+
+		// TODO [Vitali] Find out whether all checks are included?
+
+		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der
+		// Block-Chain-Technologie" p. 37f
 
 		// Case 1:
-		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
-		
+		// TODO [joeren]: Syntax has not to be verified in first step, already
+		// done by the deserializer
+
 		List<Input> inputs = transaction.getInputs();
 		List<Approval> approvals = transaction.getApprovals();
-		
+
 		if (approvals == null) {
 			// TODO [joeren]: remove debug output
 			System.out.println("DEBUG: verifyRegularTransaction: inputs is null");
@@ -131,7 +120,7 @@ public class Verification {
 
 		int sumInputsAmount = 0;
 		int sumApprovalAmount = 0;
-		
+
 		// Case 4:
 		for (Input input : inputs) {
 			int amount = input.getAmount();
@@ -143,13 +132,13 @@ public class Verification {
 			// sum up for case 5
 			sumInputsAmount += amount;
 		}
-				
-		for(Approval approval : approvals){
-			if(approval.getAmount() <= NO_COINS){
+
+		for (Approval approval : approvals) {
+			if (approval.getAmount() <= NO_COINS) {
 				System.out.println("DEBUG: verifyApprovedTransaction: approved amound is 0");
 				return false;
 			}
-			
+
 			int amount = approval.getAmount();
 			if (amount <= NO_COINS) {
 				// TODO [joeren]: remove debug output
@@ -159,7 +148,7 @@ public class Verification {
 			// sum up for case 5
 			sumApprovalAmount += amount;
 		}
-		
+
 		// Case 5:
 		// TODO [joeren]: implementation of approval-exception
 		if (sumApprovalAmount > sumInputsAmount) {
@@ -167,71 +156,74 @@ public class Verification {
 			System.out.println("DEBUG: verifyRegularTransaction: more output than input");
 			return false;
 		}
-		
-		//Case 13:
-		//TODO [Vitali] Implement the check for the lock script as soon as the Revoke class was introduced. 
-		//Till then there is no use in implementing it. 
-		//For the time being it only checked that Locking Script is not empty.
-		for(Approval approval : approvals){
+
+		// Case 13:
+		// TODO [Vitali] Implement the check for the lock script as soon as the
+		// Revoke class was introduced.
+		// Till then there is no use in implementing it.
+		// For the time being it only checked that Locking Script is not empty.
+		for (Approval approval : approvals) {
 			String lockingScript = approval.getLockingScript();
-			if(lockingScript.isEmpty()){
+			if (lockingScript.isEmpty()) {
 				System.out.println("DEBUG: verifyRegularTransaction: locking script is empty.");
 				return false;
 			}
 		}
-		
-		
-		//TODO [Vitali] Implement rest of the verification, if some.
-		
+
+		// TODO [Vitali] Implement rest of the verification, if some.
+
 		return true;
-		
-		
+
 	}
-	
-	public boolean verifyCoinbaseTransaction(Transaction transaction, Block toVerifyBlock){
-		
-		//TODO [Vitali] Find out whether all checks are included? 
-		
-		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
+
+	public boolean verifyCoinbaseTransaction(Transaction transaction, Block toVerifyBlock) {
+
+		// TODO [Vitali] Find out whether all checks are included?
+
+		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der
+		// Block-Chain-Technologie" p. 37f
 
 		// Case 1:
-		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
+		// TODO [joeren]: Syntax has not to be verified in first step, already
+		// done by the deserializer
 
 		List<Output> coinBases = transaction.getOutputs();
-		
-		if(coinBases == null){
+
+		if (coinBases == null) {
 			// TODO [joeren]: remove debug output
 			System.out.println("DEBUG: verifyCoinbaseTransaction: output is null");
 			return false;
 		}
-		
-		if(coinBases.size() != ONLY_ONE_COINBASE_TRANSACTION){
+
+		if (coinBases.size() != ONLY_ONE_COINBASE_TRANSACTION) {
 			// TODO [joeren]: remove debug output
 			System.out.println("DEBUG: verifyCoinbaseTransaction: More then one coinbase transaction.");
 			return false;
 		}
-		
+
 		Output coinBase = coinBases.iterator().next();
-		
+
 		int currentReward = coinBase.getAmount();
 		int trueReward = toVerifyBlock.rewardCalculator();
-		if(trueReward != currentReward){
+		if (trueReward != currentReward) {
 			System.out.println("DEBUG: verifyCoinbaseTransaction: reward cannot be zero.");
 			return false;
 		}
-		
-		//TODO [Vitali] Implement rest of the verification, if some.
-		
+
+		// TODO [Vitali] Implement rest of the verification, if some.
+
 		return true;
-		
+
 	}
-	
+
 	public boolean verifyRegularTransaction(Transaction transaction) {
 
-		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
+		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der
+		// Block-Chain-Technologie" p. 37f
 
 		// Case 1:
-		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
+		// TODO [joeren]: Syntax has not to be verified in first step, already
+		// done by the deserializer
 
 		List<Input> inputs = transaction.getInputs();
 
@@ -280,10 +272,10 @@ public class Verification {
 			System.out.println("DEBUG: verifyRegularTransaction: realOutputsCount does not match outputsCount");
 			return false;
 		}
-		
+
 		int sumInputsAmount = NO_COINS;
 		int sumOutputsAmount = NO_COINS;
-		
+
 		// Case 4:
 		for (Input input : inputs) {
 			int amount = input.getAmount();
@@ -305,7 +297,7 @@ public class Verification {
 			// sum up for case 5
 			sumOutputsAmount += amount;
 		}
-		
+
 		// Case 5:
 		// TODO [joeren]: implementation of approval-exception
 		if (sumOutputsAmount > sumInputsAmount) {
@@ -313,30 +305,28 @@ public class Verification {
 			System.out.println("DEBUG: verifyRegularTransaction: more output than input");
 			return false;
 		}
-		
-		//Case 13:
-		//TODO [Vitali] The check is current done with the ECDSA class but actually that should be done through the script language.
-		//Currently it check just whether the signature corresponds with one public key in the wallet file. 
+
+		// Case 13:
+		// TODO [Vitali] The check is current done with the ECDSA class but
+		// actually that should be done through the script language.
+		// Currently it check just whether the signature corresponds with one
+		// public key in the wallet file.
 		byte[] signature = null;
 		String hashedTransaction = ByteArray.convertToString(transaction.hash(), HEX);
-		for(Input input : transaction.getInputs()){
-			
+		for (Input input : transaction.getInputs()) {
+
 			signature = input.getUnlockingScript(EInputUnlockingScript.SIGNATURE);
-				
-			if(this.wallet.checkSignature(hashedTransaction, signature)){
+
+			if (this.wallet.checkSignature(hashedTransaction, signature)) {
 				System.out.println("INFO: verifyRegularTransaction: Signature is correct.");
-				break; 
+				break;
 			}
-					
+
 		}
-		
-		//TODO [Vitali] Implement rest of the verification, if some.
-		
+
+		// TODO [Vitali] Implement rest of the verification, if some.
+
 		return true;
 	}
-	
-	
-	
-
 
 }

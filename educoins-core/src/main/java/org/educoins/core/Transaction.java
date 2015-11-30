@@ -242,7 +242,7 @@ public class Transaction {
 		if (this.gate != null && this.getGatewaysCount() == 0){
 			return ETransaction.GATE;
 		}	
-		if (this.getGate() != null && this.getGatewaysCount() > 0){
+		if (this.getGate() == null && this.getGatewaysCount() > 0){
 			return ETransaction.GATEWAY;
 		}	
 		return null;

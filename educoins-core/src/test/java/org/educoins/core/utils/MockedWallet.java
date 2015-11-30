@@ -14,6 +14,7 @@ public class MockedWallet {
 		return wallet.getPublicKey();
 	}
 
+
 	public static String getSignature(String publicKey, String hash){
 		return wallet.getSignature(publicKey, hash);
 	}

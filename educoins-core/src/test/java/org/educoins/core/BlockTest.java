@@ -93,8 +93,7 @@ public class BlockTest{
         }
         Block b = new Block();
         b.addTransactions(list);
-        String createdMerkleTree = b.getHashMerkleRoot().toString();
-        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap(createdMerkleTree).getBytes());
+        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap("7bfec2d8a632b9ef95fe71dfc789323fafc62d1abbf219673f056447589bb479").getBytes());
     }
 
     @Test
@@ -105,8 +104,7 @@ public class BlockTest{
         }
         Block b = new Block();
         b.addTransactions(list);
-        String createdMerkleTree = b.getHashMerkleRoot().toString();
-        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap(createdMerkleTree).getBytes());
+        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap("77127955e09974ab86e941d1c12928f14d7852fd38c91f4d67655590a6995692").getBytes());
     }
 }
 

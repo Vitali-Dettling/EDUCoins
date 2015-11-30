@@ -35,6 +35,7 @@ public class Block {
 	private int transactionsCount;
 	private List<Transaction> transactions;
 	private List<Gateway> gateways;
+	private int gatewaysCount;
 
 	public Block() {
 		this.setVersion(VERSION);
@@ -48,6 +49,7 @@ public class Block {
 		this.transactionsCount = this.transactions.size();
 		
 		this.gateways = new ArrayList<>();
+		this.gatewaysCount = this.gateways.size();
 	}
 
 	public Block copy(){
@@ -207,6 +209,15 @@ public class Block {
     public void addAllGateways(Collection<Gateway> gateways) {
 		this.gateways.addAll(gateways);
 	}
+    
+    public void addGateway(Gateway gateway) {
+        if (this.gateways == null) {
+            this.gateways = new ArrayList<>();
+        }
+        this.gateways.add(gateway);
+        this.gatewaysCount = this.gateways.size();
+	}
+    
     
     public Sha256Hash hash() {
         return Block.hash(this);

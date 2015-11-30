@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.educoins.core.Block;
@@ -189,12 +188,13 @@ public class LevelDbBlockStoreTest {
     	final String publicKey = MockedWallet.getPublicKey();
     	final String signature = MockedWallet.getSignature(publicKey, randomNumber);
     	
-    	Gate gate = new Gate(null, publicKey);
+    	Gate gate = new Gate();
     	Gateway gateway = new Gateway();
     	List<Gateway> gateways = new ArrayList<Gateway>();
     	Block block = new Block();
     	
     	gate.setSignature(signature);
+    	gate.setPublicKey(publicKey);
 		gateway.addGate(gate);
 		gateways.add(gateway);
 		block.addAllGateways(gateways);
