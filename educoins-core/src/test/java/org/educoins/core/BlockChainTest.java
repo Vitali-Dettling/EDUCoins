@@ -1,9 +1,14 @@
 package org.educoins.core;
 
 import org.educoins.core.utils.MockedBlockChain;
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Sha256Hash;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BlockChainTest {
 	
@@ -25,19 +30,19 @@ public class BlockChainTest {
 	public void testPrepareNewBlock() {
 
 		
-//		Block lastBlock = new Block();
-//		Block newBlock = this.mockedBlockchain.prepareNewBlock(lastBlock);
-//		
-//		assertTrue(newBlock.getVersion() > NEGATIVE);
-//		
-//		byte[] arrayMerkleTree = newBlock.getHashMerkleRoot().getBytes();
-//		int valueMerkleTree = ByteArray.convertToInt(arrayMerkleTree);
-//		assertTrue(valueMerkleTree > 0);
-//		
-//		assertEquals(newBlock.getHashPrevBlock(), Sha256Hash.ZERO_HASH);
-//		assertEquals(newBlock.getHashMerkleRoot(), Sha256Hash.ZERO_HASH);
-//		assertEquals(newBlock.getTransactionsCount(), COINBASE_ONLY);
-//		assertEquals(newBlock.getBits(), Sha256Hash.MAX_HASH);
+		Block lastBlock = new Block();
+		Block newBlock = this.mockedBlockchain.prepareNewBlock(lastBlock);
+		
+		assertTrue(newBlock.getVersion() > NEGATIVE);
+		
+		byte[] arrayMerkleTree = newBlock.getHashMerkleRoot().getBytes();
+		int valueMerkleTree = ByteArray.convertToInt(arrayMerkleTree);
+		assertTrue(valueMerkleTree > 0);
+		
+		assertEquals(newBlock.getHashPrevBlock(), Sha256Hash.ZERO_HASH);
+		assertEquals(newBlock.getHashMerkleRoot(), Sha256Hash.ZERO_HASH);
+		assertEquals(newBlock.getTransactionsCount(), COINBASE_ONLY);
+		assertEquals(newBlock.getBits(), Sha256Hash.MAX_HASH);
 		
 	}
 	
