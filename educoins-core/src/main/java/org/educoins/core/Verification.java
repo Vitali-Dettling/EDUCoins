@@ -2,6 +2,7 @@ package org.educoins.core;
 
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.utils.BinaryTree;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 
@@ -77,8 +78,15 @@ public class Verification {
 			}
 		}
 		
+	    if (!verifyMerkle(toVerifyBlock))
+	    {
+	    	return false;
+	    }
+	    
 		// TODO[Vitali] Überlegen ob weitere Test von nöten wären???
-
+	    // TODO maxBlockSIze: size_in_bytes < MAX_BLOCK_SIZE
+	    
+	    
 		return true;
 
 	}
@@ -189,6 +197,12 @@ public class Verification {
 		int trueReward = toVerifyBlock.rewardCalculator();
 		if(trueReward != currentReward){
 			System.out.println("DEBUG: verifyCoinbaseTransaction: reward cannot be zero.");
+			return false;
+		}
+		
+		// #6
+		if (transaction.getInputsCount() > 0)
+		{
 			return false;
 		}
 		
@@ -307,7 +321,11 @@ public class Verification {
 		return true;
 	}
 	
-	
+	private boolean verifyMerkle(Block block) {
+		Sha256Hash merkle = block.getHashMerkleRoot();
+		BinaryTree<Transaction> tree = new BinaryTree<>(block.getTransactions());
+		return Sha256Hash.wrap(tree.getRoot().hash()).equals(merkle);
+	}
 	
 
 
