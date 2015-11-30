@@ -18,10 +18,6 @@ public class BlockStoreFactory {
         return new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
     }
 
-    public static IBlockStore getRandomlyFilledBlockStore() throws BlockStoreException {
-        return new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
-    }
-
     public static void fillRandom(IBlockStore store, int filled) {
         for (int i = 0; i < filled; i++) {
             store.put(getRandomBlock());

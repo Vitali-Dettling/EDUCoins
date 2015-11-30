@@ -1,13 +1,13 @@
 package org.educoins.core;
 
-import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.utils.ByteArray;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import org.educoins.core.Input.EInputUnlockingScript;
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.utils.ByteArray;
 
 public class Client extends Thread implements ITransactionListener {
 
@@ -49,8 +49,8 @@ public class Client extends Thread implements ITransactionListener {
 
 		for (Input input : this.inputs) {
 
-			String publicKey = ByteArray
-					.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
+			String publicKey = ByteArray.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY),
+					16);
 			String message = ByteArray.convertToString(transaction.hash(), 16);
 			String signature = this.wallet.getSignature(publicKey, message);
 
@@ -91,8 +91,8 @@ public class Client extends Thread implements ITransactionListener {
 
 		for (Input input : this.inputs) {
 
-			String publicKey = ByteArray
-					.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
+			String publicKey = ByteArray.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY),
+					16);
 			String message = ByteArray.convertToString(transaction.hash(), 16);
 			String signature = this.wallet.getSignature(publicKey, message);
 
@@ -106,24 +106,24 @@ public class Client extends Thread implements ITransactionListener {
 		this.inputs = new ArrayList<>();
 	}
 
-	public void sendGatewayTransaction(String publicKey){
+	public void sendGatewayTransaction(String publicKey) {
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
-		
+
 		Gate gate = new Gate();
 		transaction.setGate(gate);
-		
+
 		byte[] hash = transaction.hash();
 		String hashedTranscation = ByteArray.convertToString(hash, 16);
-		
+
 		String signature = this.wallet.getSignature(publicKey, hashedTranscation);
 		gate.setSignature(signature);
 		gate.setPublicKey(publicKey);
-		
+
 		transaction.setGate(gate);
 		this.blockChain.sendTransaction(transaction);
 	}
-	
+
 	@Override
 	public void transactionReceived(Transaction transaction) {
 		generateInputs(transaction);
@@ -165,9 +165,12 @@ public class Client extends Thread implements ITransactionListener {
 						for (Input tmpInput : tmpInputs) {
 							availableAmount += tmpInput.getAmount();
 						}
-						//TODO[Vitali] Testing
-						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
-								amount, availableAmount, typeString, output.getLockingScript()));
+						// TODO[Vitali] Testing
+						// System.out.println(String.format("Info: Received %d
+						// EDUCoins (new Amount: %d) from a %s with
+						// LockingScript %s",
+						// amount, availableAmount, typeString,
+						// output.getLockingScript()));
 					}
 				}
 			}

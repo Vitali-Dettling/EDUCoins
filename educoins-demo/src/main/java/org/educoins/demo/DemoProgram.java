@@ -1,12 +1,5 @@
 package org.educoins.demo;
 
-import org.educoins.core.*;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.core.utils.IO;
-import org.educoins.core.utils.IO.EPath;
-import org.educoins.miner.Miner;
-
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -21,14 +14,14 @@ import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.utils.IO;
 import org.educoins.miner.Miner;
 
 public class DemoProgram {
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
-		File localDBStorage = IO.getDefaultFileLocation(EPath.DEMO, EPath.EDUCoinsBlockStore);
-		File tempDBLocation = IO.getDefaultFileLocation(EPath.TMP, EPath.EDUCoinsBlockStore);
+		File localDBStorage = IO.getDefaultBlockStoreFile();
 
 		boolean localStorageSet = false;
 		boolean runMiner = false;
@@ -71,7 +64,7 @@ public class DemoProgram {
             String input = null;
 
 			System.out.println("path of local storage (" + localDBStorage + "): ");
-			System.out.println("path of local storage (" + tempDBLocation + "): ");
+			
 			input = scanner.nextLine().trim();
 			if (!input.isEmpty()) {
 				localDBStorage = new File(input);

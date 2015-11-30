@@ -1,12 +1,14 @@
 package org.educoins.core;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Hashable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.base.Objects;
 
 
 public class Transaction implements Hashable {

@@ -1,7 +1,8 @@
 package org.educoins.core.store;
 
-import com.google.gson.Gson;
-import org.jetbrains.annotations.Nullable;
+import java.io.File;
+import java.io.IOException;
+
 import org.educoins.core.Block;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
@@ -10,8 +11,7 @@ import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
+import com.google.gson.Gson;
 
 /**
  * The default implementation of a {@link IBlockStore} using Google Level Db as
@@ -80,7 +80,6 @@ public class LevelDbBlockStore implements IBlockStore {
 		}
 	}
 
-    @SuppressWarnings("restriction")
 	@Override
 	public void destroy() throws BlockStoreException {
 		try {
@@ -97,10 +96,16 @@ public class LevelDbBlockStore implements IBlockStore {
 		return latest == null;
 	}
 
+
     @Override
-    public IBlockIterator iterator() {
+    public IBlockIterator blockIterator() {
         return new BlockIterator(this, genesisHash);
     }
+    
+	@Override
+	public ITransactionIterator transactionIterator() {
+		return new TransactionIterator(this, genesisHash);
+	}
 
 	private Block getBlock(byte[] jsonblock) {
 		Block block = null;
@@ -116,6 +121,5 @@ public class LevelDbBlockStore implements IBlockStore {
 	 private String getJson(Block block) {
 	        return new Gson().toJson(block);
 	    }
-
 
 }

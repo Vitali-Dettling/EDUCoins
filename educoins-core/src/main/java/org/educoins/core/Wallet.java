@@ -1,20 +1,27 @@
 package org.educoins.core;
 
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.IO;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.IO;
 
 public class Wallet {
 
@@ -40,6 +47,23 @@ public class Wallet {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean compare(String message, String signature, String publicKey) {
+
+		this.keyPair = new ECDSA();
+		try {
+
+			byte[] sign = ByteArray.convertFromString(signature, HEX);
+			if (this.keyPair.verifySignature(message, sign, publicKey)) {
+				return true;
+			}
+		} catch (Exception e) {
+			System.err.println("ERROR: Class Wallet. Verification of the Signature." + e.getMessage());
+			e.printStackTrace();
+		}
+
+		return false;
 	}
 	
 	//TODO [Vitali] Bad performance because the whole file will be checked over and over again. Will be better with the DB.

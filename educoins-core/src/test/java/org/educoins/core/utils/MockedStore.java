@@ -4,7 +4,6 @@ import org.educoins.core.Block;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.core.utils.IO.EPath;
 
 public class MockedStore {
 
@@ -12,7 +11,7 @@ public class MockedStore {
 
 	static{
 		try {
-			store = new LevelDbBlockStore(IO.getDefaultFileLocation(EPath.TMP, EPath.EDUCoinsBlockStore));
+			store = new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
 		} catch (BlockStoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,14 +1,14 @@
 package org.educoins.core;
 
+import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
 
 public class BlockTest{
 
@@ -93,7 +93,7 @@ public class BlockTest{
         }
         Block b = new Block();
         b.addTransactions(list);
-        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap("7bfec2d8a632b9ef95fe71dfc789323fafc62d1abbf219673f056447589bb479").getBytes());
+        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap("5e9dc0cb197e89a155683decb4473848e50530183845119ddd8f9d361dddea8a").getBytes());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class BlockTest{
         }
         Block b = new Block();
         b.addTransactions(list);
-        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap("77127955e09974ab86e941d1c12928f14d7852fd38c91f4d67655590a6995692").getBytes());
+        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap("c76bc870259e380e3b7ba45ef97123df9182a53af6eb6a87fe13e06274b2532e").getBytes());
     }
 }
 

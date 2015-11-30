@@ -1,15 +1,15 @@
 package org.educoins.demo;
 
-import org.jetbrains.annotations.NotNull;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.educoins.core.Block;
 import org.educoins.core.IBlockListener;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
 public class DemoBlockReceiver implements IBlockReceiver {
 

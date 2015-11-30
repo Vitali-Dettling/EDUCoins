@@ -1,9 +1,5 @@
 package org.educoins.core;
 
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.utils.Sha256Hash;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,18 +8,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.IO;
 import org.educoins.core.utils.Sha256Hash;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
-	private static final int CHECK_AFTER_BLOCKS = 100;
+	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
 	private static final int IN_SECONDS = 1000;
 	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * IN_SECONDS * CHECK_AFTER_BLOCKS;
 	private static final int SCALE_DECIMAL_LENGTH = 100;
-	private static final int HEX = 16;
 	private static final int RESET_BLOCKS_COUNT = 0;
 
 	private int blockCounter;
@@ -42,8 +35,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	private String publicKey;
 
-	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
-		
+	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver,
+			ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
+
 		this.wallet = new Wallet();
 		this.blockListeners = new CopyOnWriteArrayList<>();
 		this.blockReceiver = blockReceiver;
@@ -135,12 +129,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 		}
 	}
-	
-	private boolean isOwnGate(Transaction transaction){
-		
+
+	private boolean isOwnGate(Transaction transaction) {
+
 		Gate gate = transaction.getGate();
 
-		byte[] messageByte = transaction.hash();
 		String message = gate.getMessage();
 		String signature = gate.getSignature();
 		String publicKey = gate.getPublicKey();

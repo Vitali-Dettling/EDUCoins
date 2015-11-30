@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.educoins.core.Transaction.ETransaction;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-
 public class TransactionTest {
 	
 			// Coinbase:

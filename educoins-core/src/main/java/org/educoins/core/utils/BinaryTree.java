@@ -1,10 +1,10 @@
 package org.educoins.core.utils;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
 
 public class BinaryTree<E extends Hashable> {
 

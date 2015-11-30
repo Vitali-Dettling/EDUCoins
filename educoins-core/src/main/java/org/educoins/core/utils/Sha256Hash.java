@@ -1,17 +1,18 @@
 package org.educoins.core.utils;
 
 
-import com.google.common.io.BaseEncoding;
-import com.google.common.io.ByteStreams;
-import org.educoins.core.cryptography.SHA256Hasher;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Arrays;
+
+import org.educoins.core.cryptography.SHA256Hasher;
+import org.jetbrains.annotations.NotNull;
+
+import com.google.common.io.BaseEncoding;
+import com.google.common.io.ByteStreams;
 
 /**
  * A Sha256Hash just wraps a byte[] so that equals and hashcode work correctly, allowing it to be used as keys in a

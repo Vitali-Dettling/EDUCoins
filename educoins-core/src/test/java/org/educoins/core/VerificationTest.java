@@ -1,12 +1,12 @@
 package org.educoins.core;
 
+import static org.junit.Assert.assertTrue;
+
 import org.educoins.core.utils.MockedBlockChain;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import static org.junit.Assert.assertTrue;
 
 public class VerificationTest {
 	
@@ -19,9 +19,7 @@ public class VerificationTest {
 	public void setUp(){
 		
 		Wallet wallet = new Wallet();
-		MockedBlockChain mockedBlockChain = new MockedBlockChain();
-		BlockChain blockChain = mockedBlockChain.getMockedBlockChain();
-		this.verification = new Verification(wallet, blockChain);
+		this.verification = new Verification(wallet, MockedBlockChain.getMockedBlockChain());
 	}
 
 	@Test

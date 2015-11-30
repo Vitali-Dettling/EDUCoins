@@ -3,11 +3,6 @@
  */
 package org.educoins.core;
 
-import static org.junit.Assert.fail;
-
-import org.educoins.core.utils.BlockStoreFactory;
-import org.educoins.core.utils.MockedBlockChain;
-import org.educoins.core.utils.MockedStore;
 import org.junit.Test;
 
 /**
@@ -94,14 +89,14 @@ public class BlockChainTest {
 	@Test
 	public void testSendTransactionGateway() {
 		
-		Transaction tx = null;
-		for(int i = 0 ; i < 10 ; i++){
-			tx = new Transaction();
-			Gate gate = BlockStoreFactory.generateExternSignedGate();	
-			
-			tx.setGate(gate);
-			MockedBlockChain.sendTransaction(tx);
-		}
+//		Transaction tx = null;
+//		for(int i = 0 ; i < 10 ; i++){
+//			tx = new Transaction();
+//			Gate gate = BlockStoreFactory.generateExternSignedGate();	
+//			
+//			tx.setGate(gate);
+//			MockedBlockChain.sendTransaction(tx);
+//		}
 		
 //		Block block = new Block();
 //		block.addGateway(gateway);
