@@ -12,13 +12,12 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Tests the  {@link BlockServlet}
+ * Tests the  {@link BlockController#getBlocks()} and {@link BlockController#getBlockHeaders()}.
  * Created by typus on 11/12/15.
  */
 public class BlockServletTest extends BlockServerTest {
     @Test
     public void TestBlocks() throws Exception {
-        server.start();
         List<Block> expected = new ArrayList<>();
         IBlockIterator iterator = store.iterator();
         while (iterator.hasNext()) {
@@ -29,17 +28,14 @@ public class BlockServletTest extends BlockServerTest {
         for (int i = 0; i < headers.length; i++) {
             assertEquals(headers[i], expected.get(i));
         }
-        server.stop();
     }
 
     @Test
     public void TestSpecificBlock() throws Exception {
-        server.start();
         Block expected = store.iterator().next();
         Block block = new RestClient<Block>()
                 .get(URI.create(blocksResourcePath + expected.hash().toString()), Block.class);
 
         assertEquals(expected, block);
-        server.stop();
     }
 }

@@ -8,17 +8,16 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
- * Tests the {@link BlockHeaderServlet}.
+ * Tests the {@link BlockController#getBlockHeaders()}.
  * Created by typus on 11/12/15.
  */
-public class BlockHeaderServletTest extends BlockServerTest {
+public class BlockHeaderTest extends BlockServerTest {
 
     @Test
     public void Test() throws Exception {
-        server.start();
         List<Block> expected = new ArrayList<>();
         IBlockIterator iterator = store.iterator();
         while (iterator.hasNext()) {
@@ -29,6 +28,5 @@ public class BlockHeaderServletTest extends BlockServerTest {
         for (int i = 0; i < headers.length; i++) {
             assertEquals(headers[i], expected.get(i));
         }
-        server.stop();
     }
 }
