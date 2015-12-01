@@ -7,14 +7,10 @@ import org.educoins.core.Wallet;
 
 public class MockedWallet {
 	
-	private static Wallet wallet;
+	private static Wallet wallet = new Wallet(MockedIO.getDefaultWalletStore());	;
 	
 	public static String getPublicKey(){
 		return wallet.getPublicKey();
-	}
-	
-	public static void create() {
-		wallet = new Wallet(MockedIO.getDefaultWalletStore());	
 	}
 
 	public static String getSignature(String publicKey, String hash){

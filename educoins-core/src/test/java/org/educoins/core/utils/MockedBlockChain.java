@@ -3,7 +3,6 @@ package org.educoins.core.utils;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.IBlockReceiver;
-import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
 import org.educoins.core.Transaction;
@@ -35,8 +34,9 @@ public class MockedBlockChain {
 		ITransactionReceiver txReceiver = Mockito.mock(ITransactionReceiver.class);
 		ITransactionTransmitter txTransmitter = Mockito.mock(ITransactionTransmitter.class);
 		Wallet mockedWallet = MockedWallet.getMockedWallet(); 
+		IBlockStore mockedStore = MockedStore.getStore();
 		
-		blockchain = new BlockChain(blockReceiver, txReceiver, txTransmitter, MockedStore.getStore(), mockedWallet);
+		blockchain = new BlockChain(blockReceiver, txReceiver, txTransmitter, mockedStore, mockedWallet);
 
 	}
 
@@ -47,7 +47,14 @@ public class MockedBlockChain {
 	public static void sendTransaction(Transaction transaction) {
 		blockchain.transactionReceived(transaction);
 	}
-
 	
+	public static void storeBlock(Block block){
+		blockchain.foundPoW(block);
+	}
+	
+	public static void close(){
+		MockedWallet.delete();
+		MockedStore.delete();
+	}
 
 }

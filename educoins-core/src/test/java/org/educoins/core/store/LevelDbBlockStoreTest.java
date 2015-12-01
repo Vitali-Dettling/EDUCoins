@@ -18,7 +18,6 @@ import org.educoins.core.utils.Sha256Hash;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -29,24 +28,10 @@ public class LevelDbBlockStoreTest {
 	private static final int STORED = 10;
 
 	private IBlockStore store;
-
-	@Before
-	public void setup() {
-		try {
-			this.store = BlockStoreFactory.getBlockStore();
-		} catch (BlockStoreException e) {
-			fail();
-		}
-	}
 	
 	@AfterClass
 	public static void deleteTmp(){
 		MockedWallet.delete();
-	}
-	
-	@BeforeClass
-	public static void createTmp(){
-		MockedWallet.create();
 	}
 
 	@After
@@ -61,6 +46,16 @@ public class LevelDbBlockStoreTest {
 		if (!MockedIO.deleteDefaultBlockStoreFile()) {
 			throw new IllegalStateException(
 					"Db could not be deleted! Path: " + MockedIO.getDefaultBlockStoreFile().toString());
+		}
+	}
+	
+
+	@Before
+	public void setup() {
+		try {
+			this.store = BlockStoreFactory.getBlockStore();
+		} catch (BlockStoreException e) {
+			fail();
 		}
 	}
 

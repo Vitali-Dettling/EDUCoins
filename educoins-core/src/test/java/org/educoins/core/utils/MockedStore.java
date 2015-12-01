@@ -33,5 +33,14 @@ public class MockedStore {
 	public static Block getLatest(){
 		return store.getLatest();
 	}
+	
+	public static void delete(){
+		try {
+			store.destroy();
+		} catch (BlockStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }

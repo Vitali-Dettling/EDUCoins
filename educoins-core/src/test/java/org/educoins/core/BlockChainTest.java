@@ -6,8 +6,7 @@ package org.educoins.core;
 import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.MockedStore;
-import org.educoins.core.utils.MockedWallet;
-import org.junit.BeforeClass;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 /**
@@ -15,11 +14,11 @@ import org.junit.Test;
  *
  */
 public class BlockChainTest {
-
 	
-	@BeforeClass
-	public static void createTmp(){
-		MockedWallet.create();
+	
+	@AfterClass
+	public static void deleteTmp(){
+		MockedBlockChain.close();
 	}
 	
 	/**
@@ -134,8 +133,10 @@ public class BlockChainTest {
 			Transaction tx = new Transaction();
 			tx.setGate(gate);
 			
-			MockedBlockChain.sendTransaction(tx);
+			MockedBlockChain.sendTransaction(tx);			
 		}
+		
+		
 	}
 
 	/**

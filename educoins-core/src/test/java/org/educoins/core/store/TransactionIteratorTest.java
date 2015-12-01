@@ -5,7 +5,6 @@ package org.educoins.core.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -18,7 +17,6 @@ import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.MockedWallet;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -45,7 +43,6 @@ public class TransactionIteratorTest {
 
 		try {
 			store = BlockStoreFactory.getBlockStore();
-			MockedWallet.create();
 		} catch (BlockStoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
