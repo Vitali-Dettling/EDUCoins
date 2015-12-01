@@ -123,7 +123,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 		} else if (type == ETransaction.GATEWAY) {
 			if (this.verification.verifyGateway(transaction)) {
-				this.externGateways.add(this.myGateway);
+				this.transactions.add(transaction);
 			}
 		} else if (type == ETransaction.GATE) {
 			if (isOwnGate(transaction) && this.verification.verifyGate(transaction)) {
@@ -161,6 +161,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	public Block prepareNewBlock(Block currentBlock) {
 		this.newBlock = new Block();
+		
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
 		this.newBlock.setVersion(currentBlock.getVersion());
@@ -286,6 +287,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 
 		}
+		//Rounds the number up.
 		return (int) (countGateways * 0.8);
 	}
 

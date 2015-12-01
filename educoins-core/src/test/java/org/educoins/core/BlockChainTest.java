@@ -3,15 +3,16 @@
  */
 package org.educoins.core;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.List;
 
 import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.MockedStore;
 import org.junit.AfterClass;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 /**
  * @author Vitali Dettling
@@ -122,16 +123,19 @@ public class BlockChainTest {
 	@Test
 	public void testSendTransactionGateway() {
 
+		
+		final int count = 10;
+		
 		Block block = new Block();
 
 		//Create an chain of Gateways.
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i <= count; i++) {
 			block = BlockStoreFactory.generateGatewayChain(block);
 			MockedStore.put(block);
 		}
 
 		//Signed and send by different external Gateways.
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i <= count; i++) {
 			Gate gate = BlockStoreFactory.generateExternSignedGate();
 
 			Transaction tx = new Transaction();
@@ -141,13 +145,13 @@ public class BlockChainTest {
 		}
 		MockedBlockChain.storeGateway();
 		Block latestBlock = MockedBlockChain.getLastStoredBlock();
-		Gateway gateway = latestBlock.getTransactions().get(0).getGateways().get(0);
 		
+		List<Gateway> gateways = latestBlock.getTransactions().get(1).getGateways();
 		//Gateway was created and stored in the Blockchain.
-		assertNotNull(gateway);
-		
-		int result = latestBlock.getTransactions().get(0).getGateways().get(0).getGates().size();
-		int expexted = 7;
+		assertNotNull(gateways);
+
+		int result = gateways.get(0).getGates().size();
+		int expexted = (int) (count * 0.8);
 		assertEquals(expexted, result);
 	}
 
