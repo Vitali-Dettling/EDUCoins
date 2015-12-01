@@ -1,7 +1,7 @@
 package org.educoins.core.p2p.peers;
 
 import org.educoins.core.BlockChain;
-import org.educoins.core.p2p.peers.remote.RemoteNode;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -13,16 +13,16 @@ public class SoloMinerPeer extends Peer {
     private final BlockChain blockChain;
 
 
-    public SoloMinerPeer(@NotNull RemoteNode remoteNode,
+    public SoloMinerPeer(@NotNull RemoteProxy remoteProxy,
 //                         @NotNull Miner miner,
                          @NotNull BlockChain blockChain) {
-        super(remoteNode);
+        super(remoteProxy);
 //        this.miner = miner;
         this.blockChain = blockChain;
     }
 
-    public SoloMinerPeer(@NotNull RemoteNode remoteNode) {
-        super(remoteNode);
+    public SoloMinerPeer(@NotNull RemoteProxy remoteProxy) {
+        super(remoteProxy);
 //        this.miner = null;
         this.blockChain = null;
     }

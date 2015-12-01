@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
  * Tests the {@link BlockController#getBlockHeaders()}.
  * Created by typus on 11/12/15.
  */
-public class BlockHeaderTest extends BlockServerTest {
+public class BlockHeaderTest extends PeerServerTest {
 
     @Test
     public void Test() throws Exception {

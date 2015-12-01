@@ -1,7 +1,7 @@
 package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
-import org.educoins.core.p2p.peers.remote.RemoteNode;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,49 +10,52 @@ import java.io.IOException;
 import java.util.*;
 
 /**
+ * A PeerNode representation. Necessary for P2P Networking. The concrete implementations are the following:
  * Reference Client->miner,blockchain,wallet
  * Full BlockChain->blockchain
  * Solo Miner->miner,blockchain
- **/
-
-/**
- * A PeerNode representation. Necessary for P2P Networking.
  * Created by typus on 10/27/15.
  */
 public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITransactionTransmitter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     protected Set<IBlockListener> blockListeners = new HashSet<>();
     protected Set<ITransactionListener> transactionListeners = new HashSet<>();
-    protected RemoteNode remoteNode;
+    protected RemoteProxy remoteProxy;
 
+    public Peer() {
+    }
 
-    public Peer(@NotNull RemoteNode remoteNode) {
-        this.remoteNode = remoteNode;
+    public Peer(@NotNull RemoteProxy remoteProxy) {
+        this.remoteProxy = remoteProxy;
+    }
+
+    public void hello() throws IOException {
+        remoteProxy.hello();
     }
 
     @NotNull
     public Collection<Block> getBlocks() throws IOException {
-        return remoteNode.getBlocks();
+        return remoteProxy.getBlocks();
     }
 
     @NotNull
     public Collection<Block> getHeaders() throws IOException {
-        return remoteNode.getHeaders();
+        return remoteProxy.getHeaders();
     }
 
-    @NotNull
-    public RemoteNode getRemoteNode() {
-        return remoteNode;
+    public @NotNull RemoteProxy getRemoteProxy() {
+        return remoteProxy;
     }
 
-    public void setRemoteNode(@NotNull RemoteNode remoteNode) {
-        this.remoteNode = remoteNode;
+    public void setRemoteProxy(@NotNull RemoteProxy remoteProxy) {
+        this.remoteProxy = remoteProxy;
     }
 
     @Override
     public int hashCode() {
-        return remoteNode != null ? remoteNode.hashCode() : 0;
+        return remoteProxy != null ? remoteProxy.hashCode() : 0;
     }
 
     @Override
@@ -62,7 +65,7 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
 
         Peer peer = (Peer) o;
 
-        return !(remoteNode != null ? !remoteNode.equals(peer.remoteNode) : peer.remoteNode != null);
+        return !(remoteProxy != null ? !remoteProxy.equals(peer.remoteProxy) : peer.remoteProxy != null);
     }
 
     @Override
@@ -98,11 +101,31 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
 
     @Override
     public void receiveTransactions() {
-
+        try {
+            getBlocks().iterator().next().getTransactions();
+        } catch (IOException e) {
+            logger.error("Could not receive Transactions", e);
+        }
     }
 
     @Override
     public void transmitTransaction(Transaction transaction) {
 
+    }
+
+    public Set<IBlockListener> getBlockListeners() {
+        return blockListeners;
+    }
+
+    public void setBlockListeners(Set<IBlockListener> blockListeners) {
+        this.blockListeners = blockListeners;
+    }
+
+    public Set<ITransactionListener> getTransactionListeners() {
+        return transactionListeners;
+    }
+
+    public void setTransactionListeners(Set<ITransactionListener> transactionListeners) {
+        this.transactionListeners = transactionListeners;
     }
 }

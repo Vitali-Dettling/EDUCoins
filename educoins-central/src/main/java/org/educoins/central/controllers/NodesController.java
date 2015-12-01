@@ -27,20 +27,19 @@ public class NodesController {
 
     @RequestMapping("/nodes/miner")
     public Collection<Node> getMinerPeers() {
-        return nodesRepository.findByType(PeerType.MINER);
+        return nodesRepository.findFirst10ByType(PeerType.MINER);
     }
 
 
     @RequestMapping("/nodes/blockchain")
     public Collection<Node> getBlockChainPeers() {
-        return nodesRepository.findByType(PeerType.BLOCKCHAIN);
+        return nodesRepository.findFirst10ByType(PeerType.BLOCKCHAIN);
     }
 
     @RequestMapping("/nodes/reference")
     public Collection<Node> getReferencePeers() {
-        return nodesRepository.findByType(PeerType.REFERENCE);
+        return nodesRepository.findFirst10ByType(PeerType.REFERENCE);
     }
-
 
     @RequestMapping(value = "/peers/", method = RequestMethod.POST)
     public ResponseEntity<Node> hello(Node node) {

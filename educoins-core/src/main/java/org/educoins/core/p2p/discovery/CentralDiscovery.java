@@ -1,8 +1,8 @@
 package org.educoins.core.p2p.discovery;
 
 import org.educoins.core.p2p.peers.*;
-import org.educoins.core.p2p.peers.remote.HttpNode;
-import org.educoins.core.p2p.peers.remote.RemoteNode;
+import org.educoins.core.p2p.peers.remote.HttpProxy;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.utils.RestClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public class CentralDiscovery implements DiscoveryStrategy {
     public static final String RESOURCE_NODES_BLOCKCHAIN = "/nodes/blockchain";
     public static final String RESOURCE_NODES_REFERENCE = "nodes/reference";
     private String centralUrl;
-    private RestClient<RemoteNode[]> client;
+    private RestClient<RemoteProxy[]> client;
 
     public CentralDiscovery(@NotNull String centralUrl) {
         this.centralUrl = centralUrl;
@@ -31,12 +31,12 @@ public class CentralDiscovery implements DiscoveryStrategy {
     public @NotNull Collection<Peer> getReferencePeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();
-            RemoteNode[] nodes = client
-                    .get(new URI(centralUrl + RESOURCE_NODES_REFERENCE), HttpNode[].class);
+            RemoteProxy[] nodes = client
+                    .get(new URI(centralUrl + RESOURCE_NODES_REFERENCE), HttpProxy[].class);
 
             if (nodes == null) return peers;
 
-            for (RemoteNode node : nodes) {
+            for (RemoteProxy node : nodes) {
                 peers.add(new ReferencePeer(node));
             }
 
@@ -50,12 +50,12 @@ public class CentralDiscovery implements DiscoveryStrategy {
     public @NotNull Collection<Peer> getFullBlockchainPeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();
-            RemoteNode[] nodes = client
-                    .get(new URI(centralUrl + RESOURCE_NODES_BLOCKCHAIN), HttpNode[].class);
+            RemoteProxy[] nodes = client
+                    .get(new URI(centralUrl + RESOURCE_NODES_BLOCKCHAIN), HttpProxy[].class);
 
             if (nodes == null) return peers;
 
-            for (RemoteNode node : nodes) {
+            for (RemoteProxy node : nodes) {
                 peers.add(new FullBlockChainPeer(node));
             }
 
@@ -69,12 +69,12 @@ public class CentralDiscovery implements DiscoveryStrategy {
     public @NotNull Collection<Peer> getSoloMinerPeers() throws DiscoveryException {
         try {
             List<Peer> peers = new ArrayList<>();
-            RemoteNode[] nodes = client
-                    .get(new URI(centralUrl + RESOURCE_NODES_MINER), HttpNode[].class);
+            RemoteProxy[] nodes = client
+                    .get(new URI(centralUrl + RESOURCE_NODES_MINER), HttpProxy[].class);
 
             if (nodes == null) return peers;
 
-            for (RemoteNode node : nodes) {
+            for (RemoteProxy node : nodes) {
                 peers.add(new SoloMinerPeer(node));
             }
 

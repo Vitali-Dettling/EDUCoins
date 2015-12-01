@@ -13,7 +13,7 @@ import java.util.Collection;
  */
 @Repository
 public interface NodesRepository extends CrudRepository<Node, Long> {
-    Collection<Node> findByType(PeerType type);
+    Collection<Node> findFirst10ByType(PeerType type);
 
     Node save(Node node);
 

@@ -17,22 +17,22 @@ import java.net.URI;
 import static org.junit.Assert.*;
 
 /**
- * Tests the {@link BlockServer}.
+ * Tests the {@link PeerServer}.
  * Created by typus on 11/5/15.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(BlockServer.class)
+@SpringApplicationConfiguration(PeerServer.class)
 @WebAppConfiguration
 @IntegrationTest("server.port:8080")
-public class BlockServerTest {
+public class PeerServerTest {
 
     @Autowired
     protected IBlockStore store;
 
     protected RestClient<Block[]> restClient;
     protected int port = 8080;
-    protected String blocksResourcePath = "http://localhost:" + port + BlockServer.BLOCKS_RESOURCE_PATH;
-    protected String blockHeadersResourcePath = "http://localhost:" + port + BlockServer.BLOCK_HEADERS_RESOURCE_PATH;
+    protected String blocksResourcePath = "http://localhost:" + port + PeerServer.BLOCKS_RESOURCE_PATH;
+    protected String blockHeadersResourcePath = "http://localhost:" + port + PeerServer.BLOCK_HEADERS_RESOURCE_PATH;
 
     @Before
     public void setup() {

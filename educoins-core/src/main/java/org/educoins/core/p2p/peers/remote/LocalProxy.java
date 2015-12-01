@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
  * Simulating a Remote Peer.
  * Created by typus on 10/27/15.
  */
-public class LocalNode extends RemoteNode {
+public class LocalProxy extends RemoteProxy {
 
-    private final Logger logger = LoggerFactory.getLogger(LocalNode.class);
+    private final Logger logger = LoggerFactory.getLogger(LocalProxy.class);
     private final IBlockStore blockStore;
 
-    public LocalNode(IBlockStore blockStore) {
+    public LocalProxy(IBlockStore blockStore) {
         this.blockStore = blockStore;
     }
 
@@ -60,4 +60,10 @@ public class LocalNode extends RemoteNode {
             return null;
         }
     }
+
+    @Override
+    public void hello() throws IOException {
+
+    }
+
 }

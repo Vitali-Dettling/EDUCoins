@@ -1,8 +1,8 @@
 package org.educoins.core.p2p.discovery;
 
 import org.educoins.core.p2p.peers.*;
-import org.educoins.core.p2p.peers.remote.HttpNode;
-import org.educoins.core.p2p.peers.remote.RemoteNode;
+import org.educoins.core.p2p.peers.remote.HttpProxy;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.testutils.FieldInjector;
 import org.educoins.core.utils.RestClient;
 import org.junit.*;
@@ -42,28 +42,28 @@ public class CentralDiscoveryTest {
 
     @Test
     public void testErrors() throws URISyntaxException, IOException {
-        when(clientMock.get(uriBlockChain, HttpNode[].class)).thenReturn(null);
+        when(clientMock.get(uriBlockChain, HttpProxy[].class)).thenReturn(null);
         assertNotNull(discovery.getFullBlockchainPeers());
 
-        when(clientMock.get(uriReference, HttpNode[].class)).thenReturn(null);
+        when(clientMock.get(uriReference, HttpProxy[].class)).thenReturn(null);
         assertNotNull(discovery.getReferencePeers());
 
-        when(clientMock.get(uriReference, HttpNode[].class)).thenThrow(new IOException("ERROR"));
+        when(clientMock.get(uriReference, HttpProxy[].class)).thenThrow(new IOException("ERROR"));
         exception.expect(DiscoveryException.class);
         discovery.getReferencePeers();
 
-        when(clientMock.get(uriBlockChain, HttpNode[].class)).thenThrow(new IOException("ERROR"));
+        when(clientMock.get(uriBlockChain, HttpProxy[].class)).thenThrow(new IOException("ERROR"));
         exception.expect(DiscoveryException.class);
         discovery.getFullBlockchainPeers();
     }
 
     @Test
     public void testGetFullPeers() throws Exception {
-        RemoteNode[] remoteNodes = new RemoteNode[]{new HttpNode()};
-        for (RemoteNode node : remoteNodes) {
+        RemoteProxy[] remoteProxies = new RemoteProxy[]{new HttpProxy()};
+        for (RemoteProxy node : remoteProxies) {
             expectedPeers.add(new FullBlockChainPeer(node));
         }
-        when(clientMock.get(uriBlockChain, HttpNode[].class)).thenReturn(remoteNodes);
+        when(clientMock.get(uriBlockChain, HttpProxy[].class)).thenReturn(remoteProxies);
 
         Collection<Peer> fullPeersActual = discovery.getFullBlockchainPeers();
         fullPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));
@@ -71,11 +71,11 @@ public class CentralDiscoveryTest {
 
     @Test
     public void testGetReadOnlyPeers() throws Exception {
-        RemoteNode[] remoteNodes = new RemoteNode[]{new HttpNode()};
-        for (RemoteNode node : remoteNodes) {
+        RemoteProxy[] remoteProxies = new RemoteProxy[]{new HttpProxy()};
+        for (RemoteProxy node : remoteProxies) {
             expectedPeers.add(new SoloMinerPeer(node));
         }
-        when(clientMock.get(uriReference, HttpNode[].class)).thenReturn(remoteNodes);
+        when(clientMock.get(uriReference, HttpProxy[].class)).thenReturn(remoteProxies);
 
         Collection<Peer> readOnlyPeersActual = discovery.getReferencePeers();
         readOnlyPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));

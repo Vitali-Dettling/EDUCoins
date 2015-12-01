@@ -3,7 +3,7 @@ package org.educoins.core.p2p.peers.server.config;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.p2p.peers.LocalPeer;
-import org.educoins.core.p2p.peers.remote.LocalNode;
+import org.educoins.core.p2p.peers.remote.LocalProxy;
 import org.educoins.core.store.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
@@ -51,7 +51,7 @@ public class MvcConfig {
     @Bean
     public BlockChain blockChain() throws BlockStoreException {
         if (blockChain == null) {
-            LocalPeer localPeer = new LocalPeer(new LocalNode(blockStore()));
+            LocalPeer localPeer = new LocalPeer(new LocalProxy(blockStore()));
             this.blockChain = new BlockChain(localPeer, localPeer, localPeer, blockStore());
         }
         return blockChain;

@@ -1,6 +1,6 @@
 package org.educoins.core.p2p.peers;
 
-import org.educoins.core.p2p.peers.remote.RemoteNode;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * Created by typus on 11/5/15.
  */
 public class LocalPeer extends Peer {
-    public LocalPeer(@NotNull RemoteNode remoteNode) {
-        super(remoteNode);
+    public LocalPeer(@NotNull RemoteProxy remoteProxy) {
+        super(remoteProxy);
     }
 }

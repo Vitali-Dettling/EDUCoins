@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  * Tests the  {@link BlockController#getBlocks()} and {@link BlockController#getBlockHeaders()}.
  * Created by typus on 11/12/15.
  */
-public class BlockServletTest extends BlockServerTest {
+public class BlockServletTest extends PeerServerTest {
     @Test
     public void TestBlocks() throws Exception {
         List<Block> expected = new ArrayList<>();
