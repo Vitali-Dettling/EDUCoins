@@ -156,17 +156,11 @@ public class Transaction implements Hashable {
 	public ETransaction whichTransaction() {
 
 		// Coinbase:
-		// inputs = 0;
-		// outputs > 0;
-		// approvals = 0;
+		// inputs = 0; outputs > 0; 	approvals = 0;
 		// Regular:
-		// inputs > 0;
-		// outputs > 0;
-		// approvals = 0;
+		// inputs > 0; outputs > 0; 	approvals = 0;
 		// Approval:
-		// inputs > 0;
-		// outputs = 0 || > 0
-		// approvals > 0
+		// inputs > 0; outputs >= 0; 	approvals > 0
 
 		// Check for transaction type.
 		if ((this.getInputs() == null || this.getInputs().size() == 0)
@@ -209,14 +203,13 @@ public class Transaction implements Hashable {
 		}
 
 		// hash concatenated header fields and return
-		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed));
-		return hash;
+		return SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed));
 
 	}
 
 	// TODO[Vitali] Much better implementation, with generic class and
 	// so!!!!!!!!!!!!!!!!!!!
-	private static byte[] getByteArrayInput(Transaction transaction) {
+	protected static byte[] getByteArrayInput(Transaction transaction) {
 		int length = 0;
 		for (Input input : transaction.getInputs()) {
 			length += input.getConcatedInput().length;
@@ -233,7 +226,7 @@ public class Transaction implements Hashable {
 
 	// TODO[Vitali] Much better implementation, with generic class and
 	// so!!!!!!!!!!!!!!!!!!!
-	private static byte[] getByteArrayOutput(Transaction transaction) {
+	protected static byte[] getByteArrayOutput(Transaction transaction) {
 		int length = 0;
 		for (Output output : transaction.getOutputs()) {
 			length += output.getConcatedOutput().length;
@@ -250,7 +243,7 @@ public class Transaction implements Hashable {
 
 	// TODO[Vitali] Much better implementation, with generic class and
 	// so!!!!!!!!!!!!!!!!!!!
-	private static byte[] getByteArrayApproved(Transaction transaction) {
+	protected static byte[] getByteArrayApproved(Transaction transaction) {
 		int length = 0;
 		for (Approval approval : transaction.getApprovals()) {
 			length += approval.getConcatedApproval().length;
@@ -267,7 +260,7 @@ public class Transaction implements Hashable {
 
 	public enum ETransaction {
 
-		APPROVED, COINBASE, REGULAR,
+		APPROVED, COINBASE, REGULAR, REVOKE,
 
 	}
 
