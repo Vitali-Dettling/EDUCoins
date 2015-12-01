@@ -3,11 +3,15 @@
  */
 package org.educoins.core;
 
+import static org.junit.Assert.*;
+
 import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.MockedStore;
 import org.junit.AfterClass;
 import org.junit.Test;
+
+import junit.framework.Assert;
 
 /**
  * @author Vitali Dettling
@@ -135,8 +139,16 @@ public class BlockChainTest {
 			
 			MockedBlockChain.sendTransaction(tx);			
 		}
+		MockedBlockChain.storeGateway();
+		Block latestBlock = MockedBlockChain.getLastStoredBlock();
+		Gateway gateway = latestBlock.getTransactions().get(0).getGateways().get(0);
 		
+		//Gateway was created and stored in the Blockchain.
+		assertNotNull(gateway);
 		
+		int result = latestBlock.getTransactions().get(0).getGateways().get(0).getGates().size();
+		int expexted = 7;
+		assertEquals(expexted, result);
 	}
 
 	/**

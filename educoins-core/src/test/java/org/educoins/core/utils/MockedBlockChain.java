@@ -2,7 +2,9 @@ package org.educoins.core.utils;
 
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
+import org.educoins.core.Gateway;
 import org.educoins.core.IBlockReceiver;
+import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
 import org.educoins.core.Transaction;
@@ -23,9 +25,8 @@ public class MockedBlockChain {
 	private ITransactionReceiver mockedGatewayReceiver;
 	@Mock
 	private ITransactionTransmitter mockedGatewayTransmitter;
-	@Mock
-	private IBlockStore store;
 
+	private static IBlockStore mockedStore;
 	private static BlockChain blockchain;
 
 	static {
@@ -34,7 +35,7 @@ public class MockedBlockChain {
 		ITransactionReceiver txReceiver = Mockito.mock(ITransactionReceiver.class);
 		ITransactionTransmitter txTransmitter = Mockito.mock(ITransactionTransmitter.class);
 		Wallet mockedWallet = MockedWallet.getMockedWallet(); 
-		IBlockStore mockedStore = MockedStore.getStore();
+		mockedStore = MockedStore.getStore();
 		
 		blockchain = new BlockChain(blockReceiver, txReceiver, txTransmitter, mockedStore, mockedWallet);
 
@@ -48,8 +49,17 @@ public class MockedBlockChain {
 		blockchain.transactionReceived(transaction);
 	}
 	
-	public static void storeBlock(Block block){
+	public static void storeGateway(){
+		Gateway gateway = blockchain.getGateway();
+		Block block = BlockStoreFactory.getRandomBlock();
+		Transaction tx = BlockStoreFactory.generateTransaction(1);
+		tx.addGateway(gateway);
+		block.addTransaction(tx);
 		blockchain.foundPoW(block);
+	}
+	
+	public static Block getLastStoredBlock(){
+		return mockedStore.getLatest();
 	}
 	
 	public static void close(){

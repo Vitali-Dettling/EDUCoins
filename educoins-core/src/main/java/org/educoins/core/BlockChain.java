@@ -233,6 +233,12 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return this.newBlock;
 	}
 
+	// TODO my delete but how to check whether the gateway was created and
+	// stored in the Blockchain? (testSendTransactionGateway)
+	public Gateway getGateway() {
+		return this.myGateway;
+	}
+
 	public Block getPreviousBlock(Block currentBlock) {
 		return this.store.get(currentBlock.hash().getBytes());
 	}
@@ -243,17 +249,17 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			// When all signatures of the other gateways have been collected.
 			// Then it will continue transmit the created new gateway.
 			if (allGatesSigned()) {
-				this.myGateway.setAllGates(this.ownGates);			
+				this.myGateway.setAllGates(this.ownGates);
 				this.externGateways.add(this.myGateway);
-				
+
 				Transaction newTx = new Transaction();
 				newTx.setGateways(this.externGateways);
-				
+
 				this.sendTransaction(newTx);
 			}
 		}
 	}
-	
+
 	private boolean allGatesSigned() {
 
 		int precent = findAllGateway();
