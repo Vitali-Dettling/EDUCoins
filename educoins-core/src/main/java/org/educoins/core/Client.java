@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 
 public class Client extends Thread implements ITransactionListener {
@@ -106,19 +105,19 @@ public class Client extends Thread implements ITransactionListener {
 		this.inputs = new ArrayList<>();
 	}
 
-	public void sendGatewayTransaction(String publicKey) {
+	public void sendGateTransaction(String publicKey) {
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
 
 		Gate gate = new Gate();
 		transaction.setGate(gate);
+		gate.setPublicKey(publicKey);
 
 		byte[] hash = transaction.hash();
 		String hashedTranscation = ByteArray.convertToString(hash, 16);
 
 		String signature = this.wallet.getSignature(publicKey, hashedTranscation);
 		gate.setSignature(signature);
-		gate.setPublicKey(publicKey);
 
 		transaction.setGate(gate);
 		this.blockChain.sendTransaction(transaction);
@@ -148,29 +147,6 @@ public class Client extends Thread implements ITransactionListener {
 						Input input = new Input(amount, hashPrevOutput, index);
 						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, this.wallet.getPublicKey());
 						this.inputs.add(input);
-
-						String typeString = null;
-						ETransaction type = transaction.whichTransaction();
-						if (type == ETransaction.COINBASE) {
-							typeString = "Coinbase Transaction";
-						} else if (type == ETransaction.REGULAR) {
-							typeString = "Regular Transaction";
-						} else if (type == ETransaction.APPROVED) {
-							typeString = "Approved Transaction";
-						} else {
-							typeString = "Unknown Transaction";
-						}
-						int availableAmount = 0;
-						List<Input> tmpInputs = new ArrayList<>(inputs);
-						for (Input tmpInput : tmpInputs) {
-							availableAmount += tmpInput.getAmount();
-						}
-						// TODO[Vitali] Testing
-						// System.out.println(String.format("Info: Received %d
-						// EDUCoins (new Amount: %d) from a %s with
-						// LockingScript %s",
-						// amount, availableAmount, typeString,
-						// output.getLockingScript()));
 					}
 				}
 			}
@@ -215,7 +191,7 @@ public class Client extends Thread implements ITransactionListener {
 				System.out.print("Gate is broadcasted.");
 				System.out.print("Type in your public key: ");
 				String publicKey = scanner.nextLine();
-				this.sendGatewayTransaction(publicKey);
+				this.sendGateTransaction(publicKey);
 				break;
 			default:
 			}

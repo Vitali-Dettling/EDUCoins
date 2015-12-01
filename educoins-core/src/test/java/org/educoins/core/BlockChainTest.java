@@ -19,13 +19,13 @@ import org.junit.Test;
  *
  */
 public class BlockChainTest {
-	
-	
+
 	@AfterClass
-	public static void deleteTmp(){
+	public static void deleteTmp() {
 		MockedBlockChain.close();
+		MockedStore.delete();
 	}
-	
+
 	/**
 	 * Test method for
 	 * {@link org.educoins.core.BlockChain#BlockChain(org.educoins.core.IBlockReceiver, org.educoins.core.ITransactionReceiver, org.educoins.core.ITransactionTransmitter, org.educoins.core.store.IBlockStore)}
@@ -123,31 +123,30 @@ public class BlockChainTest {
 	@Test
 	public void testSendTransactionGateway() {
 
-		
 		final int count = 10;
-		
+
 		Block block = new Block();
 
-		//Create an chain of Gateways.
+		// Create an chain of Gateways.
 		for (int i = 0; i <= count; i++) {
 			block = BlockStoreFactory.generateGatewayChain(block);
 			MockedStore.put(block);
 		}
 
-		//Signed and send by different external Gateways.
+		// Signed and send by different external Gateways.
 		for (int i = 0; i <= count; i++) {
 			Gate gate = BlockStoreFactory.generateExternSignedGate();
 
 			Transaction tx = new Transaction();
 			tx.setGate(gate);
-			
-			MockedBlockChain.sendTransaction(tx);			
+
+			MockedBlockChain.sendTransaction(tx);
 		}
 		MockedBlockChain.storeGateway();
 		Block latestBlock = MockedBlockChain.getLastStoredBlock();
-		
+
 		List<Gateway> gateways = latestBlock.getTransactions().get(1).getGateways();
-		//Gateway was created and stored in the Blockchain.
+		// Gateway was created and stored in the Blockchain.
 		assertNotNull(gateways);
 
 		int result = gateways.get(0).getGates().size();

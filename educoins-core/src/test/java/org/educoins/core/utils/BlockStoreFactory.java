@@ -109,6 +109,14 @@ public class BlockStoreFactory {
 
 		return gateway;
 	}
+	
+	public static Input generateRandomInput(String hashPrevOutput){
+		
+		int amount = (int) (Math.random() * Integer.MAX_VALUE);
+		Input input = new Input(amount, hashPrevOutput, 1);
+		input.setUnlockingScript(Input.EInputUnlockingScript.PUBLIC_KEY, "12345");
+		return input;
+	}
 
 	public static Block generateGatewayChain(Block block) {
 		Gateway gateway = BlockStoreFactory.generateGateway();

@@ -3,6 +3,7 @@ package org.educoins.core;
 import static org.junit.Assert.assertTrue;
 
 import org.educoins.core.utils.MockedBlockChain;
+import org.educoins.core.utils.MockedStore;
 import org.educoins.core.utils.MockedWallet;
 import org.junit.After;
 import org.junit.Before;
@@ -28,6 +29,7 @@ public class VerificationTest {
 	@After
 	public void tearDown(){
 		MockedWallet.delete();
+		MockedStore.delete();
 	}
 
 	@Test
@@ -43,15 +45,5 @@ public class VerificationTest {
 		assertTrue(this.verification.verifyBlock(block));
 		
 	}
-	
-	/*
-	    block.setBits(bits);
-		block.setHashMerkleRoot(hashMerkleRoot);
-		block.setHashPrevBlock(hashPrevBlock);
-		block.setNonce(nonce);
-		block.setTime(time);
-		block.setVersion(version);
-		block.setTransactions(transactions);
-	 * */
 
 }

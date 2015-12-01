@@ -1,36 +1,56 @@
 package org.educoins.core;
 
-import org.junit.After;
+import java.util.List;
+
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.utils.MockedClient;
+import org.educoins.core.utils.MockedWallet;
 import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class ClientTest {
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
+	public static void deleteTmp() {
+		MockedClient.delete();
 	}
 
 	@Test
-	public void test() {
-		//fail("Not yet implemented");
+	public void testSendRegularTransaction() {
+
+		String dstPublicKey = MockedWallet.getPublicKey();
+		String lockingScript = MockedWallet.getPublicKey();
+
+		List<Transaction> reqeived = MockedClient.sendRegularTransaction(1, dstPublicKey, lockingScript);
+		checkTransactionType(reqeived, ETransaction.REGULAR);
 	}
-	
-	//TODO [Vitali] sendRegularTransaction -> Write integration test.  
-	//TODO [Vitali] sendApprovedTransaction -> Write integration test.  
-	//TODO [Vitali] transactionReceived -> Write integration test.  
+
+	@Test
+	public void testSendApprovedTransaction() {
+
+		String owner = MockedWallet.getPublicKey();
+		String holder = MockedWallet.getPublicKey();
+		String lockingScript = MockedWallet.getPublicKey();
+		List<Transaction> reqeived = MockedClient.sendApprovedTransaction(1, owner, holder, lockingScript);
+
+		checkTransactionType(reqeived, ETransaction.APPROVED);
+	}
+
+	@Test
+	public void testSendGateTransaction() {
+
+		String publicKey = MockedWallet.getPublicKey();
+		List<Transaction> reqeived = MockedClient.sendGateTransaction(publicKey);
+		checkTransactionType(reqeived, ETransaction.GATE);
+
+	}
+
+	private void checkTransactionType(List<Transaction> reqeived, ETransaction type) {
+		Transaction tx = reqeived.get(reqeived.size() - 1);
+		ETransaction txType = tx.whichTransaction();
+		reqeived = null;
+		Assert.assertTrue(txType == type);
+	}
 
 }

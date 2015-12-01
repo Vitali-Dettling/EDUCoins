@@ -28,8 +28,9 @@ public class MockedBlockChain {
 	private static IBlockStore mockedStore;
 	private static BlockChain mockedBlockchain;
 
-	static {
 
+	static {
+		
 		IBlockReceiver blockReceiver = Mockito.mock(IBlockReceiver.class);
 		ITransactionReceiver txReceiver = Mockito.mock(ITransactionReceiver.class);
 		ITransactionTransmitter txTransmitter = Mockito.mock(ITransactionTransmitter.class);
@@ -38,6 +39,10 @@ public class MockedBlockChain {
 		
 		mockedBlockchain = new BlockChain(blockReceiver, txReceiver, txTransmitter, mockedStore, mockedWallet);
 
+	}
+	
+	public static IBlockStore getStore(){
+		return mockedStore;
 	}
 
 	public static BlockChain getMockedBlockChain() {
@@ -59,12 +64,18 @@ public class MockedBlockChain {
 	}
 	
 	public static Block getLastStoredBlock(){
-		return mockedStore.getLatest();
+		Block latestBlock = mockedStore.getLatest();
+		return mockedBlockchain.getPreviousBlock(latestBlock);
 	}
 	
 	public static void close(){
 		MockedWallet.delete();
 		MockedStore.delete();
+	}
+	
+	public static void delete(){
+		MockedStore.delete();
+		MockedWallet.delete();
 	}
 
 }

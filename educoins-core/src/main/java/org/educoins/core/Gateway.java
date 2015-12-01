@@ -51,5 +51,4 @@ public class Gateway{
 		secureRandom.nextBytes(nextByte);
 		return nextByte;
 	}
-	
 }

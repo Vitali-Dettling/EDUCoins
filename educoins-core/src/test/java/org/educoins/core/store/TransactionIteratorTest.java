@@ -69,12 +69,12 @@ public class TransactionIteratorTest {
 		Input input = txList.get(1).getInputs().get(0);
 		Output out = iterator.previous(input);
 
-		 assertNotNull(out);
-		 byte[] org = ByteArray.convertFromString(input.getHashPrevOutput());
-		 byte[] result = out.getConcatedOutput();
-		
-		 assertEquals(org.length, result.length);
-		 Assert.assertArrayEquals(org, result);
+		assertNotNull(out);
+		byte[] org = ByteArray.convertFromString(input.getHashPrevOutput());
+		byte[] result = out.getConcatedOutput();
+
+		assertEquals(org.length, result.length);
+		Assert.assertArrayEquals(org, result);
 
 	}
 

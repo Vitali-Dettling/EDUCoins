@@ -243,6 +243,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	public Block getPreviousBlock(Block currentBlock) {
 		return this.store.get(currentBlock.hash().getBytes());
 	}
+	
+	public Block getPreviousBlock() {
+		return this.store.getLatest();
+	}
 
 	private void createGateway(Transaction transaction) {
 
@@ -260,7 +264,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 		}
 	}
-
+	
 	private boolean allGatesSigned() {
 
 		int precent = findAllGateway();
@@ -275,6 +279,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	private int findAllGateway() {
 
+		//TODO [Vitali] Needs to be checked whether the Gateways are still licensed.
 		int countGateways = 0;
 		IBlockIterator iterator = this.store.blockIterator();
 
@@ -285,10 +290,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 					countGateways += transaction.getGatewaysCount();
 				}
 			}
-
 		}
-		//Rounds the number up.
 		return (int) (countGateways * 0.8);
 	}
-
 }

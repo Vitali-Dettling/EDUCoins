@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.educoins.core.utils.Generator;
+import org.educoins.core.utils.MockedStore;
 import org.educoins.core.utils.MockedWallet;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.AfterClass;
@@ -20,6 +21,7 @@ public class WalletTest {
 	@AfterClass
 	public static void deleteTmp(){
 		MockedWallet.delete();
+		MockedStore.delete();
 	}
 	
 	@Test
