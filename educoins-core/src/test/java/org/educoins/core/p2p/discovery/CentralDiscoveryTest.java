@@ -1,6 +1,5 @@
 package org.educoins.core.p2p.discovery;
 
-import org.educoins.core.p2p.peers.*;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.testutils.FieldInjector;
@@ -26,10 +25,10 @@ public class CentralDiscoveryTest {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    String centralUrl = "http://localhost:8080/";
-    DiscoveryStrategy discovery = new CentralDiscovery(centralUrl);
+    String centralUrl = "http://localhost:1337";
+    DiscoveryStrategy discovery = new CentralDiscovery();
     RestClient clientMock = Mockito.mock(RestClient.class);
-    List<Peer> expectedPeers = new ArrayList<>();
+    List<RemoteProxy> expectedPeers = new ArrayList<>();
     private URI uriBlockChain;
     private URI uriReference;
 
@@ -60,24 +59,20 @@ public class CentralDiscoveryTest {
     @Test
     public void testGetFullPeers() throws Exception {
         RemoteProxy[] remoteProxies = new RemoteProxy[]{new HttpProxy()};
-        for (RemoteProxy node : remoteProxies) {
-            expectedPeers.add(new FullBlockChainPeer(node));
-        }
+        Collections.addAll(expectedPeers, remoteProxies);
         when(clientMock.get(uriBlockChain, HttpProxy[].class)).thenReturn(remoteProxies);
 
-        Collection<Peer> fullPeersActual = discovery.getFullBlockchainPeers();
+        Collection<RemoteProxy> fullPeersActual = discovery.getFullBlockchainPeers();
         fullPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));
     }
 
     @Test
     public void testGetReadOnlyPeers() throws Exception {
         RemoteProxy[] remoteProxies = new RemoteProxy[]{new HttpProxy()};
-        for (RemoteProxy node : remoteProxies) {
-            expectedPeers.add(new SoloMinerPeer(node));
-        }
+        Collections.addAll(expectedPeers, remoteProxies);
         when(clientMock.get(uriReference, HttpProxy[].class)).thenReturn(remoteProxies);
 
-        Collection<Peer> readOnlyPeersActual = discovery.getReferencePeers();
+        Collection<RemoteProxy> readOnlyPeersActual = discovery.getReferencePeers();
         readOnlyPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));
     }
 }

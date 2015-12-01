@@ -1,8 +1,7 @@
 package org.educoins.core.p2p.discovery;
 
-import org.educoins.core.p2p.peers.LocalPeer;
-import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.p2p.peers.remote.LocalProxy;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.store.IBlockStore;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,28 +22,28 @@ public class LocalDiscovery implements DiscoveryStrategy {
     }
 
 
-    public Collection<Peer> getPeers() {
+    public Collection<RemoteProxy> getPeers() {
         /**
          * So far, it doesn't make sense to add more than one local peer.
          */
-        Collection<Peer> remoteNodes = new ArrayList<>();
-        remoteNodes.add(new LocalPeer(new LocalProxy(blockStore)));
+        Collection<RemoteProxy> remoteNodes = new ArrayList<>();
+        remoteNodes.add(new LocalProxy(blockStore));
         return remoteNodes;
     }
 
 
     @Override
-    public @NotNull Collection<Peer> getReferencePeers() throws DiscoveryException {
+    public @NotNull Collection<RemoteProxy> getReferencePeers() throws DiscoveryException {
         return getPeers();
     }
 
     @Override
-    public @NotNull Collection<Peer> getFullBlockchainPeers() throws DiscoveryException {
+    public @NotNull Collection<RemoteProxy> getFullBlockchainPeers() throws DiscoveryException {
         return getPeers();
     }
 
     @Override
-    public @NotNull Collection<Peer> getSoloMinerPeers() throws DiscoveryException {
+    public @NotNull Collection<RemoteProxy> getSoloMinerPeers() throws DiscoveryException {
         return getPeers();
     }
 }

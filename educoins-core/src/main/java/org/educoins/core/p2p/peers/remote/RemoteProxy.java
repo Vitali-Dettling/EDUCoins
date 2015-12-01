@@ -67,6 +67,10 @@ public abstract class RemoteProxy {
         return pubkey;
     }
 
+    public URI getiNetAddress() {
+        return iNetAddress;
+    }
+
     @Override
     public int hashCode() {
         int result = iNetAddress != null ? iNetAddress.hashCode() : 0;

@@ -1,6 +1,6 @@
 package org.educoins.core.p2p.peers.server;
 
-import org.educoins.core.p2p.peers.HttpNodeCache;
+import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
@@ -20,11 +20,11 @@ import java.util.*;
 @RestController
 @RequestMapping("/peers/")
 public class PeerController {
-    private final HttpNodeCache httpPeerCache;
+    private final HttpProxyPeerGroup httpPeerCache;
     private final Logger logger = LoggerFactory.getLogger(BlockController.class);
 
     @Autowired
-    public PeerController(@NotNull HttpNodeCache httpPeerCache) {
+    public PeerController(@NotNull HttpProxyPeerGroup httpPeerCache) {
         this.httpPeerCache = httpPeerCache;
     }
 
@@ -32,15 +32,15 @@ public class PeerController {
      * Manages ingoing {@link RemoteProxy#hello()} requests.
      *
      * @param peer the helloing Peer.
-     * @return all peers known so far renouced the newly added one.
+     * @return all peers known so far renounced the newly added one.
      */
     @RequestMapping(value = "http", method = RequestMethod.POST)
     @ResponseStatus(code = HttpStatus.CREATED)
-    public Collection<HttpProxy> addHttpPeer(@RequestBody @NotNull HttpProxy peer) {
+    public Collection<RemoteProxy> addHttpPeer(@RequestBody @NotNull HttpProxy peer) {
         logger.info("Added peer " + peer);
 
-        Set<HttpProxy> proxies = new HashSet<>();
-        proxies.addAll(httpPeerCache);
+        Set<RemoteProxy> proxies = new HashSet<>();
+        proxies.addAll(httpPeerCache.getAll());
 
         httpPeerCache.add(peer);
 
