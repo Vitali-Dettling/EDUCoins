@@ -25,6 +25,9 @@ public class BlockIterator implements IBlockIterator {
 
     @Override
     public boolean hasNext() {
+    	if(this.currentElement == null || genesisHash == null){
+    		return false;
+    	}
         return !Arrays.equals(this.currentElement.hash().getBytes(), genesisHash);
     }
 

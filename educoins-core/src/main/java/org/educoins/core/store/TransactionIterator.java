@@ -6,28 +6,30 @@ import org.educoins.core.Block;
 import org.educoins.core.Input;
 import org.educoins.core.Output;
 import org.educoins.core.Transaction;
+import org.educoins.core.utils.ByteArray;
 import org.jetbrains.annotations.NotNull;
 
 public class TransactionIterator implements ITransactionIterator {
 
     private IBlockIterator blockIterator;
-	private Block block = null;
+	private static Block block = null;
 	
 	public TransactionIterator(@NotNull IBlockStore blockStore, @NotNull byte[] genesisHash) {
 		this.blockIterator = new BlockIterator(blockStore, genesisHash);
-		this.block = blockStore.getLatest();
+		block = blockStore.getLatest();
 	}
 
 	@Override
 	public Output previous(@NotNull Input startInput) {
 		
-		byte[] outID = startInput.getHashPrevOutput().getBytes();
+		if(block == null){
+			//Should only occur if there is no blockchain. 
+			return null;
+		}
+		
+		byte[] outID = ByteArray.convertFromString(startInput.getHashPrevOutput());
 		Output previousOutput = null;
 		
-		if(this.blockIterator.hasNext()){
-			this.block = this.blockIterator.next();
-		}
-
 		for(Transaction tx : block.getTransactions()){
 			for(Output out : tx.getOutputs()){
 				byte[] outByte = out.getConcatedOutput();
@@ -41,7 +43,8 @@ public class TransactionIterator implements ITransactionIterator {
 			}
 		}
 		
-		if(previousOutput == null){
+		if(this.blockIterator.hasNext()){
+			block = this.blockIterator.next();
 			previous(startInput);
 		}
 		return previousOutput;

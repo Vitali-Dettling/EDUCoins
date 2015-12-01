@@ -28,7 +28,8 @@ public class Transaction implements Hashable {
 	protected int gatewaysCount;
 	protected List<Gateway> gateways;
 	
-	protected Gate gate;
+	protected int gatesCount;
+	protected List<Gate> gates;
 
 	public Transaction() {
 		this.inputs = new ArrayList<>();
@@ -39,7 +40,8 @@ public class Transaction implements Hashable {
 		this.approvalsCount = this.approvals.size();
 		this.gateways = new ArrayList<>();
 		this.gatewaysCount = this.gateways.size();		
-		this.gate = null;
+		this.gates = new ArrayList<>();
+		this.gatesCount = this.gates.size();
 	}
 
 	public int getVersion() {
@@ -163,12 +165,29 @@ public class Transaction implements Hashable {
 		this.approvalsCount = this.approvals.size();
 	}
 	
-	public Gate getGate() {
-		return this.gate;
+	public int getGateCount(){
+		return this.gatesCount;
+	}
+	
+	public List<Gate> getGates() {
+		return this.gates;
 	}
 
 	public void setGate(Gate gate) {
-		this.gate = gate;
+		if (this.gates == null) {
+			this.gates = new ArrayList<>();
+		}
+		this.gates.add(gate);
+		this.gatesCount = this.gates.size();
+	}
+	
+	public void setGates(List<Gate> gates) {
+		this.gates = gates;
+		if (this.gates == null) {
+			this.gatesCount = 0;
+		} else {
+			this.gatesCount = this.gates.size();
+		}
 	}
 
 	public int getGatewaysCount() {
@@ -242,10 +261,10 @@ public class Transaction implements Hashable {
 						.getOutputs().size() > 0)) && (this.getApprovals() != null && this.getApprovals().size() > 0)) {
 			return ETransaction.APPROVED;
 		}	
-		if (this.gate != null && this.getGatewaysCount() == 0){
+		if (this.getGatewaysCount() == 0){
 			return ETransaction.GATE;
 		}	
-		if (this.getGate() == null && this.getGatewaysCount() > 0){
+		if (this.getGatewaysCount() > 0){
 			return ETransaction.GATEWAY;
 		}	
 		return null;
@@ -273,6 +292,9 @@ public class Transaction implements Hashable {
 		}else if(transaction.whichTransaction() == ETransaction.GATE){
 			byte[] gate = getByteArrayGate(transaction);
 			toBeHashed = gate;
+		}else if(transaction.whichTransaction() == ETransaction.GATEWAY){
+			byte[] gateway = getByteArrayGateway(transaction);
+			toBeHashed = gateway;
 		}
 
 		// hash concatenated header fields and return
@@ -283,16 +305,34 @@ public class Transaction implements Hashable {
 	
 	// TODO[Vitali] Much better implementation, with generic class and
 	// so!!!!!!!!!!!!!!!!!!!
+	private static byte[] getByteArrayGateway(Transaction transaction) {
+		
+		final int index = 0;
+		
+		List<Gateway> gateways = transaction.getGateways();
+		
+		byte[] byteArray = null;
+		for(Gateway gateway : gateways){
+			final int length = gateway.getConcatedGateway().length;
+			byteArray = new byte[length];
+			System.arraycopy(gateway.getConcatedGateway(), 0, byteArray, index, length);
+		}
+		return byteArray;
+	}
+	
+	// TODO[Vitali] Much better implementation, with generic class and
+	// so!!!!!!!!!!!!!!!!!!!
 	private static byte[] getByteArrayGate(Transaction transaction) {
 		
 		final int index = 0;
 		
-		Gate gate = transaction.getGate();
-		
-		final int length = gate.getConcatedGate().length;
-		byte[] byteArray = new byte[length];
-		System.arraycopy(gate.getConcatedGate(), 0, byteArray, index, length);
-		
+		List<Gate> gates = transaction.getGates();
+		byte[] byteArray = null;
+		for(Gate gate : gates){
+			final int length = gate.getConcatedGate().length;
+			byteArray = new byte[length];
+			System.arraycopy(gate.getConcatedGate(), 0, byteArray, index, length);
+		}
 		return byteArray;
 	}
 	
@@ -366,7 +406,7 @@ public class Transaction implements Hashable {
 				.add("approvals", this.approvals.toString())
 				.add("gatewaysCount", gatewaysCount)
 				.add("gateways", this.gateways.toString())
-				.add("gate", this.gate.toString())
+				.add("gate", this.gates.toString())
 				.toString();
 	}
 

@@ -9,16 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.educoins.core.Block;
-import org.educoins.core.Gate;
 import org.educoins.core.Gateway;
 import org.educoins.core.Transaction;
 import org.educoins.core.utils.BlockStoreFactory;
-import org.educoins.core.utils.Generator;
-import org.educoins.core.utils.IO;
+import org.educoins.core.utils.MockedIO;
 import org.educoins.core.utils.MockedWallet;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -38,6 +38,16 @@ public class LevelDbBlockStoreTest {
 			fail();
 		}
 	}
+	
+	@AfterClass
+	public static void deleteTmp(){
+		MockedWallet.delete();
+	}
+	
+	@BeforeClass
+	public static void createTmp(){
+		MockedWallet.create();
+	}
 
 	@After
 	public void tearDown() {
@@ -45,10 +55,13 @@ public class LevelDbBlockStoreTest {
 			this.store.destroy();
 
 		} catch (BlockStoreException e) {
-			throw new IllegalStateException("Db could not be deleted!");
+			throw new IllegalStateException(
+					"Db could not be deleted! Path: " + MockedIO.getDefaultBlockStoreFile().toString());
 		}
-		if (!IO.deleteDefaultBlockStoreFile())
-			throw new IllegalStateException("Db could not be deleted!");
+		if (!MockedIO.deleteDefaultBlockStoreFile()) {
+			throw new IllegalStateException(
+					"Db could not be deleted! Path: " + MockedIO.getDefaultBlockStoreFile().toString());
+		}
 	}
 
 	@Test
@@ -110,6 +123,7 @@ public class LevelDbBlockStoreTest {
 
 	@Test
 	public void testGetLatest() {
+		
 		Block latest = this.store.getLatest();
 		assertNull(latest);
 		int filled = 23;
@@ -163,32 +177,21 @@ public class LevelDbBlockStoreTest {
 		for (int i = result.size() - 1; i >= 0; i--) {
 			sortResult.add(result.get(i));
 		}
-
 		assertEquals(sortResult.toString(), test.toString());
 	}
 
 	@Test
 	public void testStoreGateway() {
 
-		String randomNumber = Generator.getSecureRandomString256HEX();
-		final String publicKey = MockedWallet.getPublicKey();
-		final String signature = MockedWallet.getSignature(publicKey, randomNumber);
+		Gateway gateway = BlockStoreFactory.generateGateway();
+		Transaction tx = new Transaction();
+		tx.addGateway(gateway);
 
-		Gate gate = new Gate();
-		Gateway gateway = new Gateway();
-		List<Gateway> gateways = new ArrayList<Gateway>();
 		Block block = new Block();
-
-		gate.setSignature(signature);
-		gate.setPublicKey(publicKey);
-		gateway.addGate(gate);
-		gateways.add(gateway);
-		block.addAllGateways(gateways);
+		block.addTransaction(tx);
 
 		this.store.put(block);
 		Block storedBlock = this.store.get(block.hash().getBytes());
-
-		assertTrue(!storedBlock.getGateways().isEmpty());
 
 		String originalBlock = block.toString();
 		String storedDBBlock = storedBlock.toString();

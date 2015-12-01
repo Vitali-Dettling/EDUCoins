@@ -7,10 +7,14 @@ import org.educoins.core.Wallet;
 
 public class MockedWallet {
 	
-	private static Wallet wallet = new Wallet();
+	private static Wallet wallet;
 	
 	public static String getPublicKey(){
 		return wallet.getPublicKey();
+	}
+	
+	public static void create() {
+		wallet = new Wallet(MockedIO.getDefaultWalletStore());	
 	}
 
 	public static String getSignature(String publicKey, String hash){
@@ -33,6 +37,14 @@ public class MockedWallet {
 	public static boolean compare(String message, String signature, String publicKey) {
 		return wallet.compare(message, signature, publicKey);
 	}
-	
 
+	public static Wallet getMockedWallet() {
+		return wallet;
+	}
+	
+	public static void delete(){
+		if (!MockedIO.deleteDefaultWalletStore()){
+			throw new IllegalStateException("Db could not be deleted!");
+		}
+	}
 }

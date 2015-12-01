@@ -18,8 +18,9 @@ public class Block {
 
 	private static final int DEFAULT_REWARD = 10;
 	private static final int ZERO = 0;
-	private static final int VERSION = -1;//-1 if no version is set and also an error.
-	private static final Sha256Hash HASH_PREV_BLOCK  = Sha256Hash.ZERO_HASH;
+	private static final int VERSION = -1;// -1 if no version is set and also an
+											// error.
+	private static final Sha256Hash HASH_PREV_BLOCK = Sha256Hash.ZERO_HASH;
 	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
 	private static final long TIME = System.currentTimeMillis();
 
@@ -35,7 +36,6 @@ public class Block {
 	private int transactionsCount;
 	private List<Transaction> transactions;
 	private List<Gateway> gateways;
-	private int gatewaysCount;
 
 	public Block() {
 		this.setVersion(VERSION);
@@ -44,15 +44,12 @@ public class Block {
 		this.setTime(TIME);
 		bits = BITS;
 		this.setNonce(NONCE);
-		
+
 		this.transactions = new ArrayList<>();
 		this.transactionsCount = this.transactions.size();
-		
-		this.gateways = new ArrayList<>();
-		this.gatewaysCount = this.gateways.size();
 	}
 
-	public Block copy(){
+	public Block copy() {
 		Block b = new Block();
 		b.setBits(this.getBits());
 		b.setTime(this.getTime());
@@ -67,140 +64,125 @@ public class Block {
 		return this.version;
 	}
 
-    public void setVersion(int version) {
-        this.version = version;
-    }
+	public void setVersion(int version) {
+		this.version = version;
+	}
 
-    public Sha256Hash getHashPrevBlock() {
-        return this.hashPrevBlock;
-    }
+	public Sha256Hash getHashPrevBlock() {
+		return this.hashPrevBlock;
+	}
 
-    public void setHashPrevBlock(Sha256Hash hashPrevBlock) {
-        this.hashPrevBlock = hashPrevBlock;
-    }
+	public void setHashPrevBlock(Sha256Hash hashPrevBlock) {
+		this.hashPrevBlock = hashPrevBlock;
+	}
 
-    public Sha256Hash getHashMerkleRoot() {
-        return this.hashMerkleRoot;
-    }
+	public Sha256Hash getHashMerkleRoot() {
+		return this.hashMerkleRoot;
+	}
 
-    public void setHashMerkleRoot(Sha256Hash hashMerkleRoot) {
-        this.hashMerkleRoot = hashMerkleRoot;
-    }
+	public void setHashMerkleRoot(Sha256Hash hashMerkleRoot) {
+		this.hashMerkleRoot = hashMerkleRoot;
+	}
 
-    public long getTime() {
-        return this.time;
-    }
+	public long getTime() {
+		return this.time;
+	}
 
-    public void setTime(long time) {
-        this.time = time;
-    }
+	public void setTime(long time) {
+		this.time = time;
+	}
 
 	public Sha256Hash getBits() {
-        byte[] mantisse = Arrays.copyOfRange(bits, 1, 4);
-        int expInt = (int) bits[0];
+		byte[] mantisse = Arrays.copyOfRange(bits, 1, 4);
+		int expInt = (int) bits[0];
 
-        byte[] result = new byte[3 + expInt];
-        Arrays.fill(result, (byte) 0);
-        System.arraycopy(mantisse, 0, result, 0, 3);
-        
-        return Sha256Hash.wrap(result);
+		byte[] result = new byte[3 + expInt];
+		Arrays.fill(result, (byte) 0);
+		System.arraycopy(mantisse, 0, result, 0, 3);
+
+		return Sha256Hash.wrap(result);
 	}
 
 	public void setBits(Sha256Hash inBits) {
 		byte[] bits = inBits.getBytes();
-        byte[] mantisse;
-        byte[] exponent = new byte[1];
+		byte[] mantisse;
+		byte[] exponent = new byte[1];
 
-        int i = 0;
-        for (i = 0; bits[i] == (byte) 0; i++); //count leading 0
+		int i = 0;
+		for (i = 0; bits[i] == (byte) 0; i++)
+			; // count leading 0
 
-        exponent[0] = (byte) (bits.length - i - 3);
-        mantisse = Arrays.copyOfRange(bits, i, i + 3);
+		exponent[0] = (byte) (bits.length - i - 3);
+		mantisse = Arrays.copyOfRange(bits, i, i + 3);
 
-        this.bits = ByteArray.concatByteArrays(exponent, mantisse);
+		this.bits = ByteArray.concatByteArrays(exponent, mantisse);
 	}
 
-    public long getNonce() {
-        return this.nonce;
-    }
-
-    public void setNonce(long nonce) {
-        this.nonce = nonce;
-    }
-
-    public void calculateMerkleRoot() {
-        if (this.getTransactionsCount() == 0) {
-            this.setHashMerkleRoot(Sha256Hash.ZERO_HASH);
-            return;
-        }
-
-        BinaryTree<Transaction> tree = new BinaryTree<>(getTransactions());
-        setHashMerkleRoot(Sha256Hash.wrap(tree.getRoot().hash()));
-    }
-
-    public int getTransactionsCount() {
-        return this.transactionsCount;
-    }
-
-    public List<Transaction> getTransactions() {
-        // [joeren]: return just a copy of the transaction list, because of
-        // potential effects with transactionsCount
-        if (this.transactions != null) {
-            return new ArrayList<Transaction>(this.transactions);
-        }
-        return null;
-    }
-
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-        if (this.transactions == null) {
-            this.transactionsCount = 0;
-        } else {
-            this.transactionsCount = this.transactions.size();
-        }
-        calculateMerkleRoot();
-    }
-
-    public void addTransaction(Transaction transaction) {
-        if (this.transactions == null) {
-            this.transactions = new ArrayList<>();
-        }
-        this.transactions.add(transaction);
-        this.transactionsCount = this.transactions.size();
-        calculateMerkleRoot();
-    }
-
-    public void addTransactions(Collection<Transaction> transactions) {
-        if (this.transactions == null) {
-            this.transactions = new ArrayList<>();
-        }
-        this.transactions.addAll(transactions);
-        this.transactionsCount = this.transactions.size();
-        calculateMerkleRoot();
-    }
-
-    public List<Gateway> getGateways() {
-		return this.gateways;
+	public long getNonce() {
+		return this.nonce;
 	}
-    
-    public void addAllGateways(Collection<Gateway> gateways) {
-		this.gateways.addAll(gateways);
+
+	public void setNonce(long nonce) {
+		this.nonce = nonce;
 	}
-    
-    public void addGateway(Gateway gateway) {
-        if (this.gateways == null) {
-            this.gateways = new ArrayList<>();
-        }
-        this.gateways.add(gateway);
-        this.gatewaysCount = this.gateways.size();
+
+	public void calculateMerkleRoot() {
+		if (this.getTransactionsCount() == 0) {
+			this.setHashMerkleRoot(Sha256Hash.ZERO_HASH);
+			return;
+		}
+
+		BinaryTree<Transaction> tree = new BinaryTree<>(transactions);
+		setHashMerkleRoot(Sha256Hash.wrap(tree.getRoot().hash()));
+
 	}
-    
-    
-    public Sha256Hash hash() {
-        return Block.hash(this);
-    }
- 
-    public static Sha256Hash hash(Block block) {
+
+	public int getTransactionsCount() {
+		return this.transactionsCount;
+	}
+
+	public List<Transaction> getTransactions() {
+		// [joeren]: return just a copy of the transaction list, because of
+		// potential effects with transactionsCount
+		if (this.transactions != null) {
+			return new ArrayList<Transaction>(this.transactions);
+		}
+		return null;
+	}
+
+	public void setTransactions(List<Transaction> transactions) {
+		this.transactions = transactions;
+		if (this.transactions == null) {
+			this.transactionsCount = 0;
+		} else {
+			this.transactionsCount = this.transactions.size();
+		}
+		calculateMerkleRoot();
+	}
+
+	public void addTransaction(Transaction transaction) {
+		if (this.transactions == null) {
+			this.transactions = new ArrayList<>();
+		}
+		this.transactions.add(transaction);
+		this.transactionsCount = this.transactions.size();
+		calculateMerkleRoot();
+	}
+
+	public void addTransactions(Collection<Transaction> transactions) {
+		if (this.transactions == null) {
+			this.transactions = new ArrayList<>();
+		}
+		this.transactions.addAll(transactions);
+		this.transactionsCount = this.transactions.size();
+		calculateMerkleRoot();
+	}
+
+	public Sha256Hash hash() {
+		return Block.hash(this);
+	}
+
+	public static Sha256Hash hash(Block block) {
 		// specify used header fields (in byte arrays)
 		byte[] version = ByteArray.convertFromLong(block.version);
 		byte[] hashPrevBlock = block.hashPrevBlock.getBytes();
@@ -210,9 +192,9 @@ public class Block {
 		byte[] nonce = ByteArray.convertFromLong(block.nonce);
 
 		// concatenate used header fields
-		byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
-				bits, nonce);
-		
+		byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time, bits,
+				nonce);
+
 		// hash concatenated header fields and return
 		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
 		return Sha256Hash.wrap(hash);
@@ -232,71 +214,64 @@ public class Block {
 		}
 		return false;
 	}
-    
-    /*public MessageProtos.Block
-    /*public MessageProtos.Block toProto() {
-        MessageProtos.Block.Builder builder = MessageProtos.Block.newBuilder();
-        builder.setBits(Integer.parseInt(getBits()));
-        builder.setVersion(getVersion());
-        builder.setMerkleRoot(getHashMerkleRoot());
-        builder.setPrevBlock(getHashPrevBlock());
-        builder.setNonce((int) getNonce());
-        builder.setTimestamp(getTime());
-        builder.setTxnCount(getTransactionsCount());
-        int index = 0;
-        transactions.forEach(tnx -> builder.setTxns(index, tnx.getApprovalsCount()));
 
-        return builder.build();
-    }*/
-	
-	@SuppressWarnings("deprecation")
-	@Override
-	public String toString() {
-		return Objects.toStringHelper(this)
-				.add("version", version)
-				.add("hashPrevBlock", hashPrevBlock)
-				.add("hashMerkleRoot", hashMerkleRoot)
-				.add("time", time)
-				.add("bits", Arrays.deepToString(new Object[] { bits }))
-				.add("nonce", nonce)
-				.add("transactionsCount", transactionsCount)
-				.add("transactions", this.transactions.toString())
-				.add("gateways", this.gateways.toString())
-				.toString();
-	}
-	
-	public int rewardCalculator(){
-		
+	/*
+	 * public MessageProtos.Block /*public MessageProtos.Block toProto() {
+	 * MessageProtos.Block.Builder builder = MessageProtos.Block.newBuilder();
+	 * builder.setBits(Integer.parseInt(getBits()));
+	 * builder.setVersion(getVersion());
+	 * builder.setMerkleRoot(getHashMerkleRoot());
+	 * builder.setPrevBlock(getHashPrevBlock()); builder.setNonce((int)
+	 * getNonce()); builder.setTimestamp(getTime());
+	 * builder.setTxnCount(getTransactionsCount()); int index = 0;
+	 * transactions.forEach(tnx -> builder.setTxns(index,
+	 * tnx.getApprovalsCount()));
+	 * 
+	 * return builder.build(); }
+	 */
+
+	public int rewardCalculator() {
+
 		int newReward = ZERO;
 		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
-		
-		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
-		if(DEFAULT_REWARD == lastApprovedEDUCoins){
+
+		// TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um
+		// die ausschütung zu bestimmen!!!
+		if (DEFAULT_REWARD == lastApprovedEDUCoins) {
 			newReward = DEFAULT_REWARD;
-		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
+		} else if (DEFAULT_REWARD > lastApprovedEDUCoins) {
 			newReward = lastApprovedEDUCoins + 2;
-		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
+		} else if (DEFAULT_REWARD < lastApprovedEDUCoins) {
 			newReward = DEFAULT_REWARD - 2;
-		}		
+		}
 
 		return newReward;
 	}
 
-	private int findAllApprovedEDUCoins(){
-		
+	@SuppressWarnings("deprecation")
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this).add("version", version).add("hashPrevBlock", hashPrevBlock)
+				.add("hashMerkleRoot", hashMerkleRoot).add("time", time)
+				.add("bits", Arrays.deepToString(new Object[] { bits })).add("nonce", nonce)
+				.add("transactionsCount", transactionsCount).add("transactions", transactions).add("gateways", gateways)
+				.toString();
+	}
+
+	private int findAllApprovedEDUCoins() {
+
 		int latestApprovedEDUCoins = ZERO;
 		List<Transaction> latestTransactions = this.getTransactions();
-		
-		//TODO[Vitali] Might not be 100% correct???ß
-		for(Transaction transaction : latestTransactions){
+
+		// TODO[Vitali] Might not be 100% correct???ß
+		for (Transaction transaction : latestTransactions) {
 			List<Approval> approvals = transaction.getApprovals();
-			for(Approval approval : approvals){
+			for (Approval approval : approvals) {
 				latestApprovedEDUCoins += approval.getAmount();
 			}
 		}
-		
+
 		return latestApprovedEDUCoins;
 	}
-
 
 }

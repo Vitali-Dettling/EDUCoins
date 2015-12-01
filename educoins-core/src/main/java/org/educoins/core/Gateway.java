@@ -1,7 +1,10 @@
 package org.educoins.core;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.educoins.core.utils.ByteArray;
 
 import com.google.common.base.Objects;
 
@@ -41,6 +44,14 @@ public class Gateway{
 	
 	public void addGate(Gate gate){
 		this.gates.add(gate);
+	}
+	
+	public byte[] getConcatedGateway(){
+		
+		SecureRandom secureRandom = new SecureRandom();
+		byte[] nextByte = new byte[randomNumberLength256];
+		secureRandom.nextBytes(nextByte);
+		return nextByte;
 	}
 	
 }

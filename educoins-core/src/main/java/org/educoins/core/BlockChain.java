@@ -32,13 +32,14 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private IBlockStore store;
 	private List<Gateway> externGateways;
 	private Gateway myGateway;
+	private List<Gate> ownGates;
 
 	private String publicKey;
 
 	public BlockChain(IBlockReceiver blockReceiver, ITransactionReceiver transactionReceiver,
-			ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
+			ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore, Wallet wallet) {
 
-		this.wallet = new Wallet();
+		this.wallet = wallet;
 		this.blockListeners = new CopyOnWriteArrayList<>();
 		this.blockReceiver = blockReceiver;
 		this.blockReceiver.addBlockListener(this);
@@ -51,6 +52,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.store = senderBlockStore;
 		this.externGateways = new ArrayList<Gateway>();
 		this.myGateway = new Gateway();
+		this.ownGates = new ArrayList<>();
 
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
@@ -132,18 +134,22 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	private boolean isOwnGate(Transaction transaction) {
 
-		Gate gate = transaction.getGate();
+		List<Gate> gates = transaction.getGates();
 
-		String message = gate.getMessage();
-		String signature = gate.getSignature();
-		String publicKey = gate.getPublicKey();
+		for (Gate gate : gates) {
+			String message = gate.getMessage();
+			String signature = gate.getSignature();
+			String publicKey = gate.getPublicKey();
 
-		// Check whether the gateway was already sign by itself.
-		boolean compared = this.wallet.compare(message, signature, publicKey);
+			// Check whether the gateway was already sign by itself.
+			boolean compared = this.wallet.compare(message, signature, publicKey);
 
-		if (compared) {
-			return true;
+			if (compared) {
+				this.ownGates.add(gate);
+				return true;
+			}
 		}
+
 		return false;
 	}
 
@@ -166,10 +172,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.newBlock.addTransaction(coinbaseTransaction(currentBlock));
 		this.newBlock.addTransactions(this.transactions);
 		this.transactions.clear();
-
-		if (!this.externGateways.isEmpty()) {
-			this.newBlock.addAllGateways(this.externGateways);
-		}
 
 		return retargedBits(currentBlock);
 	}
@@ -237,33 +239,27 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	private void createGateway(Transaction transaction) {
 
-		// TODO [Vitali] How to find out about all gateways?
-		Gate gate = transaction.getGate();
 		if (this.verification.verifyGate(transaction)) {
-			this.myGateway.addGate(gate);
 			// When all signatures of the other gateways have been collected.
 			// Then it will continue transmit the created new gateway.
 			if (allGatesSigned()) {
+				this.myGateway.setAllGates(this.ownGates);			
 				this.externGateways.add(this.myGateway);
-				transaction.setGateways(this.externGateways);
-				this.sendTransaction(transaction);
+				
+				Transaction newTx = new Transaction();
+				newTx.setGateways(this.externGateways);
+				
+				this.sendTransaction(newTx);
 			}
 		}
 	}
-
+	
 	private boolean allGatesSigned() {
 
-		// TODO Delete
-		System.out.println("allGatesSigned: " + this.myGateway.toString());
+		int precent = findAllGateway();
+		int signedGates = this.ownGates.size();
 
-		final int notGatewayExist = 0;
-
-		int optainedGatewaysInBC = findAllGateway();
-		int precent = (int) (optainedGatewaysInBC * 0.8);
-
-		if (optainedGatewaysInBC == precent) {
-			return true;
-		} else if (optainedGatewaysInBC == notGatewayExist) {
+		if (signedGates == precent) {
 			return true;
 		}
 
@@ -278,13 +274,13 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		while (iterator.hasNext()) {
 			Block block = iterator.next();
 			for (Transaction transaction : block.getTransactions()) {
-				if (transaction.getGatewaysCount() == 0) {
+				if (transaction.getGatewaysCount() > 0) {
 					countGateways += transaction.getGatewaysCount();
 				}
 			}
 
 		}
-		return countGateways;
+		return (int) (countGateways * 0.8);
 	}
 
 }

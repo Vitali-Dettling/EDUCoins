@@ -11,7 +11,7 @@ public class MockedStore {
 
 	static{
 		try {
-			store = new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
+			store = new LevelDbBlockStore(MockedIO.getDefaultBlockStoreFile());
 		} catch (BlockStoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -28,6 +28,10 @@ public class MockedStore {
 	
 	public static Block get(byte[] hash){
 		return store.get(hash);
+	}
+	
+	public static Block getLatest(){
+		return store.getLatest();
 	}
 
 }

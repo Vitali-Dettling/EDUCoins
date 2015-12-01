@@ -3,6 +3,8 @@ package org.educoins.core;
 import static org.junit.Assert.assertTrue;
 
 import org.educoins.core.utils.MockedBlockChain;
+import org.educoins.core.utils.MockedWallet;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,8 +20,14 @@ public class VerificationTest {
 	@Before
 	public void setUp(){
 		
-		Wallet wallet = new Wallet();
-		this.verification = new Verification(wallet, MockedBlockChain.getMockedBlockChain());
+		Wallet mockedWallet = MockedWallet.getMockedWallet();
+		BlockChain mockedBlockchain = MockedBlockChain.getMockedBlockChain();
+		this.verification = new Verification(mockedWallet, mockedBlockchain);
+	}
+	
+	@After
+	public void tearDown(){
+		MockedWallet.delete();
 	}
 
 	@Test

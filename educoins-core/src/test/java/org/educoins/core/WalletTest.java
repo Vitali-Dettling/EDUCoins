@@ -10,12 +10,25 @@ import java.util.List;
 import org.educoins.core.utils.Generator;
 import org.educoins.core.utils.MockedWallet;
 import org.educoins.core.utils.Sha256Hash;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class WalletTest {
 
 	private static final int KEYS = 10;
-
+	
+	@AfterClass
+	public static void deleteTmp(){
+		MockedWallet.delete();
+	}
+	
+	@BeforeClass
+	public static void createTmp(){
+		MockedWallet.create();
+	}
+	
 	@Test
 	public void testSignatureVerification() {
 

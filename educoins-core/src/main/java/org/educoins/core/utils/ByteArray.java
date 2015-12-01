@@ -181,7 +181,7 @@ public final class ByteArray {
 	 * @return The string representation of the value of the byte array.
 	 */
 	public static final String convertToString(byte[] byteArray) {
-		return ByteArray.convertToString(byteArray, 10);
+		return ByteArray.convertToString(byteArray, 16);
 	}
 
 	/**

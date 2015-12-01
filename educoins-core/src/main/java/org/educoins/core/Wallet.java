@@ -30,17 +30,16 @@ public class Wallet {
 	private static final String WALLET_FILE_NAME = "/wallet.keys";
 	
 	private ECDSA keyPair;
-	private Path directoryKeyStorage;
+	private File directoryKeyStorage;
 	
-	public Wallet(){
+	public Wallet(File walletDirectory){
 		
 		try {
 			
-			this.directoryKeyStorage = Paths.get(System.getProperty("user.home") + File.separator + "documents" + File.separator
-					+ "educoins" + File.separator + "demo" + File.separator + "wallet");
-		
-			IO.deleteDirectory(directoryKeyStorage);
-			IO.createDirectory(directoryKeyStorage);
+			this.directoryKeyStorage = walletDirectory;
+
+			IO.deleteDirectory(directoryKeyStorage.getPath());
+			IO.createDirectory(directoryKeyStorage.getPath());
 			IO.createFile(this.directoryKeyStorage + WALLET_FILE_NAME);
 
 		} catch (IOException e) {

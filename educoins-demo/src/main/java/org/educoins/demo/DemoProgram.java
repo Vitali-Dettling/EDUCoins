@@ -12,6 +12,7 @@ import org.educoins.core.IBlockReceiver;
 import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
+import org.educoins.core.Wallet;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
 import org.educoins.core.utils.IO;
@@ -22,6 +23,7 @@ public class DemoProgram {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
 		File localDBStorage = IO.getDefaultBlockStoreFile();
+		File localWalletStorage = IO.getDefaultWalletStore();
 
 		boolean localStorageSet = false;
 		boolean runMiner = false;
@@ -64,6 +66,7 @@ public class DemoProgram {
             String input = null;
 
 			System.out.println("path of local storage (" + localDBStorage + "): ");
+			System.out.println("path of local storage (" + localWalletStorage + "): ");
 			
 			input = scanner.nextLine().trim();
 			if (!input.isEmpty()) {
@@ -105,7 +108,8 @@ public class DemoProgram {
         ITransactionReceiver txReceiver = new DemoTransactionReceiver();
         ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
 
-        BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
+        Wallet wallet =  new Wallet(localWalletStorage);
+        BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore, wallet);
 
         if (runMiner) {
             new Miner(blockChain);

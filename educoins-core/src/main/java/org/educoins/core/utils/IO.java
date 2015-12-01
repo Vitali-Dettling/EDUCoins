@@ -13,8 +13,9 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class IO {
-
-    public static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+    
+    public static final String DEMO_DIR = System.getProperty("user.home") + File.separator + "documents"
+			+ File.separator + "educoins" + File.separator + "demo";
     public static final String FILE_SEPERATOR = System.getProperty("file.separator");
 	
 	public static void createDirectory(String path) throws IOException {
@@ -23,7 +24,7 @@ public class IO {
 
 	public static void createDirectory(Path path) throws IOException {
 		if (Files.exists(path) && Files.isDirectory(path)) {
-			System.out.println("IO.createDirectory: directory already exists");
+			System.err.println("IO.createDirectory: directory already exists");
 			return;
 		}
 		Files.createDirectories(path);
@@ -35,7 +36,7 @@ public class IO {
 
 	public static void createFile(Path path) throws IOException {
 		if (Files.exists(path) && Files.isRegularFile(path)) {
-			System.out.println("IO.createFile: file already exists");
+			System.err.println("IO.createFile: file already exists");
 			return;
 		}
 		Files.createFile(path);
@@ -47,6 +48,7 @@ public class IO {
 
 	public static void deleteDirectory(Path path) throws IOException {
 		if (!Files.exists(path)) {
+			System.err.println("Diretory does not exist." + path.getRoot());
 			return;
 		}
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
@@ -69,6 +71,10 @@ public class IO {
 	}
 
 	public static void writeToFile(Path path, String content) throws IOException {
+		if (!Files.exists(path)) {
+			System.err.println("Diretory does not exist." + path.getRoot());
+			return;
+		}
 		BufferedWriter writer = Files.newBufferedWriter(path);
 		writer.write(content);
 		writer.close();
@@ -93,6 +99,10 @@ public class IO {
 	}
 
 	public static String readFromFile(Path path) throws IOException {
+		if (!Files.exists(path)) {
+			System.err.println("Diretory does not exist." + path.getRoot());
+			return null;
+		}
 		BufferedReader reader = Files.newBufferedReader(path);
 		StringBuilder stringBuilder = new StringBuilder();
 		String line = null;
@@ -111,20 +121,35 @@ public class IO {
 
 	public static void copyFile(Path srcPath, Path dstPath) throws IOException {
 		if (Files.exists(dstPath)) {
-			System.out.println("IO.copyFile: file already exists");
+			System.err.println("IO.copyFile: file already exists");
 			return;
 		}
 		Files.copy(srcPath, dstPath);
 	}
-	
+    
     public static File getDefaultBlockStoreFile() {
-        return new File(TMP_DIR + FILE_SEPERATOR + "EDUCoinsBlockStore");
+        return new File(DEMO_DIR + FILE_SEPERATOR + "BlockStore");
     }
 
     public static boolean deleteDefaultBlockStoreFile() {
         try {
-            deleteDirectory(TMP_DIR + FILE_SEPERATOR + "EDUCoinsBlockStore");
+            deleteDirectory(DEMO_DIR + FILE_SEPERATOR + "BlockStore");
         } catch (IOException e) {
+        	System.err.println("Cannot be deleted: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+    
+    public static File getDefaultWalletStore() {
+        return new File(DEMO_DIR + FILE_SEPERATOR + "Wallet");
+    }
+
+    public static boolean deleteDefaultWalletStore() {
+        try {
+            deleteDirectory(DEMO_DIR + FILE_SEPERATOR + "Wallet");
+        } catch (IOException e) {
+        	System.err.println("Cannot be deleted: " + e.getMessage());
             return false;
         }
         return true;

@@ -86,7 +86,7 @@ public class BlockTest{
     }
 
     @Test
-    public void calculateMerkleRootTest() {
+    public void calculateMerkleRootTest1() {
         List<Transaction> list = new LinkedList<>();
         for (int i = 1; i < 6; i++) {
             list.add(BlockStoreFactory.generateTransaction(i));
@@ -105,6 +105,15 @@ public class BlockTest{
         Block b = new Block();
         b.addTransactions(list);
         Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap("c76bc870259e380e3b7ba45ef97123df9182a53af6eb6a87fe13e06274b2532e").getBytes());
+    }
+    
+    @Test
+    public void calculateMerkleRootTest3() {
+
+        Transaction tx = BlockStoreFactory.generateTransaction(1);   
+        Block b = new Block();
+        b.addTransaction(tx);
+        Assert.assertArrayEquals(b.getHashMerkleRoot().getBytes(), Sha256Hash.wrap("5cbeaed1c79f350720fcd048eb9fffeed468015b4b9ba584032645dc02ab45b5").getBytes());
     }
 }
 
