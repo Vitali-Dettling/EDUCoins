@@ -3,7 +3,6 @@ package org.educoins.core.p2p.peers.server.config;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.p2p.peers.LocalPeer;
-import org.educoins.core.p2p.peers.remote.LocalProxy;
 import org.educoins.core.store.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +17,7 @@ public class MvcConfig {
     private IBlockStore blockStore;
     private BlockChain blockChain;
 
+    //TODO: remove block generation
     public Block getRandomBlock(Block block) {
         Block toReturn = getRandomBlock();
         toReturn.setHashPrevBlock(block.hash());
@@ -48,10 +48,11 @@ public class MvcConfig {
         return toReturn;
     }
 
+    //TODO: think of typing and so on.
     @Bean
     public BlockChain blockChain() throws BlockStoreException {
         if (blockChain == null) {
-            LocalPeer localPeer = new LocalPeer(new LocalProxy(blockStore()));
+            LocalPeer localPeer = new LocalPeer();
             this.blockChain = new BlockChain(localPeer, localPeer, localPeer, blockStore());
         }
         return blockChain;

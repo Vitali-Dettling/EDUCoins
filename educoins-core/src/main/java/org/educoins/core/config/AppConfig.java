@@ -46,8 +46,11 @@ public class AppConfig {
         return config.getServerPort();
     }
 
+    public static String getCentralUrl() {
+        return prop.getProperty("educoins.central.url");
+    }
+
     public int getServerPort() {
-        String portString = prop.getProperty("server.port");
-        return Integer.parseInt(portString);
+        return Integer.parseInt(prop.getProperty("server.port"));
     }
 }

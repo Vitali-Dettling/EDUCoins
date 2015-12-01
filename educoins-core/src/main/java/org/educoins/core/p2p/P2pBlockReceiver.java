@@ -3,7 +3,7 @@ package org.educoins.core.p2p;
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.p2p.discovery.DiscoveryStrategy;
-import org.educoins.core.p2p.peers.Peer;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +51,7 @@ public class P2pBlockReceiver implements IBlockReceiver {
         try {
 
             //only FullPeers are allowed to change data also they are the only Peers to provide block data.
-            for (Peer peer : discovery.getReferencePeers()) {
+            for (RemoteProxy peer : discovery.getReferencePeers()) {
                 try {
 
                     mergeBlocks(peer.getBlocks(), blockList);

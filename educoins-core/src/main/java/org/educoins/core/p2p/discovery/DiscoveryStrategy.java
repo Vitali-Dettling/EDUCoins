@@ -1,6 +1,7 @@
 package org.educoins.core.p2p.discovery;
 
 import org.educoins.core.p2p.peers.*;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -18,7 +19,7 @@ public interface DiscoveryStrategy {
      * @return a {@link Collection} of {@link ReferencePeer}s.
      * @throws DiscoveryException whenever the discovery failed.
      */
-    @NotNull Collection<Peer> getReferencePeers() throws DiscoveryException;
+    @NotNull Collection<RemoteProxy> getReferencePeers() throws DiscoveryException;
 
     /**
      * Discovers the specific {@link FullBlockChainPeer}s.
@@ -26,7 +27,7 @@ public interface DiscoveryStrategy {
      * @return a {@link Collection} of {@link FullBlockChainPeer}s.
      * @throws DiscoveryException whenever the discovery failed.
      */
-    @NotNull Collection<Peer> getFullBlockchainPeers() throws DiscoveryException;
+    @NotNull Collection<RemoteProxy> getFullBlockchainPeers() throws DiscoveryException;
 
     /**
      * Discovers the specific {@link SoloMinerPeer}s.
@@ -34,6 +35,6 @@ public interface DiscoveryStrategy {
      * @return a {@link Collection} of {@link SoloMinerPeer}s.
      * @throws DiscoveryException whenever the discovery failed.
      */
-    @NotNull Collection<Peer> getSoloMinerPeers() throws DiscoveryException;
+    @NotNull Collection<RemoteProxy> getSoloMinerPeers() throws DiscoveryException;
 }
 

@@ -1,7 +1,7 @@
 package org.educoins.core.p2p.peers.server;
 
 import org.educoins.core.config.AppConfig;
-import org.educoins.core.p2p.peers.*;
+import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,17 +27,17 @@ import static junit.framework.TestCase.*;
 public class PeerControllerTest {
 
     @Autowired
-    HttpNodeCache httpNodeCache;
+    private HttpProxyPeerGroup peerGroup;
 
     @Test
     public void testAddPeer() throws Exception {
-        Peer theOtherPeer = new ReferencePeer(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8081"), "myPub1"));
-        theOtherPeer.hello();
+        HttpProxy myPub1Proxy = new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8081"), "myPub1");
+        myPub1Proxy.hello();
 
         String newINetAddr = HttpProxy.PROTOCOL + InetAddress.getLocalHost().getHostAddress()
                 + ":" + AppConfig.getOwnPort();
 
-        assertTrue(httpNodeCache.contains(new HttpProxy(
+        assertTrue(peerGroup.contains(new HttpProxy(
                 URI.create(newINetAddr), "myPub1")));
     }
 
