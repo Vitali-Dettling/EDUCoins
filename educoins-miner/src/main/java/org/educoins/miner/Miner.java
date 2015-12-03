@@ -39,19 +39,14 @@ public class Miner implements IBlockListener {
 	}
 	
 	public void notifyFoundPoW(Block block) {
-		for (int i = 0; i < this.powListeners.size(); i++) {
-			IPoWListener listener = this.powListeners.get(i);
+		for (IPoWListener listener : this.powListeners) {
 			listener.foundPoW(block);
 		}
 	}
 
 	@Override
 	public void blockReceived(Block block) {
-		Thread powThread1 = new PoWThread(block.copy());
-		powThread1.start();
-
-		Thread powThread2 = new PoWThread(block.copy());
-		powThread2.start();
+		new PoWThread(block.copy()).start();
 	}
 	
 	private class PoWThread extends Thread implements IBlockListener {
@@ -88,7 +83,7 @@ public class Miner implements IBlockListener {
 			} while (this.active && challenge.compareTo(targetThreshold) < 0);
 
 			if (this.active) {
-				notifyFoundPoW(block);	
+				notifyFoundPoW(block);
 			}
 			
 			blockChain.removeBlockListener(this);

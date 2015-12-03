@@ -1,5 +1,6 @@
 package org.educoins.core;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Sha256Hash;
@@ -11,12 +12,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
-	private static final int CHECK_AFTER_BLOCKS = 100;
+	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
 	private static final int IN_SECONDS = 1000;
 	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * IN_SECONDS * CHECK_AFTER_BLOCKS;
 	private static final int SCALE_DECIMAL_LENGTH = 100;
-	private static final int HEX = 16;
 	private static final int RESET_BLOCKS_COUNT = 0;
 
 	private int blockCounter;
@@ -27,7 +27,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private List<ITransactionListener> transactionListeners;
 	private List<Transaction> transactions;
 	private Wallet wallet;
-	private Block newBlock;
 	private Verification verification;
 	private IBlockStore store;
 	
@@ -64,7 +63,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	
 	public void notifyBlockReceived(Block newBlock) {
 		synchronized (this) {
-			for (IBlockListener blockListener : blockListeners) {
+			for (IBlockListener blockListener : this.blockListeners) {
 				blockListener.blockReceived(newBlock);
 			}
 		}
@@ -129,20 +128,20 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 	
 	public Block prepareNewBlock(Block currentBlock) {
-		this.newBlock = new Block();
+		Block newBlock = new Block();
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
-		this.newBlock.setVersion(currentBlock.getVersion());
-		this.newBlock.setHashPrevBlock(currentBlock.hash());
+		newBlock.setVersion(currentBlock.getVersion());
+		newBlock.setHashPrevBlock(currentBlock.hash());
 		// TODO [joeren]: calculate hash merkle root! Temporary take the
 		// hash merkle root of the previous block.
-		this.newBlock.setHashMerkleRoot(currentBlock.getHashMerkleRoot());
+		newBlock.setHashMerkleRoot(currentBlock.getHashMerkleRoot());
 		
-		this.newBlock.addTransaction(coinbaseTransaction(currentBlock));
-		this.newBlock.addTransactions(this.transactions);
+		newBlock.addTransaction(coinbaseTransaction(currentBlock));
+		newBlock.addTransactions(this.transactions);
 		this.transactions.clear();
 		
-		return retargedBits(currentBlock);
+		return retargedBits(newBlock, currentBlock);
 	}
 	
 	
@@ -173,31 +172,39 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	 * 
 	 * New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
 	 * */
-	private Block retargedBits(Block previousBlock) {
-		
+	private Block retargedBits(Block newBlock, Block previousBlock) {
 		if(this.blockCounter == CHECK_AFTER_BLOCKS){
 			long currentTime = System.currentTimeMillis();
 			long allBlocksSinceLastTime = previousBlock.getTime();
-			BigDecimal oldDifficulty = new BigDecimal(previousBlock.getBits().toBigInteger()).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
-			BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);	
-			
-			// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
-			BigDecimal newDifficulty = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME),
-					BigDecimal.ROUND_HALF_DOWN).setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
-			
-			this.newBlock.setBits(Sha256Hash.wrap(newDifficulty.toBigInteger().toByteArray()));
-			this.newBlock.setTime(currentTime);
+
+			newBlock.setBits(calcNewDifficulty(previousBlock.getBits(), currentTime, allBlocksSinceLastTime));
+			newBlock.setTime(currentTime);
 			this.blockCounter = RESET_BLOCKS_COUNT;
 		}
 		else{
 			//The last time stamp since the last retargeting of the difficulty. 
-			this.newBlock.setTime(previousBlock.getTime());	
-			this.newBlock.setBits(previousBlock.getBits());	
+			newBlock.setTime(previousBlock.getTime());
+			newBlock.setBits(previousBlock.getBits());
 		}
 		this.blockCounter++;
-		return this.newBlock;
+		return newBlock;
 	}
-	
+
+	@VisibleForTesting
+	public static Sha256Hash calcNewDifficulty(Sha256Hash oldDiff, long currentTime, long allBlocksSinceLastTime) {
+		BigDecimal oldDifficulty = new BigDecimal(oldDiff.toBigInteger())
+				.setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
+
+		BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime)
+				.setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
+
+		// New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks / 20160 minutes)
+		BigDecimal returnValue = oldDifficulty.multiply(actualBlockTime.divide(BigDecimal.valueOf(DESIRED_BLOCK_TIME), BigDecimal.ROUND_HALF_DOWN)
+				.setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
+		return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
+	}
+
+
 	//TODO [Vitali] Method needs to be deleted as soon as the DB will be introduced.
 	public Block getPreviousBlock(Block currentBlock) {
 		return this.store.get(currentBlock.getHashPrevBlock().getBytes());

@@ -3,6 +3,7 @@ package org.educoins.core;
 import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -45,7 +46,15 @@ public class BlockChainTest {
 		assertEquals(newBlock.getBits(), Sha256Hash.MAX_HASH);
 		
 	}
-	
+
+	@Test
+	public void testCalcNewDifficulty() throws Exception {
+		Sha256Hash oldDifficulty = Sha256Hash.wrap("affeaffeaffe00000000");
+		Sha256Hash newDifficulty = BlockChain.calcNewDifficulty(oldDifficulty, 80*10*1000, 20*10*1000);
+		Assert.assertEquals(oldDifficulty.toBigInteger(), newDifficulty.toBigInteger());
+		Assert.assertEquals(oldDifficulty.compareTo(newDifficulty), 0);
+	}
+
 	//TODO[Vitali] Write a test where the difficulty calculation kicks in. 
 	
 	//TODO[Vitali] Test for getPreviousBlock();

@@ -185,13 +185,13 @@ public class Verification {
 			return false;
 		}
 		
-		if(coinBases.size() != ONLY_ONE_COINBASE_TRANSACTION){
+		if(coinBases.size() != 1){
 			// TODO [joeren]: remove debug output
 			System.out.println("DEBUG: verifyCoinbaseTransaction: More then one coinbase transaction.");
 			return false;
 		}
 		
-		Output coinBase = coinBases.iterator().next();
+		Output coinBase = coinBases.get(0);
 		
 		int currentReward = coinBase.getAmount();
 		int trueReward = toVerifyBlock.rewardCalculator();
@@ -304,7 +304,7 @@ public class Verification {
 		//TODO [Vitali] The check is current done with the ECDSA class but actually that should be done through the script language.
 		//Currently it check just whether the signature corresponds with one public key in the wallet file. 
 		byte[] signature = null;
-		String hashedTransaction = ByteArray.convertToString(transaction.hash(), HEX);
+		String hashedTransaction = transaction.hash().toString();
 		for(Input input : transaction.getInputs()){
 			
 			signature = input.getUnlockingScript(EInputUnlockingScript.SIGNATURE);
@@ -324,7 +324,7 @@ public class Verification {
 	private boolean verifyMerkle(Block block) {
 		Sha256Hash merkle = block.getHashMerkleRoot();
 		BinaryTree<Transaction> tree = new BinaryTree<>(block.getTransactions());
-		return Sha256Hash.wrap(tree.getRoot().hash()).equals(merkle);
+		return tree.getRoot().hash().equals(merkle);
 	}
 	
 

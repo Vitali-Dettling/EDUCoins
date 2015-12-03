@@ -127,7 +127,7 @@ public class Block {
         }
 
         BinaryTree<Transaction> tree = new BinaryTree<>(getTransactions());
-        setHashMerkleRoot(Sha256Hash.wrap(tree.getRoot().hash()));
+        setHashMerkleRoot(tree.getRoot().hash());
     }
 
     public int getTransactionsCount() {
@@ -192,15 +192,15 @@ public class Block {
     
 	public int rewardCalculator(){
 		
-		int newReward = ZERO;
+		int newReward;
 		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
 		
 		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
-		if(DEFAULT_REWARD == lastApprovedEDUCoins){
+		if(DEFAULT_REWARD == lastApprovedEDUCoins) {
 			newReward = DEFAULT_REWARD;
-		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
+		}else if(DEFAULT_REWARD > lastApprovedEDUCoins) {
 			newReward = lastApprovedEDUCoins + 2;
-		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
+		}else {
 			newReward = DEFAULT_REWARD - 2;
 		}		
 
@@ -209,18 +209,16 @@ public class Block {
 	
 	private int findAllApprovedEDUCoins(){
 		
-		int latestApprovedEDUCoins = ZERO;
-		List<Transaction> latestTransactions = this.getTransactions();
+		int approvedEDUCoins = 0;
 		
 		//TODO[Vitali] Might not be 100% correct???ß
-		for(Transaction transaction : latestTransactions){
-			List<Approval> approvals = transaction.getApprovals();
-			for(Approval approval : approvals){
-				latestApprovedEDUCoins += approval.getAmount();
+		for(Transaction transaction : this.getTransactions()){
+			for(Approval approval : transaction.getApprovals()){
+				approvedEDUCoins += approval.getAmount();
 			}
 		}
 		
-		return latestApprovedEDUCoins;
+		return approvedEDUCoins;
 	}
     public static Sha256Hash hash(Block block) {
 		// specify used header fields (in byte arrays)

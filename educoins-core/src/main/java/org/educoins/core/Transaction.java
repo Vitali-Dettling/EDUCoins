@@ -3,6 +3,7 @@ package org.educoins.core;
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Hashable;
+import org.educoins.core.utils.Sha256Hash;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -154,7 +155,6 @@ public class Transaction implements Hashable {
 	}
 
 	public ETransaction whichTransaction() {
-
 		// Coinbase:
 		// inputs = 0; outputs > 0; 	approvals = 0;
 		// Regular:
@@ -182,11 +182,11 @@ public class Transaction implements Hashable {
 	}
 
 	@Override
-	public byte[] hash() {
+	public Sha256Hash hash() {
 		return Transaction.hash(this);
 	}
 
-	public static byte[] hash(Transaction transaction) {
+	public static Sha256Hash hash(Transaction transaction) {
 
 		byte[] toBeHashed = null;
 		// Check for transaction type.
@@ -203,7 +203,7 @@ public class Transaction implements Hashable {
 		}
 
 		// hash concatenated header fields and return
-		return SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed));
+		return Sha256Hash.wrap(SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed)));
 
 	}
 

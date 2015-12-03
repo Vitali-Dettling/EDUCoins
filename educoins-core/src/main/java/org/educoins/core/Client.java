@@ -3,6 +3,7 @@ package org.educoins.core;
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.EDULog;
 import org.educoins.core.utils.Sha256Hash;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ public class Client extends Thread implements ITransactionListener {
 	private BlockChain blockChain;
 	private Wallet wallet;
 	private List<Input> inputs;
+	private long lastFoundTime;
 
 	public Client(BlockChain blockChain) {
 		this.setName("Client-Thread");
@@ -24,6 +26,7 @@ public class Client extends Thread implements ITransactionListener {
 		this.blockChain.addTransactionListener(this);
 		this.wallet = this.blockChain.getWallet();
 		this.inputs = new ArrayList<>();
+		this.lastFoundTime = System.currentTimeMillis();
 	}
 
 	public Transaction sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
@@ -55,7 +58,7 @@ public class Client extends Thread implements ITransactionListener {
 
 			String publicKey = ByteArray
 					.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
-			String message = ByteArray.convertToString(transaction.hash(), 16);
+			String message = transaction.hash().toString();
 			String signature = this.wallet.getSignature(publicKey, message);
 
 			// TODO [joeren] @ [vitali]: hier muss ich die Signatur anhängen, da
@@ -70,39 +73,38 @@ public class Client extends Thread implements ITransactionListener {
 	}
 
 	public Transaction sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
-		List<Input> tmpInputs = new ArrayList<>(this.inputs);
-		this.inputs.removeAll(tmpInputs);
-
+		System.out.println(this.inputs.size());
+		List<Input> tmpInputs = new ArrayList<>();
 		int availableAmount = 0;
-		for (Input input : tmpInputs) {
-			availableAmount += input.getAmount();
-			if (availableAmount >= amount) break;
-			//TODO: maybe give back inputs here
+
+		for (int i = 0; availableAmount < amount && i < this.inputs.size(); i++) {
+			tmpInputs.add(this.inputs.get(i));
+			availableAmount += this.inputs.get(i).getAmount();
 		}
+
 		if (amount > availableAmount) {
 			System.err.println("Not enough available amount (max. " + availableAmount + ")");
 			return null;
 		}
+		this.inputs.removeAll(tmpInputs);
+
 		Approval approval = new Approval(amount, owner, holder, lockingScript);
-		Output output = null;
-		if (amount < availableAmount) {
-			int reverseOutputAmount = availableAmount - amount;
-			String reverseDstPublicKey = this.wallet.getPublicKey();
-			output = new Output(reverseOutputAmount, reverseDstPublicKey, reverseDstPublicKey);
-		}
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
 		transaction.setInputs(new ArrayList<>(tmpInputs));
 		transaction.addApproval(approval);
-		if (output != null) {
+
+		if (amount < availableAmount) {
+			int remainingAmount = availableAmount - amount;
+			String senderPublicKey = this.wallet.getPublicKey();
+			Output output = new Output(remainingAmount, senderPublicKey, senderPublicKey);
 			transaction.addOutput(output);
 		}
 
+		String message = transaction.hash().toString();
 		for (Input input : tmpInputs) {
 
-			String publicKey = ByteArray
-					.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
-			String message = ByteArray.convertToString(transaction.hash(), 16);
+			String publicKey = ByteArray.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
 			String signature = this.wallet.getSignature(publicKey, message);
 
 			// TODO [joeren] @ [vitali]: hier muss ich die Signatur anhängen, da
@@ -110,7 +112,6 @@ public class Client extends Thread implements ITransactionListener {
 			input.setUnlockingScript(EInputUnlockingScript.SIGNATURE, signature);
 
 		}
-		transaction.setInputs(tmpInputs);
 		this.blockChain.sendTransaction(transaction);
 		return transaction;
 	}
@@ -136,14 +137,14 @@ public class Client extends Thread implements ITransactionListener {
 				for (String publicKey : publicKeys) {
 					if (publicKey.equals(output.getDstPublicKey())) {
 						int amount = output.getAmount();
-						String hashPrevOutput = ByteArray.convertToString(transaction.hash(), 16);
+						String hashPrevOutput = transaction.hash().toString();
 						// TODO [joeren] @ [vitali]: Wenn ich hier ";" bereits
 						// anhänge, knallts bei irgendeinem Konvertiervorgang
 						Input input = new Input(amount, hashPrevOutput, i);
 						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, this.wallet.getPublicKey());
 						this.inputs.add(input);
 
-						String typeString = null;
+						String typeString;
 						ETransaction type = transaction.whichTransaction();
 						if (type == ETransaction.COINBASE) {
 							typeString = "Coinbase Transaction";
@@ -160,8 +161,9 @@ public class Client extends Thread implements ITransactionListener {
 							availableAmount += tmpInput.getAmount();
 						}
 						//TODO[Vitali] Testing
-						//System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
-						//		amount, availableAmount, typeString, output.getLockingScript()));
+						System.out.println(String.format("Info:Received %d EDUCoins (new Amount: %d), time since last: % 6d ms. %s with LockingScript %s",
+								amount, availableAmount,System.currentTimeMillis() - lastFoundTime,  typeString, output.getLockingScript()));
+						lastFoundTime = System.currentTimeMillis();
 					}
 				}
 			}
@@ -191,7 +193,7 @@ public class Client extends Thread implements ITransactionListener {
 				if (dstPublicKey == null) continue;
 				trans = this.sendRegularTransaction(amount, dstPublicKey, dstPublicKey);
 				if (trans != null)
-					System.out.println(Sha256Hash.wrap(trans.hash()));
+					System.out.println(trans.hash());
 				break;
 			case "a":
 				amount = getIntInput(scanner, "Type in amount: ");
@@ -202,9 +204,11 @@ public class Client extends Thread implements ITransactionListener {
 				String holder = scanner.nextLine();
 				System.out.print("Type in LockingScript: ");
 				String lockingScript = scanner.nextLine();
+				long time = System.currentTimeMillis();
 				trans = this.sendApprovedTransaction(amount, owner, holder, lockingScript);
+				System.out.println(System.currentTimeMillis() - time);
 				if (trans != null)
-					System.out.println(Sha256Hash.wrap(trans.hash()));
+					System.out.println(trans.hash());
 				break;
 			case "x":
 
