@@ -1,8 +1,10 @@
 package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
+import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.CentralDiscovery;
 import org.educoins.core.p2p.discovery.DiscoveryException;
+import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +18,14 @@ import org.slf4j.LoggerFactory;
 public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITransactionTransmitter {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected HttpProxyPeerGroup remoteProxies = new HttpProxyPeerGroup();
+    protected Sha256Hash publicKey;
 
     public Peer(HttpProxyPeerGroup remoteProxies) {
         this.remoteProxies = remoteProxies;
     }
 
     public Peer() {
+        this.publicKey = AppConfig.getOwnPublicKey();
     }
 
     public void start() throws DiscoveryException {

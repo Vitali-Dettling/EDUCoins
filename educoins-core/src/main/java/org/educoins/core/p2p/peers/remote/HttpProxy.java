@@ -24,6 +24,7 @@ public class HttpProxy extends RemoteProxy {
     public static final String PROTOCOL = "http://";
 
     private int ownPort = AppConfig.getOwnPort();
+    private Sha256Hash ownPublicKey = AppConfig.getOwnPublicKey();
 
     public HttpProxy() {
     }
@@ -64,13 +65,14 @@ public class HttpProxy extends RemoteProxy {
     }
 
     @Override
-    public void hello() throws IOException {
+    public Collection<RemoteProxy> hello() throws IOException {
         URI iNetAddress = URI.create(PROTOCOL + InetAddress.getLocalHost().getHostAddress() + ":" + ownPort);
         logger.debug("Sending own address: " + iNetAddress.toString());
         String target = this.iNetAddress.toString() + PeerServer.HELLO_HTTP_RESOURCE_PATH;
         logger.info("Helloing to target: " + target);
-        new RestClient<RemoteProxy>()
+        return Arrays.asList(new RestClient<RemoteProxy>()
                 .post(URI.create(target),
-                        new HttpProxy(iNetAddress, this.pubkey));
+                        new HttpProxy(iNetAddress, this.ownPublicKey.toString()),
+                        HttpProxy[].class));
     }
 }

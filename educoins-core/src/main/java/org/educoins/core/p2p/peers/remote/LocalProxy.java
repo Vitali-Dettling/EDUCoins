@@ -9,8 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -62,8 +61,8 @@ public class LocalProxy extends RemoteProxy {
     }
 
     @Override
-    public void hello() throws IOException {
-
+    public Collection<RemoteProxy> hello() throws IOException {
+        return Arrays.asList(new RemoteProxy[]{this});
     }
 
 }

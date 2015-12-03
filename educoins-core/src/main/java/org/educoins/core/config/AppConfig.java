@@ -1,5 +1,7 @@
 package org.educoins.core.config;
 
+import org.educoins.core.utils.Sha256Hash;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -48,6 +50,10 @@ public class AppConfig {
 
     public static String getCentralUrl() {
         return prop.getProperty("educoins.central.url");
+    }
+
+    public static Sha256Hash getOwnPublicKey() {
+        return Sha256Hash.wrap(prop.getProperty("educoins.peer.pubkey"));
     }
 
     public int getServerPort() {

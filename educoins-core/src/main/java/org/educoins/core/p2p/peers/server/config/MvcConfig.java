@@ -1,7 +1,6 @@
 package org.educoins.core.p2p.peers.server.config;
 
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
+import org.educoins.core.*;
 import org.educoins.core.p2p.peers.LocalPeer;
 import org.educoins.core.store.*;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +27,8 @@ public class MvcConfig {
         Block toReturn = new Block();
         toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
+        for (int i = 0; i < Math.random() * 1000; ++i)
+            toReturn.addTransaction(new Transaction());
         return toReturn;
     }
 

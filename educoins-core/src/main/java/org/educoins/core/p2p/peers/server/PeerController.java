@@ -40,7 +40,7 @@ public class PeerController {
         logger.info("Added peer " + peer);
 
         Set<RemoteProxy> proxies = new HashSet<>();
-        proxies.addAll(httpPeerCache.getAll());
+        proxies.addAll(httpPeerCache.getAllProxies());
 
         httpPeerCache.add(peer);
 
