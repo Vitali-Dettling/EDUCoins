@@ -21,6 +21,10 @@ public abstract class RemoteProxy {
     protected transient final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected URI iNetAddress;
     protected String pubkey;
+    /**
+     * Describes the level integrity of this Proxy.
+     */
+    protected int rating = 5;
 
     public RemoteProxy() {
     }
@@ -61,7 +65,23 @@ public abstract class RemoteProxy {
     /**
      * Introduces itself to at least one other {@link Peer}.
      */
-    public abstract void hello() throws IOException;
+    public abstract Collection<RemoteProxy> hello() throws IOException;
+
+    public void rateHigher() {
+        ++rating;
+    }
+
+    public void rateLower() {
+        --rating;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
 
     public String getPubkey() {
         return pubkey;

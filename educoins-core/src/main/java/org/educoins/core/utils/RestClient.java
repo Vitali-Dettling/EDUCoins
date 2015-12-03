@@ -59,6 +59,24 @@ public class RestClient<T> {
         }
     }
 
+    public <U> U put(URI uri, T body, Class<? extends U> responseClass) throws IOException {
+        HttpPut putRequest = new HttpPut(uri);
+        putRequest.addHeader("accept", APPLICATION_JSON);
+        putRequest.addHeader("content-type", APPLICATION_JSON);
+
+        putRequest.setEntity(new StringEntity(gson.toJson(body)));
+
+        HttpResponse response = httpClient.execute(putRequest);
+
+        int status = response.getStatusLine().getStatusCode();
+        if (status != 200 && status != 201 && status != 204) {
+            throw new HttpException(String.format("PUT-Request to %s failed. Retrieved Exitcode %s",
+                    uri.toString(), status), status);
+        }
+        return extractBody(responseClass, response);
+    }
+
+
     public void post(URI uri, T body) throws IOException {
         HttpPost postRequest = new HttpPost(uri);
         postRequest.addHeader("accept", APPLICATION_JSON);
@@ -77,6 +95,26 @@ public class RestClient<T> {
         }
     }
 
+
+    public <U> U post(URI uri, T body, Class<? extends U> responseClass) throws IOException {
+        HttpPost postRequest = new HttpPost(uri);
+        postRequest.addHeader("accept", APPLICATION_JSON);
+        postRequest.addHeader("content-type", APPLICATION_JSON);
+
+        postRequest.setEntity(new StringEntity(gson.toJson(body)));
+
+        HttpResponse response = httpClient.execute(postRequest);
+
+        int status = response.getStatusLine().getStatusCode();
+        if (status != 200
+                && status != 201
+                && status != 204) {
+            throw new HttpException(String.format("POST-Request to %s failed. Retrieved Exitcode %s",
+                    uri.toString(), status), status);
+        }
+        return extractBody(responseClass, response);
+    }
+
     public void delete(URI uri) throws IOException {
         HttpDelete deleteRequest = new HttpDelete(uri);
         deleteRequest.addHeader("accept", APPLICATION_JSON);
@@ -92,7 +130,7 @@ public class RestClient<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private T extractBody(Class clazzOfT, HttpResponse response) throws IOException {
+    private <T> T extractBody(Class clazzOfT, HttpResponse response) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
         StringBuilder output = new StringBuilder();
         String outStr;
