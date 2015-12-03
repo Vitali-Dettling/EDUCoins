@@ -2,8 +2,7 @@ package org.educoins.referencenode;
 
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
-import org.educoins.core.p2p.peers.ReferencePeer;
+import org.educoins.core.p2p.peers.*;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.LevelDbBlockStore;
 import org.springframework.boot.SpringApplication;
@@ -34,7 +33,7 @@ public class ReferenceNode {
 
     @PostConstruct
     private void start() throws BlockStoreException, DiscoveryException {
-        HttpProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
+        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
         peer = new ReferencePeer(new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore()), new Wallet());
         peer.start();
     }

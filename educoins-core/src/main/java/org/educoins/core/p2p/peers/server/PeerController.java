@@ -1,6 +1,6 @@
 package org.educoins.core.p2p.peers.server;
 
-import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
+import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
@@ -20,11 +20,11 @@ import java.util.*;
 @RestController
 @RequestMapping("/peers/")
 public class PeerController {
-    private final HttpProxyPeerGroup httpPeerCache;
+    private final IProxyPeerGroup httpPeerCache;
     private final Logger logger = LoggerFactory.getLogger(BlockController.class);
 
     @Autowired
-    public PeerController(@NotNull HttpProxyPeerGroup httpPeerCache) {
+    public PeerController(@NotNull IProxyPeerGroup httpPeerCache) {
         this.httpPeerCache = httpPeerCache;
     }
 
@@ -42,7 +42,7 @@ public class PeerController {
         Set<RemoteProxy> proxies = new HashSet<>();
         proxies.addAll(httpPeerCache.getAllProxies());
 
-        httpPeerCache.add(peer);
+        httpPeerCache.addProxy(peer);
 
         return proxies;
     }

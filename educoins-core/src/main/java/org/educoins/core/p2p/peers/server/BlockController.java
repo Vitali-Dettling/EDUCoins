@@ -44,7 +44,7 @@ public class BlockController {
     /**
      * Adds the {@link Block} to the {@link BlockChain} of the {@link org.educoins.core.p2p.peers.Peer}.
      *
-     * @param block the Block to add.
+     * @param block the Block to addProxy.
      * @throws BlockChainVerificationException if the there was a conflict while validation.
      */
     @RequestMapping(value = "", method = RequestMethod.POST)

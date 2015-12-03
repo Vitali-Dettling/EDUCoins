@@ -33,11 +33,11 @@ public class HttpProxyPeerGroupTest {
     @Autowired
     private IBlockStore blockStore;
 
-    private HttpProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup();
+    private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup();
 
     @Before
     public void setup() {
-        clientPeerGroup.add(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8082"), "myPub1"));
+        clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8082"), "myPub1"));
     }
 
     @Test
@@ -62,13 +62,13 @@ public class HttpProxyPeerGroupTest {
 
     @Test
     public void testRediscovery() throws Exception {
-        clientPeerGroup.clear();
-        clientPeerGroup.add(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:42"), "myPub1"));
+        clientPeerGroup.clearProxies();
+        clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:42"), "myPub1"));
 
         for (int i = 0; i < 4; ++i)
             clientPeerGroup.receiveBlocks();
 
-        HttpProxyPeerGroup spy = spy(clientPeerGroup);
+        IProxyPeerGroup spy = spy(clientPeerGroup);
         spy.receiveBlocks();
         verify(spy).discover(any(CentralDiscovery.class));
     }

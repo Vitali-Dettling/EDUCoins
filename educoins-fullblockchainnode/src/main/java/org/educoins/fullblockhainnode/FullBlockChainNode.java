@@ -3,8 +3,7 @@ package org.educoins.fullblockhainnode;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.p2p.peers.FullBlockChainPeer;
-import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
+import org.educoins.core.p2p.peers.*;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.LevelDbBlockStore;
 import org.springframework.boot.SpringApplication;
@@ -35,7 +34,7 @@ public class FullBlockChainNode {
 
     @PostConstruct
     private void start() throws BlockStoreException, DiscoveryException {
-        HttpProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
+        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
         peer = new FullBlockChainPeer(new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore()));
         peer.start();
     }

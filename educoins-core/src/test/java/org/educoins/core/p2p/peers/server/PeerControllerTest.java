@@ -1,7 +1,7 @@
 package org.educoins.core.p2p.peers.server;
 
 import org.educoins.core.config.AppConfig;
-import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
+import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ import static junit.framework.TestCase.*;
 public class PeerControllerTest {
 
     @Autowired
-    private HttpProxyPeerGroup peerGroup;
+    private IProxyPeerGroup peerGroup;
 
     @Test
     public void testAddPeer() throws Exception {
@@ -37,7 +37,7 @@ public class PeerControllerTest {
         String newINetAddr = HttpProxy.PROTOCOL + InetAddress.getLocalHost().getHostAddress()
                 + ":" + AppConfig.getOwnPort();
 
-        assertTrue(peerGroup.contains(new HttpProxy(
+        assertTrue(peerGroup.containsProxy(new HttpProxy(
                 URI.create(newINetAddr), AppConfig.getOwnPublicKey().toString())));
     }
 

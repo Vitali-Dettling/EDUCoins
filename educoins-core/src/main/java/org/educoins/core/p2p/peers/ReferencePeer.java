@@ -17,7 +17,7 @@ public class ReferencePeer extends Peer {
         this.wallet = wallet;
     }
 
-    public ReferencePeer(HttpProxyPeerGroup remoteProxies, BlockChain blockChain, Wallet wallet) {
+    public ReferencePeer(IProxyPeerGroup remoteProxies, BlockChain blockChain, Wallet wallet) {
         super(remoteProxies);
         this.blockChain = blockChain;
         this.wallet = wallet;

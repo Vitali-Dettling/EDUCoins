@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITransactionTransmitter {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    protected HttpProxyPeerGroup remoteProxies = new HttpProxyPeerGroup();
+    protected IProxyPeerGroup remoteProxies = new HttpProxyPeerGroup();
     protected Sha256Hash publicKey;
 
-    public Peer(HttpProxyPeerGroup remoteProxies) {
+    public Peer(IProxyPeerGroup remoteProxies) {
         this.remoteProxies = remoteProxies;
     }
 

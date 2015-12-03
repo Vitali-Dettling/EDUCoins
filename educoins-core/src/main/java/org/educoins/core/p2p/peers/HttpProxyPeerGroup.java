@@ -12,27 +12,34 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * An {@link IProxyPeerGroup} of {@link HttpProxyPeerGroup}.
+ */
 @Component
 @Scope("singleton")
-public class HttpProxyPeerGroup implements IBlockReceiver, ITransactionReceiver, ITransactionTransmitter {
+public class HttpProxyPeerGroup implements IProxyPeerGroup {
     private final Logger logger = LoggerFactory.getLogger(HttpProxyPeerGroup.class);
 
     private List<RemoteProxy> proxies = new CopyOnWriteArrayList<>();
     private Set<IBlockListener> blockListeners = new HashSet<>();
     private Set<ITransactionListener> transactionListeners = new HashSet<>();
 
-    public void add(RemoteProxy proxy) {
+    @Override
+    public void addProxy(RemoteProxy proxy) {
         this.proxies.add(proxy);
     }
 
-    public void clear() {
+    @Override
+    public void clearProxies() {
         this.proxies.clear();
     }
 
-    public boolean contains(RemoteProxy proxy) {
+    @Override
+    public boolean containsProxy(RemoteProxy proxy) {
         return this.proxies.contains(proxy);
     }
 
+    @Override
     public void discover(DiscoveryStrategy strategy) throws DiscoveryException {
         logger.info("Starting new Discovery ({})", strategy.getClass().getName());
         strategy.getReferencePeers().forEach(proxy -> proxies.add(proxy));
@@ -43,6 +50,13 @@ public class HttpProxyPeerGroup implements IBlockReceiver, ITransactionReceiver,
                 logger.warn("Could not say Hello to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
             }
         });
+    }
+
+    @Override
+    public Collection<RemoteProxy> getAllProxies() {
+        Set<RemoteProxy> proxies = new HashSet<>();
+        proxies.addAll(this.proxies);
+        return proxies;
     }
 
     @Override
@@ -84,6 +98,7 @@ public class HttpProxyPeerGroup implements IBlockReceiver, ITransactionReceiver,
     public void removeTransactionListener(ITransactionListener transactionListener) {
         transactionListeners.remove(transactionListener);
     }
+    //endregion
 
     @Override
     public void receiveTransactions() {
@@ -102,7 +117,6 @@ public class HttpProxyPeerGroup implements IBlockReceiver, ITransactionReceiver,
             }
         }
     }
-    //endregion
 
     //region getter/setter
     public Set<IBlockListener> getBlockListeners() {
@@ -119,12 +133,6 @@ public class HttpProxyPeerGroup implements IBlockReceiver, ITransactionReceiver,
 
     public void setTransactionListeners(Set<ITransactionListener> transactionListeners) {
         this.transactionListeners = transactionListeners;
-    }
-
-    public Collection<RemoteProxy> getAllProxies() {
-        Set<RemoteProxy> proxies = new HashSet<>();
-        proxies.addAll(this.proxies);
-        return proxies;
     }
     //endregion
 

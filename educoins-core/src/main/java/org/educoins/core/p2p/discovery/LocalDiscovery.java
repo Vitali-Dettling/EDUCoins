@@ -24,7 +24,7 @@ public class LocalDiscovery implements DiscoveryStrategy {
 
     public Collection<RemoteProxy> getPeers() {
         /**
-         * So far, it doesn't make sense to add more than one local peer.
+         * So far, it doesn't make sense to addProxy more than one local peer.
          */
         Collection<RemoteProxy> remoteNodes = new ArrayList<>();
         remoteNodes.add(new LocalProxy(blockStore));
