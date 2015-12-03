@@ -7,8 +7,7 @@ import org.educoins.core.BlockChain;
  * Created by typus on 11/3/15.
  */
 public class FullBlockChainPeer extends Peer {
-
-    private final BlockChain blockChain;
+    ;
 
     public FullBlockChainPeer(BlockChain blockChain) {
         this.blockChain = blockChain;

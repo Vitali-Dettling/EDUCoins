@@ -19,6 +19,7 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected IProxyPeerGroup remoteProxies = new HttpProxyPeerGroup();
     protected Sha256Hash publicKey;
+    protected BlockChain blockChain;
 
     public Peer(IProxyPeerGroup remoteProxies) {
         this.remoteProxies = remoteProxies;
@@ -30,6 +31,7 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
 
     public void start() throws DiscoveryException {
         remoteProxies.discover(new CentralDiscovery());
+        blockChain.foundPoW(new Block());
     }
 
     public void stop() {

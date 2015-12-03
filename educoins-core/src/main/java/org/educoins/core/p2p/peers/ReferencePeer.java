@@ -9,7 +9,6 @@ import org.educoins.core.Wallet;
  */
 public class ReferencePeer extends Peer {
     //    private final Miner miner;
-    private final BlockChain blockChain;
     private final Wallet wallet;
 
     public ReferencePeer(BlockChain blockChain, Wallet wallet) {

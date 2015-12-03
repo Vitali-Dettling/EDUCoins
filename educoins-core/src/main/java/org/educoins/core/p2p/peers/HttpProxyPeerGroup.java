@@ -76,7 +76,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void receiveBlocks() {
-        for (RemoteProxy proxy : proxies) {
+        for (RemoteProxy proxy : getHighestRatedProxies()) {
             try {
                 proxy.getBlocks().parallelStream().forEach(block -> blockListeners.
                         forEach(iBlockListener -> iBlockListener.blockReceived(block)));
@@ -146,7 +146,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                     .getiNetAddress().getHost(), e);
 
             if (proxies.size() == 0)
-                rediscover();
+                rediscover(0);
             return true;
         }
         return false;
@@ -155,7 +155,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     private Collection<RemoteProxy> getHighestRatedProxies() {
         if (proxies.size() == 0) {
-            rediscover();
+            rediscover(0);
             return proxies;
         }
 
@@ -163,10 +163,17 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         return proxies.subList(0, Math.min(proxies.size(), 10));
     }
 
-    private void rediscover() {
+    private void rediscover(int nTry) {
         try {
             discover(new CentralDiscovery());
         } catch (DiscoveryException e1) {
+            if (nTry < 5)
+                try {
+                    Thread.sleep(nTry * 2000);
+                } catch (InterruptedException e) {
+                }
+
+            rediscover(++nTry);
             logger.error("Could not retrieve any Peers... We are isolated now!");
         }
     }
