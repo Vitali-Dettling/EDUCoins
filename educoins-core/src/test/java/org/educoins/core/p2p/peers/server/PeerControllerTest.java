@@ -31,14 +31,14 @@ public class PeerControllerTest {
 
     @Test
     public void testAddPeer() throws Exception {
-        HttpProxy myPub1Proxy = new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8081"), "myPub1");
-        myPub1Proxy.hello();
+        HttpProxy foreignNode = new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8081"), "myPub1");
+        foreignNode.hello();
 
         String newINetAddr = HttpProxy.PROTOCOL + InetAddress.getLocalHost().getHostAddress()
                 + ":" + AppConfig.getOwnPort();
 
         assertTrue(peerGroup.contains(new HttpProxy(
-                URI.create(newINetAddr), "myPub1")));
+                URI.create(newINetAddr), AppConfig.getOwnPublicKey().toString())));
     }
 
 
