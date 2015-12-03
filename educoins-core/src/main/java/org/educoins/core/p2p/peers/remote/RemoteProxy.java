@@ -67,20 +67,26 @@ public abstract class RemoteProxy {
      */
     public abstract Collection<RemoteProxy> hello() throws IOException;
 
+    /**
+     * Increases {@link RemoteProxy#rating}.
+     */
     public void rateHigher() {
         ++rating;
     }
 
+    /**
+     * Decreases {@link RemoteProxy#rating}.
+     */
     public void rateLower() {
         --rating;
     }
 
+    /**
+     * Ratings for RemoteProxies. On successful communication, the rate increases and decreases on failure. If the
+     * rating is lower then zero, the Proxy will be removed from {@link org.educoins.core.p2p.peers.HttpProxyPeerGroup}.
+     */
     public int getRating() {
         return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
     }
 
     public String getPubkey() {
