@@ -10,7 +10,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.annotation.PostConstruct;
@@ -24,18 +27,17 @@ import javax.annotation.PostConstruct;
 @EnableWebMvc
 @EnableAutoConfiguration(exclude = {JacksonAutoConfiguration.class})
 @ComponentScan(basePackages = "org.educoins.core")
+@ConfigurationProperties(value = "classpath:/application.properties")
 public class FullBlockChainNode {
 
-    private FullBlockChainPeer peer;
-
-    public static void main(String[] args) {
-        SpringApplication.run(FullBlockChainNode.class, args);
-    }
-
-    @PostConstruct
-    private void start() throws BlockStoreException, DiscoveryException {
+    public static void main(String[] args) throws BlockStoreException {
+        ConfigurableApplicationContext run = SpringApplication.run(FullBlockChainNode.class, args);
         IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
-        peer = new FullBlockChainPeer(new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore()));
-        peer.start();
+        FullBlockChainPeer peer = new FullBlockChainPeer(new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore()));
+        try {
+            peer.start();
+        } catch (DiscoveryException e) {
+            SpringApplication.exit(run, () -> -1);
+        }
     }
 }
