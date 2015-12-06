@@ -70,7 +70,7 @@ public class HttpProxyPeerGroupTest {
 
         IProxyPeerGroup spy = spy(clientPeerGroup);
         spy.receiveBlocks();
-        verify(spy).discover(any(CentralDiscovery.class));
+        verify(spy, atLeastOnce()).discover(any(CentralDiscovery.class));
     }
 
     @Test

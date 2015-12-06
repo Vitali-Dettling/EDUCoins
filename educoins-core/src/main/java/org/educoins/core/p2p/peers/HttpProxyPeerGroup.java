@@ -42,7 +42,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     @Override
     public void discover(DiscoveryStrategy strategy) throws DiscoveryException {
         logger.info("Starting new Discovery ({})", strategy.getClass().getName());
-        strategy.getReferencePeers().forEach(proxy -> proxies.add(proxy));
+        strategy.getReferencePeers().forEach(proxies::add);
         proxies.forEach(proxy -> {
             try {
                 proxies.addAll(proxy.hello());
@@ -170,10 +170,9 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             if (nTry < 5)
                 try {
                     Thread.sleep(nTry * 2000);
+                    rediscover(++nTry);
                 } catch (InterruptedException e) {
                 }
-
-            rediscover(++nTry);
             logger.error("Could not retrieve any Peers... We are isolated now!");
         }
     }

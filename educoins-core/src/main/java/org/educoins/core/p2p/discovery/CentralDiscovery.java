@@ -6,6 +6,8 @@ import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.utils.RestClient;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,7 +18,7 @@ import java.util.*;
  * Created by typus on 11/3/15.
  */
 public class CentralDiscovery implements DiscoveryStrategy {
-
+    private final Logger logger = LoggerFactory.getLogger(CentralDiscovery.class);
     public static final String RESOURCE_NODES_MINER = "/nodes/miner";
     public static final String RESOURCE_NODES_BLOCKCHAIN = "/nodes/blockchain";
     public static final String RESOURCE_NODES_REFERENCE = "nodes/reference";
@@ -30,16 +32,19 @@ public class CentralDiscovery implements DiscoveryStrategy {
 
     @Override
     public @NotNull Collection<RemoteProxy> getReferencePeers() throws DiscoveryException {
+        logger.info("Requesting ReferenceNodes...");
         return getRemoteProxies(RESOURCE_NODES_REFERENCE);
     }
 
     @Override
     public @NotNull Collection<RemoteProxy> getFullBlockchainPeers() throws DiscoveryException {
+        logger.info("Requesting FullBlockChainNodes...");
         return getRemoteProxies(RESOURCE_NODES_BLOCKCHAIN);
     }
 
     @Override
     public @NotNull Collection<RemoteProxy> getSoloMinerPeers() throws DiscoveryException {
+        logger.info("Requesting SoloMinerNodes...");
         return getRemoteProxies(RESOURCE_NODES_MINER);
     }
 
