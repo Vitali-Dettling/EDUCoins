@@ -34,7 +34,7 @@ public class TransactionController {
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void createBlock(@RequestBody @NotNull Transaction transaction) {
+    public void submitTransaction(@RequestBody @NotNull Transaction transaction) {
         blockChain.transactionReceived(transaction);
     }
 }
