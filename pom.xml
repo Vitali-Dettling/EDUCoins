@@ -14,8 +14,8 @@
 		<module>educoins-miner</module>
 		<module>educoins-demo</module>
 		<module>educoins-central</module>
-		<!--<module>educoins-referencenode</module>-->
-		<!--<module>educoins-fullblockchainnode</module>-->
+		<module>educoins-referencenode</module>
+		<module>educoins-fullblockchainnode</module>
 	</modules>
 
 	<name>educoins</name>

@@ -17,5 +17,13 @@
             <artifactId>educoins-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+        <!--Level Db-->
+        <dependency>
+            <groupId>org.fusesource.leveldbjni</groupId>
+            <artifactId>leveldbjni-all</artifactId>
+            <version>1.8</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 </project>
