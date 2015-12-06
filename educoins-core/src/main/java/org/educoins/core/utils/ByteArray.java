@@ -211,6 +211,42 @@ public final class ByteArray {
 	 *         greater or -1 if the second byte array is greater.
 	 */
 	public final static int compare(byte[] x, byte[] y) {
+//		if (x == null && y == null) {
+//			return 0;
+//		} else if (y == null) {
+//			return 1;
+//		} else if (x == null) {
+//			return -1;
+//		}
+//
+//		int indexX = 0;
+//		int indexY = 0;
+//		int maxIndex = Math.min(x.length, y.length);
+//
+//		if (x.length > y.length){
+//			for(byte c : Arrays.copyOfRange(x, 0, x.length - y.length)){
+//				if (c != 0)
+//					return 1;
+//			}
+//			indexX = x.length - y.length;
+//		}
+//		if (x.length < y.length){
+//			for(byte c : Arrays.copyOfRange(y, 0, y.length - x.length)){
+//				if (c != 0)
+//					return -1;
+//			}
+//			indexY = y.length - x.length;
+//		}
+//		for (int i = 0; i < maxIndex; i++){
+//			int a = Byte.compare(x[i + indexX], y[i + indexY]);
+//
+//			if (a != 0) {
+//				int comp = Integer.compare(a, 0);
+//				return comp;
+//			}
+//		}
+//		return 0;
+		
 		if (x == null && y == null) {
 			return 0;
 		} else if (y == null) {
@@ -219,29 +255,10 @@ public final class ByteArray {
 			return -1;
 		}
 
-		int indexX = 0;
-		int indexY = 0;
-		int maxIndex = Math.min(x.length, y.length);
-
-		if (x.length > y.length){
-			for(byte c : Arrays.copyOfRange(x, 0, x.length - y.length)){
-				if (c != 0)
-					return 1;
-			}
-			indexX = x.length - y.length;
-		}
-		if (x.length < y.length){
-			for(byte c : Arrays.copyOfRange(y, 0, y.length - x.length)){
-				if (c != 0)
-					return -1;
-			}
-			indexY = y.length - x.length;
-		}
-		for (int i = 0; i < maxIndex; i++){
-			int a = Byte.compare(x[i+indexX], y[i+indexY]);
-			if (a != 0) return Integer.compare(a, 0);
-		}
-		return 0;
+		BigInteger convertedX = new BigInteger(1,x);
+		BigInteger convertedY = new BigInteger(1,y);
+		int result =  convertedX.compareTo(convertedY);
+		return result;
 	}
 
 	/**

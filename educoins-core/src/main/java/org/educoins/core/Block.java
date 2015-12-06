@@ -20,7 +20,7 @@ public class Block {
 	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
 	private static final long TIME = System.currentTimeMillis();
 
-	private static final byte[] BITS = ByteArray.convertFromString("1dffffff");
+	private static final byte[] BITS = ByteArray.convertFromString("1d00ffff");
 	private static final long NONCE = 1114735442;
 
 	private int version;
