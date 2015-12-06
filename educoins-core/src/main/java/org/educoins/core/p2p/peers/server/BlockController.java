@@ -19,7 +19,7 @@ import java.util.Collection;
  * Created by typus on 11/30/15.
  */
 @RestController
-@RequestMapping("/blocks/")
+@RequestMapping("/blocks")
 public class BlockController {
 
     private Logger logger = LoggerFactory.getLogger(BlockController.class);
@@ -36,7 +36,7 @@ public class BlockController {
      * @return The List of all Blocks.
      * @throws BlockNotFoundException if a Block could not be found.
      */
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public Collection<Block> getBlocks() throws BlockNotFoundException {
         return blockChain.getBlocks();
     }
@@ -47,8 +47,8 @@ public class BlockController {
      * @param block the Block to addProxy.
      * @throws BlockChainVerificationException if the there was a conflict while validation.
      */
-    @RequestMapping(value = "", method = RequestMethod.POST)
-    @ResponseStatus(value = HttpStatus.CREATED)
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
     public void createBlock(@RequestBody @NotNull Block block) throws BlockChainVerificationException {
         blockChain.blockReceived(block);
     }
@@ -60,7 +60,7 @@ public class BlockController {
      * @return The Block stored in this {@link org.educoins.core.p2p.peers.Peer}.
      * @throws BlockNotFoundException if the Block could not be found.
      */
-    @RequestMapping(value = "{hash}", method = RequestMethod.GET)
+    @RequestMapping(path = "/{hash}", method = RequestMethod.GET)
     public Block getBlock(@PathVariable(value = "hash") String hash) throws
             BlockNotFoundException {
         return blockChain.getBlock(Sha256Hash.wrap(hash));
@@ -72,7 +72,7 @@ public class BlockController {
      * @return The list of all {@link Block#getHeader()}s.
      * @throws BlockNotFoundException if a Block could not be found.
      */
-    @RequestMapping(value = "headers", method = RequestMethod.GET)
+    @RequestMapping(path = "/headers", method = RequestMethod.GET)
     public Collection<Block> getBlockHeaders() throws BlockNotFoundException {
         return blockChain.getBlockHeaders();
     }

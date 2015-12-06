@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * Created by dacki on 06.12.15.
  */
 @RestController
-@RequestMapping("/transaction/")
+@RequestMapping("/transaction")
 public class TransactionController {
 
         private Logger logger = LoggerFactory.getLogger(TransactionController.class);
@@ -32,8 +32,8 @@ public class TransactionController {
      *
      * @param transaction Transaction to be added
      */
-    @RequestMapping(value = "", method = RequestMethod.POST)
-    @ResponseStatus(value = HttpStatus.CREATED)
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
     public void submitTransaction(@RequestBody @NotNull Transaction transaction) {
         blockChain.transactionReceived(transaction);
     }

@@ -18,7 +18,7 @@ import java.util.*;
  * Created by typus on 12/1/15.
  */
 @RestController
-@RequestMapping("/peers/")
+@RequestMapping("/peers")
 public class PeerController {
     private final IProxyPeerGroup httpPeerCache;
     private final Logger logger = LoggerFactory.getLogger(BlockController.class);
@@ -34,8 +34,8 @@ public class PeerController {
      * @param peer the helloing Peer.
      * @return all peers known so far renounced the newly added one.
      */
-    @RequestMapping(value = "http", method = RequestMethod.POST)
-    @ResponseStatus(code = HttpStatus.CREATED)
+    @RequestMapping(path = "/http", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
     public Collection<RemoteProxy> addHttpPeer(@RequestBody @NotNull HttpProxy peer) {
         logger.info("Added peer " + peer);
 
