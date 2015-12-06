@@ -2,7 +2,6 @@ package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
 import org.educoins.core.config.AppConfig;
-import org.educoins.core.p2p.discovery.CentralDiscovery;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
     }
 
     public void start() throws DiscoveryException {
-        remoteProxies.discover(new CentralDiscovery());
+        remoteProxies.discover();
         blockChain.foundPoW(new Block());
     }
 

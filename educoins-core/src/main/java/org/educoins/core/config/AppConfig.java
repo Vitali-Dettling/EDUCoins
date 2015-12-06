@@ -49,14 +49,19 @@ public class AppConfig {
     }
 
     public static String getCentralUrl() {
-        return prop.getProperty("educoins.central.url");
+        return prop.getProperty("educoins.discovery.central.url");
     }
 
     public static Sha256Hash getOwnPublicKey() {
         return Sha256Hash.wrap(prop.getProperty("educoins.peer.pubkey"));
     }
 
-    public int getServerPort() {
+    public static int getServerPort() {
         return Integer.parseInt(prop.getProperty("server.port"));
     }
+
+    public static int getMaxDiscoveryRetries() {
+        return Integer.parseInt(prop.getProperty("educoins.discovery.retries.max"));
+    }
+
 }

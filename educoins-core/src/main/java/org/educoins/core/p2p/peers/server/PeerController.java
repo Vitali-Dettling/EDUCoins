@@ -37,7 +37,7 @@ public class PeerController {
     @RequestMapping(path = "/http", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public Collection<RemoteProxy> addHttpPeer(@RequestBody @NotNull HttpProxy peer) {
-        logger.info("Added peer " + peer);
+        logger.info("Retrieved peer " + peer);
 
         Set<RemoteProxy> proxies = new HashSet<>();
         proxies.addAll(httpPeerCache.getAllProxies());

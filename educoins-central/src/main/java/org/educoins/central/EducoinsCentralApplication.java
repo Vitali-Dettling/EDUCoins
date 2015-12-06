@@ -27,21 +27,21 @@ public class EducoinsCentralApplication {
 
     @PostConstruct
     private void init() {
-        nodesRepository.save(new Node("myPub1", URI.create("localhost:8678"), PeerType.BLOCKCHAIN));
-        nodesRepository.save(new Node("myPub2", URI.create("localhost:8679"), PeerType.BLOCKCHAIN));
-        nodesRepository.save(new Node("myPub5", URI.create("localhost:8680"), PeerType.MINER));
-        nodesRepository.save(new Node("myPub3", URI.create("localhost:8681"), PeerType.MINER));
-        nodesRepository.save(new Node("myPub4", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub6", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub7", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub8", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub9", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub10", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub11", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub12", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub13", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub14", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub15", URI.create("localhost:8682"), PeerType.REFERENCE));
-        nodesRepository.save(new Node("myPub16", URI.create("localhost:8682"), PeerType.REFERENCE));
+        nodesRepository.save(new Node("beefbeefbeefaffeaffeaffe", URI.create("http://localhost:8081"), PeerType.BLOCKCHAIN));
+        nodesRepository.save(new Node("beefbeefbeefaffeaffeaffe", URI.create("http://localhost:8082"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub5", URI.create("localhost:8680"), PeerType.MINER));
+//        nodesRepository.save(new Node("myPub3", URI.create("localhost:8681"), PeerType.MINER));
+//        nodesRepository.save(new Node("myPub4", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub6", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub7", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub8", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub9", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub10", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub11", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub12", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub13", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub14", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub15", URI.create("localhost:8682"), PeerType.REFERENCE));
+//        nodesRepository.save(new Node("myPub16", URI.create("localhost:8682"), PeerType.BLOCKCHAIN));
     }
 }

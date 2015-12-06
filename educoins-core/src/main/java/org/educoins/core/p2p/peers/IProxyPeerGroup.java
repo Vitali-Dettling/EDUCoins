@@ -52,4 +52,15 @@ public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, I
      * @return a copy.
      */
     Collection<RemoteProxy> getAllProxies();
+
+    /**
+     * Starts discovery with the given
+     * {@link DiscoveryStrategy}. Afterwards {@link RemoteProxy#hello()}s all {@link Peer}s and
+     * adds their known {@link RemoteProxy}s to the PeerGroup.
+     *
+     * This version of {@link IProxyPeerGroup#discover(DiscoveryStrategy)} does always use the {@link org.educoins.core.p2p.discovery.CentralDiscovery}
+     * and retries the discovery until {@link org.educoins.core.config.AppConfig#getMaxDiscoveryRetries} is reached.
+     *
+     */
+    void discover();
 }

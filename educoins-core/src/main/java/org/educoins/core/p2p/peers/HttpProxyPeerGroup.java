@@ -1,6 +1,7 @@
 package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
+import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.*;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.slf4j.Logger;
@@ -26,7 +27,10 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void addProxy(RemoteProxy proxy) {
-        this.proxies.add(proxy);
+        if (!proxies.contains(proxy) && !proxy.getPubkey().equals(AppConfig.getOwnPublicKey().toString())) {
+            logger.info("Added peer " + proxy);
+            this.proxies.add(proxy);
+        }
     }
 
     @Override
@@ -45,11 +49,16 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         strategy.getReferencePeers().forEach(proxies::add);
         proxies.forEach(proxy -> {
             try {
-                proxies.addAll(proxy.hello());
+                proxy.hello().forEach(this::addProxy);
             } catch (IOException e) {
                 logger.warn("Could not say Hello to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
             }
         });
+    }
+
+    @Override
+    public void discover() {
+        rediscover(0);
     }
 
     @Override
@@ -146,7 +155,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                     .getiNetAddress().getHost(), e);
 
             if (proxies.size() == 0)
-                rediscover(0);
+                discover();
             return true;
         }
         return false;
@@ -155,7 +164,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     private Collection<RemoteProxy> getHighestRatedProxies() {
         if (proxies.size() == 0) {
-            rediscover(0);
+            discover();
             return proxies;
         }
 
@@ -163,17 +172,17 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         return proxies.subList(0, Math.min(proxies.size(), 10));
     }
 
-    private void rediscover(int nTry) {
+    public void rediscover(int nTry) {
         try {
             discover(new CentralDiscovery());
         } catch (DiscoveryException e1) {
-            if (nTry < 5)
+            logger.error("Could not retrieve any Peers... We are isolated now!");
+            if (nTry < AppConfig.getMaxDiscoveryRetries())
                 try {
                     Thread.sleep(nTry * 2000);
                     rediscover(++nTry);
                 } catch (InterruptedException e) {
                 }
-            logger.error("Could not retrieve any Peers... We are isolated now!");
         }
     }
 }
