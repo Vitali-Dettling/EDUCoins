@@ -5,11 +5,14 @@ import org.educoins.central.domain.PeerType;
 import org.educoins.central.repositories.NodesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
 
+@EnableAutoConfiguration(exclude = {JacksonAutoConfiguration.class})
 @SpringBootApplication
 public class EducoinsCentralApplication {
 

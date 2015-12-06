@@ -13,25 +13,25 @@ public class Node {
     @Id
     private String pubkey;
 
-    private URI inetAddress;
+    private URI iNetAddress;
 
     private PeerType type;
 
     public Node() {
     }
 
-    public Node(String pubkey, URI inetAddress, PeerType type) {
-        this.inetAddress = inetAddress;
+    public Node(String pubkey, URI iNetAddress, PeerType type) {
+        this.iNetAddress = iNetAddress;
         this.pubkey = pubkey;
         this.type = type;
     }
 
     public URI getInetAddress() {
-        return inetAddress;
+        return iNetAddress;
     }
 
     public void setInetAddress(URI inetAddress) {
-        this.inetAddress = inetAddress;
+        this.iNetAddress = inetAddress;
     }
 
     public String getPubkey() {
@@ -53,7 +53,7 @@ public class Node {
     @Override
     public int hashCode() {
         int result = pubkey != null ? pubkey.hashCode() : 0;
-        result = 31 * result + (inetAddress != null ? inetAddress.hashCode() : 0);
+        result = 31 * result + (iNetAddress != null ? iNetAddress.hashCode() : 0);
         result = 31 * result + (type != null ? type.hashCode() : 0);
         return result;
     }
@@ -67,7 +67,7 @@ public class Node {
         Node node = (Node) o;
 
         return !(pubkey != null ? !pubkey.equals(node.pubkey) : node.pubkey != null)
-                && !(inetAddress != null ? !inetAddress.equals(node.inetAddress) : node.inetAddress != null)
+                && !(iNetAddress != null ? !iNetAddress.equals(node.iNetAddress) : node.iNetAddress != null)
                 && (type == node.type);
 
     }
