@@ -1,5 +1,6 @@
 package org.educoins.core.p2p.peers;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.CentralDiscovery;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
@@ -61,6 +62,7 @@ public class HttpProxyPeerGroupTest {
     }
 
     @Test
+    @Ignore //Takes pretty long to test...
     public void testRediscovery() throws Exception {
         clientPeerGroup.clearProxies();
         clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:42"), "myPub1"));

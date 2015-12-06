@@ -98,22 +98,22 @@ public abstract class RemoteProxy {
     }
 
     @Override
-    public int hashCode() {
-        int result = iNetAddress != null ? iNetAddress.hashCode() : 0;
-        result = 31 * result + (pubkey != null ? pubkey.hashCode() : 0);
-        return result;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         RemoteProxy that = (RemoteProxy) o;
 
-        return !(iNetAddress != null ? !iNetAddress.equals(that.iNetAddress) : that.iNetAddress != null)
-                && !(pubkey != null ? !pubkey.equals(that.pubkey) : that.pubkey != null);
+        if (rating != that.rating) return false;
+        return !(pubkey != null ? !pubkey.equals(that.pubkey) : that.pubkey != null);
 
+    }
+
+    @Override
+    public int hashCode() {
+        int result = pubkey != null ? pubkey.hashCode() : 0;
+        result = 31 * result + rating;
+        return result;
     }
 
     @Override

@@ -176,13 +176,13 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         try {
             discover(new CentralDiscovery());
         } catch (DiscoveryException e1) {
+            logger.error("Could not retrieve any Peers... We are isolated now!");
             if (nTry < AppConfig.getMaxDiscoveryRetries())
                 try {
                     Thread.sleep(nTry * 2000);
                     rediscover(++nTry);
                 } catch (InterruptedException e) {
                 }
-            logger.error("Could not retrieve any Peers... We are isolated now!");
         }
     }
 }
