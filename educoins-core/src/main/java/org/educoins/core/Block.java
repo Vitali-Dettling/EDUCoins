@@ -143,6 +143,13 @@ public class Block {
         return null;
     }
 
+    public Transaction getTransaction(Sha256Hash hash) {
+        for (Transaction transaction : transactions) {
+            if (transaction.hash().equals(hash)) return transaction;
+        }
+        return null;
+    }
+
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
         if (this.transactions == null) {

@@ -1,14 +1,13 @@
 package org.educoins.core;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.store.BlockNotFoundException;
+import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
@@ -223,4 +222,16 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return this.store.get(currentBlock.getHashPrevBlock().getBytes());
 	}
 
+	public Transaction getTransaction(Sha256Hash hash) {
+		IBlockIterator it = this.store.iterator();
+		while (it.hasNext()) {
+			try {
+				Block block = it.next();
+				Transaction transaction = block.getTransaction(hash);
+				if (transaction != null)  return transaction;
+			} catch (BlockNotFoundException ignored) {
+			}
+		}
+		return null;
+	}
 }

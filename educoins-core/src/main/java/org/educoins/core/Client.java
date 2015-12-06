@@ -3,6 +3,7 @@ package org.educoins.core;
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.CannotRevokeRevokeTransactionException;
 import org.educoins.core.utils.Sha256Hash;
 
 import java.io.IOException;
@@ -115,8 +116,20 @@ public class Client extends Thread implements ITransactionListener {
 		return transaction;
 	}
 
-	public void revokeTransaction() {
-
+	public RevokeTransaction sendRevokeTransaction(Transaction transaction) {
+		try {
+			RevokeTransaction revoke;
+			if (transaction == null) {
+				System.out.println("Transaction not found");
+				return null;
+			}
+			revoke = new RevokeTransaction(transaction);
+			this.blockChain.sendTransaction(revoke);
+			return revoke;
+		} catch (CannotRevokeRevokeTransactionException e) {
+			System.out.println("Cannot revoke a revokeTransaction");
+			return null;
+		}
 	}
 
 	@Override
@@ -144,15 +157,21 @@ public class Client extends Thread implements ITransactionListener {
 						this.inputs.add(input);
 
 						String typeString;
-						ETransaction type = transaction.whichTransaction();
-						if (type == ETransaction.COINBASE) {
-							typeString = "Coinbase Transaction";
-						} else if (type == ETransaction.REGULAR) {
-							typeString = "Regular Transaction";
-						} else if (type == ETransaction.APPROVED) {
-							typeString = "Approved Transaction";
-						} else {
-							typeString = "Unknown Transaction";
+						switch (transaction.whichTransaction()) {
+							case APPROVED:
+								typeString = "Approved Transaction";
+								break;
+							case COINBASE:
+								typeString = "Coinbase Transaction";
+								break;
+							case REGULAR:
+								typeString = "Regular Transaction";
+								break;
+							case REVOKE:
+								typeString = "Revoke Transaction";
+								break;
+							default:
+								typeString = "Unknown Transaction";
 						}
 						int availableAmount = 0;
 						List<Input> tmpInputs = new ArrayList<>(inputs);
@@ -210,7 +229,13 @@ public class Client extends Thread implements ITransactionListener {
 					System.out.println(trans.hash());
 				break;
 			case "x":
-
+				Sha256Hash hash = Sha256Hash.wrap(getHexInput(scanner, "Type in hash of transaction to revoke: "));
+				trans = this.findTransaction(hash);
+				Transaction revoke = this.sendRevokeTransaction(trans);
+				if (revoke != null) {
+					System.out.println("Revoked transaction: " + trans.hash());
+					System.out.println("With Revoke: " + revoke.hash());
+				}
 				break;
 			case "b":
 				running = false;
@@ -218,6 +243,10 @@ public class Client extends Thread implements ITransactionListener {
 			default:
 			}
 		}
+	}
+
+	private Transaction findTransaction(Sha256Hash hash) {
+		return this.blockChain.getTransaction(hash);
 	}
 
 	private int getIntInput(Scanner scanner, String prompt) {
@@ -235,7 +264,7 @@ public class Client extends Thread implements ITransactionListener {
 		String input = scanner.nextLine();
 		try {
 			new BigInteger(input, 16);
-		} catch (NumberFormatException e) {
+		} catch (NullPointerException | NumberFormatException e) {
 			System.out.println("Please enter a valid hex value!");
 			return null;
 		}
