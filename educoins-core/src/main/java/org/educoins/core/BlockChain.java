@@ -76,17 +76,16 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	@Override
 	public void blockReceived(Block block) {
-		if (this.verification.verifyBlock(block)) {
-			Block newBlock = prepareNewBlock(block);
-			notifyBlockReceived(newBlock);
-			List<Transaction> transactions = block.getTransactions();
-			if (transactions != null) {
-				for (Transaction transaction : transactions) {
-					notifyTransactionReceived(transaction);
-				}
+		if (!this.verification.verifyBlock(block)) {
+			System.out.println("Verification of block failed: " + block.hash());
+		}
+		Block newBlock = prepareNewBlock(block);
+		notifyBlockReceived(newBlock);
+		List<Transaction> transactions = block.getTransactions();
+		if (transactions != null) {
+			for (Transaction transaction : transactions) {
+				notifyTransactionReceived(transaction);
 			}
-		} else {
-			System.out.println("Verfication of block failed: " + block.hash());
 		}
 	}
 
@@ -111,15 +110,22 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	@Override
 	public void transactionReceived(Transaction transaction) {
-		ETransaction type = transaction.whichTransaction();
-		if (type == ETransaction.REGULAR) {
-			if (this.verification.verifyRegularTransaction(transaction)) {
-				this.transactions.add(transaction);
-			}
-		} else if (type == ETransaction.APPROVED) {
-			if (this.verification.verifyApprovedTransaction(transaction)) {
-				this.transactions.add(transaction);
-			}
+		switch (transaction.whichTransaction()) {
+			case APPROVED:
+				if (this.verification.verifyApprovedTransaction(transaction)) {
+					this.transactions.add(transaction);
+				}
+				break;
+			case REGULAR:
+				if (this.verification.verifyRegularTransaction(transaction)) {
+					this.transactions.add(transaction);
+				}
+				break;
+			case REVOKE:
+				if (this.verification.verifyRevokeTransaction(transaction)) {
+					this.transactions.add(transaction);
+				}
+				break;
 		}
 	}
 

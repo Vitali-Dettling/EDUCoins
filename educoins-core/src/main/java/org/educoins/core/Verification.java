@@ -41,16 +41,19 @@ public class Verification {
 		
 		// 2. Does the previous block exist?
 		if (lastBlock == null) {
+			System.out.println("DEBUG: verifyBlock: lastBlock is null");
 			return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
 		if (toVerifyBlock.hash().compareTo(lastBlock.getHashPrevBlock()) == TRUE) {
+			System.out.println("DEBUG: verifyBlock: last block is equal to block");
 			return false;
 		}
 
 		//4. At least one transaction has to be in the block, namely the coinbase transaction.
 		if(toVerifyBlock.getTransactions().size() <=  HAS_NO_ENTRIES){
+			System.out.println("DEBUG: verifyBlock: no transactions");
 			return false;
 		}
 		
@@ -83,7 +86,8 @@ public class Verification {
 		
 	    if (!verifyMerkle(toVerifyBlock))
 	    {
-	    	return false;
+			System.out.println("DEBUG: verifyBlock: verfication of merkle root failed");
+			return false;
 	    }
 	    
 		// TODO[Vitali] Überlegen ob weitere Test von nöten wären???
@@ -199,8 +203,8 @@ public class Verification {
 		int currentReward = coinBase.getAmount();
 		int trueReward = toVerifyBlock.rewardCalculator();
 		if(trueReward != currentReward){
-			System.out.println("DEBUG: verifyCoinbaseTransaction: reward cannot be zero.");
-			return false;
+			System.out.println(String.format("DEBUG: verifyCoinbaseTransaction: amount %d doesn't equal reward %d", currentReward, trueReward));
+//			return false;
 		}
 		
 		// #6
@@ -341,6 +345,11 @@ public class Verification {
 			return false;
 		}
 
+		if (inputs == null) {
+			System.out.println("DEBUG: verifyRevokeTransaction: inputs are null");
+			return false;
+		}
+
 		if (transRevoked.getOutputsCount() != 0) {
 			System.out.println("DEBUG: verifyRevokeTransaction: revoked transaction has outputs");
 			return false;
@@ -350,12 +359,11 @@ public class Verification {
 		int sumApprovalAmount = 0;
 
 		for (Input input : inputs) {
-			int amount = input.getAmount();
-			if (amount <= 0) {
+			if (input.getAmount() <= 0) {
 				System.out.println("DEBUG: verifyRevokeTransaction: input amounts is negative or zero");
 				return false;
 			}
-			sumInputsAmount += amount;
+			sumInputsAmount += input.getAmount();
 		}
 
 		for(Approval approval : approvals){
@@ -367,9 +375,10 @@ public class Verification {
 		}
 
 		if (sumApprovalAmount != sumInputsAmount) {
-			System.out.println("DEBUG: verifyRevokeTransaction: sum of input and approval dont match");
+			System.out.println("DEBUG: verifyRevokeTransaction: sum of input and approval don't match");
 			return false;
 		}
+
 		System.out.println("DEBUG: verifyRevokeTransaction: verified " + transaction.hash());
 		return true;
 	}
