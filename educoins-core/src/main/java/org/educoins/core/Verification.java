@@ -12,10 +12,8 @@ public class Verification {
 	
 	private static final int TRUE = 0;
 	private static final int ZERO = 0;
-	private static final int HEX = 16;
 	private static final int NO_COINS = 0;
 	private static final int HAS_NO_ENTRIES = 0;
-	private static final int ONLY_ONE_COINBASE_TRANSACTION = 1;
 	private static final String GENESIS_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 	
 	private Wallet wallet;
@@ -43,33 +41,40 @@ public class Verification {
 		
 		// 2. Does the previous block exist?
 		if (lastBlock == null) {
+			System.out.println("DEBUG: verifyBlock: lastBlock is null");
 			return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
 		if (toVerifyBlock.hash().compareTo(lastBlock.getHashPrevBlock()) == TRUE) {
+			System.out.println("DEBUG: verifyBlock: last block is equal to block");
 			return false;
 		}
 
 		//4. At least one transaction has to be in the block, namely the coinbase transaction.
 		if(toVerifyBlock.getTransactions().size() <=  HAS_NO_ENTRIES){
+			System.out.println("DEBUG: verifyBlock: no transactions");
 			return false;
 		}
 		
 		//5. Verification of all transactions in a block.
-		boolean isTransactionValid = true;
+		boolean isTransactionValid = false;
 		List<Transaction> transactions = toVerifyBlock.getTransactions();
 	    for (Transaction transaction : transactions) {
-	    	
 			//5.1 Check for transaction type.
-			if(transaction.whichTransaction() == ETransaction.COINBASE){
-				isTransactionValid = verifyCoinbaseTransaction(transaction, toVerifyBlock);
-			}
-			else if(transaction.whichTransaction() == ETransaction.REGULAR){
-				isTransactionValid = verifyRegularTransaction(transaction);
-			}
-			else if(transaction.whichTransaction() == ETransaction.APPROVED){
-				isTransactionValid = verifyApprovedTransaction(transaction);
+			switch (transaction.whichTransaction()) {
+				case APPROVED:
+					isTransactionValid = verifyApprovedTransaction(transaction);
+					break;
+				case COINBASE:
+					isTransactionValid = verifyCoinbaseTransaction(transaction, toVerifyBlock);
+					break;
+				case REGULAR:
+					isTransactionValid = verifyRegularTransaction(transaction);
+					break;
+				case REVOKE:
+					isTransactionValid = verifyRevokeTransaction(transaction);
+					break;
 			}
 			
 			//As soon as a transaction is not valid, the loop will be cancelled.
@@ -80,7 +85,8 @@ public class Verification {
 		
 	    if (!verifyMerkle(toVerifyBlock))
 	    {
-	    	return false;
+			System.out.println("DEBUG: verifyBlock: verfication of merkle root failed");
+			return false;
 	    }
 	    
 		// TODO[Vitali] Überlegen ob weitere Test von nöten wären???
@@ -105,7 +111,7 @@ public class Verification {
 		
 		if (approvals == null) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: inputs is null");
+			System.out.println("DEBUG: verifyApprovedTransaction: inputs is null");
 			return false;
 		}
 
@@ -117,7 +123,7 @@ public class Verification {
 			int amount = input.getAmount();
 			if (amount <= NO_COINS) {
 				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyRegularTransaction: input amounts is negative or zero");
+				System.out.println("DEBUG: verifyApprovedTransaction: input amounts is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -133,7 +139,7 @@ public class Verification {
 			int amount = approval.getAmount();
 			if (amount <= NO_COINS) {
 				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyRegularTransaction: output amount is negative or zero");
+				System.out.println("DEBUG: verifyApprovedTransaction: output amount is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -144,7 +150,7 @@ public class Verification {
 		// TODO [joeren]: implementation of approval-exception
 		if (sumApprovalAmount > sumInputsAmount) {
 			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: more output than input");
+			System.out.println("DEBUG: verifyApprovedTransaction: more output than input");
 			return false;
 		}
 		
@@ -155,14 +161,14 @@ public class Verification {
 		for(Approval approval : approvals){
 			String lockingScript = approval.getLockingScript();
 			if(lockingScript.isEmpty()){
-				System.out.println("DEBUG: verifyRegularTransaction: locking script is empty.");
+				System.out.println("DEBUG: verifyApprovedTransaction: locking script is empty.");
 				return false;
 			}
 		}
 		
 		
 		//TODO [Vitali] Implement rest of the verification, if some.
-		
+		System.out.println("DEBUG: verifyApprovedTransaction: verified " + transaction.hash());
 		return true;
 		
 		
@@ -185,19 +191,19 @@ public class Verification {
 			return false;
 		}
 		
-		if(coinBases.size() != ONLY_ONE_COINBASE_TRANSACTION){
+		if(coinBases.size() != 1){
 			// TODO [joeren]: remove debug output
 			System.out.println("DEBUG: verifyCoinbaseTransaction: More then one coinbase transaction.");
 			return false;
 		}
 		
-		Output coinBase = coinBases.iterator().next();
+		Output coinBase = coinBases.get(0);
 		
 		int currentReward = coinBase.getAmount();
 		int trueReward = toVerifyBlock.rewardCalculator();
 		if(trueReward != currentReward){
-			System.out.println("DEBUG: verifyCoinbaseTransaction: reward cannot be zero.");
-			return false;
+			System.out.println(String.format("DEBUG: verifyCoinbaseTransaction: amount %d doesn't equal reward %d", currentReward, trueReward));
+//			return false;
 		}
 		
 		// #6
@@ -207,7 +213,6 @@ public class Verification {
 		}
 		
 		//TODO [Vitali] Implement rest of the verification, if some.
-		
 		return true;
 		
 	}
@@ -304,7 +309,7 @@ public class Verification {
 		//TODO [Vitali] The check is current done with the ECDSA class but actually that should be done through the script language.
 		//Currently it check just whether the signature corresponds with one public key in the wallet file. 
 		byte[] signature = null;
-		String hashedTransaction = ByteArray.convertToString(transaction.hash(), HEX);
+		String hashedTransaction = transaction.hash().toString();
 		for(Input input : transaction.getInputs()){
 			
 			signature = input.getUnlockingScript(EInputUnlockingScript.SIGNATURE);
@@ -317,14 +322,67 @@ public class Verification {
 		}
 		
 		//TODO [Vitali] Implement rest of the verification, if some.
-		
+		System.out.println("DEBUG: verifyRegularTransaction: verified " + transaction.hash());
+		return true;
+	}
+
+	public boolean verifyRevokeTransaction(Transaction transaction) {
+		Transaction transRevoked = this.blockChain.getTransaction(transaction.getApprovedTransaction());
+		if (transRevoked == null) {
+			System.out.println("DEBUG: verifyRevokeTransaction: Transaction be be revoked cannot be found");
+			return false;
+		}
+
+		List<Input> inputs = transaction.getInputs();
+		List<Approval> approvals = transRevoked.getApprovals();
+
+		if (approvals == null) {
+			System.out.println("DEBUG: verifyRevokeTransaction: approvals are null");
+			return false;
+		}
+
+		if (inputs == null) {
+			System.out.println("DEBUG: verifyRevokeTransaction: inputs are null");
+			return false;
+		}
+
+		if (transRevoked.getOutputsCount() != 0) {
+			System.out.println("DEBUG: verifyRevokeTransaction: revoked transaction has outputs");
+			return false;
+		}
+
+		int sumInputsAmount = 0;
+		int sumApprovalAmount = 0;
+
+		for (Input input : inputs) {
+			if (input.getAmount() <= 0) {
+				System.out.println("DEBUG: verifyRevokeTransaction: input amounts is negative or zero");
+				return false;
+			}
+			sumInputsAmount += input.getAmount();
+		}
+
+		for(Approval approval : approvals){
+			if (approval.getAmount() <= 0) {
+				System.out.println("DEBUG: verifyRevokeTransaction: approved amount is negative or zero");
+				return false;
+			}
+			sumApprovalAmount += approval.getAmount();
+		}
+
+		if (sumApprovalAmount != sumInputsAmount) {
+			System.out.println("DEBUG: verifyRevokeTransaction: sum of input and approval don't match");
+			return false;
+		}
+
+		System.out.println("DEBUG: verifyRevokeTransaction: verified " + transaction.hash());
 		return true;
 	}
 	
 	private boolean verifyMerkle(Block block) {
 		Sha256Hash merkle = block.getHashMerkleRoot();
 		BinaryTree<Transaction> tree = new BinaryTree<>(block.getTransactions());
-		return Sha256Hash.wrap(tree.getRoot().hash()).equals(merkle);
+		return tree.getRoot().hash().equals(merkle);
 	}
 	
 

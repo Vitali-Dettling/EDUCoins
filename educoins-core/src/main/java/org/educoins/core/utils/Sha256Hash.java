@@ -130,10 +130,13 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
         return Sha256Hash.wrap(SHA256Hasher.hash(ret));
     }
 
+    /** 
+     * 0 if the both are equal, 1 if comp is greater or -1 if this is greater.
+     */
     @Override
-    public int compareTo(@NotNull Sha256Hash o) {
+    public int compareTo(@NotNull Sha256Hash comp) {
         // note that in this implementation compareTo() is not consistent with equals()
-    	return ByteArray.compare(o.getBytes(), this.getBytes());// arbitrary but consistent
+    	return ByteArray.compare(comp.getBytes(), this.getBytes());// arbitrary but consistent
     }
 }
 

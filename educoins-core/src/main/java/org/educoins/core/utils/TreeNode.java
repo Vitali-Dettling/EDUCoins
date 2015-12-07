@@ -13,8 +13,8 @@ public class TreeNode<E extends Hashable> implements Hashable {
 
     TreeNode(TreeNode parent, List<TreeNode<E>> children) {
         this.element = null;
-        Sha256Hash leftHash = Sha256Hash.wrap(children.get(0).hash());
-        Sha256Hash rightHash = Sha256Hash.wrap(children.get(1).hash());
+        Sha256Hash leftHash = children.get(0).hash();
+        Sha256Hash rightHash = children.get(1).hash();
         this.hash = leftHash.concat(rightHash);
         this.parent = parent;
         this.children = new ArrayList<TreeNode<E>>(children);
@@ -22,7 +22,7 @@ public class TreeNode<E extends Hashable> implements Hashable {
 
     TreeNode(E element, TreeNode parent) {
         this.element = element;
-        this.hash = Sha256Hash.wrap(element.hash());
+        this.hash = element.hash();
         this.parent = parent;
         this.children = null;
     }
@@ -64,8 +64,8 @@ public class TreeNode<E extends Hashable> implements Hashable {
     }
 
     @Override
-    public byte[] hash() {
-        return this.hash.getBytes();
+    public Sha256Hash hash() {
+        return this.hash;
     }
 
     public void setParent(TreeNode node) {

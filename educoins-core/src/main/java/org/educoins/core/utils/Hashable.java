@@ -1,5 +1,5 @@
 package org.educoins.core.utils;
 
 public interface Hashable {
-    byte[] hash();
+    Sha256Hash hash();
 }

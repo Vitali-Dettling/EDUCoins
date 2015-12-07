@@ -3,9 +3,13 @@ package org.educoins.core;
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.CannotRevokeRevokeTransactionException;
+import org.educoins.core.utils.Sha256Hash;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -14,6 +18,7 @@ public class Client extends Thread implements ITransactionListener {
 	private BlockChain blockChain;
 	private Wallet wallet;
 	private List<Input> inputs;
+	private long lastFoundTime;
 
 	public Client(BlockChain blockChain) {
 		this.setName("Client-Thread");
@@ -21,16 +26,17 @@ public class Client extends Thread implements ITransactionListener {
 		this.blockChain.addTransactionListener(this);
 		this.wallet = this.blockChain.getWallet();
 		this.inputs = new ArrayList<>();
+		this.lastFoundTime = System.currentTimeMillis();
 	}
 
-	public void sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
+	public Transaction sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
 		int availableAmount = 0;
 		for (Input input : this.inputs) {
 			availableAmount += input.getAmount();
 		}
 		if (amount > availableAmount) {
 			System.err.println("Not enough available amount (max. " + availableAmount + ")");
-			return;
+			return null;
 		}
 		List<Output> outputs = new ArrayList<>();
 		Output output = new Output(amount, dstPublicKey, lockingScript);
@@ -47,11 +53,12 @@ public class Client extends Thread implements ITransactionListener {
 		transaction.setInputs(new ArrayList<>(this.inputs));
 		transaction.setOutputs(outputs);
 
-		for (Input input : this.inputs) {
+		List<Input> tmpInputs = new ArrayList<>(this.inputs);
+		for (Input input : tmpInputs) {
 
 			String publicKey = ByteArray
 					.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
-			String message = ByteArray.convertToString(transaction.hash(), 16);
+			String message = transaction.hash().toString();
 			String signature = this.wallet.getSignature(publicKey, message);
 
 			// TODO [joeren] @ [vitali]: hier muss ich die Signatur anhängen, da
@@ -62,38 +69,42 @@ public class Client extends Thread implements ITransactionListener {
 		transaction.setInputs(inputs);
 		this.blockChain.sendTransaction(transaction);
 		this.inputs = new ArrayList<>();
+		return transaction;
 	}
 
-	public void sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
+	public Transaction sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
+		System.out.println(this.inputs.size());
+		List<Input> tmpInputs = new ArrayList<>();
 		int availableAmount = 0;
-		for (Input input : this.inputs) {
-			availableAmount += input.getAmount();
+
+		for (int i = 0; availableAmount < amount && i < this.inputs.size(); i++) {
+			tmpInputs.add(this.inputs.get(i));
+			availableAmount += this.inputs.get(i).getAmount();
 		}
+
 		if (amount > availableAmount) {
 			System.err.println("Not enough available amount (max. " + availableAmount + ")");
-			return;
+			return null;
 		}
+		this.inputs.removeAll(tmpInputs);
+
 		Approval approval = new Approval(amount, owner, holder, lockingScript);
-		Output output = null;
-		if (amount < availableAmount) {
-			int reverseOutputAmount = availableAmount - amount;
-			String reverseDstPublicKey = this.wallet.getPublicKey();
-			String reverseLockingScript = reverseDstPublicKey;
-			output = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
-		}
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
-		transaction.setInputs(new ArrayList<>(this.inputs));
+		transaction.setInputs(new ArrayList<>(tmpInputs));
 		transaction.addApproval(approval);
-		if (output != null) {
+
+		if (amount < availableAmount) {
+			int remainingAmount = availableAmount - amount;
+			String senderPublicKey = this.wallet.getPublicKey();
+			Output output = new Output(remainingAmount, senderPublicKey, senderPublicKey);
 			transaction.addOutput(output);
 		}
 
-		for (Input input : this.inputs) {
+		String message = transaction.hash().toString();
+		for (Input input : tmpInputs) {
 
-			String publicKey = ByteArray
-					.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
-			String message = ByteArray.convertToString(transaction.hash(), 16);
+			String publicKey = ByteArray.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY), 16);
 			String signature = this.wallet.getSignature(publicKey, message);
 
 			// TODO [joeren] @ [vitali]: hier muss ich die Signatur anhängen, da
@@ -101,9 +112,23 @@ public class Client extends Thread implements ITransactionListener {
 			input.setUnlockingScript(EInputUnlockingScript.SIGNATURE, signature);
 
 		}
-		transaction.setInputs(inputs);
 		this.blockChain.sendTransaction(transaction);
-		this.inputs = new ArrayList<>();
+		return transaction;
+	}
+
+	public Transaction sendRevokeTransaction(Transaction transaction) {
+		try {
+			if (transaction == null) {
+				System.out.println("Transaction not found");
+				return null;
+			}
+			Transaction revoke = transaction.revokeTransaction();
+			this.blockChain.sendTransaction(revoke);
+			return revoke;
+		} catch (CannotRevokeRevokeTransactionException e) {
+			System.out.println("Cannot revoke a revokeTransaction");
+			return null;
+		}
 	}
 
 	@Override
@@ -122,25 +147,30 @@ public class Client extends Thread implements ITransactionListener {
 				Output output = availableOutputs.get(i);
 				for (String publicKey : publicKeys) {
 					if (publicKey.equals(output.getDstPublicKey())) {
-						int index = i;
 						int amount = output.getAmount();
-						String hashPrevOutput = ByteArray.convertToString(transaction.hash(), 16);
+						String hashPrevOutput = transaction.hash().toString();
 						// TODO [joeren] @ [vitali]: Wenn ich hier ";" bereits
 						// anhänge, knallts bei irgendeinem Konvertiervorgang
-						Input input = new Input(amount, hashPrevOutput, index);
+						Input input = new Input(amount, hashPrevOutput, i);
 						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, this.wallet.getPublicKey());
 						this.inputs.add(input);
 
-						String typeString = null;
-						ETransaction type = transaction.whichTransaction();
-						if (type == ETransaction.COINBASE) {
-							typeString = "Coinbase Transaction";
-						} else if (type == ETransaction.REGULAR) {
-							typeString = "Regular Transaction";
-						} else if (type == ETransaction.APPROVED) {
-							typeString = "Approved Transaction";
-						} else {
-							typeString = "Unknown Transaction";
+						String typeString;
+						switch (transaction.whichTransaction()) {
+							case APPROVED:
+								typeString = "Approved Transaction";
+								break;
+							case COINBASE:
+								typeString = "Coinbase Transaction";
+								break;
+							case REGULAR:
+								typeString = "Regular Transaction";
+								break;
+							case REVOKE:
+								typeString = "Revoke Transaction";
+								break;
+							default:
+								typeString = "Unknown Transaction";
 						}
 						int availableAmount = 0;
 						List<Input> tmpInputs = new ArrayList<>(inputs);
@@ -148,8 +178,9 @@ public class Client extends Thread implements ITransactionListener {
 							availableAmount += tmpInput.getAmount();
 						}
 						//TODO[Vitali] Testing
-						System.out.println(String.format("Info: Received %d EDUCoins (new Amount: %d) from a %s with LockingScript %s",
-								amount, availableAmount, typeString, output.getLockingScript()));
+						//System.out.println(String.format("Info:Received %d EDUCoins (new Amount: %d), time since last: % 6d ms. %s with LockingScript %s",
+						//		amount, availableAmount,System.currentTimeMillis() - lastFoundTime,  typeString, output.getLockingScript()));
+						lastFoundTime = System.currentTimeMillis();
 					}
 				}
 			}
@@ -160,38 +191,83 @@ public class Client extends Thread implements ITransactionListener {
 
 	@Override
 	public void run() {
-		while (true) {
+		boolean running = true;
+		while (running) {
 			Scanner scanner = new Scanner(System.in);
 			System.out.println("Select action:");
 			System.out.println("\t - (R)egular transaction");
 			System.out.println("\t - (A)pproved transaction");
+			System.out.println("\t - (X)Revoke transaction");
+			System.out.println("\t - (B)reak client");
 			String action = scanner.nextLine();
-			String unparsedAmount = null;
 			int amount = -1;
+			Transaction trans = null;
 			switch (action.toLowerCase()) {
 			case "r":
-				System.out.print("Type in amount: ");
-				unparsedAmount = scanner.nextLine();
-				amount = Integer.valueOf(unparsedAmount);
-				System.out.print("Type in dstPublicKey: ");
-				String dstPublicKey = scanner.nextLine();
-				this.sendRegularTransaction(amount, dstPublicKey, dstPublicKey);
+				amount = getIntInput(scanner, "Type in amount: ");
+				if (amount == -1) continue;
+				String dstPublicKey = getHexInput(scanner, "Type in dstPublicKey: ");
+				if (dstPublicKey == null) continue;
+				trans = this.sendRegularTransaction(amount, dstPublicKey, dstPublicKey);
+				if (trans != null)
+					System.out.println(trans.hash());
 				break;
 			case "a":
-				System.out.print("Type in amount: ");
-				unparsedAmount = scanner.nextLine();
-				amount = Integer.valueOf(unparsedAmount);
+				amount = getIntInput(scanner, "Type in amount: ");
+				if (amount == -1) continue;
 				System.out.print("Type in owner: ");
 				String owner = scanner.nextLine();
 				System.out.print("Type in holder: ");
 				String holder = scanner.nextLine();
 				System.out.print("Type in LockingScript: ");
 				String lockingScript = scanner.nextLine();
-				this.sendApprovedTransaction(amount, owner, holder, lockingScript);
+				long time = System.currentTimeMillis();
+				trans = this.sendApprovedTransaction(amount, owner, holder, lockingScript);
+				System.out.println(System.currentTimeMillis() - time);
+				if (trans != null)
+					System.out.println(trans.hash());
+				break;
+			case "x":
+				Sha256Hash hash = Sha256Hash.wrap(getHexInput(scanner, "Type in hash of transaction to revoke: "));
+				trans = this.findTransaction(hash);
+				Transaction revoke = this.sendRevokeTransaction(trans);
+				if (revoke != null) {
+					System.out.println("Revoked transaction: " + trans.hash());
+					System.out.println("With Revoke: " + revoke.hash());
+				}
+				break;
+			case "b":
+				running = false;
 				break;
 			default:
 			}
 		}
+	}
+
+	private Transaction findTransaction(Sha256Hash hash) {
+		return this.blockChain.getTransaction(hash);
+	}
+
+	private int getIntInput(Scanner scanner, String prompt) {
+		System.out.print(prompt);
+		try {
+			return Integer.valueOf(scanner.nextLine());
+		} catch (NumberFormatException e) {
+			System.out.println("Please enter a number value!");
+			return -1;
+		}
+	}
+
+	private String getHexInput(Scanner scanner, String prompt) {
+		System.out.print(prompt);
+		String input = scanner.nextLine();
+		try {
+			new BigInteger(input, 16);
+		} catch (NullPointerException | NumberFormatException e) {
+			System.out.println("Please enter a valid hex value!");
+			return null;
+		}
+		return input;
 	}
 
 }

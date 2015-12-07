@@ -4,6 +4,7 @@ import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.BinaryTree;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -14,13 +15,12 @@ import java.util.*;
 public class Block {
 	
 	private static final int DEFAULT_REWARD = 10;
-	private static final int ZERO = 0;
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
 	private static final Sha256Hash HASH_PREV_BLOCK  = Sha256Hash.ZERO_HASH;
 	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
 	private static final long TIME = System.currentTimeMillis();
 
-	private static final byte[] BITS = ByteArray.convertFromString("1dffffff");
+	private static final byte[] BITS = ByteArray.convertFromString("1d00ffff");
 	private static final long NONCE = 1114735442;
 
 	private int version;
@@ -29,7 +29,6 @@ public class Block {
 	private long time;
 	private byte[] bits;
 	private long nonce;
-	private int transactionsCount;
 	private List<Transaction> transactions;
 
 	public Block() {
@@ -39,9 +38,7 @@ public class Block {
 		this.setTime(TIME);
 		bits = BITS;
 		this.setNonce(NONCE);
-		
 		this.transactions = new ArrayList<>();
-		this.transactionsCount = this.transactions.size();
 	}
 
 	public Block copy(){
@@ -51,7 +48,7 @@ public class Block {
 		b.setHashMerkleRoot(this.getHashMerkleRoot());
 		b.setHashPrevBlock(this.getHashPrevBlock());
 		b.setNonce(this.getNonce());
-		b.setTransactions(new ArrayList<Transaction>(this.getTransactions()));
+		b.setTransactions(new ArrayList<>(this.getTransactions()));
 		return b;
 	}
 
@@ -127,47 +124,37 @@ public class Block {
         }
 
         BinaryTree<Transaction> tree = new BinaryTree<>(getTransactions());
-        setHashMerkleRoot(Sha256Hash.wrap(tree.getRoot().hash()));
+        setHashMerkleRoot(tree.getRoot().hash());
     }
 
     public int getTransactionsCount() {
-        return this.transactionsCount;
+        return this.transactions.size();
     }
 
     public List<Transaction> getTransactions() {
-        // [joeren]: return just a copy of the transaction list, because of
-        // potential effects with transactionsCount
-        if (this.transactions != null) {
-            return new ArrayList<Transaction>(this.transactions);
+        return new ArrayList<>(this.transactions);
+    }
+
+    public Transaction getTransaction(Sha256Hash hash) {
+        for (Transaction transaction : transactions) {
+            if (transaction.hash().equals(hash)) return transaction;
         }
         return null;
     }
 
     public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-        if (this.transactions == null) {
-            this.transactionsCount = 0;
-        } else {
-            this.transactionsCount = this.transactions.size();
-        }
+        this.transactions.clear();
+        this.transactions.addAll(transactions);
         calculateMerkleRoot();
     }
 
-    public void addTransaction(Transaction transaction) {
-        if (this.transactions == null) {
-            this.transactions = new ArrayList<>();
-        }
+    public void addTransaction(@NotNull Transaction transaction) {
         this.transactions.add(transaction);
-        this.transactionsCount = this.transactions.size();
         calculateMerkleRoot();
     }
 
     public void addTransactions(Collection<Transaction> transactions) {
-        if (this.transactions == null) {
-            this.transactions = new ArrayList<>();
-        }
         this.transactions.addAll(transactions);
-        this.transactionsCount = this.transactions.size();
         calculateMerkleRoot();
     }
 
@@ -192,15 +179,15 @@ public class Block {
     
 	public int rewardCalculator(){
 		
-		int newReward = ZERO;
+		int newReward;
 		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
 		
-		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdengen, um die ausschütung zu bestimmen!!!
-		if(DEFAULT_REWARD == lastApprovedEDUCoins){
+		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdenken, um die Ausschütung zu bestimmen!!!
+		if (DEFAULT_REWARD == lastApprovedEDUCoins) {
 			newReward = DEFAULT_REWARD;
-		}else if(DEFAULT_REWARD > lastApprovedEDUCoins){
+		} else if(DEFAULT_REWARD > lastApprovedEDUCoins) {
 			newReward = lastApprovedEDUCoins + 2;
-		}else if(DEFAULT_REWARD < lastApprovedEDUCoins){
+		} else {
 			newReward = DEFAULT_REWARD - 2;
 		}		
 
@@ -209,18 +196,16 @@ public class Block {
 	
 	private int findAllApprovedEDUCoins(){
 		
-		int latestApprovedEDUCoins = ZERO;
-		List<Transaction> latestTransactions = this.getTransactions();
+		int approvedEDUCoins = 0;
 		
 		//TODO[Vitali] Might not be 100% correct???ß
-		for(Transaction transaction : latestTransactions){
-			List<Approval> approvals = transaction.getApprovals();
-			for(Approval approval : approvals){
-				latestApprovedEDUCoins += approval.getAmount();
+		for(Transaction transaction : this.getTransactions()){
+			for(Approval approval : transaction.getApprovals()){
+				approvedEDUCoins += approval.getAmount();
 			}
 		}
 		
-		return latestApprovedEDUCoins;
+		return approvedEDUCoins;
 	}
     public static Sha256Hash hash(Block block) {
 		// specify used header fields (in byte arrays)

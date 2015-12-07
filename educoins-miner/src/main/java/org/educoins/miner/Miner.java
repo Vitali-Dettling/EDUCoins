@@ -6,6 +6,7 @@ import org.educoins.core.BlockChain;
 import org.educoins.core.IBlockListener;
 import org.educoins.core.IPoWListener;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 
 import java.security.SecureRandom;
@@ -39,19 +40,14 @@ public class Miner implements IBlockListener {
 	}
 	
 	public void notifyFoundPoW(Block block) {
-		for (int i = 0; i < this.powListeners.size(); i++) {
-			IPoWListener listener = this.powListeners.get(i);
+		for (IPoWListener listener : this.powListeners) {
 			listener.foundPoW(block);
 		}
 	}
 
 	@Override
 	public void blockReceived(Block block) {
-		Thread powThread1 = new PoWThread(block.copy());
-		powThread1.start();
-
-		Thread powThread2 = new PoWThread(block.copy());
-		powThread2.start();
+		new PoWThread(block.copy()).start();
 	}
 	
 	private class PoWThread extends Thread implements IBlockListener {
@@ -82,13 +78,18 @@ public class Miner implements IBlockListener {
 
 				challenge = this.block.hash();
 				
-//				System.out.println("nonce: " + ByteArray.convertToString(nonce) + " | challenge: " + ByteArray.convertToString(challenge.getBytes())
+				if (challenge.compareTo(targetThreshold) > 0)
+				{
+					//System.out.println("Found smaller challenge! target: " + FormatToScientifc.format(targetThreshold, 1)
+							//+ " | challenge: " + FormatToScientifc.format(challenge, 1));
+				}
+				// System.out.println("challenge: " + ByteArray.convertToString(challenge.getBytes())
 //				+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold.getBytes()));
 				
-			} while (this.active && challenge.compareTo(targetThreshold) < 0);
+ 			} while (this.active && challenge.compareTo(targetThreshold) < 0);
 
 			if (this.active) {
-				notifyFoundPoW(block);	
+				notifyFoundPoW(block);
 			}
 			
 			blockChain.removeBlockListener(this);
