@@ -73,7 +73,7 @@ public class LevelDbBlockStoreTest {
             itemCount++;
         }
 
-        assertTrue(itemCount == filled);
+        assertEquals(itemCount, filled + 1);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class LevelDbBlockStoreTest {
     @Test
     public void testGetLatest() {
         Block latest = this.store.getLatest();
-        assertNull(latest);
+
         int filled = 23;
         BlockStoreFactory.fillRandom(this.store, filled);
 

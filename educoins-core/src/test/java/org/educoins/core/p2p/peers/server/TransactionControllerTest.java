@@ -1,11 +1,10 @@
 package org.educoins.core.p2p.peers.server;
 
 import org.educoins.core.BlockChain;
-import org.educoins.core.CoinbaseTransaction;
-import org.educoins.core.Input;
 import org.educoins.core.Transaction;
 import org.educoins.core.utils.RestClient;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,11 @@ public class TransactionControllerTest {
     public static void init() throws URISyntaxException {
     }
 
+    @Ignore
     @Test
     public void testSubmitEmptyTransaction() throws IOException {
         Transaction tx = new Transaction();
         restClient.post(TRANSACTION_URI, tx);
+        //TODO: Test real error case
     }
 }

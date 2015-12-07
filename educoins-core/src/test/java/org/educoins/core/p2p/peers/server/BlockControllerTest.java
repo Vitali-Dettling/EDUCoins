@@ -2,6 +2,7 @@ package org.educoins.core.p2p.peers.server;
 
 import org.educoins.core.Block;
 import org.educoins.core.store.IBlockIterator;
+import org.educoins.core.testutils.BlockStoreFactory;
 import org.educoins.core.utils.RestClient;
 import org.junit.Test;
 
@@ -15,7 +16,7 @@ import static org.junit.Assert.*;
  * Tests the  {@link BlockController#getBlocks()} and {@link BlockController#getBlockHeaders()}.
  * Created by typus on 11/12/15.
  */
-public class BlockServletTest extends PeerServerTest {
+public class BlockControllerTest extends PeerServerTest {
     @Test
     public void TestBlocks() throws Exception {
         List<Block> expected = new ArrayList<>();
@@ -32,6 +33,7 @@ public class BlockServletTest extends PeerServerTest {
 
     @Test
     public void TestSpecificBlock() throws Exception {
+        store.put(BlockStoreFactory.getRandomBlock(store.getLatest()));
         Block expected = store.iterator().next();
         Block block = new RestClient<Block>()
                 .get(URI.create(blocksResourcePath + expected.hash().toString()), Block.class);

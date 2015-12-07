@@ -5,6 +5,7 @@ import org.educoins.core.Input;
 import org.educoins.core.Transaction;
 import org.educoins.core.p2p.peers.server.PeerServer;
 import org.educoins.core.utils.RestClient;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.IntegrationTest;
@@ -31,13 +32,11 @@ public class SoloMinerPeerTest {
     /**
      * Submit an empty transaction. Behavior is undefined so far.
      */
+    @Ignore
     @Test
     public void testSubmitEmpty() throws IOException {
         Transaction tx = new Transaction();
         restClient.post(TRANSACTION_URI, tx);
+        //TODO: Test real error case
     }
-
-    @Test
-    public void test(){}
-
 }

@@ -1,6 +1,7 @@
 package org.educoins.core.p2p.peers.server.config;
 
 import org.educoins.core.*;
+import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.LocalPeer;
 import org.educoins.core.store.*;
@@ -17,30 +18,12 @@ import org.springframework.context.annotation.Configuration;
 public class MvcConfig {
     private IBlockStore blockStore;
     private BlockChain blockChain;
-    @Autowired
     private IProxyPeerGroup peerGroup;
-
-    //TODO: remove block generation
-    public Block getRandomBlock(Block block) {
-        Block toReturn = getRandomBlock();
-        toReturn.setHashPrevBlock(block.hash());
-        return toReturn;
-    }
-
-    public Block getRandomBlock() {
-        Block toReturn = new Block();
-        toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
-        toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
-        for (int i = 0; i < Math.random() * 1000; ++i)
-            toReturn.addTransaction(new Transaction());
-        return toReturn;
-    }
 
     @Bean
     public IBlockStore blockStore() throws BlockStoreException {
         if (blockStore == null) {
             this.blockStore = new LevelDbBlockStore();
-            fillRandomTree(this.blockStore);
         }
         return blockStore;
     }
@@ -57,18 +40,19 @@ public class MvcConfig {
     @Bean
     public BlockChain blockChain() throws BlockStoreException {
         if (blockChain == null) {
-            this.blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, blockStore());
+            this.blockChain = new BlockChain(proxyPeerGroup(), proxyPeerGroup(), proxyPeerGroup(), blockStore());
         }
         return blockChain;
     }
 
-    public void fillRandomTree(IBlockStore store) {
-        Block previous = getRandomBlock();
-        for (int i = 0; i < 23; i++) {
-            previous = getRandomBlock(previous);
-            store.put(previous);
+    @Bean
+    public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {
+        if (peerGroup == null) {
+            peerGroup = new HttpProxyPeerGroup();
         }
+        return peerGroup;
     }
+
 }
 
 

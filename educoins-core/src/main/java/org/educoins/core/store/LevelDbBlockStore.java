@@ -37,6 +37,16 @@ public class LevelDbBlockStore implements IBlockStore {
 
         try {
             tryOpen(directory, dbFactory, options);
+            Block block = new Block();
+            byte[] hash = block.hash().getBytes();
+            if (genesisHash == null) {
+                genesisHash = hash;
+            }
+
+            database.put(hash, getJson(block).getBytes());
+            latest = block.hash().getBytes();
+            database.put(LATEST_KEY, latest);
+
         } catch (IOException e) {
             try {
                 dbFactory.repair(directory, options);

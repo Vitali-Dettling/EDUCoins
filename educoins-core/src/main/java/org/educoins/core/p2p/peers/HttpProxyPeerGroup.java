@@ -16,8 +16,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * An {@link IProxyPeerGroup} of {@link HttpProxyPeerGroup}.
  */
-@Component
-@Scope("singleton")
+//@Component
+//@Scope("singleton")
 public class HttpProxyPeerGroup implements IProxyPeerGroup {
     private final Logger logger = LoggerFactory.getLogger(HttpProxyPeerGroup.class);
 

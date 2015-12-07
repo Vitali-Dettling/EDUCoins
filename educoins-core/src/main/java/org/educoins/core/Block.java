@@ -139,8 +139,7 @@ public class Block {
         block.setNonce(getNonce());
         block.setTime(getTime());
         block.setVersion(getVersion());
-        block.setTransactions(null);
-        block.transactionsCount = transactionsCount;
+        block.transactions = null;
         return block;
     }
 
@@ -155,7 +154,7 @@ public class Block {
         return null;
     }
 
-    public void setTransactions(List<Transaction> transactions) {
+    public void setTransactions(@NotNull List<Transaction> transactions) {
         this.transactions.clear();
         this.transactions.addAll(transactions);
         calculateMerkleRoot();
@@ -166,7 +165,7 @@ public class Block {
         calculateMerkleRoot();
     }
 
-    public void addTransactions(Collection<Transaction> transactions) {
+    public void addTransactions(@NotNull Collection<Transaction> transactions) {
         this.transactions.addAll(transactions);
         calculateMerkleRoot();
     }

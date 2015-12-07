@@ -1,10 +1,11 @@
 package org.educoins.core;
 
 import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.utils.BinaryTree;
-import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -18,7 +19,8 @@ public class Verification {
 	
 	private Wallet wallet;
 	private BlockChain blockChain;
-	
+	private Logger logger = LoggerFactory.getLogger(BlockChain.class);
+
 	public Verification(Wallet wallet, BlockChain blockChain){
 		this.blockChain = blockChain;
 		this.wallet = wallet;	
@@ -37,11 +39,11 @@ public class Verification {
 
 		// 1. Find the previous block.
 		//TODO: Check naming of lastBlock / getPreviousBlock()
-		Block lastBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
-		
-		// 2. Does the previous block exist?
-		if (lastBlock == null) {
-			System.out.println("DEBUG: verifyBlock: lastBlock is null");
+		Block lastBlock = null;
+		try {
+			lastBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
+		} catch (BlockNotFoundException e) {
+			logger.warn("verifyBlock: lastBlock is null", e);
 			return false;
 		}
 

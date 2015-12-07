@@ -12,6 +12,7 @@ import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.jetbrains.annotations.NotNull;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
@@ -247,8 +248,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	// TODO [Vitali] Method needs to be deleted as soon as the DB will be
 	// introduced.
-	public Block getPreviousBlock(Block currentBlock) {
-		return this.store.get(currentBlock.getHashPrevBlock().getBytes());
+	public Block getPreviousBlock(Block currentBlock) throws BlockNotFoundException {
+		return this.store.get(currentBlock.getHashPrevBlock());
 	}
 
 	public Transaction getTransaction(Sha256Hash hash) {

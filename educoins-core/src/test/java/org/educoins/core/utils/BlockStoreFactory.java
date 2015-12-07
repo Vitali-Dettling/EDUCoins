@@ -28,7 +28,7 @@ public class BlockStoreFactory {
     }
 
     public static void fillRandomTree(IBlockStore store, int filled) {
-        Block previous = getRandomBlock();
+        Block previous = store.getLatest();
         for (int i = 0; i < filled; i++) {
             previous = getRandomBlockChain(previous);
             store.put(previous);

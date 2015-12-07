@@ -1,6 +1,5 @@
 package org.educoins.core.p2p.peers;
 
-import educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.CentralDiscovery;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
@@ -8,6 +7,7 @@ import org.educoins.core.p2p.peers.server.PeerServer;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.testutils.BlockStoreFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -22,9 +22,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.io.IOException;
 import java.net.URI;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -42,8 +41,6 @@ public class HttpProxyPeerGroupTest {
     private IBlockStore blockStore;
     @Autowired
     private BlockChain blockChain;
-    @Autowired
-    private IProxyPeerGroup ownPeerGroup;
     private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup();
 
     @Before
