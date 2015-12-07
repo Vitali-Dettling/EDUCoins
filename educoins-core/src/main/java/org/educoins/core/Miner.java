@@ -1,13 +1,11 @@
-package org.educoins.miner;
+package org.educoins.core;
 
 
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.IBlockListener;
-import org.educoins.core.IPoWListener;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -15,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Miner implements IBlockListener {
 
 	private static final int BIT32 = 32;
-	
+	Logger log = LoggerFactory.getLogger(Miner.class);
 	private BlockChain blockChain;
 	private CopyOnWriteArrayList<IPoWListener> powListeners;
 
@@ -86,7 +84,7 @@ public class Miner implements IBlockListener {
 				// System.out.println("challenge: " + ByteArray.convertToString(challenge.getBytes())
 //				+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold.getBytes()));
 				
- 			} while (this.active && challenge.compareTo(targetThreshold) < 0);
+			} while (this.active && challenge.compareTo(targetThreshold) > 0);
 
 			if (this.active) {
 				notifyFoundPoW(block);

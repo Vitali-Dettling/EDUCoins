@@ -1,8 +1,7 @@
 package org.educoins.core;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.educoins.core.Transaction.ETransaction;
@@ -15,6 +14,7 @@ import org.educoins.core.utils.Sha256Hash;
 import com.google.common.annotations.VisibleForTesting;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
+
 
 	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
@@ -53,6 +53,29 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
+	
+    public @NotNull Block getBlock(Sha256Hash blockHash) throws BlockNotFoundException {
+        return store.get(blockHash);
+    }
+
+    public @NotNull Collection<Block> getBlocks() throws BlockNotFoundException {
+        List<Block> blocks = new ArrayList<>();
+        IBlockIterator iterator = store.iterator();
+        while (iterator.hasNext()) {
+            blocks.add(iterator.next());
+        }
+        return blocks;
+    }
+
+    public @NotNull Collection<Block> getBlockHeaders() throws BlockNotFoundException {
+        List<Block> headers = new ArrayList<>();
+        IBlockIterator iterator = store.iterator();
+        while (iterator.hasNext()) {
+            headers.add(iterator.next().getHeader());
+        }
+        return headers;
+    }
+
 
 	public Wallet getWallet() {
 		return this.wallet;

@@ -1,14 +1,13 @@
 package org.educoins.core.store;
 
 import com.google.gson.Gson;
-import org.jetbrains.annotations.Nullable;
 import org.educoins.core.Block;
+import org.educoins.core.utils.IO;
+import org.educoins.core.utils.Sha256Hash;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBException;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.Options;
+import org.iq80.leveldb.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +24,10 @@ public class LevelDbBlockStore implements IBlockStore {
 
     private DB database;
     private byte[] latest;
+
+    public LevelDbBlockStore() throws BlockStoreException {
+        this(IO.getDefaultBlockStoreFile());
+    }
 
     public LevelDbBlockStore(File directory) throws BlockStoreException {
         DBFactory dbFactory = JniDBFactory.factory;
@@ -62,24 +65,20 @@ public class LevelDbBlockStore implements IBlockStore {
         database.put(LATEST_KEY, latest);
     }
 
-
     @Override
     @NotNull
-    public synchronized Block get(byte[] hash) {
-        byte[] byteBlock = database.get(hash);
+    public synchronized Block get(Sha256Hash hash) throws BlockNotFoundException {
+        byte[] byteBlock = database.get(hash.getBytes());
 
-        if (byteBlock == null) {
-            try {
-				throw new BlockNotFoundException(hash);
-			} catch (BlockNotFoundException e) {
-				e.printStackTrace();
-			}
-        }
+        if (byteBlock == null)
+            throw new BlockNotFoundException(hash.toString());
+
+
         return getBlock(byteBlock);
     }
 
     @SuppressWarnings("restriction")
-	@Override
+    @Override
     @Nullable
     public synchronized Block getLatest() {
         if (isEmpty()) return null;
@@ -92,11 +91,11 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     @Override
-    public void destroy() throws BlockStoreException  {
+    public void destroy() throws BlockStoreException {
         try {
             database.close();
-        } catch (IOException  e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new BlockStoreException(e);
         }
     }
 
@@ -117,13 +116,19 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     private Block getBlock(byte[] jsonblock) {
-    	Block block = null;
-    	try{
-    		block = new Gson().fromJson(new String(jsonblock), Block.class);
-    	}catch(Exception e){
-    		System.err.println("Not a block object, why is it stored in the DB?");
-    		block = null;
-    	}
+        Block block;
+        try {
+            block = new Gson().fromJson(new String(jsonblock), Block.class);
+        } catch (Exception e) {
+            System.err.println("Not a block object, why is it stored in the DB?");
+            block = null;
+        }
         return block;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        this.destroy();
     }
 }

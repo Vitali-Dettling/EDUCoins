@@ -1,6 +1,7 @@
 package org.educoins.core.store;
 
 import org.educoins.core.Block;
+import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -32,7 +33,7 @@ public class BlockIterator implements IBlockIterator {
     @NotNull
     public Block next() throws BlockNotFoundException {
         Block elementToReturn = this.currentElement;
-        byte[] currentHash = currentElement.getHashPrevBlock().getBytes();
+        Sha256Hash currentHash = currentElement.getHashPrevBlock();
         currentElement = blockStore.get(currentHash);
         return elementToReturn;
     }

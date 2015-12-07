@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Default test for {@link LevelDbBlockStore}
+ * Default test for {@link org.educoins.core.store.LevelDbBlockStore}
  * Created by typus on 10/19/15.
  */
 public class LevelDbBlockStoreTest {
@@ -49,7 +49,7 @@ public class LevelDbBlockStoreTest {
         int filled = 23;
         BlockStoreFactory.fillRandom(this.store, filled);
 
-        Block actual = this.store.get(b1.hash().getBytes());
+        Block actual = this.store.get(b1.hash());
         byte[] expected = Block.hash(b1).getBytes();
         byte[] actualBytes = Block.hash(actual).getBytes();
 
@@ -89,7 +89,7 @@ public class LevelDbBlockStoreTest {
 
         this.store.put(b1);
 
-        Block b2 = this.store.get(Block.hash(b1).getBytes());
+        Block b2 = this.store.get(b1.hash());
         assert b2 != null;
         assertEquals(1, b2.getTransactionsCount());
 

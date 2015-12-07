@@ -1,24 +1,25 @@
 package org.educoins.core.p2p;
 
-import org.educoins.core.Block;
-import org.educoins.core.IBlockListener;
-import org.educoins.core.IBlockReceiver;
+import org.educoins.core.*;
+import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.p2p.discovery.DiscoveryStrategy;
-import org.educoins.core.p2p.nodes.Peer;
+import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * The P2p specific implementation of an {@link IBlockReceiver}.
  * Created by typus on 10/27/15.
  */
 public class P2pBlockReceiver implements IBlockReceiver {
+
+    private final Logger logger = LoggerFactory.getLogger(P2pBlockReceiver.class);
 
     private final IBlockStore blockStore;
     private final Set<IBlockListener> blockListeners = new HashSet<>();
@@ -31,37 +32,48 @@ public class P2pBlockReceiver implements IBlockReceiver {
     }
 
     @Override
-    public void addBlockListener(IBlockListener blockListener) {
+    public void addBlockListener(@NotNull IBlockListener blockListener) {
+        logger.debug("adding bocklistener: " + blockListener.getClass().getName());
         this.blockListeners.add(blockListener);
     }
 
     @Override
-    public void removeBlockListener(IBlockListener blockListener) {
+    public void removeBlockListener(@NotNull IBlockListener blockListener) {
+        logger.debug("removing bocklistener: " + blockListener.getClass().getName());
         this.blockListeners.remove(blockListener);
     }
 
     @Override
     public void receiveBlocks() {
+        logger.info("Fetching blocks.");
         Collection<Block> blockList = new ArrayList<>();
 
-        for (Peer peer : discovery.getPeers()) {
-            mergeBlocks(peer.getBlocks(), blockList);
+        try {
+
+            //only FullPeers are allowed to change data also they are the only Peers to provide block data.
+            for (RemoteProxy peer : discovery.getReferencePeers()) {
+                try {
+
+                    mergeBlocks(peer.getBlocks(), blockList);
+
+                } catch (IOException e) {
+                    logger.warn("One of the peers retrieved via discovery did not respond properly", e);
+                }
+            }
+
+            blockList.forEach(block -> {
+                Threading.run(() -> blockStore.put(block));
+                blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block));
+            });
+
+        } catch (DiscoveryException e) {
+            logger.error("Peer discovery failed! We are now in an invalid state!", e);
         }
 
-        blockList.forEach(block -> {
-            Threading.run(() -> blockStore.put(block));
-            blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block));
-        });
     }
 
 
-    private void mergeBlocks(Collection<Block> newBlocks, Collection<Block> globalBlocks) {
-//        for (Block block : newBlocks) {
-//            if (globalBlocks.contains(block)) {
-//
-//            }
-//        }
-
+    private void mergeBlocks(@NotNull Collection<Block> newBlocks, @NotNull Collection<Block> globalBlocks) {
         //TODO: replace this by meaningful branching/merging logic.
         globalBlocks.addAll(newBlocks);
     }

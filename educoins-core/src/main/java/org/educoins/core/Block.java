@@ -13,7 +13,7 @@ import java.util.*;
 //import org.educoins.core.p2p.messages.MessageProtos;
 
 public class Block {
-	
+
 	private static final int DEFAULT_REWARD = 10;
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
 	private static final Sha256Hash HASH_PREV_BLOCK  = Sha256Hash.ZERO_HASH;
@@ -41,7 +41,7 @@ public class Block {
 		this.transactions = new ArrayList<>();
 	}
 
-	public Block copy(){
+	public Block copy() {
 		Block b = new Block();
 		b.setBits(this.getBits());
 		b.setTime(this.getTime());
@@ -131,6 +131,19 @@ public class Block {
         return this.transactions.size();
     }
 
+    public Block getHeader() {
+        Block block = new Block();
+        block.setHashPrevBlock(getHashMerkleRoot());
+        block.setBits(getBits());
+        block.setHashMerkleRoot(getHashMerkleRoot());
+        block.setNonce(getNonce());
+        block.setTime(getTime());
+        block.setVersion(getVersion());
+        block.setTransactions(null);
+        block.transactionsCount = transactionsCount;
+        return block;
+    }
+
     public List<Transaction> getTransactions() {
         return new ArrayList<>(this.transactions);
     }
@@ -176,7 +189,7 @@ public class Block {
 
         return builder.build();
     }*/
-    
+
 	public int rewardCalculator(){
 		
 		int newReward;
@@ -232,23 +245,24 @@ public class Block {
 
         Block block = (Block) o;
 
-        if (version != block.version) return false;
-        if (time != block.time) return false;
-        if (nonce != block.nonce) return false;
-        if (!hashPrevBlock.equals(block.hashPrevBlock)) return false;
-        if (!hashMerkleRoot.equals(block.hashMerkleRoot)) return false;
-        return bits.equals(block.bits);
+
+        return version == block.version
+                && time == block.time
+                && nonce == block.nonce
+                && hashPrevBlock.equals(block.hashPrevBlock)
+                && hashMerkleRoot.equals(block.hashMerkleRoot)
+                && Arrays.equals(bits, block.bits);
     }
 
 
     @Override
-	public int hashCode() {
-		int result = version;
-		result = 31 * result + hashPrevBlock.hashCode();
-		result = 31 * result + hashMerkleRoot.hashCode();
-		result = 31 * result + (int) (time ^ (time >>> 32));
-		result = 31 * result + bits.hashCode();
-		result = 31 * result + (int) (nonce ^ (nonce >>> 32));
-		return result;
-	}
+    public int hashCode() {
+        int result = version;
+        result = 31 * result + Arrays.hashCode(hashPrevBlock.getBytes());
+        result = 31 * result + Arrays.hashCode(hashMerkleRoot.getBytes());
+        result = 31 * result + (int) (time ^ (time >>> 32));
+        result = 31 * result + bits.hashCode();
+        result = 31 * result + (int) (nonce ^ (nonce >>> 32));
+        return result;
+    }
 }
