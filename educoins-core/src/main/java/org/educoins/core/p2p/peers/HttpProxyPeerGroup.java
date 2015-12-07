@@ -57,15 +57,15 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     }
 
     @Override
-    public void discover() {
-        rediscover(0);
-    }
-
-    @Override
     public Collection<RemoteProxy> getAllProxies() {
         Set<RemoteProxy> proxies = new HashSet<>();
         proxies.addAll(this.proxies);
         return proxies;
+    }
+
+    @Override
+    public void discover() {
+        rediscover(0);
     }
 
     @Override
@@ -184,5 +184,17 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 } catch (InterruptedException e) {
                 }
         }
+    }
+
+    @Override
+    public void foundPoW(Block block) {
+        getHighestRatedProxies().forEach(proxy -> {
+            try {
+                proxy.transmitBlock(block);
+            } catch (IOException e) {
+                logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy
+                        .getiNetAddress().getHost(), e);
+            }
+        });
     }
 }

@@ -1,13 +1,11 @@
 package org.educoins.core.p2p.peers;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.CentralDiscovery;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.server.PeerServer;
 import org.educoins.core.store.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

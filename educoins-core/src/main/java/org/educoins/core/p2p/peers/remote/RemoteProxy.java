@@ -63,6 +63,14 @@ public abstract class RemoteProxy {
     public abstract Block getBlock(Sha256Hash hash) throws IOException;
 
     /**
+     * Transmits a specific {@link Block} to the remote node.
+     *
+     * @param block the {@link Block} to transmit.
+     * @throws IOException if the communication went wrong.
+     */
+    public abstract void transmitBlock(Block block) throws IOException;
+
+    /**
      * Introduces itself to at least one other {@link Peer}.
      */
     public abstract Collection<RemoteProxy> hello() throws IOException;
@@ -98,22 +106,22 @@ public abstract class RemoteProxy {
     }
 
     @Override
+    public int hashCode() {
+        int result = pubkey != null ? pubkey.hashCode() : 0;
+        result = 31 * result + rating;
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         RemoteProxy that = (RemoteProxy) o;
 
-        if (rating != that.rating) return false;
-        return !(pubkey != null ? !pubkey.equals(that.pubkey) : that.pubkey != null);
+        return rating == that.rating
+                && !(pubkey != null ? !pubkey.equals(that.pubkey) : that.pubkey != null);
 
-    }
-
-    @Override
-    public int hashCode() {
-        int result = pubkey != null ? pubkey.hashCode() : 0;
-        result = 31 * result + rating;
-        return result;
     }
 
     @Override

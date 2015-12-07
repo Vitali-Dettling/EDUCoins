@@ -3,15 +3,11 @@ package org.educoins;
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.p2p.peers.SoloMinerPeer;
-import org.educoins.core.store.BlockStoreException;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.miner.Miner;
+import org.educoins.core.store.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by dacki on 03.12.15.
@@ -32,7 +28,7 @@ public class MinerApplication {
         }
         BlockChain bc = new BlockChain(BlockReveiverDummy.create(), TransactionReveiverDummy.create(), null, blockStore);
         Miner miner = new Miner(bc);
-        SoloMinerPeer peer = new SoloMinerPeer(bc);
+        SoloMinerPeer peer = new SoloMinerPeer(bc, miner);
         try {
             peer.start();
         } catch (DiscoveryException e) {

@@ -9,12 +9,11 @@ import java.util.Collection;
 
 /**
  * A Group of Peers represented as {@link RemoteProxy}s. This unit handles discovery mechanisms autonomously.
- * It is also
- * {@link IBlockReceiver}, {@link ITransactionReceiver} and {@link ITransactionTransmitter} to enable {@link Peer}s
- * to handle Networking.
+ * It is also {@link IBlockReceiver}, {@link ITransactionReceiver}, {@link ITransactionTransmitter}
+ * and {@link IPoWListener} to enable {@link Peer}s to handle Networking.
  * Created by typus on 12/3/15.
  */
-public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, ITransactionTransmitter {
+public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, ITransactionTransmitter, IPoWListener {
 
     /**
      * Adds a {@link RemoteProxy} to the PeerGroup.

@@ -66,6 +66,12 @@ public class HttpProxy extends RemoteProxy {
     }
 
     @Override
+    public void transmitBlock(Block block) throws IOException {
+        new RestClient<Block>()
+                .post(URI.create(iNetAddress.toString() + PeerServer.BLOCKS_RESOURCE_PATH), block);
+    }
+
+    @Override
     public Collection<RemoteProxy> hello() throws IOException {
         URI iNetAddress = URI.create(PROTOCOL + InetAddress.getLocalHost().getHostAddress() + ":" + ownPort);
         logger.debug("Sending own address: " + iNetAddress.toString());

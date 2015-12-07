@@ -61,6 +61,11 @@ public class LocalProxy extends RemoteProxy {
     }
 
     @Override
+    public void transmitBlock(Block block) throws IOException {
+        blockStore.put(block);
+    }
+
+    @Override
     public Collection<RemoteProxy> hello() throws IOException {
         return Arrays.asList(new RemoteProxy[]{this});
     }

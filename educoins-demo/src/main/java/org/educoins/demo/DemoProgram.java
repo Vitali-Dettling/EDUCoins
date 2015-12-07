@@ -3,7 +3,6 @@ package org.educoins.demo;
 import org.educoins.core.*;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.miner.Miner;
 
 import java.io.File;
 import java.io.IOException;

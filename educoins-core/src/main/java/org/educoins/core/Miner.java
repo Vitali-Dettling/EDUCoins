@@ -1,10 +1,6 @@
-package org.educoins.miner;
+package org.educoins.core;
 
 
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.IBlockListener;
-import org.educoins.core.IPoWListener;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
@@ -15,9 +11,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Miner implements IBlockListener {
 
-	Logger log = LoggerFactory.getLogger(Miner.class);
 	private static final int BIT32 = 32;
-	
+	Logger log = LoggerFactory.getLogger(Miner.class);
 	private BlockChain blockChain;
 	private CopyOnWriteArrayList<IPoWListener> powListeners;
 
@@ -93,14 +88,16 @@ public class Miner implements IBlockListener {
 		}
 		
 		@Override
-		public void blockReceived(Block block) {
-			this.active = false;
-		}
-		
-		@Override
 		public String toString() {
 			return "PoWThread";
 		}
+
+		@Override
+		public void blockReceived(Block block) {
+			this.active = false;
+		}
+
+
 	}
 
 }
