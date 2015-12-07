@@ -1,9 +1,11 @@
 package org.educoins.core.p2p.peers.server.config;
 
 import org.educoins.core.*;
+import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.LocalPeer;
 import org.educoins.core.store.*;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +17,8 @@ import org.springframework.context.annotation.Configuration;
 public class MvcConfig {
     private IBlockStore blockStore;
     private BlockChain blockChain;
+    @Autowired
+    private IProxyPeerGroup peerGroup;
 
     //TODO: remove block generation
     public Block getRandomBlock(Block block) {
@@ -53,8 +57,7 @@ public class MvcConfig {
     @Bean
     public BlockChain blockChain() throws BlockStoreException {
         if (blockChain == null) {
-            LocalPeer localPeer = new LocalPeer();
-            this.blockChain = new BlockChain(localPeer, localPeer, localPeer, blockStore());
+            this.blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, blockStore());
         }
         return blockChain;
     }

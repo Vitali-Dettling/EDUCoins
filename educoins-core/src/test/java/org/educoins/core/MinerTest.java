@@ -1,7 +1,7 @@
-package org.educoins.miner;
+package org.educoins.core;
 
-import org.educoins.core.*;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.utils.Threading;
 import org.junit.*;
 
 import static org.mockito.Mockito.*;

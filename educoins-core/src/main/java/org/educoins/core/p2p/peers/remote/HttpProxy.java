@@ -68,7 +68,7 @@ public class HttpProxy extends RemoteProxy {
     @Override
     public void transmitBlock(Block block) throws IOException {
         new RestClient<Block>()
-                .post(URI.create(iNetAddress.toString() + PeerServer.BLOCKS_RESOURCE_PATH), block);
+                .post(URI.create(iNetAddress.toString() + PeerServer.BLOCKS_RESOURCE_PATH), block, Block.class);
     }
 
     @Override

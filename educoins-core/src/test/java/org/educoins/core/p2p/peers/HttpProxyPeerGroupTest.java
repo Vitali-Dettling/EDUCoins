@@ -1,11 +1,16 @@
 package org.educoins.core.p2p.peers;
 
+import educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.CentralDiscovery;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.server.PeerServer;
-import org.educoins.core.store.*;
-import org.junit.*;
+import org.educoins.core.store.BlockNotFoundException;
+import org.educoins.core.store.IBlockIterator;
+import org.educoins.core.store.IBlockStore;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +19,12 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.io.IOException;
 import java.net.URI;
 
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -31,7 +40,10 @@ public class HttpProxyPeerGroupTest {
 
     @Autowired
     private IBlockStore blockStore;
-
+    @Autowired
+    private BlockChain blockChain;
+    @Autowired
+    private IProxyPeerGroup ownPeerGroup;
     private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup();
 
     @Before
@@ -102,5 +114,21 @@ public class HttpProxyPeerGroupTest {
             block.getTransactions().forEach(transaction -> count[0]++);
         }
         return count[0];
+    }
+
+    @Test
+    public void testFoundPoW() throws IOException {
+        Block block = BlockStoreFactory.getRandomBlock();
+        final boolean[] received = {false};
+        blockChain.addBlockListener(new IBlockListener() {
+            @Override
+            public void blockReceived(Block block2) {
+                received[0] = true;
+                assertNotNull(block2);
+                assertTrue(block.equals(block2));
+            }
+        });
+        clientPeerGroup.foundPoW(block);
+        assertTrue(received[0]);
     }
 }
