@@ -116,14 +116,13 @@ public class Client extends Thread implements ITransactionListener {
 		return transaction;
 	}
 
-	public RevokeTransaction sendRevokeTransaction(Transaction transaction) {
+	public Transaction sendRevokeTransaction(Transaction transaction) {
 		try {
-			RevokeTransaction revoke;
 			if (transaction == null) {
 				System.out.println("Transaction not found");
 				return null;
 			}
-			revoke = new RevokeTransaction(transaction);
+			Transaction revoke = transaction.revokeTransaction();
 			this.blockChain.sendTransaction(revoke);
 			return revoke;
 		} catch (CannotRevokeRevokeTransactionException e) {
@@ -179,8 +178,8 @@ public class Client extends Thread implements ITransactionListener {
 							availableAmount += tmpInput.getAmount();
 						}
 						//TODO[Vitali] Testing
-						System.out.println(String.format("Info:Received %d EDUCoins (new Amount: %d), time since last: % 6d ms. %s with LockingScript %s",
-								amount, availableAmount,System.currentTimeMillis() - lastFoundTime,  typeString, output.getLockingScript()));
+						//System.out.println(String.format("Info:Received %d EDUCoins (new Amount: %d), time since last: % 6d ms. %s with LockingScript %s",
+						//		amount, availableAmount,System.currentTimeMillis() - lastFoundTime,  typeString, output.getLockingScript()));
 						lastFoundTime = System.currentTimeMillis();
 					}
 				}

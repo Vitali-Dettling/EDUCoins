@@ -80,8 +80,8 @@ public class Miner implements IBlockListener {
 				
 				if (challenge.compareTo(targetThreshold) > 0)
 				{
-					System.out.println("Found smaller challenge! target: " + FormatToScientifc.format(targetThreshold, 1) 
-							+ " | challenge: " + FormatToScientifc.format(challenge, 1));
+					//System.out.println("Found smaller challenge! target: " + FormatToScientifc.format(targetThreshold, 1)
+							//+ " | challenge: " + FormatToScientifc.format(challenge, 1));
 				}
 				// System.out.println("challenge: " + ByteArray.convertToString(challenge.getBytes())
 //				+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold.getBytes()));

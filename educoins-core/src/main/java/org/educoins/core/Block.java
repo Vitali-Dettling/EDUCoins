@@ -4,6 +4,7 @@ import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.BinaryTree;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -14,7 +15,6 @@ import java.util.*;
 public class Block {
 	
 	private static final int DEFAULT_REWARD = 10;
-	private static final int ZERO = 0;
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
 	private static final Sha256Hash HASH_PREV_BLOCK  = Sha256Hash.ZERO_HASH;
 	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
@@ -29,7 +29,6 @@ public class Block {
 	private long time;
 	private byte[] bits;
 	private long nonce;
-	private int transactionsCount;
 	private List<Transaction> transactions;
 
 	public Block() {
@@ -39,9 +38,7 @@ public class Block {
 		this.setTime(TIME);
 		bits = BITS;
 		this.setNonce(NONCE);
-		
 		this.transactions = new ArrayList<>();
-		this.transactionsCount = this.transactions.size();
 	}
 
 	public Block copy(){
@@ -51,7 +48,7 @@ public class Block {
 		b.setHashMerkleRoot(this.getHashMerkleRoot());
 		b.setHashPrevBlock(this.getHashPrevBlock());
 		b.setNonce(this.getNonce());
-		b.setTransactions(new ArrayList<Transaction>(this.getTransactions()));
+		b.setTransactions(new ArrayList<>(this.getTransactions()));
 		return b;
 	}
 
@@ -131,16 +128,11 @@ public class Block {
     }
 
     public int getTransactionsCount() {
-        return this.transactionsCount;
+        return this.transactions.size();
     }
 
     public List<Transaction> getTransactions() {
-        // [joeren]: return just a copy of the transaction list, because of
-        // potential effects with transactionsCount
-        if (this.transactions != null) {
-            return new ArrayList<Transaction>(this.transactions);
-        }
-        return null;
+        return new ArrayList<>(this.transactions);
     }
 
     public Transaction getTransaction(Sha256Hash hash) {
@@ -151,30 +143,18 @@ public class Block {
     }
 
     public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-        if (this.transactions == null) {
-            this.transactionsCount = 0;
-        } else {
-            this.transactionsCount = this.transactions.size();
-        }
+        this.transactions.clear();
+        this.transactions.addAll(transactions);
         calculateMerkleRoot();
     }
 
-    public void addTransaction(Transaction transaction) {
-        if (this.transactions == null) {
-            this.transactions = new ArrayList<>();
-        }
+    public void addTransaction(@NotNull Transaction transaction) {
         this.transactions.add(transaction);
-        this.transactionsCount = this.transactions.size();
         calculateMerkleRoot();
     }
 
     public void addTransactions(Collection<Transaction> transactions) {
-        if (this.transactions == null) {
-            this.transactions = new ArrayList<>();
-        }
         this.transactions.addAll(transactions);
-        this.transactionsCount = this.transactions.size();
         calculateMerkleRoot();
     }
 

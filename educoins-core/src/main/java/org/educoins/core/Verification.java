@@ -58,10 +58,9 @@ public class Verification {
 		}
 		
 		//5. Verification of all transactions in a block.
-		boolean isTransactionValid = true;
+		boolean isTransactionValid = false;
 		List<Transaction> transactions = toVerifyBlock.getTransactions();
 	    for (Transaction transaction : transactions) {
-	    	
 			//5.1 Check for transaction type.
 			switch (transaction.whichTransaction()) {
 				case APPROVED:
@@ -328,10 +327,7 @@ public class Verification {
 	}
 
 	public boolean verifyRevokeTransaction(Transaction transaction) {
-		if (!transaction.getClass().equals(RevokeTransaction.class)) return false;
-		RevokeTransaction revokeTransaction = (RevokeTransaction) transaction;
-
-		Transaction transRevoked = this.blockChain.getTransaction(revokeTransaction.getApprovedTransaction());
+		Transaction transRevoked = this.blockChain.getTransaction(transaction.getApprovedTransaction());
 		if (transRevoked == null) {
 			System.out.println("DEBUG: verifyRevokeTransaction: Transaction be be revoked cannot be found");
 			return false;

@@ -2,6 +2,7 @@ package org.educoins.core;
 
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.CannotRevokeRevokeTransactionException;
 import org.educoins.core.utils.Hashable;
 import org.educoins.core.utils.Sha256Hash;
 
@@ -23,6 +24,7 @@ public class Transaction implements Hashable {
 
 	protected int approvalsCount;
 	protected List<Approval> approvals;
+	private Sha256Hash approvedTransaction;
 
 	public Transaction() {
 		this.inputs = new ArrayList<>();
@@ -31,6 +33,8 @@ public class Transaction implements Hashable {
 		this.outputsCount = this.outputs.size();
 		this.approvals = new ArrayList<>();
 		this.approvalsCount = this.approvals.size();
+
+		this.approvedTransaction = null;
 	}
 
 	public int getVersion() {
@@ -154,6 +158,14 @@ public class Transaction implements Hashable {
 		this.approvalsCount = this.approvals.size();
 	}
 
+	public Sha256Hash getApprovedTransaction() {
+		return approvedTransaction;
+	}
+
+	public void setApprovedTransaction(Sha256Hash approvedTransaction) {
+		this.approvedTransaction = approvedTransaction;
+	}
+
 	public ETransaction whichTransaction() {
 		// Coinbase:
 		// inputs = 0; outputs > 0; 	approvals = 0;
@@ -163,20 +175,26 @@ public class Transaction implements Hashable {
 		// inputs > 0; outputs >= 0; 	approvals > 0
 
 		// Check for transaction type.
-		if ((this.getInputs() == null || this.getInputs().size() == 0)
-				&& (this.getOutputs() != null && this.getOutputs().size() > 0)
-				&& (this.getApprovals() == null || this.getApprovals().size() == 0)) {
-			return ETransaction.COINBASE;
-		}
-		if ((this.getInputs() != null && this.getInputs().size() > 0)
-				&& (this.getOutputs() != null && this.getOutputs().size() > 0)
-				&& (this.getApprovals() == null || this.getApprovals().size() == 0)) {
-			return ETransaction.REGULAR;
-		}
-		if ((this.getInputs() != null && this.getInputs().size() > 0)
-				&& ((this.getOutputs() == null || this.getOutputs().size() == 0) || (this.getOutputs() != null && this
-						.getOutputs().size() > 0)) && (this.getApprovals() != null && this.getApprovals().size() > 0)) {
-			return ETransaction.APPROVED;
+		if (this.approvedTransaction == null) {
+			if ((this.getInputs() == null || this.getInputs().size() == 0)
+					&& (this.getOutputs() != null && this.getOutputs().size() > 0)
+					&& (this.getApprovals() == null || this.getApprovals().size() == 0)) {
+				return ETransaction.COINBASE;
+			}
+			if ((this.getInputs() != null && this.getInputs().size() > 0)
+					&& (this.getOutputs() != null && this.getOutputs().size() > 0)
+					&& (this.getApprovals() == null || this.getApprovals().size() == 0)) {
+				return ETransaction.REGULAR;
+			}
+			if ((this.getInputs() != null && this.getInputs().size() > 0)
+					&& ((this.getOutputs() == null || this.getOutputs().size() == 0) || (this.getOutputs() != null && this
+					.getOutputs().size() > 0)) && (this.getApprovals() != null && this.getApprovals().size() > 0)) {
+				return ETransaction.APPROVED;
+			}
+		} else {
+			if (inputs != null && inputs.size() != 0) {
+				return ETransaction.REVOKE;
+			}
 		}
 		return null;
 	}
@@ -188,23 +206,47 @@ public class Transaction implements Hashable {
 
 	public static Sha256Hash hash(Transaction transaction) {
 
+		byte[] input;
+		byte[] output;
+		byte[] approved;
 		byte[] toBeHashed = null;
 		// Check for transaction type.
-		if (transaction.whichTransaction() == ETransaction.COINBASE) {
-			toBeHashed = getByteArrayOutput(transaction);
-		} else if (transaction.whichTransaction() == ETransaction.REGULAR) {
-			byte[] input = getByteArrayInput(transaction);
-			byte[] output = getByteArrayOutput(transaction);
-			toBeHashed = ByteArray.concatByteArrays(input, output);
-		} else if (transaction.whichTransaction() == ETransaction.APPROVED) {
-			byte[] input = getByteArrayInput(transaction);
-			byte[] approved = getByteArrayApproved(transaction);
-			toBeHashed = ByteArray.concatByteArrays(input, approved);
+		switch (transaction.whichTransaction()) {
+			case APPROVED:
+				input = getByteArrayInput(transaction);
+				approved = getByteArrayApproved(transaction);
+				toBeHashed = ByteArray.concatByteArrays(input, approved);
+				break;
+			case COINBASE:
+				toBeHashed = getByteArrayOutput(transaction);
+				break;
+			case REGULAR:
+				input = getByteArrayInput(transaction);
+				output = getByteArrayOutput(transaction);
+				toBeHashed = ByteArray.concatByteArrays(input, output);
+				break;
+			case REVOKE:
+				toBeHashed = transaction.approvedTransaction.getBytes();
+				break;
 		}
-
 		// hash concatenated header fields and return
 		return Sha256Hash.wrap(SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed)));
 
+	}
+
+	public Transaction revokeTransaction() throws CannotRevokeRevokeTransactionException {
+		Transaction revoke = new Transaction();
+		if (whichTransaction() == ETransaction.REVOKE) {
+			throw new CannotRevokeRevokeTransactionException();
+		}
+		revoke.setApprovedTransaction(hash());
+		for (int i = 0; i < approvals.size(); i++) {
+			Input input = new Input(approvals.get(i).getAmount(), hash().toString(), i);
+			revoke.addInput(input);
+		}
+		revoke.setOutputs(outputs);
+		setOutputs(null);
+		return revoke;
 	}
 
 	// TODO[Vitali] Much better implementation, with generic class and
