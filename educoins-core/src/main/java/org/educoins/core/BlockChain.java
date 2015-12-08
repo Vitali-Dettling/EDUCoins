@@ -77,6 +77,13 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
         return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
     }
 
+    public @NotNull Block getLatestBlock() throws BlockNotFoundException {
+        Block latest = store.getLatest();
+        if (latest != null)
+            return latest;
+        return new Block();
+    }
+
     public @NotNull Block getBlock(Sha256Hash blockHash) throws BlockNotFoundException {
         return store.get(blockHash);
     }

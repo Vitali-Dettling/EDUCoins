@@ -3,9 +3,8 @@ package org.educoins.fullblockhainnode;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.p2p.peers.*;
+import org.educoins.core.p2p.peers.FullBlockChainPeer;
 import org.educoins.core.store.BlockStoreException;
-import org.educoins.core.store.LevelDbBlockStore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,10 +28,15 @@ public class FullBlockChainNode {
 
     public static void main(String[] args) throws BlockStoreException {
         ConfigurableApplicationContext run = SpringApplication.run(FullBlockChainNode.class, args);
-        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
-        FullBlockChainPeer peer = new FullBlockChainPeer(new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore()));
+        BlockChain blockChain = (BlockChain) run.getBean("blockChain");
+        FullBlockChainPeer peer = new FullBlockChainPeer(blockChain);
+
+        //TODO: for demo, remove afterwards
         try {
             peer.start();
+            blockChain.foundPoW(BlockStoreFactory.getRandomBlock(blockChain.getLatestBlock()));
+            blockChain.foundPoW(BlockStoreFactory.getRandomBlock(blockChain.getLatestBlock()));
+            blockChain.foundPoW(BlockStoreFactory.getRandomBlock(blockChain.getLatestBlock()));
         } catch (DiscoveryException e) {
             SpringApplication.exit(run, () -> -1);
         }

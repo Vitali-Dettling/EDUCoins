@@ -93,7 +93,12 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         logger.info("Receiving blocks now...");
         for (RemoteProxy proxy : getHighestRatedProxies()) {
             try {
-                proxy.getBlocks().parallelStream().forEach(block -> blockListeners.
+                Collection<Block> blocks = proxy.getBlocks();
+                logger.info("Received {} blocks from proxy {}@{}",
+                        blocks.size(), proxy.getPubkey(), proxy.getiNetAddress());
+
+                //TODO: parallel?
+                blocks.stream().forEach(block -> blockListeners.
                         forEach(iBlockListener -> iBlockListener.blockReceived(block)));
 
                 proxy.rateHigher();

@@ -38,6 +38,7 @@ public class BlockController {
      */
     @RequestMapping(method = RequestMethod.GET)
     public Collection<Block> getBlocks() throws BlockNotFoundException {
+        logger.info("Offering blocks");
         return blockChain.getBlocks();
     }
 
@@ -50,6 +51,7 @@ public class BlockController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void createBlock(@RequestBody @NotNull Block block) throws BlockChainVerificationException {
+        logger.info("Received Block from foreign node via push");
         blockChain.blockReceived(block);
     }
 
@@ -63,6 +65,7 @@ public class BlockController {
     @RequestMapping(path = "/{hash}", method = RequestMethod.GET)
     public Block getBlock(@PathVariable(value = "hash") String hash) throws
             BlockNotFoundException {
+        logger.info("Offering block {}", hash);
         return blockChain.getBlock(Sha256Hash.wrap(hash));
     }
 
@@ -74,6 +77,7 @@ public class BlockController {
      */
     @RequestMapping(path = "/headers", method = RequestMethod.GET)
     public Collection<Block> getBlockHeaders() throws BlockNotFoundException {
+        logger.info("Offering block headers.");
         return blockChain.getBlockHeaders();
     }
 

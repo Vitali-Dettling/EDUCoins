@@ -2,9 +2,8 @@ package org.educoins.referencenode;
 
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.p2p.peers.*;
+import org.educoins.core.p2p.peers.ReferencePeer;
 import org.educoins.core.store.BlockStoreException;
-import org.educoins.core.store.LevelDbBlockStore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,14 +25,26 @@ public class ReferenceNode {
 
     public static void main(String[] args) throws BlockStoreException {
         ConfigurableApplicationContext run = SpringApplication.run(ReferenceNode.class, args);
-        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
-        BlockChain blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore());
-        Miner miner = new Miner(blockChain);
-        ReferencePeer peer = new ReferencePeer(blockChain, miner, new Wallet());
+        BlockChain blockChain = (BlockChain) run.getBean("blockChain");
+        ReferencePeer peer = new ReferencePeer(blockChain, new Miner(blockChain), new Wallet());
+
+        //TODO: for demo, remove afterwards
         try {
             peer.start();
         } catch (DiscoveryException e) {
             SpringApplication.exit(run, () -> -1);
         }
+
+
+//        ConfigurableApplicationContext run = SpringApplication.run(ReferenceNode.class, args);
+//        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
+//        BlockChain blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore());
+//        Miner miner = new Miner(blockChain);
+//        ReferencePeer peer = new ReferencePeer(blockChain, miner, new Wallet());
+//        try {
+//            peer.start();
+//        } catch (DiscoveryException e) {
+//            SpringApplication.exit(run, () -> -1);
+//        }
     }
 }
