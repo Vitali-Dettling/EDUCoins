@@ -84,7 +84,7 @@ public class Miner implements IBlockListener {
 				// System.out.println("challenge: " + ByteArray.convertToString(challenge.getBytes())
 //				+ " | targetThreshold: " + ByteArray.convertToString(targetThreshold.getBytes()));
 				
-			} while (this.active && challenge.compareTo(targetThreshold) > 0);
+			} while (this.active && challenge.compareTo(targetThreshold) < 0);
 
 			if (this.active) {
 				notifyFoundPoW(block);
