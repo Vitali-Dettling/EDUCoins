@@ -14,6 +14,12 @@ import java.util.Collection;
 public interface DiscoveryStrategy {
 
     /**
+     * Makes the caller known to the target nodes.
+     * @throws DiscoveryException whenever the hello-process failed.
+     */
+    void hello() throws DiscoveryException;
+
+    /**
      * Discovers the specific {@link ReferencePeer}s.
      *
      * @return a {@link Collection} of {@link ReferencePeer}s.

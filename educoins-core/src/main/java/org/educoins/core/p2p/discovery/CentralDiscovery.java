@@ -18,16 +18,30 @@ import java.util.*;
  * Created by typus on 11/3/15.
  */
 public class CentralDiscovery implements DiscoveryStrategy {
-    private final Logger logger = LoggerFactory.getLogger(CentralDiscovery.class);
-    public static final String RESOURCE_NODES_MINER = "/nodes/miner";
-    public static final String RESOURCE_NODES_BLOCKCHAIN = "/nodes/blockchain";
+    public static final String NODES = "nodes/";
+    public static final String RESOURCE_NODES_MINER = "nodes/miner";
+    public static final String RESOURCE_NODES_BLOCKCHAIN = "nodes/blockchain";
     public static final String RESOURCE_NODES_REFERENCE = "nodes/reference";
+    private final Logger logger = LoggerFactory.getLogger(CentralDiscovery.class);
     private String centralUrl;
     private RestClient<RemoteProxy[]> client;
 
     public CentralDiscovery() {
         this.centralUrl = AppConfig.getCentralUrl();
         this.client = new RestClient<>();
+    }
+
+    @Override
+    public void hello() throws DiscoveryException {
+        try {
+            new RestClient<RemoteProxy>()
+                    .post(URI.create(centralUrl + NODES),
+                            new HttpProxy(AppConfig.getOwnAddress("http://"),
+                                    AppConfig.getOwnPublicKey().toString()));
+        } catch (Exception e) {
+            throw new DiscoveryException(e);
+        }
+
     }
 
     @Override

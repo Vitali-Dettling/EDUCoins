@@ -33,6 +33,11 @@ public class LocalDiscovery implements DiscoveryStrategy {
 
 
     @Override
+    public void hello() throws DiscoveryException {
+
+    }
+
+    @Override
     public @NotNull Collection<RemoteProxy> getReferencePeers() throws DiscoveryException {
         return getPeers();
     }

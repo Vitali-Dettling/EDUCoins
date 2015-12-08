@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,7 +72,7 @@ public class HttpProxy extends RemoteProxy {
 
     @Override
     public Collection<RemoteProxy> hello() throws IOException {
-        URI iNetAddress = URI.create(PROTOCOL + InetAddress.getLocalHost().getHostAddress() + ":" + ownPort);
+        URI iNetAddress = AppConfig.getOwnAddress(PROTOCOL);
         logger.debug("Sending own address: " + iNetAddress.toString());
         String target = this.iNetAddress.toString() + PeerServer.HELLO_HTTP_RESOURCE_PATH;
         logger.info("Helloing to target: " + target);

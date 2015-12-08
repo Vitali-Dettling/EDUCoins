@@ -6,8 +6,6 @@ import org.educoins.core.p2p.discovery.*;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
@@ -65,6 +63,11 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void discover() {
+        try {
+            new CentralDiscovery().hello();
+        } catch (DiscoveryException e) {
+            logger.warn("Could not hello the Central!", e);
+        }
         rediscover(0);
     }
 

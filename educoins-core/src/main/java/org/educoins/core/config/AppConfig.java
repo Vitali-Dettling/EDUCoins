@@ -4,6 +4,7 @@ import org.educoins.core.utils.Sha256Hash;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.*;
 import java.util.Properties;
 
 /**
@@ -39,13 +40,19 @@ public class AppConfig {
         }
     }
 
+    public static URI getOwnAddress(String protocol) throws UnknownHostException {
+        return URI.create(protocol
+                + InetAddress.getLocalHost().getHostAddress() + ":"
+                + AppConfig.getOwnPort());
+    }
+
     /**
      * Returns the port configured of the running peer server.
      *
      * @return the port as int.
      */
     public static int getOwnPort() {
-        return config.getServerPort();
+        return AppConfig.getServerPort();
     }
 
     public static String getCentralUrl() {
