@@ -21,34 +21,18 @@ public class LocalDiscovery implements DiscoveryStrategy {
         this.blockStore = blockStore;
     }
 
-
-    public Collection<RemoteProxy> getPeers() {
-        /**
-         * So far, it doesn't make sense to addProxy more than one local peer.
-         */
-        Collection<RemoteProxy> remoteNodes = new ArrayList<>();
-        remoteNodes.add(new LocalProxy(blockStore));
-        return remoteNodes;
-    }
-
-
     @Override
     public void hello() throws DiscoveryException {
 
     }
 
     @Override
-    public @NotNull Collection<RemoteProxy> getReferencePeers() throws DiscoveryException {
-        return getPeers();
-    }
-
-    @Override
-    public @NotNull Collection<RemoteProxy> getFullBlockchainPeers() throws DiscoveryException {
-        return getPeers();
-    }
-
-    @Override
-    public @NotNull Collection<RemoteProxy> getSoloMinerPeers() throws DiscoveryException {
-        return getPeers();
+    public @NotNull Collection<RemoteProxy> getPeers() throws DiscoveryException {
+        /**
+         * So far, it doesn't make sense to addProxy more than one local peer.
+         */
+        Collection<RemoteProxy> remoteNodes = new ArrayList<>();
+        remoteNodes.add(new LocalProxy(blockStore));
+        return remoteNodes;
     }
 }

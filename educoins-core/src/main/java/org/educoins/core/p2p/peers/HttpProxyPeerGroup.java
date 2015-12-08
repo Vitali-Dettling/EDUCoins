@@ -44,7 +44,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     @Override
     public void discover(DiscoveryStrategy strategy) throws DiscoveryException {
         logger.info("Starting new Discovery ({})", strategy.getClass().getName());
-        strategy.getReferencePeers().forEach(proxies::add);
+        strategy.getPeers().forEach(proxies::add);
         if (proxies.size() == 0)
             throw new DiscoveryException("No proxies received!");
         proxies.forEach(proxy -> {
@@ -90,6 +90,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void receiveBlocks() {
+        logger.info("Receiving blocks now...");
         for (RemoteProxy proxy : getHighestRatedProxies()) {
             try {
                 proxy.getBlocks().parallelStream().forEach(block -> blockListeners.
@@ -98,9 +99,11 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 proxy.rateHigher();
             } catch (IOException e) {
                 if (checkProxiesState(proxy, e)) return;
-                logger.error("Could not retrieve Blocks", e);
+                logger.error("Could not retrieve Blocks from proxy: {}@{}",
+                        proxy.getPubkey(), proxy.getiNetAddress(), e);
             }
         }
+        logger.info("Receiving blocks was successful.");
     }
 
     @Override
@@ -116,6 +119,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void receiveTransactions() {
+        logger.info("Receiving Transactions now.");
         for (RemoteProxy proxy : getHighestRatedProxies()) {
             try {
                 proxy.getBlocks().parallelStream().
@@ -127,9 +131,11 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 proxy.rateHigher();
             } catch (IOException e) {
                 if (checkProxiesState(proxy, e)) return;
-                logger.error("Could not retrieve Blocks", e);
+                logger.error("Could not retrieve Blocks from proxy: {}@{}",
+                        proxy.getPubkey(), proxy.getiNetAddress(), e);
             }
         }
+        logger.info("Receiving Transactions successful.");
     }
 
     //region getter/setter

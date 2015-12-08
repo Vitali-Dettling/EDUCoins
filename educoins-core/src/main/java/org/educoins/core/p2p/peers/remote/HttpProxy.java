@@ -30,7 +30,6 @@ public class HttpProxy extends RemoteProxy {
 
     public HttpProxy(@NotNull URI iNetAddress, @NotNull String pubkey) {
         super(iNetAddress, pubkey);
-        setINetAddress(iNetAddress);
     }
 
     @Override
@@ -80,13 +79,5 @@ public class HttpProxy extends RemoteProxy {
                 .post(URI.create(target),
                         new HttpProxy(iNetAddress, this.ownPublicKey.toString()),
                         HttpProxy[].class));
-    }
-
-    public void setINetAddress(URI iNetAddress) {
-        if (!iNetAddress.getScheme().equals(PROTOCOL))
-            this.iNetAddress = URI.create(PROTOCOL
-                    + iNetAddress.getHost() + ':'
-                    + iNetAddress.getPort()
-                    + iNetAddress.getPath());
     }
 }

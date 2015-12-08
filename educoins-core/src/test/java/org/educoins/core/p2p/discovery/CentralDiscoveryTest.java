@@ -29,50 +29,31 @@ public class CentralDiscoveryTest {
     DiscoveryStrategy discovery = new CentralDiscovery();
     RestClient clientMock = Mockito.mock(RestClient.class);
     List<RemoteProxy> expectedPeers = new ArrayList<>();
-    private URI uriBlockChain;
     private URI uriReference;
 
     @Before
     public void setup() throws NoSuchFieldException, IllegalAccessException, IOException, URISyntaxException {
-        uriBlockChain = new URI(centralUrl + "/nodes/blockchain");
-        uriReference = new URI(centralUrl + "/nodes/reference");
+        uriReference = new URI(centralUrl + "/nodes/");
         FieldInjector.setField(discovery, clientMock, "client");
     }
 
     @Test
     public void testErrors() throws URISyntaxException, IOException {
-        when(clientMock.get(uriBlockChain, HttpProxy[].class)).thenReturn(null);
-        assertNotNull(discovery.getFullBlockchainPeers());
-
         when(clientMock.get(uriReference, HttpProxy[].class)).thenReturn(null);
-        assertNotNull(discovery.getReferencePeers());
+        assertNotNull(discovery.getPeers());
 
         when(clientMock.get(uriReference, HttpProxy[].class)).thenThrow(new IOException("ERROR"));
         exception.expect(DiscoveryException.class);
-        discovery.getReferencePeers();
-
-        when(clientMock.get(uriBlockChain, HttpProxy[].class)).thenThrow(new IOException("ERROR"));
-        exception.expect(DiscoveryException.class);
-        discovery.getFullBlockchainPeers();
+        discovery.getPeers();
     }
 
     @Test
     public void testGetFullPeers() throws Exception {
         RemoteProxy[] remoteProxies = new RemoteProxy[]{new HttpProxy()};
         Collections.addAll(expectedPeers, remoteProxies);
-        when(clientMock.get(uriBlockChain, HttpProxy[].class)).thenReturn(remoteProxies);
-
-        Collection<RemoteProxy> fullPeersActual = discovery.getFullBlockchainPeers();
-        fullPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));
-    }
-
-    @Test
-    public void testGetReadOnlyPeers() throws Exception {
-        RemoteProxy[] remoteProxies = new RemoteProxy[]{new HttpProxy()};
-        Collections.addAll(expectedPeers, remoteProxies);
         when(clientMock.get(uriReference, HttpProxy[].class)).thenReturn(remoteProxies);
 
-        Collection<RemoteProxy> readOnlyPeersActual = discovery.getReferencePeers();
-        readOnlyPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));
+        Collection<RemoteProxy> fullPeersActual = discovery.getPeers();
+        fullPeersActual.forEach(peer -> assertTrue(expectedPeers.contains(peer)));
     }
 }

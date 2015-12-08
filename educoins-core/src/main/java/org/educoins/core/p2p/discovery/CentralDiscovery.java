@@ -19,9 +19,6 @@ import java.util.*;
  */
 public class CentralDiscovery implements DiscoveryStrategy {
     public static final String NODES = "nodes/";
-    public static final String RESOURCE_NODES_MINER = "nodes/miner";
-    public static final String RESOURCE_NODES_BLOCKCHAIN = "nodes/blockchain";
-    public static final String RESOURCE_NODES_REFERENCE = "nodes/reference";
     private final Logger logger = LoggerFactory.getLogger(CentralDiscovery.class);
     private String centralUrl;
     private RestClient<RemoteProxy[]> client;
@@ -34,10 +31,13 @@ public class CentralDiscovery implements DiscoveryStrategy {
     @Override
     public void hello() throws DiscoveryException {
         try {
-            new RestClient<RemoteProxy>()
-                    .post(URI.create(centralUrl + NODES),
-                            new HttpProxy(AppConfig.getOwnAddress("http://"),
-                                    AppConfig.getOwnPublicKey().toString()));
+            HttpProxy thisProxy = new HttpProxy(URI.create("localhost"),
+                    AppConfig.getOwnPublicKey().toString());
+            thisProxy.setPort(AppConfig.getOwnPort());
+
+            String ip = new RestClient<RemoteProxy>()
+                    .post(URI.create(centralUrl + NODES), thisProxy, String.class);
+            AppConfig.setInetAddress(ip);
         } catch (Exception e) {
             throw new DiscoveryException(e);
         }
@@ -45,21 +45,9 @@ public class CentralDiscovery implements DiscoveryStrategy {
     }
 
     @Override
-    public @NotNull Collection<RemoteProxy> getReferencePeers() throws DiscoveryException {
+    public @NotNull Collection<RemoteProxy> getPeers() throws DiscoveryException {
         logger.info("Requesting ReferenceNodes...");
-        return getRemoteProxies(RESOURCE_NODES_REFERENCE);
-    }
-
-    @Override
-    public @NotNull Collection<RemoteProxy> getFullBlockchainPeers() throws DiscoveryException {
-        logger.info("Requesting FullBlockChainNodes...");
-        return getRemoteProxies(RESOURCE_NODES_BLOCKCHAIN);
-    }
-
-    @Override
-    public @NotNull Collection<RemoteProxy> getSoloMinerPeers() throws DiscoveryException {
-        logger.info("Requesting SoloMinerNodes...");
-        return getRemoteProxies(RESOURCE_NODES_MINER);
+        return getRemoteProxies(NODES);
     }
 
     @NotNull

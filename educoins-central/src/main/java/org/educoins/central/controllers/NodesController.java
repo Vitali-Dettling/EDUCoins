@@ -1,7 +1,6 @@
 package org.educoins.central.controllers;
 
 import org.educoins.central.domain.Node;
-import org.educoins.central.domain.PeerType;
 import org.educoins.central.repositories.NodesRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.URI;
 import java.util.Collection;
 
 /**
@@ -29,28 +30,15 @@ public class NodesController {
         return nodesRepository.findAll();
     }
 
-    @RequestMapping("miner")
-    public Collection<Node> getMinerPeers() {
-        return nodesRepository.findFirst10ByType(PeerType.MINER);
-    }
-
-
-    @RequestMapping("blockchain")
-    public Collection<Node> getBlockChainPeers() {
-        return nodesRepository.findFirst10ByType(PeerType.BLOCKCHAIN);
-    }
-
-    @RequestMapping("reference")
-    public Collection<Node> getReferencePeers() {
-        return nodesRepository.findFirst10ByType(PeerType.REFERENCE);
-    }
-
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<Node> hello(@RequestBody Node node) {
-        logger.info("Retrieved 'hello' from {}@{}", node.getPubkey(), node.getInetAddress());
-        if (node != null)
-            return new ResponseEntity<>(nodesRepository.save(node), HttpStatus.CREATED);
+    public ResponseEntity<URI> hello(@RequestBody Node node, HttpServletRequest request) {
+        URI inetAddr = URI.create(request.getRemoteAddr());
+        logger.info("Retrieved 'hello' from {}@{}", node.getPubkey(), inetAddr);
 
-        return new ResponseEntity<>(new Node(), HttpStatus.BAD_REQUEST);
+        //TODO: get protocol aware
+        node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + node.getPort()));
+        nodesRepository.save(node);
+
+        return new ResponseEntity<>(inetAddr, HttpStatus.OK);
     }
 }

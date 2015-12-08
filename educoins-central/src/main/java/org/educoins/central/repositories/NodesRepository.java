@@ -1,7 +1,6 @@
 package org.educoins.central.repositories;
 
 import org.educoins.central.domain.Node;
-import org.educoins.central.domain.PeerType;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,8 +13,6 @@ import java.util.Collection;
  */
 @Repository
 public interface NodesRepository extends CrudRepository<Node, Long> {
-    Collection<Node> findFirst10ByType(PeerType type);
-
     Collection<Node> findByTimestampBefore(LocalDateTime dateTime);
 
     Node save(Node node);

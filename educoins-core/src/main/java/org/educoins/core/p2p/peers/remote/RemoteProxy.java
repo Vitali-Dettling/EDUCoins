@@ -21,6 +21,7 @@ public abstract class RemoteProxy {
     protected transient final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected URI iNetAddress;
     protected String pubkey;
+    protected int port;
     /**
      * Describes the level integrity of this Proxy.
      */
@@ -103,6 +104,14 @@ public abstract class RemoteProxy {
 
     public URI getiNetAddress() {
         return iNetAddress;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     @Override
