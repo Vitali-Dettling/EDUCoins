@@ -44,7 +44,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     @Override
     public void discover(DiscoveryStrategy strategy) throws DiscoveryException {
         logger.info("Starting new Discovery ({})", strategy.getClass().getName());
-        strategy.getReferencePeers().forEach(proxies::add);
+        strategy.getPeers().forEach(proxies::add);
         if (proxies.size() == 0)
             throw new DiscoveryException("No proxies received!");
         proxies.forEach(proxy -> {

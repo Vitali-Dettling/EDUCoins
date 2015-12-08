@@ -4,7 +4,8 @@ import org.educoins.core.utils.Sha256Hash;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 /**
@@ -14,6 +15,7 @@ import java.util.Properties;
 public class AppConfig {
 
     public static Properties prop = new Properties();
+    private static String inetAddress;
     private static AppConfig config = new AppConfig();
 
     public AppConfig() {
@@ -40,10 +42,16 @@ public class AppConfig {
         }
     }
 
+    public static void setInetAddress(String ip) {
+        inetAddress = ip;
+    }
+
     public static URI getOwnAddress(String protocol) throws UnknownHostException {
-        return URI.create(protocol
-                + InetAddress.getLocalHost().getHostAddress() + ":"
-                + AppConfig.getOwnPort());
+        if (inetAddress != null)
+            return URI.create(protocol
+                    + inetAddress + ":"
+                    + AppConfig.getOwnPort());
+        throw new UnknownHostException("IP not yet set!");
     }
 
     /**

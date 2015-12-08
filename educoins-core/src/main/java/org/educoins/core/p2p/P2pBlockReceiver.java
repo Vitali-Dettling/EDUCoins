@@ -51,7 +51,7 @@ public class P2pBlockReceiver implements IBlockReceiver {
         try {
 
             //only FullPeers are allowed to change data also they are the only Peers to provide block data.
-            for (RemoteProxy peer : discovery.getReferencePeers()) {
+            for (RemoteProxy peer : discovery.getPeers()) {
                 try {
 
                     mergeBlocks(peer.getBlocks(), blockList);
