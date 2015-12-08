@@ -3,6 +3,7 @@ package org.educoins.central.domain;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.net.URI;
+import java.time.LocalDateTime;
 
 /**
  * The Node representation like stored in the database and also presented to the requester.
@@ -17,6 +18,8 @@ public class Node {
 
     private PeerType type;
 
+    private LocalDateTime timestamp;
+
     public Node() {
     }
 
@@ -24,6 +27,7 @@ public class Node {
         this.iNetAddress = iNetAddress;
         this.pubkey = pubkey;
         this.type = type;
+        this.timestamp = LocalDateTime.now();
     }
 
     public URI getInetAddress() {
@@ -48,6 +52,22 @@ public class Node {
 
     public void setType(PeerType type) {
         this.type = type;
+    }
+
+    public URI getiNetAddress() {
+        return iNetAddress;
+    }
+
+    public void setiNetAddress(URI iNetAddress) {
+        this.iNetAddress = iNetAddress;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override
