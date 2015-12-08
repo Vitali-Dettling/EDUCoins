@@ -54,8 +54,8 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
     }
 
     @Override
-    public void receiveBlocks() {
-        this.remoteProxies.receiveBlocks();
+    public void receiveBlocks(Sha256Hash from) {
+        this.remoteProxies.receiveBlocks(from);
     }
 
     @Override

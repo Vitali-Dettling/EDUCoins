@@ -51,6 +51,14 @@ public class HttpProxy extends RemoteProxy {
     }
 
     @Override
+    public @NotNull Collection<Block> getBlocks(Sha256Hash from) throws IOException {
+        return Arrays.asList(
+                new RestClient<Block[]>()
+                        .get(URI.create(iNetAddress.toString() + PeerServer.BLOCKS_FROM_RESOURCE_PATH + from.toString()),
+                                Block[].class));
+    }
+
+    @Override
     @Nullable
     public Block getBlock(Sha256Hash hash) throws IOException {
         try {

@@ -5,6 +5,7 @@ import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.p2p.discovery.DiscoveryStrategy;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.utils.Sha256Hash;
 import org.educoins.core.utils.Threading;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class P2pBlockReceiver implements IBlockReceiver {
     }
 
     @Override
-    public void receiveBlocks() {
+    public void receiveBlocks(Sha256Hash from) {
         logger.info("Fetching blocks.");
         Collection<Block> blockList = new ArrayList<>();
 

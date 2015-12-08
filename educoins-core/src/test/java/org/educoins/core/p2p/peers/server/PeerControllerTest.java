@@ -34,6 +34,7 @@ public class PeerControllerTest {
 
     @Test
     public void testAddPeer() throws Exception {
+        AppConfig.setInetAddress("localhost");
         HttpProxy proxy = new HttpProxy(AppConfig.getOwnAddress(HttpProxy.PROTOCOL), AppConfig.getOwnPublicKey().toString());
 
         HttpProxy foreignNode = new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8081"), "myPub1");

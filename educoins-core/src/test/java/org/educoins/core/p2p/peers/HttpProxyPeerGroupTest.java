@@ -4,13 +4,10 @@ import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.CentralDiscovery;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.server.PeerServer;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.*;
 import org.educoins.core.testutils.BlockStoreFactory;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.educoins.core.utils.Sha256Hash;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +19,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.io.IOException;
 import java.net.URI;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -63,8 +59,7 @@ public class HttpProxyPeerGroupTest {
         int count = getBlockCount();
 
         clientPeerGroup.addBlockListener(listener);
-
-        clientPeerGroup.receiveBlocks();
+        clientPeerGroup.receiveBlocks(blockStore.getLatest().hash());
         verify(listener, atLeast(count)).blockReceived(any(Block.class));
     }
 
@@ -74,11 +69,13 @@ public class HttpProxyPeerGroupTest {
         clientPeerGroup.clearProxies();
         clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:42"), "myPub1"));
 
-        for (int i = 0; i < 4; ++i)
-            clientPeerGroup.receiveBlocks();
+        Sha256Hash hash = blockStore.getLatest().hash();
+        for (int i = 0; i < 4; ++i) {
+            clientPeerGroup.receiveBlocks(hash);
+        }
 
         IProxyPeerGroup spy = spy(clientPeerGroup);
-        spy.receiveBlocks();
+        spy.receiveBlocks(hash);
         verify(spy, atLeastOnce()).discover(any(CentralDiscovery.class));
     }
 

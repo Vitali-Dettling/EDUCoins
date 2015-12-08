@@ -97,6 +97,17 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
         return blocks;
     }
 
+    public @NotNull Collection<Block> getBlocksFrom(Sha256Hash from) throws BlockNotFoundException {
+        List<Block> blocks = new ArrayList<>();
+        IBlockIterator iterator = store.iterator();
+        while (iterator.hasNext()) {
+            Block next = iterator.next();
+            if (next.hash().equals(from)) return blocks;
+            blocks.add(next);
+        }
+        return blocks;
+    }
+
     public @NotNull Collection<Block> getBlockHeaders() throws BlockNotFoundException {
         List<Block> headers = new ArrayList<>();
         IBlockIterator iterator = store.iterator();
@@ -191,7 +202,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
         this.store.put(block);
         logger.info("Added block to blockStore.");
         // this.blockTransmitter.transmitBlock(block);
-        this.blockReceiver.receiveBlocks();
+        try {
+            this.blockReceiver.receiveBlocks(getLatestBlock().hash());
+        } catch (BlockNotFoundException e) {
+            this.blockReceiver.receiveBlocks(block.hash());
+        }
     }
 
     public Block prepareNewBlock(Block currentBlock) {
