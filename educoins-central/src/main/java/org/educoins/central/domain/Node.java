@@ -16,17 +16,16 @@ public class Node {
 
     private URI iNetAddress;
 
-    private PeerType type;
+    private int port;
 
     private LocalDateTime timestamp;
 
     public Node() {
     }
 
-    public Node(String pubkey, URI iNetAddress, PeerType type) {
+    public Node(String pubkey, URI iNetAddress) {
         this.iNetAddress = iNetAddress;
         this.pubkey = pubkey;
-        this.type = type;
         this.timestamp = LocalDateTime.now();
     }
 
@@ -46,14 +45,6 @@ public class Node {
         this.pubkey = pubkey;
     }
 
-    public PeerType getType() {
-        return type;
-    }
-
-    public void setType(PeerType type) {
-        this.type = type;
-    }
-
     public URI getiNetAddress() {
         return iNetAddress;
     }
@@ -70,25 +61,27 @@ public class Node {
         this.timestamp = timestamp;
     }
 
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
     @Override
     public int hashCode() {
-        int result = pubkey != null ? pubkey.hashCode() : 0;
-        result = 31 * result + (iNetAddress != null ? iNetAddress.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        return result;
+        return pubkey != null ? pubkey.hashCode() : 0;
     }
 
     @Override
     public boolean equals(Object o) {
-
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         Node node = (Node) o;
 
-        return !(pubkey != null ? !pubkey.equals(node.pubkey) : node.pubkey != null)
-                && !(iNetAddress != null ? !iNetAddress.equals(node.iNetAddress) : node.iNetAddress != null)
-                && (type == node.type);
+        return !(pubkey != null ? !pubkey.equals(node.pubkey) : node.pubkey != null);
 
     }
 }
