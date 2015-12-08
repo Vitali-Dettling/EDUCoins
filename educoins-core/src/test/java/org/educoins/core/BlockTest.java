@@ -16,29 +16,59 @@ public class BlockTest{
     public void BitsSetterTest() {
         byte[] input = ByteArray.convertFromString("ffffffffffffffffffffffffffffffff"); //32
         byte[] expectedCompact = ByteArray.convertFromString("0dffffff");
-        Assert.assertArrayEquals(expectedCompact, getCompactBits(input));
+        Assert.assertArrayEquals(expectedCompact, setInputAndGetCompactBits(input));
     }
 
     @Test
     public void BitsSetter64Test() {
         byte[] input = ByteArray.convertFromString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); //64
         byte[] expectedCompact = ByteArray.convertFromString("1dffffff");
-        Assert.assertArrayEquals(expectedCompact, getCompactBits(input));
+        Assert.assertArrayEquals(expectedCompact, setInputAndGetCompactBits(input));
     }
 
-    private byte[] getCompactBits(byte[] input) {
-        Block b = new Block();
-        b.setBits(Sha256Hash.wrap(input));
-        byte[] compactBits = null;
+
+    private Field getBitsField(Block b){
+        Field f = null;
         try {
-            Field f = b.getClass().getDeclaredField("bits"); //NoSuchFieldException
+            f = b.getClass().getDeclaredField("bits"); //NoSuchFieldException
             f.setAccessible(true);
-            compactBits = (byte[]) f.get(b);
         }
-        catch (NoSuchFieldException | IllegalAccessException ex){
+        catch (NoSuchFieldException ex){
             Assert.fail();
         }
-        return compactBits;
+        return f;
+    }
+
+    private void setCompactBits(Block b, byte[] input){
+        try {
+            Field f = getBitsField(b);
+            f.set(b, input);
+        }
+        catch (IllegalAccessException ex){
+            Assert.fail();
+        }
+    }
+
+    private byte[] setInputAndGetCompactBits(byte[] input) {
+        Block b = new Block();
+        b.setBits(Sha256Hash.wrap(input));
+        return getCompactBits(b);
+    }
+
+    private byte[] getCompactBits(Block b) {
+        Field f = getBitsField(b);
+        try {
+            return (byte[])f.get(b);
+        } catch (IllegalAccessException e) {
+            Assert.fail();
+            return null;
+        }
+    }
+
+    private byte[] getBits(byte[] input) {
+        Block b = new Block();
+        b.setBits(Sha256Hash.wrap(input));
+        return b.getBits().getBytes();
     }
 
     @Test
@@ -69,11 +99,6 @@ public class BlockTest{
         Assert.assertArrayEquals(expec, getBits(input));
     }
 
-    private byte[] getBits(byte[] input) {
-        Block b = new Block();
-        b.setBits(Sha256Hash.wrap(input));
-        return b.getBits().getBytes();
-    }
 
     @Test
     public void BitsAsByte(){
@@ -106,5 +131,19 @@ public class BlockTest{
         b.addTransactions(list);
         Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("c76bc870259e380e3b7ba45ef97123df9182a53af6eb6a87fe13e06274b2532e"));
     }
+
+    @Test
+    public void getBitsWithLargeExponent(){
+        byte[] bits = new byte[] { -1, 1, 78, 0};
+        Block b = new Block();
+        setCompactBits(b, bits);
+        byte[] actual = b.getBits().getBytes();
+        Assert.assertEquals(actual[0], 1);
+        Assert.assertEquals(actual[1], 78);
+        Assert.assertEquals(actual[2], 0);
+        Assert.assertEquals(258, actual.length);
+
+    }
+
 }
 
