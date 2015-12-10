@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Miner implements IBlockListener {
 
 	private static final int BIT32 = 32;
-	Logger log = LoggerFactory.getLogger(Miner.class);
+	private static Logger logger = LoggerFactory.getLogger(Miner.class);
 	private BlockChain blockChain;
 	private CopyOnWriteArrayList<IPoWListener> powListeners;
 
@@ -69,7 +69,8 @@ public class Miner implements IBlockListener {
 
 			Sha256Hash targetThreshold = this.block.getBits();
 			Sha256Hash challenge;
-			
+
+			logger.info("Starting mining process");
 			do {
 				nonceGenerator.nextBytes(nonce);
 				this.block.setNonce(ByteArray.convertToInt(nonce));
@@ -87,6 +88,7 @@ public class Miner implements IBlockListener {
 			} while (this.active && challenge.compareTo(targetThreshold) > 0);
 
 			if (this.active) {
+				logger.info("Found a sufficient hash: {}", challenge.toString());
 				notifyFoundPoW(block);
 			}
 			
