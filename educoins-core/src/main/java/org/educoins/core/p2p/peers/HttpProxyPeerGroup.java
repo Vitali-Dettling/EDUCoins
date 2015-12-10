@@ -26,7 +26,9 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void addProxy(RemoteProxy proxy) {
-        if (!proxies.contains(proxy) && !proxy.getPubkey().equals(AppConfig.getOwnPublicKey().toString())) {
+        if (!proxies.contains(proxy)
+                && !proxy.getPubkey().equals(AppConfig.getOwnPublicKey().toString())
+                && proxies.size() < 100) {
             logger.info("Added peer " + proxy);
             this.proxies.add(proxy);
         }
@@ -45,10 +47,10 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     @Override
     public void discover(DiscoveryStrategy strategy) throws DiscoveryException {
         logger.info("Starting new Discovery ({})", strategy.getClass().getName());
-        strategy.getPeers().forEach(proxies::add);
+        strategy.getPeers().forEach(this::addProxy);
         if (proxies.size() == 0)
             throw new DiscoveryException("No proxies received!");
-        proxies.forEach(proxy -> {
+        proxies.parallelStream().forEach(proxy -> {
             try {
                 proxy.hello().forEach(this::addProxy);
             } catch (IOException e) {
@@ -92,9 +94,11 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     @Override
     public void receiveBlocks(Sha256Hash from) {
         logger.info("Receiving blocks now...");
+        long blocksReceived = 0;
         for (RemoteProxy proxy : getHighestRatedProxies()) {
             try {
                 Collection<Block> blocks = proxy.getBlocks(from);
+                blocksReceived += blocks.size();
                 logger.info("Received {} blocks from proxy {}@{}",
                         blocks.size(), proxy.getPubkey(), proxy.getiNetAddress());
 
@@ -109,7 +113,17 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                         proxy.getPubkey(), proxy.getiNetAddress(), e);
             }
         }
-        logger.info("Receiving blocks was successful.");
+        //RETRY
+        if (blocksReceived == 0) {
+            logger.info("Did not retrieve any blocks... Retry in 1 minute");
+            try {
+                Thread.sleep(60 * 1000);
+            } catch (InterruptedException e) {
+            }
+            logger.info("Retrying now.");
+            receiveBlocks(from);
+        }
+        logger.info("Receiving blocks done.");
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.educoins.core;
 
 
 import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,7 @@ public class Miner implements IBlockListener {
 		public void run() {
 			
 			blockChain.addBlockListener(this);
-			
+			log.info("Starting POW processing...");
 			SecureRandom nonceGenerator = new SecureRandom();
 			byte[] nonce = new byte[BIT32];
 
@@ -87,21 +86,23 @@ public class Miner implements IBlockListener {
 			} while (this.active && challenge.compareTo(targetThreshold) > 0);
 
 			if (this.active) {
+				log.info("Found POW!");
 				notifyFoundPoW(block);
 			}
 			
 			blockChain.removeBlockListener(this);
-		}
-		
-		@Override
-		public void blockReceived(Block block) {
-			this.active = false;
+			log.info("Finished POW processing.");
 		}
 		
 		@Override
 		public String toString() {
 			return "PoWThread";
+		}		@Override
+		public void blockReceived(Block block) {
+			this.active = false;
 		}
+		
+
 	}
 
 }
