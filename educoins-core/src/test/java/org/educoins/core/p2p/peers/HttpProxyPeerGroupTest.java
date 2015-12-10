@@ -58,9 +58,13 @@ public class HttpProxyPeerGroupTest {
         IBlockListener listener = Mockito.mock(IBlockListener.class);
         int count = getBlockCount();
 
+        ((HttpProxyPeerGroup) clientPeerGroup).setRetry(false);
+
         clientPeerGroup.addBlockListener(listener);
         clientPeerGroup.receiveBlocks(blockStore.getLatest().hash());
         verify(listener, atLeast(count)).blockReceived(any(Block.class));
+
+        ((HttpProxyPeerGroup) clientPeerGroup).setRetry(true);
     }
 
     @Test
