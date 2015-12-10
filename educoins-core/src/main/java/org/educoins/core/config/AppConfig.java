@@ -47,11 +47,9 @@ public class AppConfig {
     }
 
     public static URI getOwnAddress(String protocol) throws UnknownHostException {
-        if (inetAddress != null)
-            return URI.create(protocol
-                    + inetAddress + ":"
-                    + AppConfig.getOwnPort());
-        throw new UnknownHostException("IP not yet set!");
+        if (inetAddress == null)
+            throw new UnknownHostException("IP not yet set!");
+        return URI.create(protocol + inetAddress + ":" + AppConfig.getOwnPort());
     }
 
     /**

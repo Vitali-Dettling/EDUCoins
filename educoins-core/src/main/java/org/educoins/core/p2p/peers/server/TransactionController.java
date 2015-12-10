@@ -35,6 +35,7 @@ public class TransactionController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void submitTransaction(@RequestBody @NotNull Transaction transaction) {
+        logger.info("Received transaction of type: {}", transaction.whichTransaction().name());
         blockChain.transactionReceived(transaction);
     }
 }
