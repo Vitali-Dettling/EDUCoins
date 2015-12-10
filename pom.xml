@@ -9,6 +9,12 @@
 
 	<packaging>pom</packaging>
 
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.3.0.RELEASE</version>
+	</parent>
+
 	<modules>
 		<module>educoins-core</module>
 		<module>educoins-miner</module>

@@ -19,7 +19,7 @@ import java.util.Collection;
  * Created by typus on 11/30/15.
  */
 @RestController
-@RequestMapping("/blocks")
+@RequestMapping("/blocks/")
 public class BlockController {
 
     private Logger logger = LoggerFactory.getLogger(BlockController.class);
@@ -36,7 +36,7 @@ public class BlockController {
      * @return The List of all Blocks.
      * @throws BlockNotFoundException if a Block could not be found.
      */
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public Collection<Block> getBlocks() throws BlockNotFoundException {
         logger.info("Offering blocks");
         return blockChain.getBlocks();
@@ -48,7 +48,7 @@ public class BlockController {
      * @return The List of all Blocks.
      * @throws BlockNotFoundException if a Block could not be found.
      */
-    @RequestMapping(path = "/from/{hash}", method = RequestMethod.GET)
+    @RequestMapping(value = "from/{hash}", method = RequestMethod.GET)
     public Collection<Block> getBlocksFrom(@PathVariable(value = "hash") String hash) throws BlockNotFoundException {
         logger.info("Offering blocks from hash: {}", hash);
         return blockChain.getBlocksFrom(Sha256Hash.wrap(hash));
@@ -60,7 +60,7 @@ public class BlockController {
      * @param block the Block to addProxy.
      * @throws BlockChainVerificationException if the there was a conflict while validation.
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void createBlock(@RequestBody @NotNull Block block) throws BlockChainVerificationException {
         logger.info("Received Block from foreign node via push");
@@ -74,7 +74,7 @@ public class BlockController {
      * @return The Block stored in this {@link org.educoins.core.p2p.peers.Peer}.
      * @throws BlockNotFoundException if the Block could not be found.
      */
-    @RequestMapping(path = "/{hash}", method = RequestMethod.GET)
+    @RequestMapping(value = "{hash}", method = RequestMethod.GET)
     public Block getBlock(@PathVariable(value = "hash") String hash) throws
             BlockNotFoundException {
         logger.info("Offering block {}", hash);
@@ -87,7 +87,7 @@ public class BlockController {
      * @return The list of all {@link Block#getHeader()}s.
      * @throws BlockNotFoundException if a Block could not be found.
      */
-    @RequestMapping(path = "/headers", method = RequestMethod.GET)
+    @RequestMapping(value = "headers", method = RequestMethod.GET)
     public Collection<Block> getBlockHeaders() throws BlockNotFoundException {
         logger.info("Offering block headers.");
         return blockChain.getBlockHeaders();

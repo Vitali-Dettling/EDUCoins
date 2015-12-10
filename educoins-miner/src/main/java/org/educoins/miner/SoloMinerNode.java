@@ -1,4 +1,4 @@
-package org.educoins;
+package org.educoins.miner;
 
 import org.educoins.core.BlockChain;
 import org.educoins.core.Miner;
