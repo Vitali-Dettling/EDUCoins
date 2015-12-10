@@ -23,6 +23,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     private List<RemoteProxy> proxies = new CopyOnWriteArrayList<>();
     private Set<IBlockListener> blockListeners = new HashSet<>();
     private Set<ITransactionListener> transactionListeners = new HashSet<>();
+    private boolean retry = true;
 
     @Override
     public void addProxy(RemoteProxy proxy) {
@@ -115,7 +116,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             }
         }
         //RETRY
-        if (blocksReceived == 0) {
+        if (blocksReceived == 0 && retry) {
             logger.info("Did not retrieve any blocks... Retry in 1 minute");
             try {
                 Thread.sleep(60 * 1000);
@@ -228,5 +229,13 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                         .getiNetAddress().getHost(), e);
             }
         });
+    }
+
+    public boolean isRetry() {
+        return retry;
+    }
+
+    public void setRetry(boolean retry) {
+        this.retry = retry;
     }
 }
