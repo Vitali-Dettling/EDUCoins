@@ -21,7 +21,6 @@ public class BlockIterator implements IBlockIterator {
         this.blockStore = blockStore;
         this.genesisHash = genesisHash;
         this.currentElement = blockStore.getLatest();
-
     }
 
     @Override
@@ -36,5 +35,10 @@ public class BlockIterator implements IBlockIterator {
         Sha256Hash currentHash = currentElement.getHashPrevBlock();
         currentElement = blockStore.get(currentHash);
         return elementToReturn;
+    }
+
+    @Override
+    public @NotNull Block get() throws BlockNotFoundException {
+        return currentElement;
     }
 }

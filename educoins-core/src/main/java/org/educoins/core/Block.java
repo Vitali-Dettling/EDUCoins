@@ -1,12 +1,8 @@
 package org.educoins.core;
 
 import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.utils.BinaryTree;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Sha256Hash;
+import org.educoins.core.utils.*;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
 
 import java.util.*;
 
@@ -18,7 +14,8 @@ public class Block {
 	private static final int VERSION = -1;//-1 if no version is set and also an error.
 	private static final Sha256Hash HASH_PREV_BLOCK  = Sha256Hash.ZERO_HASH;
 	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
-	private static final long TIME = System.currentTimeMillis();
+    //	private static final long TIME = System.currentTimeMillis();
+    private static final long TIME = 0;
 
 	private static final byte[] BITS = ByteArray.convertFromString("1d00ffff");
 	private static final long NONCE = 1114735442;
@@ -40,6 +37,24 @@ public class Block {
 		this.setNonce(NONCE);
 		this.transactions = new ArrayList<>();
 	}
+
+    public static Sha256Hash hash(Block block) {
+        // specify used header fields (in byte arrays)
+        byte[] version = ByteArray.convertFromLong(block.version);
+        byte[] hashPrevBlock = block.hashPrevBlock.getBytes();
+        byte[] hashMerkleRoot = block.hashMerkleRoot.getBytes();
+        byte[] time = ByteArray.convertFromLong(block.time);
+        byte[] bits = block.bits;
+        byte[] nonce = ByteArray.convertFromLong(block.nonce);
+
+        // concatenate used header fields
+        byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
+                bits, nonce);
+
+        // hash concatenated header fields and return
+        byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
+        return Sha256Hash.wrap(hash);
+    }
 
 	public Block copy() {
 		Block b = new Block();
@@ -91,7 +106,7 @@ public class Block {
         byte[] result = new byte[3 + expInt];
         Arrays.fill(result, (byte) 0);
         System.arraycopy(mantisse, 0, result, 0, 3);
-        
+
         return Sha256Hash.wrap(result);
 	}
 
@@ -147,17 +162,17 @@ public class Block {
         return new ArrayList<>(this.transactions);
     }
 
+    public void setTransactions(@NotNull List<Transaction> transactions) {
+        this.transactions.clear();
+        this.transactions.addAll(transactions);
+        calculateMerkleRoot();
+    }
+
     public Transaction getTransaction(Sha256Hash hash) {
         for (Transaction transaction : transactions) {
             if (transaction.hash().equals(hash)) return transaction;
         }
         return null;
-    }
-
-    public void setTransactions(@NotNull List<Transaction> transactions) {
-        this.transactions.clear();
-        this.transactions.addAll(transactions);
-        calculateMerkleRoot();
     }
 
     public void addTransaction(@NotNull Transaction transaction) {
@@ -168,10 +183,6 @@ public class Block {
     public void addTransactions(@NotNull Collection<Transaction> transactions) {
         this.transactions.addAll(transactions);
         calculateMerkleRoot();
-    }
-
-    public Sha256Hash hash() {
-        return Block.hash(this);
     }
 
     /*public MessageProtos.Block toProto() {
@@ -189,11 +200,15 @@ public class Block {
         return builder.build();
     }*/
 
-	public int rewardCalculator(){
-		
+    public Sha256Hash hash() {
+        return Block.hash(this);
+    }
+
+    public int rewardCalculator(){
+
 		int newReward;
 		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
-		
+
 		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdenken, um die Ausschütung zu bestimmen!!!
 		if (DEFAULT_REWARD == lastApprovedEDUCoins) {
 			newReward = DEFAULT_REWARD;
@@ -201,41 +216,35 @@ public class Block {
 			newReward = lastApprovedEDUCoins + 2;
 		} else {
 			newReward = DEFAULT_REWARD - 2;
-		}		
+        }
 
 		return newReward;
 	}
-	
-	private int findAllApprovedEDUCoins(){
-		
-		int approvedEDUCoins = 0;
-		
-		//TODO[Vitali] Might not be 100% correct???ß
+
+    private int findAllApprovedEDUCoins(){
+
+        int approvedEDUCoins = 0;
+
+        //TODO[Vitali] Might not be 100% correct???ß
 		for(Transaction transaction : this.getTransactions()){
 			for(Approval approval : transaction.getApprovals()){
 				approvedEDUCoins += approval.getAmount();
 			}
 		}
-		
-		return approvedEDUCoins;
-	}
-    public static Sha256Hash hash(Block block) {
-		// specify used header fields (in byte arrays)
-		byte[] version = ByteArray.convertFromLong(block.version);
-		byte[] hashPrevBlock = block.hashPrevBlock.getBytes();
-		byte[] hashMerkleRoot = block.hashMerkleRoot.getBytes();
-		byte[] time = ByteArray.convertFromLong(block.time);
-		byte[] bits = block.bits;
-		byte[] nonce = ByteArray.convertFromLong(block.nonce);
 
-		// concatenate used header fields
-		byte[] concatenatedHeaderFields = ByteArray.concatByteArrays(version, hashPrevBlock, hashMerkleRoot, time,
-				bits, nonce);
-		
-		// hash concatenated header fields and return
-		byte[] hash = SHA256Hasher.hash(SHA256Hasher.hash(concatenatedHeaderFields));
-		return Sha256Hash.wrap(hash);
+        return approvedEDUCoins;
 	}
+
+    @Override
+    public int hashCode() {
+        int result = version;
+        result = 31 * result + Arrays.hashCode(hashPrevBlock.getBytes());
+        result = 31 * result + Arrays.hashCode(hashMerkleRoot.getBytes());
+        result = 31 * result + (int) (time ^ (time >>> 32));
+        result = 31 * result + bits.hashCode();
+        result = 31 * result + (int) (nonce ^ (nonce >>> 32));
+        return result;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -251,17 +260,5 @@ public class Block {
                 && hashPrevBlock.equals(block.hashPrevBlock)
                 && hashMerkleRoot.equals(block.hashMerkleRoot)
                 && Arrays.equals(bits, block.bits);
-    }
-
-
-    @Override
-    public int hashCode() {
-        int result = version;
-        result = 31 * result + Arrays.hashCode(hashPrevBlock.getBytes());
-        result = 31 * result + Arrays.hashCode(hashMerkleRoot.getBytes());
-        result = 31 * result + (int) (time ^ (time >>> 32));
-        result = 31 * result + bits.hashCode();
-        result = 31 * result + (int) (nonce ^ (nonce >>> 32));
-        return result;
     }
 }

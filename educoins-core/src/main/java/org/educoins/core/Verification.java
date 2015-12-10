@@ -31,24 +31,23 @@ public class Verification {
 		if(toVerifyBlock == null){
 			throw new NullPointerException("Block is null.");	
 		}
-		
-		// 0. If geniuses block return true, because there no other block before.
+
+		// 0. If block is the genesis block return true, because there is no previous.
 		if (toVerifyBlock.getHashPrevBlock().equals(Sha256Hash.wrap(GENESIS_BLOCK))) {
 			return true;
 		}
 
 		// 1. Find the previous block.
-		//TODO: Check naming of lastBlock / getPreviousBlock()
-		Block lastBlock = null;
+		Block previousBlock = null;
 		try {
-			lastBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
+			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
-			logger.warn("verifyBlock: lastBlock is null", e);
+			logger.warn("verifyBlock: previousBlock is null", e);
 			return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
-		if (toVerifyBlock.hash().compareTo(lastBlock.getHashPrevBlock()) == TRUE) {
+		if (toVerifyBlock.hash().compareTo(previousBlock.getHashPrevBlock()) == TRUE) {
 			System.out.println("DEBUG: verifyBlock: last block is equal to block");
 			return false;
 		}

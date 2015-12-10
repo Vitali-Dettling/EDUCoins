@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -21,7 +22,7 @@ import java.util.*;
 @RequestMapping("/peers")
 public class PeerController {
     private final IProxyPeerGroup httpPeerCache;
-    private final Logger logger = LoggerFactory.getLogger(BlockController.class);
+    private final Logger logger = LoggerFactory.getLogger(PeerController.class);
 
     @Autowired
     public PeerController(@NotNull IProxyPeerGroup httpPeerCache) {
@@ -36,8 +37,8 @@ public class PeerController {
      */
     @RequestMapping(path = "/http", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public Collection<RemoteProxy> addHttpPeer(@RequestBody @NotNull HttpProxy peer) {
-        logger.info("Retrieved peer " + peer);
+    public Collection<RemoteProxy> addHttpPeer(@RequestBody @NotNull HttpProxy peer, HttpServletRequest request) {
+        logger.info("Retrieved peer {} from {}", peer, request.getRemoteAddr());
 
         Set<RemoteProxy> proxies = new HashSet<>();
         proxies.addAll(httpPeerCache.getAllProxies());

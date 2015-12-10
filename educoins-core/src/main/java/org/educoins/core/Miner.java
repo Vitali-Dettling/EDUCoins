@@ -2,7 +2,6 @@ package org.educoins.core;
 
 
 import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,13 +87,13 @@ public class Miner implements IBlockListener {
 			} while (this.active && challenge.compareTo(targetThreshold) > 0);
 
 			if (this.active) {
-				logger.info("Found a sufficient hash: {}", challenge.toString());
+				logger.info("Found a sufficient PoW hash: {}", challenge.toString());
 				notifyFoundPoW(block);
 			}
 			
 			blockChain.removeBlockListener(this);
 		}
-		
+
 		@Override
 		public void blockReceived(Block block) {
 			this.active = false;

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
@@ -100,11 +101,20 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
     public @NotNull Collection<Block> getBlocksFrom(Sha256Hash from) throws BlockNotFoundException {
         List<Block> blocks = new ArrayList<>();
         IBlockIterator iterator = store.iterator();
+
         while (iterator.hasNext()) {
             Block next = iterator.next();
             if (next.hash().equals(from)) return blocks;
             blocks.add(next);
         }
+
+        Set<Block> blocksFrom = blocks.stream().filter(block -> block.hash().equals(from)).collect(Collectors.toSet());
+        if (blocksFrom.size() > 1)
+            throw new IllegalStateException("More than one block with the same hash found!");
+
+        if (blocksFrom.size() == 0 && from.equals(iterator.get().hash()))
+            throw new BlockNotFoundException(from.getBytes());
+
         return blocks;
     }
 
@@ -142,6 +152,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
         logger.info("Received block. Verifying now...");
         if (!this.verification.verifyBlock(block)) {
             logger.warn("Verification of block failed: " + block.hash());
+            //TODO: cool so?
+            return;
         }
         Block newBlock = prepareNewBlock(block);
         notifyBlockReceived(newBlock);
@@ -198,7 +210,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
     @Override
     public void foundPoW(Block block) {
-        logger.info("Found pow.");
+        logger.info("Found pow. (Block {})", block.hash().toString());
         this.store.put(block);
         logger.info("Added block to blockStore.");
         // this.blockTransmitter.transmitBlock(block);

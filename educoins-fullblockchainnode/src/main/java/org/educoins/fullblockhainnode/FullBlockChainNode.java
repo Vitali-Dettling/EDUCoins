@@ -34,9 +34,6 @@ public class FullBlockChainNode {
         //TODO: for demo, remove afterwards
         try {
             peer.start();
-            blockChain.foundPoW(BlockStoreFactory.getRandomBlock(blockChain.getLatestBlock()));
-            blockChain.foundPoW(BlockStoreFactory.getRandomBlock(blockChain.getLatestBlock()));
-            blockChain.foundPoW(BlockStoreFactory.getRandomBlock(blockChain.getLatestBlock()));
         } catch (DiscoveryException e) {
             SpringApplication.exit(run, () -> -1);
         }
