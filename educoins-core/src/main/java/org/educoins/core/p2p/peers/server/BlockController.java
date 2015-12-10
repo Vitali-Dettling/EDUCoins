@@ -43,6 +43,18 @@ public class BlockController {
     }
 
     /**
+     * Returns all {@link Block}s stored in this {@link org.educoins.core.p2p.peers.Peer}.
+     *
+     * @return The List of all Blocks.
+     * @throws BlockNotFoundException if a Block could not be found.
+     */
+    @RequestMapping(path = "/from/{hash}", method = RequestMethod.GET)
+    public Collection<Block> getBlocksFrom(@PathVariable(value = "hash") String hash) throws BlockNotFoundException {
+        logger.info("Offering blocks from hash: {}", hash);
+        return blockChain.getBlocksFrom(Sha256Hash.wrap(hash));
+    }
+
+    /**
      * Adds the {@link Block} to the {@link BlockChain} of the {@link org.educoins.core.p2p.peers.Peer}.
      *
      * @param block the Block to addProxy.

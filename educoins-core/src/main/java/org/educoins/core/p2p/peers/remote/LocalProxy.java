@@ -50,6 +50,11 @@ public class LocalProxy extends RemoteProxy {
     }
 
     @Override
+    public @NotNull Collection<Block> getBlocks(Sha256Hash from) throws IOException {
+        return getBlocks();
+    }
+
+    @Override
     @Nullable
     public Block getBlock(Sha256Hash hash) throws IOException {
         try {

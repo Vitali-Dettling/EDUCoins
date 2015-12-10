@@ -19,6 +19,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ComponentScan(basePackages = "org.educoins.core")
 public class PeerServer {
     public static final String contentType = "application/json";
+    public static final String BLOCKS_FROM_RESOURCE_PATH = "/blocks/from/";
     public static final String BLOCKS_RESOURCE_PATH = "/blocks/";
     public static final String BLOCK_HEADERS_RESOURCE_PATH = "/blocks/headers/";
     public static final String HELLO_HTTP_RESOURCE_PATH = "/peers/http";

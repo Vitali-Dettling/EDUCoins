@@ -4,6 +4,7 @@ import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.p2p.peers.SoloMinerPeer;
 import org.educoins.core.store.*;
+import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class MinerApplication {
         }
 
         @Override
-        public void receiveBlocks() {
+        public void receiveBlocks(Sha256Hash from) {
 
         }
     }

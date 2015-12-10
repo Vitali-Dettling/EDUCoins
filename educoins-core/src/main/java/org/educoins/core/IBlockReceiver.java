@@ -1,5 +1,7 @@
 package org.educoins.core;
 
+import org.educoins.core.utils.Sha256Hash;
+
 public interface IBlockReceiver {
 
 	/**
@@ -16,8 +18,9 @@ public interface IBlockReceiver {
 	void removeBlockListener(IBlockListener blockListener);
 
 	/**
-	 * Fetches Blocks.
+	 * Fetches Blocks which are younger then the specified hash.
+	 * @param from the hash to get the older ones from.
 	 */
-	void receiveBlocks();
+	void receiveBlocks(Sha256Hash from);
 	
 }
