@@ -10,7 +10,7 @@ import static org.mockito.Mockito.*;
  * Created by dacki on 01.12.15.
  */
 public class MinerTest {
-    private static Miner miner;
+    private static Miner miner = mock(Miner.class);
     private static IBlockReceiver blockReceiver = mock(IBlockReceiver.class);
     private static ITransactionReceiver transactionReceiver = mock(ITransactionReceiver.class);
     private static ITransactionTransmitter transactionTransmitter = mock(ITransactionTransmitter.class);
@@ -18,8 +18,7 @@ public class MinerTest {
 
     @BeforeClass
     public static void init() {
-        BlockChain blockchain = new BlockChain(blockReceiver, transactionReceiver,transactionTransmitter, blockStore);
-        miner = new Miner(blockchain);
+        BlockChain blockchain = new BlockChain(blockReceiver, miner, transactionReceiver,transactionTransmitter, blockStore);
     }
 
     @AfterClass

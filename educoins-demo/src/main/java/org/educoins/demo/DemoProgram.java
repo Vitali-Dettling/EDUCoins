@@ -92,21 +92,21 @@ public class DemoProgram {
         IBlockStore senderBlockStore = new LevelDbBlockStore(new File(localDBStorage));
 
         IBlockReceiver blockReceiver = new DemoBlockReceiver(senderBlockStore);
-        blockReceiver.addBlockListener(senderBlockStore::put);
+//        blockReceiver.addBlockListener(senderBlockStore::put);
+//
+//        ITransactionReceiver txReceiver = new DemoTransactionReceiver();
+//        ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
+//
+//        BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
+//
+//        if (runMiner) {
+//            new Miner(blockChain);
+//        }
+//        Thread client = new Client(blockChain);
+//        client.start();
 
-        ITransactionReceiver txReceiver = new DemoTransactionReceiver();
-        ITransactionTransmitter txTransmitter = new DemoTransactionTransmitter((ITransactionListener) txReceiver);
-
-        BlockChain blockChain = new BlockChain(blockReceiver, txReceiver, txTransmitter, senderBlockStore);
-
-        if (runMiner) {
-            new Miner(blockChain);
-        }
-        Thread client = new Client(blockChain);
-        client.start();
-
-        //Kick of the system with the genesis block. 
-        blockChain.foundPoW(new Block());
-        txReceiver.receiveTransactions();
+//        //Kick of the system with the genesis block. 
+//        blockChain.foundPoW(new Block());
+//        txReceiver.receiveTransactions();
     }
 }

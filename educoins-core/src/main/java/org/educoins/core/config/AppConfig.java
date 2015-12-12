@@ -66,7 +66,8 @@ public class AppConfig {
     }
 
     public static Sha256Hash getOwnPublicKey() {
-        return Sha256Hash.wrap(prop.getProperty("educoins.peer.pubkey"));
+    	String publicKey = prop.getProperty("educoins.peer.pubkey");
+        return Sha256Hash.wrap(publicKey);
     }
 
     public static int getServerPort() {

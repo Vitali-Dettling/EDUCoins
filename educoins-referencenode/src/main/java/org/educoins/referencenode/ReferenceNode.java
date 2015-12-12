@@ -2,8 +2,11 @@ package org.educoins.referencenode;
 
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
+import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
+import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.ReferencePeer;
 import org.educoins.core.store.BlockStoreException;
+import org.educoins.core.store.LevelDbBlockStore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,8 +28,9 @@ public class ReferenceNode {
 
     public static void main(String[] args) throws BlockStoreException {
         ConfigurableApplicationContext run = SpringApplication.run(ReferenceNode.class, args);
-        BlockChain blockChain = (BlockChain) run.getBean("blockChain");
-        ReferencePeer peer = new ReferencePeer(blockChain, new Miner(blockChain), new Wallet());
+        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
+        BlockChain blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, peerGroup, new LevelDbBlockStore());
+        ReferencePeer peer = new ReferencePeer(blockChain, new Wallet());
 
         //TODO: for demo, remove afterwards
         try {

@@ -3,8 +3,10 @@ package org.educoins.core.p2p.peers;
 import org.educoins.core.*;
 import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.*;
+import org.educoins.core.p2p.peers.Peer.PeerType;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.utils.Sha256Hash;
+import org.educoins.core.utils.Threading;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +76,9 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         } catch (DiscoveryException e) {
             logger.warn("Could not hello the Central!", e);
         }
-        rediscover(0);
+        if(Peer.type != PeerType.MINER){
+        	rediscover(0);
+        }
     }
 
     @Override
@@ -116,7 +120,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             }
         }
         //RETRY
-        if (blocksReceived == 0 && retry) {
+        if (blocksReceived == 0 && retry && Peer.type != PeerType.MINER) {
             logger.info("Did not retrieve any blocks... Retry in 1 minute");
             try {
                 Thread.sleep(60 * 1000);
@@ -215,7 +219,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                     Thread.sleep(nTry * 2000);
                     rediscover(++nTry);
                 } catch (InterruptedException e) {
-                }
+            }
         }
     }
 

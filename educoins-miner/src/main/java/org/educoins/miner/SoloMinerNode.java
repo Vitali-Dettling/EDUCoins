@@ -2,6 +2,7 @@ package org.educoins.miner;
 
 import org.educoins.core.BlockChain;
 import org.educoins.core.Miner;
+import org.educoins.core.Wallet;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.p2p.peers.*;
 import org.educoins.core.store.BlockStoreException;
@@ -19,20 +20,34 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 @EnableAutoConfiguration(exclude = {JacksonAutoConfiguration.class})
 @ComponentScan(basePackages = "org.educoins.core")
-@ConfigurationProperties(value = "classpath:/application.properties")
+//@ConfigurationProperties(value = "classpath:/application.properties")
 public class SoloMinerNode {
 
     public static void main(String[] args) throws BlockStoreException {
-        ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
-        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
-        BlockChain blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore());
-        Miner miner = new Miner(blockChain);
-        miner.addPoWListener(peerGroup);
-        SoloMinerPeer peer = new SoloMinerPeer(blockChain, miner);
-        try {
-            peer.start();
-        } catch (DiscoveryException e) {
-            SpringApplication.exit(run, () -> -1);
-        }
+    	 ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
+         BlockChain blockChain = (BlockChain) run.getBean("blockChain");
+         Miner miner = (Miner) run.getBean("miner");
+         SoloMinerPeer peer = new SoloMinerPeer(blockChain, miner);
+
+         //TODO: for demo, remove afterwards
+         try {
+             peer.start();
+         } catch (DiscoveryException e) {
+             SpringApplication.exit(run, () -> -1);
+         }
+
+    	
+//        ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
+//        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
+//        BlockChain blockChain = (BlockChain) run.getBean("blockChain");
+//       // BlockChain blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore());
+//        Miner miner = new Miner(blockChain);
+//        miner.addPoWListener(peerGroup);
+//        SoloMinerPeer peer = new SoloMinerPeer(blockChain, miner);
+//        try {
+//            peer.start();
+//        } catch (DiscoveryException e) {
+//            SpringApplication.exit(run, () -> -1);
+//        }
     }
 }
