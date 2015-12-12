@@ -136,6 +136,7 @@ public class Miner implements IBlockListener, IBlockReceiver {
 		Block latestBlock;
 		try {
 			latestBlock = this.blockChain.getLatestBlock();
+			logger.info("Received Block: " + latestBlock.toString());
 			Threading.run(() -> blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(latestBlock)));
 		} catch (BlockNotFoundException e) {
 			// TODO Auto-generated catch block

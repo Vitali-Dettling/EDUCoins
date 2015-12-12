@@ -17,7 +17,6 @@ public class SoloMinerPeer extends Peer {
 	public SoloMinerPeer(BlockChain blockChain, Miner miner) {
 		Peer.blockChain = blockChain;
 		this.miner = miner;
-		Peer.type = PeerType.MINER;
 
 		IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
 		this.miner.setBlockChain(blockChain);

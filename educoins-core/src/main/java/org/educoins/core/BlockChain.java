@@ -32,6 +32,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private ITransactionTransmitter transactionTransmitter;
 	private List<ITransactionListener> transactionListeners;
 	private List<Transaction> transactions;
+	private List<Block> blocks;
 	private Wallet wallet;
 	private Verification verification;
 	private IBlockStore store;
@@ -151,9 +152,26 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 	}
 
+	private boolean checkStoreUpToDate(Block block){
+	
+		//TODO There needs to be an implementation, when the node starts the first time, such that it will get all block till the current state. 
+		try {
+			this.store.get(block.hash());
+		} catch (BlockNotFoundException e) {
+			this.store.put(block);
+			return false;
+		}		
+		return true;
+	}
+	
 	@Override
 	public void blockReceived(Block block) {
 		logger.info("Received block. Verifying now...");
+		
+		if(!checkStoreUpToDate(block)){
+			return;
+		}
+		
 		if (!this.verification.verifyBlock(block)) {
 			logger.warn("Verification of block failed: " + block.hash());
 			// TODO: cool so?
@@ -216,7 +234,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	public void foundPoW(Block block) {
 		logger.info("Found pow. (Block {})", block.hash().toString());
 		this.store.put(block);
-		logger.info("Added block to blockStore.");
+		logger.info("Added block to blockStore: " + this.store.getLatest().toString());
 
 		try {
 			this.blockReceiverResetMiner.receiveBlocks(null);

@@ -62,4 +62,7 @@ public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, I
      *
      */
     void discover();
+
+	void getBlocks();
+
 }

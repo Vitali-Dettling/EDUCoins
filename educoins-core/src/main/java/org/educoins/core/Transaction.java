@@ -305,5 +305,12 @@ public class Transaction implements Hashable {
 		APPROVED, COINBASE, REGULAR, REVOKE,
 
 	}
+	
+	@Override
+	public String toString() {
+		return "Transaction [version=" + version + ", inputsCount=" + inputsCount + ", inputs=" + inputs
+				+ ", outputsCount=" + outputsCount + ", outputs=" + outputs + ", approvalsCount=" + approvalsCount
+				+ ", approvals=" + approvals + ", approvedTransaction=" + approvedTransaction + "]";
+	}
 
 }

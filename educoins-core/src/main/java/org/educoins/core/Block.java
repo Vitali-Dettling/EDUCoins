@@ -11,7 +11,7 @@ import java.util.*;
 public class Block {
 
 	private static final int DEFAULT_REWARD = 10;
-	private static final int VERSION = -1;//-1 if no version is set and also an error.
+	private static final int VERSION = 1;//-1 if no version is set and also an error.
 	private static final Sha256Hash HASH_PREV_BLOCK  = Sha256Hash.ZERO_HASH;
 	private static final Sha256Hash HASH_MERKLE_ROOT = Sha256Hash.ZERO_HASH;
     //	private static final long TIME = System.currentTimeMillis();
@@ -246,7 +246,15 @@ public class Block {
         return result;
     }
 
-    @Override
+
+	@Override
+	public String toString() {
+		return "Block [version=" + version + ", hashPrevBlock=" + hashPrevBlock + ", hashMerkleRoot=" + hashMerkleRoot
+				+ ", time=" + time + ", bits=" + Arrays.toString(bits) + ", nonce=" + nonce + ", transactions="
+				+ transactions + "]";
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

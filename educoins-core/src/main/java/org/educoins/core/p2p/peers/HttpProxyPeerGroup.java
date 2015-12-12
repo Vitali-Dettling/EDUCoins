@@ -3,7 +3,6 @@ package org.educoins.core.p2p.peers;
 import org.educoins.core.*;
 import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.*;
-import org.educoins.core.p2p.peers.Peer.PeerType;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.utils.Sha256Hash;
 import org.educoins.core.utils.Threading;
@@ -37,6 +36,28 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         }
     }
 
+	@Override
+    public void getBlocks(){
+    	 logger.info("Receiving Block now.");
+        
+    	  for (RemoteProxy proxy : getHighestRatedProxies()) {
+		try {
+        	 	proxy.getBlocks().parallelStream().
+                        forEach(block -> blockListeners.
+                                forEach(iBlockListener ->
+                                        iBlockListener.blockReceived(block)));
+
+        	 proxy.rateHigher();
+         } catch (IOException e) {
+             if (checkProxiesState(proxy, e)) return;
+             logger.error("Could not retrieve Blocks from proxy: {}@{}",
+                     proxy.getPubkey(), proxy.getiNetAddress(), e);
+         }
+    	  }
+         logger.info("Receiving Block successful.");
+    	
+    }
+    
     @Override
     public void clearProxies() {
         this.proxies.clear();
@@ -57,8 +78,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             try {
                 proxy.hello().forEach(this::addProxy);
             } catch (IOException e) {
-                logger.warn("Could not say Hello to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
-            }
+                logger.warn("Could not say Hello to {}@{}", proxy.getPubkey(), proxy.getiNetAddress() + ":" + proxy.getPort());
+            }            
         });
     }
 
@@ -69,18 +90,22 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         return proxies;
     }
 
+    private static boolean once = true;
+    
     @Override
     public void discover() {
         try {
-            new CentralDiscovery().hello();
+        	if(once){
+        		once = false;
+        		new CentralDiscovery().hello();
+        	}
         } catch (DiscoveryException e) {
             logger.warn("Could not hello the Central!", e);
         }
-        if(Peer.type != PeerType.MINER){
-        	rediscover(0);
-        }
+       
+       	rediscover(0);
     }
-
+    
     @Override
     public void transmitTransaction(Transaction transaction) {
     }
@@ -120,7 +145,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             }
         }
         //RETRY
-        if (blocksReceived == 0 && retry && Peer.type != PeerType.MINER) {
+        if (blocksReceived == 0 && retry) {
             logger.info("Did not retrieve any blocks... Retry in 1 minute");
             try {
                 Thread.sleep(60 * 1000);
@@ -227,6 +252,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     public void foundPoW(Block block) {
         getHighestRatedProxies().forEach(proxy -> {
             try {
+            	logger.info("Transmitting Block: " + block.toString());
                 proxy.transmitBlock(block);
             } catch (IOException e) {
                 logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy
