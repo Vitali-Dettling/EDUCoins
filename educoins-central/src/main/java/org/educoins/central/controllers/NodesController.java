@@ -33,11 +33,11 @@ public class NodesController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<URI> hello(@RequestBody Node node, HttpServletRequest request) {
         URI inetAddr = URI.create(request.getRemoteAddr());
-        logger.info("Retrieved 'hello' from {}@{}", node.getPubkey(), inetAddr);
+        logger.info("Retrieved 'hello' from {}@{}", node.getPubkey(), inetAddr + ":" + node.getPort());
 
         //TODO: get protocol aware
-        node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + request.getRemotePort()));
-//        node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + node.getPort()));
+//        node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + request.getRemotePort()));
+        node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + node.getPort()));
         nodesRepository.save(node);
 
         return new ResponseEntity<>(inetAddr, HttpStatus.OK);
