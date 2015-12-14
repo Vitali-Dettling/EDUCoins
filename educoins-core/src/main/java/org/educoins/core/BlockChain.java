@@ -172,7 +172,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 		logger.info("Verified Block stored in the BC: " + block.toString());
 		this.store.put(block);
-		
+	
+//TODO Only the task from the Miner. 		
 		Block newBlock = prepareNewBlock(block);
 		notifyBlockReceived(newBlock);
 		List<Transaction> transactions = block.getTransactions();
@@ -201,6 +202,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 
 	public void sendTransaction(Transaction transaction) {
+		
+		this.transactions.add(transaction);
+		//TODO Needs to be implemented that all miner will get transactions.  
 		this.transactionTransmitter.transmitTransaction(transaction);
 	}
 
@@ -234,6 +238,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		try {
 			this.blockReceiverResetMiner.receiveBlocks(null);
+			//TODO Only the task from the Client. 	
 			this.blockReceiverPeerGroup.receiveBlocks(getLatestBlock().hash());
 		} catch (BlockNotFoundException e) {
 			this.blockReceiverResetMiner.receiveBlocks(null);

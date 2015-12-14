@@ -14,4 +14,10 @@ public class LocalPeer extends Peer {
 //      remoteProxies.discover();
 //      blockChain.foundPoW(new Block());
   }
+
+	@Override
+	public void stop() {
+		// TODO Auto-generated method stub
+		
+	}
 }

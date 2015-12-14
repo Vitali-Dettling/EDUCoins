@@ -29,13 +29,9 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
         this.publicKey = AppConfig.getOwnPublicKey();
     }
 
-    public void start() throws DiscoveryException {
-		//Needs to be overwritten by the inherent classes
-    }
+    public abstract void start() throws DiscoveryException;
 
-    public void stop() {
-        //TODO: anything to do?
-    }
+    public abstract void stop();
 
     @Override
     public void transmitTransaction(Transaction transaction) {
