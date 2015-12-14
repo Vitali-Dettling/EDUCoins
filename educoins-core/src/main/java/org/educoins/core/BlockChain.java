@@ -95,6 +95,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
         while (iterator.hasNext()) {
             blocks.add(iterator.next());
         }
+        Collections.reverse(blocks);
         return blocks;
     }
 
@@ -183,6 +184,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
     }
 
     public void sendTransaction(Transaction transaction) {
+        //TODO: might this be right?
+        this.transactions.add(transaction);
         this.transactionTransmitter.transmitTransaction(transaction);
     }
 

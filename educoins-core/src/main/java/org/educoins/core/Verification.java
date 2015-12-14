@@ -42,7 +42,7 @@ public class Verification {
 		try {
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
-			logger.warn("verifyBlock: previousBlock is null", e);
+			logger.warn("verifyBlock: previousBlock is incorrect.", e);
 			return false;
 		}
 
