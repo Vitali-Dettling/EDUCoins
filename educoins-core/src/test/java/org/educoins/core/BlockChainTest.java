@@ -1,49 +1,38 @@
 package org.educoins.core;
 
-import org.educoins.core.utils.MockedBlockChain;
-import org.educoins.core.utils.ByteArray;
+import org.educoins.core.store.BlockStoreException;
+import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.mock;
 
 public class BlockChainTest {
-	
-	
-	private static final int NEGATIVE = 0;
-	private static final int COINBASE_ONLY = 1;
 	
 	private BlockChain mockedBlockchain;
 	 
 	@Before
-	public void setUp(){
-		
-		MockedBlockChain mockedBlockchain = new MockedBlockChain();
-		this.mockedBlockchain = mockedBlockchain.getMockedBlockChain();
+	public void setUp() throws BlockStoreException {
+		this.mockedBlockchain = new BlockChain(mock(IBlockReceiver.class),
+				mock(ITransactionReceiver.class),
+				mock(ITransactionTransmitter.class),
+				BlockStoreFactory.getBlockStore());
 	}
 	
 	@Test
-	@Ignore
 	public void testPrepareNewBlock() {
-
-		
 		Block lastBlock = new Block();
 		Block newBlock = this.mockedBlockchain.prepareNewBlock(lastBlock);
 		
-		assertTrue(newBlock.getVersion() > NEGATIVE);
-		
-		byte[] arrayMerkleTree = newBlock.getHashMerkleRoot().getBytes();
-		int valueMerkleTree = ByteArray.convertToInt(arrayMerkleTree);
-		assertTrue(valueMerkleTree > 0);
-		
-		assertEquals(newBlock.getHashPrevBlock(), Sha256Hash.ZERO_HASH);
-		assertEquals(newBlock.getHashMerkleRoot(), Sha256Hash.ZERO_HASH);
-		assertEquals(newBlock.getTransactionsCount(), COINBASE_ONLY);
-		assertEquals(newBlock.getBits(), Sha256Hash.MAX_HASH);
+		assertEquals(newBlock.getVersion(), lastBlock.getVersion());
+		assertNotEquals(newBlock.getHashMerkleRoot(), Sha256Hash.ZERO_HASH);
+		assertEquals(newBlock.getHashPrevBlock(), lastBlock.hash());
+		assertEquals(newBlock.getTransactionsCount(), 1);
+		assertEquals(newBlock.getBits().compareTo(lastBlock.getBits()), 0);
 		
 	}
 

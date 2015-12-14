@@ -1,7 +1,6 @@
 package org.educoins.core;
 
 import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.CannotRevokeRevokeTransactionException;
 import org.educoins.core.utils.Sha256Hash;
@@ -9,7 +8,6 @@ import org.educoins.core.utils.Sha256Hash;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -30,30 +28,34 @@ public class Client extends Thread implements ITransactionListener {
 	}
 
 	public Transaction sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
+		List<Input> tmpInputs = new ArrayList<>();
 		int availableAmount = 0;
-		for (Input input : this.inputs) {
-			availableAmount += input.getAmount();
+
+		for (int i = 0; availableAmount < amount && i < this.inputs.size(); i++) {
+			tmpInputs.add(this.inputs.get(i));
+			availableAmount += this.inputs.get(i).getAmount();
 		}
+
 		if (amount > availableAmount) {
 			System.err.println("Not enough available amount (max. " + availableAmount + ")");
 			return null;
 		}
+		this.inputs.removeAll(tmpInputs);
+
 		List<Output> outputs = new ArrayList<>();
 		Output output = new Output(amount, dstPublicKey, lockingScript);
 		outputs.add(output);
 		if (amount < availableAmount) {
 			int reverseOutputAmount = availableAmount - amount;
-			String reverseDstPublicKey = this.wallet.getPublicKey();
-			String reverseLockingScript = reverseDstPublicKey;
-			Output reverseOutput = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
+			String senderPublicKey = this.wallet.getPublicKey();
+			Output reverseOutput = new Output(reverseOutputAmount, senderPublicKey, senderPublicKey);
 			outputs.add(reverseOutput);
 		}
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
-		transaction.setInputs(new ArrayList<>(this.inputs));
+		transaction.setInputs(new ArrayList<>(tmpInputs));
 		transaction.setOutputs(outputs);
 
-		List<Input> tmpInputs = new ArrayList<>(this.inputs);
 		for (Input input : tmpInputs) {
 
 			String publicKey = ByteArray
@@ -66,14 +68,12 @@ public class Client extends Thread implements ITransactionListener {
 			input.setUnlockingScript(EInputUnlockingScript.SIGNATURE, signature);
 
 		}
-		transaction.setInputs(inputs);
+		transaction.setInputs(tmpInputs);
 		this.blockChain.sendTransaction(transaction);
-		this.inputs = new ArrayList<>();
 		return transaction;
 	}
 
 	public Transaction sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
-		System.out.println(this.inputs.size());
 		List<Input> tmpInputs = new ArrayList<>();
 		int availableAmount = 0;
 
@@ -149,13 +149,11 @@ public class Client extends Thread implements ITransactionListener {
 					if (publicKey.equals(output.getDstPublicKey())) {
 						int amount = output.getAmount();
 						String hashPrevOutput = transaction.hash().toString();
-						// TODO [joeren] @ [vitali]: Wenn ich hier ";" bereits
-						// anhänge, knallts bei irgendeinem Konvertiervorgang
 						Input input = new Input(amount, hashPrevOutput, i);
 						input.setUnlockingScript(EInputUnlockingScript.PUBLIC_KEY, this.wallet.getPublicKey());
 						this.inputs.add(input);
 
-						String typeString;
+						/*String typeString;
 						switch (transaction.whichTransaction()) {
 							case APPROVED:
 								typeString = "Approved Transaction";
@@ -178,9 +176,9 @@ public class Client extends Thread implements ITransactionListener {
 							availableAmount += tmpInput.getAmount();
 						}
 						//TODO[Vitali] Testing
-						//System.out.println(String.format("Info:Received %d EDUCoins (new Amount: %d), time since last: % 6d ms. %s with LockingScript %s",
-						//		amount, availableAmount,System.currentTimeMillis() - lastFoundTime,  typeString, output.getLockingScript()));
-						lastFoundTime = System.currentTimeMillis();
+						System.out.println(String.format("Info:Received %d EDUCoins (new Amount: %d), time since last: % 6d ms. %s with LockingScript %s",
+								amount, availableAmount,System.currentTimeMillis() - lastFoundTime,  typeString, output.getLockingScript()));
+						lastFoundTime = System.currentTimeMillis();*/
 					}
 				}
 			}
