@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITransactionTransmitter {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    protected IProxyPeerGroup remoteProxies = new HttpProxyPeerGroup();
+    protected IProxyPeerGroup remoteProxies;
     protected Sha256Hash publicKey;
     protected static BlockChain blockChain;
 

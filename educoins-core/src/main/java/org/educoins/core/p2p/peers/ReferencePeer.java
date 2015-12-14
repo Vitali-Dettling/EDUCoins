@@ -10,6 +10,7 @@ import org.educoins.core.p2p.discovery.DiscoveryException;
 public class ReferencePeer extends Peer {
 
 	public ReferencePeer(BlockChain blockChain) {
+		super(blockChain.getHttpProxyPeerGroup());
 		this.blockChain = blockChain;
 
 	}

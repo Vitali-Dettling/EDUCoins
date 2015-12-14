@@ -1,6 +1,8 @@
 package org.educoins.core;
 
 import com.google.common.annotations.VisibleForTesting;
+
+import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.store.*;
 import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
@@ -58,7 +60,11 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
-
+	
+	public HttpProxyPeerGroup getHttpProxyPeerGroup(){
+		return (HttpProxyPeerGroup) this.blockReceiverPeerGroup;
+	}
+	
 	@VisibleForTesting
 	public static Sha256Hash calcNewDifficulty(Sha256Hash oldDiff, long currentTime, long allBlocksSinceLastTime) {
 		BigDecimal oldDifficulty = new BigDecimal(oldDiff.toBigInteger()).setScale(SCALE_DECIMAL_LENGTH,
@@ -95,11 +101,12 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	public @NotNull Collection<Block> getBlocks() throws BlockNotFoundException {
 		List<Block> blocks = new ArrayList<>();
-		
 		IBlockIterator iterator = store.iterator();
 		while (iterator.hasNext()) {
 			blocks.add(iterator.next());
-		}	
+		}
+		//Includes the genesis block as well.
+		blocks.add(this.store.get(blocks.get(blocks.size() -1).getHashPrevBlock()));
 		Collections.reverse(blocks);	
 		return blocks;
 	}
@@ -163,6 +170,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			// TODO: cool so?
 			return;
 		}
+		logger.info("Verified Block stored in the BC: " + block.toString());
+		this.store.put(block);
+		
 		Block newBlock = prepareNewBlock(block);
 		notifyBlockReceived(newBlock);
 		List<Transaction> transactions = block.getTransactions();

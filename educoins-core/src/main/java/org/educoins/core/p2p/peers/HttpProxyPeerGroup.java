@@ -41,9 +41,11 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
 		for (RemoteProxy proxy : getHighestRatedProxies()) {
 			try {
-				
-				proxy.getBlocks().parallelStream().forEach(
-						block -> blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block)));
+				for(Block block : proxy.getBlocks()){
+					for(IBlockListener listener : this.blockListeners){
+						listener.blockReceived(block);						
+					}
+				}
 
 				proxy.rateHigher();
 			} catch (IOException e) {
