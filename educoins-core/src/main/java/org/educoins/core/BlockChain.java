@@ -95,10 +95,12 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	public @NotNull Collection<Block> getBlocks() throws BlockNotFoundException {
 		List<Block> blocks = new ArrayList<>();
+		
 		IBlockIterator iterator = store.iterator();
 		while (iterator.hasNext()) {
 			blocks.add(iterator.next());
-		}
+		}	
+		Collections.reverse(blocks);	
 		return blocks;
 	}
 
@@ -152,25 +154,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 	}
 
-	private boolean checkStoreUpToDate(Block block){
-	
-		//TODO There needs to be an implementation, when the node starts the first time, such that it will get all block till the current state. 
-		try {
-			this.store.get(block.hash());
-		} catch (BlockNotFoundException e) {
-			this.store.put(block);
-			return false;
-		}		
-		return true;
-	}
-	
 	@Override
 	public void blockReceived(Block block) {
 		logger.info("Received block. Verifying now...");
-		
-		if(!checkStoreUpToDate(block)){
-			return;
-		}
 		
 		if (!this.verification.verifyBlock(block)) {
 			logger.warn("Verification of block failed: " + block.hash());
