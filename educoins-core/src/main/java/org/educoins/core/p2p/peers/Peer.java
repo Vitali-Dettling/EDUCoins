@@ -4,7 +4,6 @@ import org.educoins.core.*;
 import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.utils.Sha256Hash;
-import org.educoins.core.utils.Threading;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,7 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected IProxyPeerGroup remoteProxies;
     protected Sha256Hash publicKey;
-    protected static BlockChain blockChain;
+    protected BlockChain blockChain;
 
     public Peer(IProxyPeerGroup remoteProxies) {
         this.remoteProxies = remoteProxies;

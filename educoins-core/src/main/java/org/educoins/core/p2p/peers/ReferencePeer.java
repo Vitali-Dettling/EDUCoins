@@ -1,10 +1,10 @@
 package org.educoins.core.p2p.peers;
 
-import java.util.Scanner;
-
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.utils.Sha256Hash;
+
+import java.util.Scanner;
 
 /**
  * The Reference Client consisting of a Miner, a {@link BlockChain} and a
@@ -21,8 +21,14 @@ public class ReferencePeer extends Peer {
 	@Override
 	public void start() throws DiscoveryException {
 		remoteProxies.discover();
-		remoteProxies.getBlocks();
+		remoteProxies.receiveBlocks(new Block().hash());
 		client();
+	}
+
+	@Override
+	public void stop() {
+		// TODO Auto-generated method stub
+
 	}
 
 	private void client() {
@@ -95,11 +101,5 @@ public class ReferencePeer extends Peer {
 			default:
 			}
 		}
-	}
-
-	@Override
-	public void stop() {
-		// TODO Auto-generated method stub
-		
 	}
 }

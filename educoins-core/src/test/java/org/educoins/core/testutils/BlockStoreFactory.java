@@ -39,7 +39,7 @@ public class BlockStoreFactory {
     }
 
     public static void fillRandomTree(IBlockStore store) {
-        Block previous = getRandomBlock();
+        Block previous = new Block();
         for (int i = 0; i < 23; i++) {
             previous = getRandomBlock(previous);
             store.put(previous);

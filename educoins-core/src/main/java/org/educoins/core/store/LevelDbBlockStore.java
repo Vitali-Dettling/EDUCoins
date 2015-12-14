@@ -114,6 +114,13 @@ public class LevelDbBlockStore implements IBlockStore {
         return new BlockIterator(this, genesisHash);
     }
 
+    @Override
+    @NotNull
+    public Block getGenesisBlock() throws BlockNotFoundException {
+        if (genesisHash == null) throw new BlockNotFoundException("No GenesisBlock inserted so far!");
+        return get(Sha256Hash.wrap(genesisHash));
+    }
+
     private boolean isEmpty() {
         if (latest == null)
             latest = database.get(LATEST_KEY);

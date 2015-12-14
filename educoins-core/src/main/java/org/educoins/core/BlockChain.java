@@ -1,7 +1,6 @@
 package org.educoins.core;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.store.*;
 import org.educoins.core.utils.FormatToScientifc;
@@ -61,10 +60,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
 	
-	public HttpProxyPeerGroup getHttpProxyPeerGroup(){
-		return (HttpProxyPeerGroup) this.blockReceiverPeerGroup;
-	}
-	
 	@VisibleForTesting
 	public static Sha256Hash calcNewDifficulty(Sha256Hash oldDiff, long currentTime, long allBlocksSinceLastTime) {
 		BigDecimal oldDifficulty = new BigDecimal(oldDiff.toBigInteger()).setScale(SCALE_DECIMAL_LENGTH,
@@ -86,6 +81,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		System.out.println("+++++++++++++++++++++");
 
 		return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
+	}
+
+	public HttpProxyPeerGroup getHttpProxyPeerGroup() {
+		return (HttpProxyPeerGroup) this.blockReceiverPeerGroup;
 	}
 
 	public @NotNull Block getLatestBlock() throws BlockNotFoundException {
@@ -126,7 +125,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		if (blocksFrom.size() > 1)
 			throw new IllegalStateException("More than one block with the same hash found!");
 
-		if (blocksFrom.size() == 0 && from.equals(iterator.get().hash()))
+		if (blocksFrom.size() == 0 && !from.equals(iterator.get().hash()))
 			throw new BlockNotFoundException(from.getBytes());
 
 		return blocks;
@@ -327,5 +326,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 		}
 		return null;
+	}
+
+	public Block getGenesisBlock() throws BlockNotFoundException {
+		return store.getGenesisBlock();
 	}
 }

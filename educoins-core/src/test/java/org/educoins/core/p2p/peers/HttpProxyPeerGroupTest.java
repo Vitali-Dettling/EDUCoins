@@ -89,7 +89,6 @@ public class HttpProxyPeerGroupTest {
         int count = getTxnsCount();
 
         clientPeerGroup.addTransactionListener(listener);
-
         clientPeerGroup.receiveTransactions();
         verify(listener, atLeast(count)).transactionReceived(any(Transaction.class));
     }
@@ -108,8 +107,12 @@ public class HttpProxyPeerGroupTest {
         final int[] count = {0};
         IBlockIterator iterator = blockStore.iterator();
         while (iterator.hasNext()) {
-            Block block = iterator.next();
-            block.getTransactions().forEach(transaction -> count[0]++);
+            try {
+                Block block = iterator.next();
+                block.getTransactions().forEach(transaction -> count[0]++);
+            } catch (Exception e) {
+                break;
+            }
         }
         return count[0];
     }

@@ -1,15 +1,9 @@
 package org.educoins.core.p2p.peers;
 
-import java.util.Scanner;
-
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.Client;
-import org.educoins.core.Miner;
-import org.educoins.core.Transaction;
+import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.utils.Sha256Hash;
+
+import java.util.Scanner;
 
 /**
  * The {@link Peer}-Type having only reading-capabilities. Created by typus on
@@ -20,7 +14,7 @@ public class SoloMinerPeer extends Peer {
 	private Miner miner;
 
 	public SoloMinerPeer(BlockChain blockChain, Miner miner) {
-		Peer.blockChain = blockChain;
+		this.blockChain = blockChain;
 		this.miner = miner;
 
 		IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
@@ -34,6 +28,12 @@ public class SoloMinerPeer extends Peer {
 		// Kick off Miner.
 		blockChain.foundPoW(new Block());
 		client();
+	}
+
+	@Override
+	public void stop() {
+		// TODO Auto-generated method stub
+
 	}
 
 	private void client() {
@@ -67,11 +67,5 @@ public class SoloMinerPeer extends Peer {
 			default:
 			}
 		}
-	}
-
-	@Override
-	public void stop() {
-		// TODO Auto-generated method stub
-		
 	}
 }
