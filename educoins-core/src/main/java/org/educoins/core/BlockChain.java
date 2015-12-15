@@ -36,6 +36,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private List<Transaction> transactions;
 	private List<Block> blocks;
 	private Wallet wallet;
+	private Miner miner;
 	private Verification verification;
 	private IBlockStore store;
 
@@ -59,6 +60,18 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.store = senderBlockStore;
 
 		this.blockCounter = RESET_BLOCKS_COUNT;
+	}
+	
+	public void setMiner(Miner miner){
+		this.miner = miner;
+	}
+
+	public Miner getMiner(){
+		return this.miner;
+	}
+	
+	public IBlockStore getBlockStore(){
+		return this.store;
 	}
 	
 	public HttpProxyPeerGroup getHttpProxyPeerGroup(){
@@ -174,8 +187,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.store.put(block);
 	
 //TODO Only the task from the Miner. 		
-		Block newBlock = prepareNewBlock(block);
-		notifyBlockReceived(newBlock);
+//		Block newBlock = prepareNewBlock(block);
+//		notifyBlockReceived(newBlock);
 		List<Transaction> transactions = block.getTransactions();
 		if (transactions != null) {
 			logger.info("Found {} transactions", transactions.size());

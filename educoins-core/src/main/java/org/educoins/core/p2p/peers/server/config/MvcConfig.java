@@ -47,6 +47,7 @@ public class MvcConfig {
         	Miner miner = miner();
     		
             this.blockChain = new BlockChain(proxyPeerGroup, miner, proxyPeerGroup, proxyPeerGroup, store);
+            this.blockChain.setMiner(miner);
         }
         return blockChain;
     }

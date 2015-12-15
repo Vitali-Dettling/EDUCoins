@@ -25,10 +25,10 @@ public class SoloMinerNode {
 
     public static void main(String[] args) throws BlockStoreException {
     	 ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
-    	 Miner miner = (Miner) run.getBean("miner");
+    	// Miner miner = (Miner) run.getBean("miner");
          BlockChain blockChain = (BlockChain) run.getBean("blockChain");
         
-         SoloMinerPeer peer = new SoloMinerPeer(blockChain, miner);
+         SoloMinerPeer peer = new SoloMinerPeer(blockChain);
 
          //TODO: for demo, remove afterwards
          try {
@@ -36,19 +36,5 @@ public class SoloMinerNode {
          } catch (DiscoveryException e) {
              SpringApplication.exit(run, () -> -1);
          }
-
-    	
-//        ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
-//        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
-//        BlockChain blockChain = (BlockChain) run.getBean("blockChain");
-//       // BlockChain blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore());
-//        Miner miner = new Miner(blockChain);
-//        miner.addPoWListener(peerGroup);
-//        SoloMinerPeer peer = new SoloMinerPeer(blockChain, miner);
-//        try {
-//            peer.start();
-//        } catch (DiscoveryException e) {
-//            SpringApplication.exit(run, () -> -1);
-//        }
     }
 }

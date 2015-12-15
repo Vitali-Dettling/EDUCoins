@@ -20,6 +20,7 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
     protected IProxyPeerGroup remoteProxies;
     protected Sha256Hash publicKey;
     protected static BlockChain blockChain;
+    protected static Client client;
 
     public Peer(IProxyPeerGroup remoteProxies) {
         this.remoteProxies = remoteProxies;
