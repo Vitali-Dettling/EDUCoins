@@ -46,4 +46,12 @@ public interface IBlockStore {
      * @return the initialized {@link IBlockIterator}.
      */
     IBlockIterator iterator();
+
+    /**
+     * Returns the genesis block. This is most likely the first block inserted.
+     *
+     * @return the GenesisBlock.
+     * @throws BlockNotFoundException if there is no genesis block in the store right now.
+     */
+    @NotNull Block getGenesisBlock() throws BlockNotFoundException;
 }

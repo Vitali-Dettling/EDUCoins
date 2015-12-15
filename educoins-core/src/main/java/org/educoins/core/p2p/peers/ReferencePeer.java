@@ -28,7 +28,9 @@ public class ReferencePeer extends Peer {
 	@Override
 	public void start() throws DiscoveryException {
 		remoteProxies.discover();
-		remoteProxies.getBlocks();
+		Block genesisBlock = new Block();
+		//Kick starts the receiving of blocks. 
+		remoteProxies.receiveBlocks(genesisBlock.hash());
 		client();
 	}
 

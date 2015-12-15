@@ -4,7 +4,6 @@ import org.educoins.core.*;
 import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.utils.Sha256Hash;
-import org.educoins.core.utils.Threading;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

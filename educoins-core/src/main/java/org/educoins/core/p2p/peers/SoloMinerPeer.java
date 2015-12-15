@@ -1,5 +1,8 @@
 package org.educoins.core.p2p.peers;
 
+import org.educoins.core.*;
+import org.educoins.core.p2p.discovery.DiscoveryException;
+
 import java.util.Scanner;
 
 import org.educoins.core.Block;
@@ -22,7 +25,7 @@ public class SoloMinerPeer extends Peer {
 	private Miner miner;
 
 	public SoloMinerPeer(BlockChain blockChain) {
-		Peer.blockChain = blockChain;
+		this.blockChain = blockChain;
 		this.miner = Peer.blockChain.getMiner();
 		Peer.client = new Client(Peer.blockChain);
 

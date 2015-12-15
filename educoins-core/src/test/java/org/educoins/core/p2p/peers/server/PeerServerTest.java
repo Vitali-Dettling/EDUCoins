@@ -1,6 +1,7 @@
 package org.educoins.core.p2p.peers.server;
 
 import org.educoins.core.Block;
+import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.testutils.BlockStoreFactory;
 import org.educoins.core.utils.RestClient;
@@ -37,7 +38,13 @@ public class PeerServerTest {
     @Before
     public void setup() {
         try {
-            store.iterator().hasNext();
+            int cnt = 0;
+            IBlockIterator iter = store.iterator();
+            while (iter.hasNext())
+                cnt++;
+
+            if (cnt <= 1)
+                BlockStoreFactory.fillRandomTree(store);
         } catch (IllegalArgumentException e) {
             BlockStoreFactory.fillRandomTree(store);
         }
@@ -47,13 +54,6 @@ public class PeerServerTest {
 
     @After
     public void tearDown() {
-//        try {
-//            store.destroy();
-//        } catch (BlockStoreException e) {
-//            throw new IllegalStateException("Db could not be deleted!");
-//        }
-//        if (!IO.deleteDefaultBlockStoreFile())
-//            throw new IllegalStateException("Db could not be deleted!");
     }
 
     @Test

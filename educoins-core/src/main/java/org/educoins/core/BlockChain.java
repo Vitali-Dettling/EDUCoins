@@ -1,7 +1,6 @@
 package org.educoins.core;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.store.*;
 import org.educoins.core.utils.FormatToScientifc;
@@ -129,16 +128,23 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		IBlockIterator iterator = store.iterator();
 
 		while (iterator.hasNext()) {
+			//TODO Does not return the genesis block.
 			Block next = iterator.next();
 			if (next.hash().equals(from))
 				return blocks;
 			blocks.add(next);
 		}
-
+		
+		//Workaround: Includes the genesis block as well.
+		if(blocks.size() > 0){
+			blocks.add(this.store.get(blocks.get(blocks.size() -1).getHashPrevBlock()));
+			Collections.reverse(blocks);	
+		}
+		
 		Set<Block> blocksFrom = blocks.stream().filter(block -> block.hash().equals(from)).collect(Collectors.toSet());
 		if (blocksFrom.size() > 1)
 			throw new IllegalStateException("More than one block with the same hash found!");
-
+		
 		if (blocksFrom.size() == 0 && from.equals(iterator.get().hash()))
 			throw new BlockNotFoundException(from.getBytes());
 
@@ -340,5 +346,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 		}
 		return null;
+	}
+
+	public Block getGenesisBlock() throws BlockNotFoundException {
+		return store.getGenesisBlock();
 	}
 }
