@@ -42,7 +42,24 @@ public class Wallet {
 		}
 	}
 	
-	//TODO [Vitali] Bad performance because the whole file will be checked over and over again. Will be better with the DB.
+	public boolean compare(String message, String signature, String publicKey) {
+
+		this.keyPair = new ECDSA();
+		try {
+
+			byte[] sign = ByteArray.convertFromString(signature, HEX);
+			if (this.keyPair.verifySignature(message, sign, publicKey)) {
+				return true;
+			}
+		} catch (Exception e) {
+			System.err.println("ERROR: Class Wallet. Verification of the Signature." + e.getMessage());
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+	
+	//TODO Bad performance because the whole file will be checked over and over again. Will be better with the DB.
 	public boolean checkSignature(String hashedTranscation, byte[] signature){
 		
 		try {
@@ -102,16 +119,23 @@ public class Wallet {
 		
 	}
 	
-	public List<String> getPublicKeys() throws IOException {
-		List<String> publicKeys = new ArrayList<>();
-		String keyFile = IO.readFromFile(this.directoryKeyStorage + KeyStorageFile);
-		BufferedReader reader = new BufferedReader(new StringReader(keyFile));
-		String line;
-		while ((line = reader.readLine()) != null) {
-			String publicKey = line.substring(line.indexOf(";") + 1);
-			publicKeys.add(publicKey);
-		}
+	public List<String> getPublicKeys() {
 		
+		List<String> publicKeys = new ArrayList<>();
+		try {
+			String keyFile;
+			keyFile = IO.readFromFile(this.directoryKeyStorage + KeyStorageFile);
+
+			BufferedReader reader = new BufferedReader(new StringReader(keyFile));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String publicKey = line.substring(line.indexOf(";") + 1);
+				publicKeys.add(publicKey);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return publicKeys;
 	}
 	

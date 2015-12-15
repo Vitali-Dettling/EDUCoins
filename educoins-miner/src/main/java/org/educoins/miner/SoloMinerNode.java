@@ -25,12 +25,10 @@ public class SoloMinerNode {
 
     public static void main(String[] args) throws BlockStoreException {
     	 ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
-    	// Miner miner = (Miner) run.getBean("miner");
          BlockChain blockChain = (BlockChain) run.getBean("blockChain");
         
          SoloMinerPeer peer = new SoloMinerPeer(blockChain);
 
-         //TODO: for demo, remove afterwards
          try {
              peer.start();
          } catch (DiscoveryException e) {

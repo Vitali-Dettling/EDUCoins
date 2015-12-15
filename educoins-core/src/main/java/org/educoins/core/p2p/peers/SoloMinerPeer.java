@@ -3,6 +3,7 @@ package org.educoins.core.p2p.peers;
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 
+import java.util.List;
 import java.util.Scanner;
 
 import org.educoins.core.Block;
@@ -23,20 +24,21 @@ import org.educoins.core.store.IBlockStore;
 public class SoloMinerPeer extends Peer {
 
 	private Miner miner;
+	private static int amount = 0;
 
 	public SoloMinerPeer(BlockChain blockChain) {
-		this.blockChain = blockChain;
+		Peer.blockChain = blockChain;	
+	}
+
+	@Override
+	public void start() throws DiscoveryException {
 		this.miner = Peer.blockChain.getMiner();
 		Peer.client = new Client(Peer.blockChain);
 
 		IProxyPeerGroup peerGroup = Peer.blockChain.getHttpProxyPeerGroup();
 		this.miner.setBlockChain(blockChain);
 		miner.addPoWListener(peerGroup);
-	}
-
-	@Override
-	public void start() throws DiscoveryException {
-
+		
 		// Kick off Miner.
 		Block block = new Block();
 		blockChain.foundPoW(block);
@@ -46,17 +48,16 @@ public class SoloMinerPeer extends Peer {
 	private void client() {
 
 		boolean running = true;
-		int own = 0;
 		while (running) {
-			own = getAmountInput();
 			Scanner scanner = new Scanner(System.in);
-			System.out.println("Select action: (Amount: " + own + ")");
+			System.out.println("Select action:");
 			System.out.println("\t - (G)Get Own EDUCoins");
 			System.out.println("\t - (R)egular transaction");
 			System.out.println("\t - (E)xit");
 			String action = scanner.nextLine();
 			int amount = -1;
 			Transaction trans = null;
+			int own = getAmount();
 			switch (action.toLowerCase()) {
 			case "g":
 				System.out.println("Owen EDUCoins " + own);
@@ -79,25 +80,16 @@ public class SoloMinerPeer extends Peer {
 			}
 		}
 	}
-
-	// TODO Bad performance, each time the whole blockchain will be searched.
-	private int getAmountInput() {
-		IBlockStore store = Peer.blockChain.getBlockStore();
-		IBlockIterator iterator = store.iterator();
-		int availableAmount = 0;
-		try {
-			while (iterator.hasNext()) {
-				for (Transaction tx : iterator.next().getTransactions()) {
-					for (Output outs : tx.getOutputs()) {
-						availableAmount += outs.getAmount();
-					}
-				}
-			}
-		} catch (BlockNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return availableAmount;
+	
+	@Override
+	public int getAmount(){
+//		Wallet wallet = Peer.blockChain.getWallet();
+//		List<String> publickeys = wallet.getPublicKeys();
+//		
+//		for(String key : publickeys){
+//			SoloMinerPeer.amount = Peer.client.getAmount(key);
+//		}
+		return -1;
 	}
 
 	@Override

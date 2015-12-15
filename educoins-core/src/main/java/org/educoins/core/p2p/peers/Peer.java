@@ -32,6 +32,8 @@ public abstract class Peer implements IBlockReceiver, ITransactionReceiver, ITra
     public abstract void start() throws DiscoveryException;
 
     public abstract void stop();
+    
+    public abstract int getAmount();
 
     @Override
     public void transmitTransaction(Transaction transaction) {

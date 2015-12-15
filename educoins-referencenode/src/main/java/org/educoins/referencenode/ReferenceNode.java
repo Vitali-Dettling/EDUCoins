@@ -32,23 +32,10 @@ public class ReferenceNode {
         BlockChain blockChain = (BlockChain) run.getBean("blockChain");
         ReferencePeer peer = new ReferencePeer(blockChain);
 
-        //TODO: for demo, remove afterwards
         try {
             peer.start();
         } catch (DiscoveryException e) {
             SpringApplication.exit(run, () -> -1);
         }
-
-
-//        ConfigurableApplicationContext run = SpringApplication.run(ReferenceNode.class, args);
-//        IProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
-//        BlockChain blockChain = new BlockChain(peerGroup, peerGroup, peerGroup, new LevelDbBlockStore());
-//        Miner miner = new Miner(blockChain);
-//        ReferencePeer peer = new ReferencePeer(blockChain, miner, new Wallet());
-//        try {
-//            peer.start();
-//        } catch (DiscoveryException e) {
-//            SpringApplication.exit(run, () -> -1);
-//        }
     }
 }

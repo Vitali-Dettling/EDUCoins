@@ -1,17 +1,21 @@
 package org.educoins.core.utils;
 
+import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.IBlockReceiver;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
 import org.educoins.core.Miner;
+import org.educoins.core.Transaction;
+import org.educoins.core.Wallet;
+import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
+import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockStore;
-import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
 public class MockedBlockChain {
-	
+
 	@Mock
 	private IBlockReceiver mockedBlockReceiver;
 	@Mock
@@ -19,28 +23,69 @@ public class MockedBlockChain {
 	@Mock
 	private ITransactionTransmitter mockedTxTransmitter;
 	@Mock
-	private IBlockStore store;
-	
-	private BlockChain blockchain;
-	
-	@Before
-	public void setUp(){
-	
+	private ITransactionReceiver mockedGatewayReceiver;
+	@Mock
+	private ITransactionTransmitter mockedGatewayTransmitter;
+
+	private static IBlockStore mockedStore;
+	private static BlockChain mockedBlockchain;
+
+
+	static {
+		
 		IBlockReceiver blockReceiver = Mockito.mock(IBlockReceiver.class);
 		ITransactionReceiver txReceiver = Mockito.mock(ITransactionReceiver.class);
 		ITransactionTransmitter txTransmitter = Mockito.mock(ITransactionTransmitter.class);
-		IBlockStore store = Mockito.mock(IBlockStore.class);
+		HttpProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
+		mockedStore = MockedStore.getStore();
 		Miner miner = Mockito.mock(Miner.class);
 		
-		this.blockchain = new BlockChain(blockReceiver, miner, txReceiver, txTransmitter, store);
-		
-	}
-	
-	public BlockChain getMockedBlockChain(){
-		return this.blockchain;
-	}
-	
-	
+		mockedBlockchain = new BlockChain(peerGroup, miner, txReceiver, txTransmitter, mockedStore);
 
+	}
+	
+	public static IBlockStore getStore(){
+		return mockedStore;
+	}
+
+	public static BlockChain getMockedBlockChain() {
+		return mockedBlockchain;
+	}
+
+	public static void sendTransaction(Transaction transaction) {
+		mockedBlockchain.transactionReceived(transaction);
+	}
+	
+	public static void storeGateway(){
+		//TODO Late, if the gateways will be implemented.
+//		Block block = BlockStoreFactory.getRandomBlock();
+//		Transaction tx = new Transaction();
+//		Gateway gateway = mockedBlockchain.getGateway();
+//		tx.addGateway(gateway);
+//		mockedBlockchain.transactionReceived(tx);
+//		block = mockedBlockchain.prepareNewBlock(block);		
+//		mockedBlockchain.foundPoW(block);
+	}
+	
+	public static Block getLastStoredBlock() {
+		Block latestBlock = mockedStore.getLatest();
+		try {
+			return mockedBlockchain.getPreviousBlock(latestBlock);
+		} catch (BlockNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return latestBlock;
+	}
+	
+	public static void close(){
+		MockedWallet.delete();
+		MockedStore.delete();
+	}
+	
+	public static void delete(){
+		MockedStore.delete();
+		MockedWallet.delete();
+	}
 
 }

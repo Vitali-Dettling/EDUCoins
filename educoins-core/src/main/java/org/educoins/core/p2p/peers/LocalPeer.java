@@ -20,4 +20,11 @@ public class LocalPeer extends Peer {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public int getAmount() {
+		return 0;
+		// TODO Auto-generated method stub
+		
+	}
 }

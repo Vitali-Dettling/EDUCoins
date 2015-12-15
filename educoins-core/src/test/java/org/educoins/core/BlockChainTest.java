@@ -55,9 +55,4 @@ public class BlockChainTest {
 		Assert.assertEquals(oldDifficulty.compareTo(newDifficulty), 0);
 	}
 
-	//TODO[Vitali] Write a test where the difficulty calculation kicks in. 
-	
-	//TODO[Vitali] Test for getPreviousBlock();
-	
-
 }

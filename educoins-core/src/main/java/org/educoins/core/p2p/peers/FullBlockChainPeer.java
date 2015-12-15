@@ -24,4 +24,11 @@ public class FullBlockChainPeer extends Peer {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public int getAmount() {
+		return 0;
+		// TODO Auto-generated method stub
+		
+	}
 }
