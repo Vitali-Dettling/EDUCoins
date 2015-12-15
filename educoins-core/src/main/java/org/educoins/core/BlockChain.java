@@ -1,24 +1,25 @@
 package org.educoins.core;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
-import org.educoins.core.store.*;
+import org.educoins.core.store.BlockNotFoundException;
+import org.educoins.core.store.IBlockIterator;
+import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import org.educoins.core.Transaction.ETransaction;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.utils.FormatToScientifc;
-import org.educoins.core.utils.Sha256Hash;
-
 import com.google.common.annotations.VisibleForTesting;
-import org.jetbrains.annotations.NotNull;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
@@ -130,6 +131,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return blocks;
 	}
 
+	private static boolean once = true;
+	
 	public @NotNull Collection<Block> getBlocksFrom(Sha256Hash from) throws BlockNotFoundException {
 		List<Block> blocks = new ArrayList<>();
 		IBlockIterator iterator = store.iterator();
@@ -142,10 +145,13 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			blocks.add(next);
 		}
 
-		// Workaround: Includes the genesis block as well.
-		if (blocks.size() > 0) {
-			blocks.add(this.store.get(blocks.get(blocks.size() - 1).getHashPrevBlock()));
-			Collections.reverse(blocks);
+		if(once){
+			// Workaround: Includes the genesis block as well.
+			if (blocks.size() > 0) {
+				blocks.add(this.store.get(blocks.get(blocks.size() - 1).getHashPrevBlock()));
+				Collections.reverse(blocks);
+			}
+			once = false;
 		}
 
 		Set<Block> blocksFrom = blocks.stream().filter(block -> block.hash().equals(from)).collect(Collectors.toSet());
@@ -191,6 +197,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	public void blockReceived(Block block) {
 		logger.info("Received block. Verifying now...");
 
+		//TODO Verifications does not work properly at the moment. 
 		if (!this.verification.verifyBlock(block)) {
 
 			logger.warn("Verification of block failed: " + block.toString());
@@ -217,8 +224,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	//TODO Are this test done in the verification class? -> Group 2
 	private void requestBlocksAgain(Block lastReceivedBlock) {
 
-		Block latestBlock = this.store.getLatest();
-		if (latestBlock.equals(lastReceivedBlock)) {
+		Block latestStoredBlock = this.store.getLatest();
+		System.out.println("Latest store: " + latestStoredBlock.hash());
+		System.out.println("received:     " + lastReceivedBlock.getHashPrevBlock());
+		if (latestStoredBlock.equals(lastReceivedBlock)) {
 			logger.info("The not verified block is already the latest block in the blockchain.");
 			return;
 		}
@@ -226,10 +235,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		Block block = this.store.get(lastReceivedBlock);
 		if(block != null){
 			logger.info("The not verified block exists already in the blockchain.");
+		}else{
+			//Tries one more time to get the right blocks in order.
+			this.blockReceiverPeerGroup.receiveBlocks(latestStoredBlock.hash());
 		}
-		
-		//Tries one more time to get the right blocks in order.
-		this.blockReceiverPeerGroup.receiveBlocks(lastReceivedBlock.hash());
 	}
 
 	public void addTransactionListener(ITransactionListener transactionListener) {

@@ -34,26 +34,24 @@ public class Client extends Thread implements ITransactionListener {
 		store = this.blockChain.getBlockStore();
 	}
 
-
-		for (int i = 0; availableAmount < amount && i < this.inputs.size(); i++) {
-			tmpInputs.add(this.inputs.get(i));
-			availableAmount += this.inputs.get(i).getAmount();
-		this.inputs.removeAll(tmpInputs);
+	public Transaction sendRegularTransaction(int amount, String dstPublicKey, String lockingScript, int availableAmount) {
 
 		List<Output> outputs = new ArrayList<>();
 		Output output = new Output(amount, dstPublicKey, lockingScript);
 		outputs.add(output);
 		if (amount < availableAmount) {
 			int reverseOutputAmount = availableAmount - amount;
-			String senderPublicKey = this.wallet.getPublicKey();
-			Output reverseOutput = new Output(reverseOutputAmount, senderPublicKey, senderPublicKey);
+			String reverseDstPublicKey = this.wallet.getPublicKey();
+			String reverseLockingScript = reverseDstPublicKey;
+			Output reverseOutput = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
 			outputs.add(reverseOutput);
 		}
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
-		transaction.setInputs(new ArrayList<>(tmpInputs));
+		transaction.setInputs(new ArrayList<>(this.inputs));
 		transaction.setOutputs(outputs);
 
+		List<Input> tmpInputs = new ArrayList<>(this.inputs);
 		for (Input input : tmpInputs) {
 
 			String publicKey = ByteArray.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY),
@@ -66,8 +64,9 @@ public class Client extends Thread implements ITransactionListener {
 			input.setUnlockingScript(EInputUnlockingScript.SIGNATURE, signature);
 
 		}
-		transaction.setInputs(tmpInputs);
+		transaction.setInputs(inputs);
 		this.blockChain.sendTransaction(transaction);
+		this.inputs = new ArrayList<>();
 		return transaction;
 	}
 
@@ -137,6 +136,10 @@ public class Client extends Thread implements ITransactionListener {
 
 	private void generateInputs(Transaction transaction) {
 
+		List<String> publicKeys = this.wallet.getPublicKeys();
+		List<Output> availableOutputs = transaction.getOutputs();
+		if (availableOutputs == null) {
+			return;
 		}
 		for (int i = 0; i < availableOutputs.size(); i++) {
 			Output output = availableOutputs.get(i);
