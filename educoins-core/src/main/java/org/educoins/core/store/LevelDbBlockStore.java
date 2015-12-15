@@ -81,8 +81,20 @@ public class LevelDbBlockStore implements IBlockStore {
         byte[] byteBlock = database.get(hash.getBytes());
 
         if (byteBlock == null)
+        	//TODO May change that in return null?
             throw new BlockNotFoundException(hash.toString());
 
+        return getBlock(byteBlock);
+    }
+    
+    @Override
+    @NotNull
+    public synchronized Block get(Block block) {
+    	Sha256Hash hash = block.hash();
+        byte[] byteBlock = database.get(hash.getBytes());
+
+        if (byteBlock == null)
+        	return null;
 
         return getBlock(byteBlock);
     }

@@ -41,8 +41,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 	private String publicKey;
 
-	public BlockChain(IBlockReceiver blockReceiverPeerGroup, IBlockReceiver blockReceiverResetMiner, ITransactionReceiver transactionReceiver,
-			ITransactionTransmitter transactionTransmitter, IBlockStore senderBlockStore) {
+	public BlockChain(IBlockReceiver blockReceiverPeerGroup, IBlockReceiver blockReceiverResetMiner,
+			ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter,
+			IBlockStore senderBlockStore) {
 
 		this.wallet = new Wallet();
 		this.blockListeners = new CopyOnWriteArrayList<>();
@@ -60,23 +61,23 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
-	
-	public void setMiner(Miner miner){
+
+	public void setMiner(Miner miner) {
 		this.miner = miner;
 	}
 
-	public Miner getMiner(){
+	public Miner getMiner() {
 		return this.miner;
 	}
-	
-	public IBlockStore getBlockStore(){
+
+	public IBlockStore getBlockStore() {
 		return this.store;
 	}
-	
-	public HttpProxyPeerGroup getHttpProxyPeerGroup(){
+
+	public HttpProxyPeerGroup getHttpProxyPeerGroup() {
 		return (HttpProxyPeerGroup) this.blockReceiverPeerGroup;
 	}
-	
+
 	@VisibleForTesting
 	public static Sha256Hash calcNewDifficulty(Sha256Hash oldDiff, long currentTime, long allBlocksSinceLastTime) {
 		BigDecimal oldDifficulty = new BigDecimal(oldDiff.toBigInteger()).setScale(SCALE_DECIMAL_LENGTH,
@@ -117,9 +118,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		while (iterator.hasNext()) {
 			blocks.add(iterator.next());
 		}
-		//Includes the genesis block as well.
-		blocks.add(this.store.get(blocks.get(blocks.size() -1).getHashPrevBlock()));
-		Collections.reverse(blocks);	
+		// Includes the genesis block as well.
+		blocks.add(this.store.get(blocks.get(blocks.size() - 1).getHashPrevBlock()));
+		Collections.reverse(blocks);
 		return blocks;
 	}
 
@@ -128,23 +129,23 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		IBlockIterator iterator = store.iterator();
 
 		while (iterator.hasNext()) {
-			//TODO Does not return the genesis block.
+			// TODO Does not return the genesis block.
 			Block next = iterator.next();
 			if (next.hash().equals(from))
 				return blocks;
 			blocks.add(next);
 		}
-		
-		//Workaround: Includes the genesis block as well.
-		if(blocks.size() > 0){
-			blocks.add(this.store.get(blocks.get(blocks.size() -1).getHashPrevBlock()));
-			Collections.reverse(blocks);	
+
+		// Workaround: Includes the genesis block as well.
+		if (blocks.size() > 0) {
+			blocks.add(this.store.get(blocks.get(blocks.size() - 1).getHashPrevBlock()));
+			Collections.reverse(blocks);
 		}
-		
+
 		Set<Block> blocksFrom = blocks.stream().filter(block -> block.hash().equals(from)).collect(Collectors.toSet());
 		if (blocksFrom.size() > 1)
 			throw new IllegalStateException("More than one block with the same hash found!");
-		
+
 		if (blocksFrom.size() == 0 && from.equals(iterator.get().hash()))
 			throw new BlockNotFoundException(from.getBytes());
 
@@ -183,18 +184,20 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	@Override
 	public void blockReceived(Block block) {
 		logger.info("Received block. Verifying now...");
-		
+
 		if (!this.verification.verifyBlock(block)) {
-			logger.warn("Verification of block failed: " + block.hash());
-			// TODO: cool so?
+
+			logger.warn("Verification of block failed: " + block.toString());
+			// Probably the last block was not the correct one in the line.
+			requestBlocksAgain(block);
 			return;
 		}
 		logger.info("Verified Block stored in the BC: " + block.toString());
 		this.store.put(block);
-	
-//TODO Only the task from the Miner. 		
-//		Block newBlock = prepareNewBlock(block);
-//		notifyBlockReceived(newBlock);
+
+		// TODO Only the task from the Miner.
+		// Block newBlock = prepareNewBlock(block);
+		// notifyBlockReceived(newBlock);
 		List<Transaction> transactions = block.getTransactions();
 		if (transactions != null) {
 			logger.info("Found {} transactions", transactions.size());
@@ -203,6 +206,24 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 		}
 		logger.info("Block processed.");
+	}
+
+	//TODO Are this test done in the verification class? -> Group 2
+	private void requestBlocksAgain(Block lastReceivedBlock) {
+
+		Block latestBlock = this.store.getLatest();
+		if (latestBlock.equals(lastReceivedBlock)) {
+			logger.info("The not verified block is already the latest block in the blockchain.");
+			return;
+		}
+		
+		Block block = this.store.get(lastReceivedBlock);
+		if(block != null){
+			logger.info("The not verified block exists already in the blockchain.");
+		}
+		
+		//Tries one more time to get the right blocks in order.
+		this.blockReceiverPeerGroup.receiveBlocks(lastReceivedBlock.hash());
 	}
 
 	public void addTransactionListener(ITransactionListener transactionListener) {
@@ -221,9 +242,9 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 
 	public void sendTransaction(Transaction transaction) {
-		
+
 		this.transactions.add(transaction);
-		//TODO Needs to be implemented that all miner will get transactions.  
+		// TODO Needs to be implemented that all miner will get transactions.
 		this.transactionTransmitter.transmitTransaction(transaction);
 	}
 
@@ -257,7 +278,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 
 		try {
 			this.blockReceiverResetMiner.receiveBlocks(null);
-			//TODO Only the task from the Client. 	
+			// TODO Only the task from the Client.
 			this.blockReceiverPeerGroup.receiveBlocks(getLatestBlock().hash());
 		} catch (BlockNotFoundException e) {
 			this.blockReceiverResetMiner.receiveBlocks(null);
@@ -328,8 +349,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return newBlock;
 	}
 
-	// TODO [Vitali] Method needs to be deleted as soon as the DB will be
-	// introduced.
 	public Block getPreviousBlock(Block currentBlock) throws BlockNotFoundException {
 		return this.store.get(currentBlock.getHashPrevBlock());
 	}

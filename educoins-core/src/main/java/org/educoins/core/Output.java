@@ -48,5 +48,10 @@ public class Output {
 		return ByteArray.concatByteArrays(lockingScript);
 		
 	}
+	
+	@Override
+	public String toString() {
+		return "Output [amount=" + amount + ", dstPublicKey=" + dstPublicKey + ", lockingScript=" + lockingScript + "]";
+	}
 
 }

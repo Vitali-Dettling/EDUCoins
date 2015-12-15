@@ -115,9 +115,14 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 if (checkProxiesState(proxy, e)) return;
                 logger.error("Could not retrieve Blocks from proxy: {}@{}",
                         proxy.getPubkey(), proxy.getiNetAddress(), e);
+                retry(blocksReceived, from);
             }
         }
-        //RETRY
+        logger.info("Receiving blocks done.");
+    }
+    
+    private void retry(long blocksReceived, Sha256Hash from){
+        //RETRY onyl if no peer are available right now.
         if (blocksReceived == 0 && retry) {
             logger.info("Did not retrieve any blocks... Retry in 1 minute");
             try {
@@ -127,7 +132,6 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             logger.info("Retrying now.");
             receiveBlocks(from);
         }
-        logger.info("Receiving blocks done.");
     }
 
     @Override
