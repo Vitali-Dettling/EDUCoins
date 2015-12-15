@@ -59,7 +59,6 @@ public class MinerTest {
         Block block = new Block();
         miner.addPoWListener(powListener);
         miner.blockReceived(block);
-        Thread.sleep(100); //TODO: Not optimal, it would be better to just wait for PoWThread to finish
-        verify(powListener).foundPoW(any(Block.class));
+        verify(powListener, timeout(300)).foundPoW(any(Block.class));
     }
 }

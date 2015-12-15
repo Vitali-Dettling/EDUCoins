@@ -1,7 +1,6 @@
 package org.educoins.core;
 
 import org.educoins.core.Input.EInputUnlockingScript;
-import org.educoins.core.Transaction.ETransaction;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockIterator;
@@ -13,7 +12,6 @@ import org.educoins.core.utils.Sha256Hash;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,24 +34,26 @@ public class Client extends Thread implements ITransactionListener {
 		store = this.blockChain.getBlockStore();
 	}
 
-	public Transaction sendRegularTransaction(int amount, String dstPublicKey, String lockingScript, int availableAmount) {
+
+		for (int i = 0; availableAmount < amount && i < this.inputs.size(); i++) {
+			tmpInputs.add(this.inputs.get(i));
+			availableAmount += this.inputs.get(i).getAmount();
+		this.inputs.removeAll(tmpInputs);
 
 		List<Output> outputs = new ArrayList<>();
 		Output output = new Output(amount, dstPublicKey, lockingScript);
 		outputs.add(output);
 		if (amount < availableAmount) {
 			int reverseOutputAmount = availableAmount - amount;
-			String reverseDstPublicKey = this.wallet.getPublicKey();
-			String reverseLockingScript = reverseDstPublicKey;
-			Output reverseOutput = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
+			String senderPublicKey = this.wallet.getPublicKey();
+			Output reverseOutput = new Output(reverseOutputAmount, senderPublicKey, senderPublicKey);
 			outputs.add(reverseOutput);
 		}
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
-		transaction.setInputs(new ArrayList<>(this.inputs));
+		transaction.setInputs(new ArrayList<>(tmpInputs));
 		transaction.setOutputs(outputs);
 
-		List<Input> tmpInputs = new ArrayList<>(this.inputs);
 		for (Input input : tmpInputs) {
 
 			String publicKey = ByteArray.convertToString(input.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY),
@@ -66,14 +66,12 @@ public class Client extends Thread implements ITransactionListener {
 			input.setUnlockingScript(EInputUnlockingScript.SIGNATURE, signature);
 
 		}
-		transaction.setInputs(inputs);
+		transaction.setInputs(tmpInputs);
 		this.blockChain.sendTransaction(transaction);
-		this.inputs = new ArrayList<>();
 		return transaction;
 	}
 
 	public Transaction sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
-		System.out.println(this.inputs.size());
 		List<Input> tmpInputs = new ArrayList<>();
 		int availableAmount = 0;
 
@@ -139,10 +137,6 @@ public class Client extends Thread implements ITransactionListener {
 
 	private void generateInputs(Transaction transaction) {
 
-		List<String> publicKeys = this.wallet.getPublicKeys();
-		List<Output> availableOutputs = transaction.getOutputs();
-		if (availableOutputs == null) {
-			return;
 		}
 		for (int i = 0; i < availableOutputs.size(); i++) {
 			Output output = availableOutputs.get(i);

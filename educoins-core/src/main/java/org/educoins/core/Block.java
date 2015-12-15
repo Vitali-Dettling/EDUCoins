@@ -1,5 +1,6 @@
 package org.educoins.core;
 
+import com.google.common.primitives.UnsignedBytes;
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.*;
 import org.jetbrains.annotations.NotNull;
@@ -101,7 +102,7 @@ public class Block {
 
 	public Sha256Hash getBits() {
         byte[] mantisse = Arrays.copyOfRange(bits, 1, 4);
-        int expInt = (int) bits[0];
+        int expInt = UnsignedBytes.toInt(bits[0]);
 
         byte[] result = new byte[3 + expInt];
         Arrays.fill(result, (byte) 0);

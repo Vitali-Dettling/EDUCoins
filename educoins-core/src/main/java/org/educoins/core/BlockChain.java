@@ -9,10 +9,16 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
+
+import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.store.BlockNotFoundException;
+import org.educoins.core.store.IBlockIterator;
+import org.educoins.core.store.IBlockStore;
+import org.educoins.core.utils.FormatToScientifc;
+import org.educoins.core.utils.Sha256Hash;
+
+import com.google.common.annotations.VisibleForTesting;
+import org.jetbrains.annotations.NotNull;
 
 public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
 
@@ -315,8 +321,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		String lockingScript = publicKey;
 
 		// Input is empty because it is a coinbase transaction.
-		int newReward = currentBlock.rewardCalculator();
-		Output output = new Output(newReward, publicKey, lockingScript);
+		Output output = new Output(currentBlock.rewardCalculator(), publicKey, lockingScript);
 
 		CoinbaseTransaction transaction = new CoinbaseTransaction();
 		transaction.addOutput(output);

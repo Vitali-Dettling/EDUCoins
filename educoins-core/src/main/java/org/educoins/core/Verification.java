@@ -7,6 +7,8 @@ import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class Verification {
@@ -21,12 +23,57 @@ public class Verification {
 	private BlockChain blockChain;
 	private Logger logger = LoggerFactory.getLogger(BlockChain.class);
 
+    private HashMap<String, Boolean> usedOutputs;
+
 	public Verification(Wallet wallet, BlockChain blockChain){
+        this.usedOutputs = new HashMap<>();
 		this.blockChain = blockChain;
 		this.wallet = wallet;	
 	}
-		
-	public boolean verifyBlock(Block toVerifyBlock) {
+
+	public boolean verifyBlockChain(BlockChain newChain) {
+        //TODO: replaced with reversed list
+        assert newChain != null;
+
+        this.blockChain = newChain;
+        this.usedOutputs.clear();
+        try {
+            Iterator<Block> it = blockChain.getBlocks().iterator();
+            Block currentBlock;
+            while (it.hasNext()) {
+                currentBlock = it.next();
+                //verify block, if fails, return false
+                if (!verifyBlock(currentBlock)) return false;
+                //verify all transactions in this block
+                if (!verifyAllTransactions(currentBlock)) return true;
+            }
+        } catch (BlockNotFoundException e) {
+            return false;
+        }
+        return true;
+	}
+
+    private boolean verifyAllTransactions(Block currentBlock) {
+        for (Transaction transaction : currentBlock.getTransactions()) {
+            String transHash = transaction.hash().toString();
+            //put all outputs to list and set to "not used"
+            for (int i = 0; i < transaction.getOutputsCount(); i++) {
+                usedOutputs.put(transHash + i, false);
+            }
+            for (Input input : transaction.getInputs()) {
+                //if output is already "used" return false
+                if (usedOutputs.getOrDefault(input.getHashPrevOutput() + input.getN(), false)) {
+                    return false;
+                } else {
+                    //If Key wasn't set, there was no output, otherwise set used to true
+                    if (usedOutputs.replace(input.getHashPrevOutput() + input.getN(), true) == null) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean verifyBlock(Block toVerifyBlock) {
 		
 		if(toVerifyBlock == null){
 			throw new NullPointerException("Block is null.");	
@@ -38,7 +85,7 @@ public class Verification {
 		}
 
 		// 1. Find the previous block.
-		Block previousBlock = null;
+		Block lastBlock;
 		try {
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
@@ -48,13 +95,13 @@ public class Verification {
 
 		// 3. Are the hashes equal of the current block and the previous one?
 		if (toVerifyBlock.hash().compareTo(previousBlock.getHashPrevBlock()) == TRUE) {
-			System.out.println("DEBUG: verifyBlock: last block is equal to block");
+            logger.warn("verifyBlock: last block is equal to block");
 			return false;
 		}
 
 		//4. At least one transaction has to be in the block, namely the coinbase transaction.
 		if(toVerifyBlock.getTransactions().size() <=  HAS_NO_ENTRIES){
-			System.out.println("DEBUG: verifyBlock: no transactions");
+            logger.warn("verifyBlock: no transactions");
 			return false;
 		}
 		
@@ -83,36 +130,26 @@ public class Verification {
 				return false;
 			}
 		}
+
+        //6. verify inputs
+        if (!verifyAllTransactions(toVerifyBlock)) {
+            logger.warn("verifyBlock: transaction inputs are not valid!");
+            return false;
+        }
 		
-	    if (!verifyMerkle(toVerifyBlock))
-	    {
-			System.out.println("DEBUG: verifyBlock: verfication of merkle root failed");
+	    if (!verifyMerkle(toVerifyBlock)) {
+            logger.warn("verifyBlock: verfication of merkle root failed");
 			return false;
 	    }
-	    
-		// TODO[Vitali] Überlegen ob weitere Test von nöten wären???
-	    // TODO maxBlockSIze: size_in_bytes < MAX_BLOCK_SIZE
-	    
-	    
 		return true;
-
-	}
+    }
 	
 	public boolean verifyApprovedTransaction(Transaction transaction){
-		
-		//TODO [Vitali] Find out whether all checks are included? 
-		
-		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
-
-		// Case 1:
-		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
-		
 		List<Input> inputs = transaction.getInputs();
 		List<Approval> approvals = transaction.getApprovals();
 		
 		if (approvals == null) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyApprovedTransaction: inputs is null");
+            logger.warn("verifyApprovedTransaction: inputs is null");
 			return false;
 		}
 
@@ -123,8 +160,7 @@ public class Verification {
 		for (Input input : inputs) {
 			int amount = input.getAmount();
 			if (amount <= NO_COINS) {
-				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyApprovedTransaction: input amounts is negative or zero");
+                logger.warn("verifyApprovedTransaction: input amounts is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -133,14 +169,13 @@ public class Verification {
 				
 		for(Approval approval : approvals){
 			if(approval.getAmount() <= NO_COINS){
-				System.out.println("DEBUG: verifyApprovedTransaction: approved amound is 0");
+                logger.warn("verifyApprovedTransaction: approved amound is 0");
 				return false;
 			}
 			
 			int amount = approval.getAmount();
 			if (amount <= NO_COINS) {
-				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyApprovedTransaction: output amount is negative or zero");
+                logger.warn("verifyApprovedTransaction: output amount is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -148,10 +183,8 @@ public class Verification {
 		}
 		
 		// Case 5:
-		// TODO [joeren]: implementation of approval-exception
 		if (sumApprovalAmount > sumInputsAmount) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyApprovedTransaction: more output than input");
+            logger.warn("verifyApprovedTransaction: more output than input");
 			return false;
 		}
 		
@@ -162,14 +195,12 @@ public class Verification {
 		for(Approval approval : approvals){
 			String lockingScript = approval.getLockingScript();
 			if(lockingScript.isEmpty()){
-				System.out.println("DEBUG: verifyApprovedTransaction: locking script is empty.");
+                logger.warn("DEBUG: verifyApprovedTransaction: locking script is empty.");
 				return false;
 			}
 		}
-		
-		
-		//TODO [Vitali] Implement rest of the verification, if some.
-		System.out.println("DEBUG: verifyApprovedTransaction: verified " + transaction.hash());
+
+        logger.info("verifyApprovedTransaction: verified " + transaction.hash());
 		return true;
 		
 		
@@ -182,19 +213,15 @@ public class Verification {
 		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
 
 		// Case 1:
-		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
-
 		List<Output> coinBases = transaction.getOutputs();
 		
 		if(coinBases == null){
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyCoinbaseTransaction: output is null");
+            logger.warn("verifyCoinbaseTransaction: output is null");
 			return false;
 		}
 		
 		if(coinBases.size() != 1){
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyCoinbaseTransaction: More then one coinbase transaction.");
+            logger.warn("verifyCoinbaseTransaction: More then one coinbase transaction.");
 			return false;
 		}
 		
@@ -203,73 +230,55 @@ public class Verification {
 		int currentReward = coinBase.getAmount();
 		int trueReward = toVerifyBlock.rewardCalculator();
 		if(trueReward != currentReward){
-			System.out.println(String.format("DEBUG: verifyCoinbaseTransaction: amount %d doesn't equal reward %d", currentReward, trueReward));
-//			return false;
+            logger.warn(String.format("verifyCoinbaseTransaction: amount %d doesn't equal reward %d", currentReward, trueReward));
 		}
 		
 		// #6
-		if (transaction.getInputsCount() > 0)
-		{
-			return false;
-		}
-		
-		//TODO [Vitali] Implement rest of the verification, if some.
-		return true;
-		
-	}
+        return transaction.getInputsCount() <= 0;
+    }
 	
 	public boolean verifyRegularTransaction(Transaction transaction) {
-
 		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der Block-Chain-Technologie" p. 37f
-
 		// Case 1:
-		// TODO [joeren]: Syntax has not to be verified in first step, already done by the deserializer
-
 		List<Input> inputs = transaction.getInputs();
 
 		if (inputs == null) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: inputs is null");
+            logger.warn("verifyRegularTransaction: inputs is null");
 			return false;
 		}
 
 		int realInputsCount = inputs.size();
 
 		if (realInputsCount == ZERO) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: realInputsCount is 0");
+            logger.warn("verifyRegularTransaction: realInputsCount is 0");
 			return false;
 		}
 
 		int inputsCount = transaction.getInputsCount();
 
 		if (realInputsCount != inputsCount) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: realInputsCount does not match inputsCount");
+            logger.warn("verifyRegularTransaction: realInputsCount does not match inputsCount");
 			return false;
 		}
 
 		List<Output> outputs = transaction.getOutputs();
 
 		if (outputs == null) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: outputs is null");
+            logger.warn("verifyRegularTransaction: outputs is null");
 			return false;
 		}
 
 		int realOutputsCount = outputs.size();
 
 		if (realOutputsCount == ZERO) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: realOutputsCount is 0");
+            logger.warn("verifyRegularTransaction: realOutputsCount is 0");
 			return false;
 		}
 
 		int outputsCount = transaction.getOutputsCount();
 
 		if (realOutputsCount != outputsCount) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: realOutputsCount does not match outputsCount");
+            logger.warn("verifyRegularTransaction: realOutputsCount does not match outputsCount");
 			return false;
 		}
 		
@@ -280,8 +289,7 @@ public class Verification {
 		for (Input input : inputs) {
 			int amount = input.getAmount();
 			if (amount <= NO_COINS) {
-				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyRegularTransaction: input amounts is negative or zero");
+                logger.warn("verifyRegularTransaction: input amounts is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -290,8 +298,7 @@ public class Verification {
 		for (Output output : outputs) {
 			int amount = output.getAmount();
 			if (amount <= NO_COINS) {
-				// TODO [joeren]: remove debug output
-				System.out.println("DEBUG: verifyRegularTransaction: output amount is negative or zero");
+                logger.warn("verifyRegularTransaction: output amount is negative or zero");
 				return false;
 			}
 			// sum up for case 5
@@ -299,10 +306,8 @@ public class Verification {
 		}
 		
 		// Case 5:
-		// TODO [joeren]: implementation of approval-exception
 		if (sumOutputsAmount > sumInputsAmount) {
-			// TODO [joeren]: remove debug output
-			System.out.println("DEBUG: verifyRegularTransaction: more output than input");
+            logger.warn("verifyRegularTransaction: more output than input");
 			return false;
 		}
 		
@@ -321,16 +326,15 @@ public class Verification {
 			}
 					
 		}
-		
-		//TODO [Vitali] Implement rest of the verification, if some.
-		System.out.println("DEBUG: verifyRegularTransaction: verified " + transaction.hash());
+
+        logger.info("verifyRegularTransaction: verified " + transaction.hash());
 		return true;
 	}
 
 	public boolean verifyRevokeTransaction(Transaction transaction) {
 		Transaction transRevoked = this.blockChain.getTransaction(transaction.getApprovedTransaction());
 		if (transRevoked == null) {
-			System.out.println("DEBUG: verifyRevokeTransaction: Transaction be be revoked cannot be found");
+            logger.warn("verifyRevokeTransaction: Transaction be be revoked cannot be found");
 			return false;
 		}
 
@@ -338,17 +342,17 @@ public class Verification {
 		List<Approval> approvals = transRevoked.getApprovals();
 
 		if (approvals == null) {
-			System.out.println("DEBUG: verifyRevokeTransaction: approvals are null");
+            logger.warn("verifyRevokeTransaction: approvals are null");
 			return false;
 		}
 
 		if (inputs == null) {
-			System.out.println("DEBUG: verifyRevokeTransaction: inputs are null");
+            logger.warn("verifyRevokeTransaction: inputs are null");
 			return false;
 		}
 
 		if (transRevoked.getOutputsCount() != 0) {
-			System.out.println("DEBUG: verifyRevokeTransaction: revoked transaction has outputs");
+            logger.warn("verifyRevokeTransaction: revoked transaction has outputs");
 			return false;
 		}
 
@@ -357,7 +361,7 @@ public class Verification {
 
 		for (Input input : inputs) {
 			if (input.getAmount() <= 0) {
-				System.out.println("DEBUG: verifyRevokeTransaction: input amounts is negative or zero");
+                logger.warn("verifyRevokeTransaction: input amounts is negative or zero");
 				return false;
 			}
 			sumInputsAmount += input.getAmount();
@@ -365,18 +369,18 @@ public class Verification {
 
 		for(Approval approval : approvals){
 			if (approval.getAmount() <= 0) {
-				System.out.println("DEBUG: verifyRevokeTransaction: approved amount is negative or zero");
+                logger.warn("verifyRevokeTransaction: approved amount is negative or zero");
 				return false;
 			}
 			sumApprovalAmount += approval.getAmount();
 		}
 
 		if (sumApprovalAmount != sumInputsAmount) {
-			System.out.println("DEBUG: verifyRevokeTransaction: sum of input and approval don't match");
+            logger.warn("verifyRevokeTransaction: sum of input and approval don't match");
 			return false;
 		}
 
-		System.out.println("DEBUG: verifyRevokeTransaction: verified " + transaction.hash());
+        logger.info("verifyRevokeTransaction: verified " + transaction.hash());
 		return true;
 	}
 	
