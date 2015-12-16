@@ -69,6 +69,10 @@ public class LevelDbBlockStore implements IBlockStore {
         if (genesisHash == null) {
             genesisHash = hash;
         }
+        Block alreadyStored = get(block);
+		if(alreadyStored != null){
+			return;
+		}
 
         database.put(hash, getJson(block).getBytes());
         latest = block.hash().getBytes();

@@ -80,6 +80,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	public IBlockStore getBlockStore() {
 		return this.store;
 	}
+	
+	public void setBlockStore(IBlockStore store) {
+		this.store = store;
+	}
 
 	public HttpProxyPeerGroup getHttpProxyPeerGroup() {
 		return (HttpProxyPeerGroup) this.blockReceiverPeerGroup;
@@ -130,29 +134,26 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		Collections.reverse(blocks);
 		return blocks;
 	}
-
-	private static boolean once = true;
 	
 	public @NotNull Collection<Block> getBlocksFrom(Sha256Hash from) throws BlockNotFoundException {
 		List<Block> blocks = new ArrayList<>();
-		IBlockIterator iterator = store.iterator();
+		IBlockIterator iterator = this.store.iterator();
 
 		while (iterator.hasNext()) {
 			// TODO Does not return the genesis block.
 			Block next = iterator.next();
-			if (next.hash().equals(from))
+			if (next.hash().equals(from)){
+				Collections.reverse(blocks);
 				return blocks;
+			}
 			blocks.add(next);
 		}
 
-		if(once){
-			// Workaround: Includes the genesis block as well.
-			if (blocks.size() > 0) {
-				blocks.add(this.store.get(blocks.get(blocks.size() - 1).getHashPrevBlock()));
-				Collections.reverse(blocks);
-			}
-			once = false;
-		}
+		//Includes the genesis block.
+		Block genesisBlock = this.store.getGenesisBlock();
+		blocks.add(genesisBlock);
+		Collections.reverse(blocks);
+		
 
 		Set<Block> blocksFrom = blocks.stream().filter(block -> block.hash().equals(from)).collect(Collectors.toSet());
 		if (blocksFrom.size() > 1)
@@ -194,25 +195,38 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	}
 
 	@Override
-	public void blockReceived(Block block) {
+	public void blockReceived(Block receivedBlock) {
 		logger.info("Received block. Verifying now...");
-
-		//TODO Verifications does not work properly at the moment. 
-		//TODO Commend in again. Is only for testing out commented.
-		if (!this.verification.verifyBlock(block)) {
-
-			logger.warn("Verification of block failed: " + block.toString());
-			// Probably the last block was not the correct one in the line.
-			requestBlocksAgain(block);
+		
+		//Already up to date.
+		Block latestStoredBlock = this.store.getLatest();
+		if(receivedBlock.equals(latestStoredBlock)){
 			return;
 		}
-		logger.info("Verified Block stored in the BC: " + block.toString());
-		this.store.put(block);
+
+		//Check block for validity. 
+		if (!this.verification.verifyBlock(receivedBlock)) {
+
+			logger.warn("Verification of block failed: " + receivedBlock.toString());
+			
+			//TODO Delete
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//Tries one more time to get the right blocks in order.
+			this.blockReceiverPeerGroup.receiveBlocks(latestStoredBlock.hash());
+			return;
+		}
+
+		this.store.put(receivedBlock);
 
 		// TODO Only the task from the Miner.
-		 Block newBlock = prepareNewBlock(block);
-		 notifyBlockReceived(newBlock);
-		List<Transaction> transactions = block.getTransactions();
+//		 Block newBlock = prepareNewBlock(block);
+//		 notifyBlockReceived(newBlock);
+		List<Transaction> transactions = receivedBlock.getTransactions();
 		if (transactions != null) {
 			logger.info("Found {} transactions", transactions.size());
 			for (Transaction transaction : transactions) {
@@ -220,26 +234,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 		}
 		logger.info("Block processed.");
-	}
-
-	//TODO Are this test done in the verification class? -> Group 2
-	private void requestBlocksAgain(Block lastReceivedBlock) {
-
-		Block latestStoredBlock = this.store.getLatest();
-		System.out.println("Latest store: " + latestStoredBlock.hash());
-		System.out.println("received:     " + lastReceivedBlock.getHashPrevBlock());
-		if (latestStoredBlock.equals(lastReceivedBlock)) {
-			logger.info("The not verified block is already the latest block in the blockchain.");
-			return;
-		}
-		
-		Block block = this.store.get(lastReceivedBlock);
-		if(block != null){
-			logger.info("The not verified block exists already in the blockchain.");
-		}else{
-			//Tries one more time to get the right blocks in order.
-			this.blockReceiverPeerGroup.receiveBlocks(latestStoredBlock.hash());
-		}
 	}
 
 	public void addTransactionListener(ITransactionListener transactionListener) {

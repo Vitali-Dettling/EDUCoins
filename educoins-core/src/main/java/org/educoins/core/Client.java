@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class Client extends Thread implements ITransactionListener {
+public class Client implements ITransactionListener {
 
 	private BlockChain blockChain;
 	private Wallet wallet;
@@ -41,17 +41,25 @@ public class Client extends Thread implements ITransactionListener {
 
 	public Transaction sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
 
+		if (amount > Client.availableAmount) {
+			System.err.println("Not enough available amount");
+			return null;
+		}
+		
 		List<Output> outputs = new ArrayList<>();
-		Output output = new Output(amount, dstPublicKey, lockingScript);
-		outputs.add(output);
 		if (amount < Client.availableAmount) {
+			//Send to address.
+			Output output = new Output(amount, lockingScript, lockingScript);
+			outputs.add(output);
+			//Getting back.
 			int reverseOutputAmount = Client.availableAmount - amount;
-			String reverseDstPublicKey = this.wallet.getPublicKey();
-			String reverseLockingScript = reverseDstPublicKey;
+			String reverseDstPublicKey = dstPublicKey;
+			String reverseLockingScript = dstPublicKey;
 			Output reverseOutput = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
 			outputs.add(reverseOutput);
 			Client.availableAmount = 0;
 		}
+
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
 		transaction.setInputs(new ArrayList<>(this.inputs));
@@ -75,6 +83,8 @@ public class Client extends Thread implements ITransactionListener {
 		this.inputs = new ArrayList<>();
 		return transaction;
 	}
+	
+	
 
 	public Transaction sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
 		List<Input> tmpInputs = new ArrayList<>();

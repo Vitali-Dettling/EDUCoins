@@ -40,10 +40,6 @@ public class VerificationTest {
 		//Check Genesis block.
 		block = new Block();
 		assertTrue(this.verification.verifyBlock(block));
-		
-		//TODO [Vitali] Finish tests.
-		
-		
 	}
 
 	@Test
@@ -112,15 +108,5 @@ public class VerificationTest {
 		when(blockChain.getPreviousBlock(block1)).thenReturn(block);
 		assertFalse(this.verification.verifyBlock(block1));
 	}
-	
-	/*
-	    block.setBits(bits);
-		block.setHashMerkleRoot(hashMerkleRoot);
-		block.setHashPrevBlock(hashPrevBlock);
-		block.setNonce(nonce);
-		block.setTime(time);
-		block.setVersion(version);
-		block.setTransactions(transactions);
-	 * */
 
 }

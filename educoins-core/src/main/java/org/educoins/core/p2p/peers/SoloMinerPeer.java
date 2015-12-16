@@ -25,10 +25,12 @@ public class SoloMinerPeer extends Peer {
 
 	private Miner miner;
 	private static Wallet wallet;
+	private static String reversPublicKey;
 
 	public SoloMinerPeer(BlockChain blockChain) {
 		Peer.blockChain = blockChain;
 		SoloMinerPeer.wallet = Peer.blockChain.getWallet();
+		reversPublicKey = SoloMinerPeer.wallet.getPublicKey();
 		this.miner = Peer.blockChain.getMiner();
 		Peer.client = new Client(Peer.blockChain);
 	}
@@ -65,10 +67,10 @@ public class SoloMinerPeer extends Peer {
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
 				if (amount == -1)
 					continue;
-				String dstPublicKey = Peer.client.getHexInput(scanner, "Type in dstPublicKey: ");
-				if (dstPublicKey == null)
+				String lockingScript = Peer.client.getHexInput(scanner, "Type in dstPublicKey: ");
+				if (lockingScript == null)
 					continue;
-				trans = Peer.client.sendRegularTransaction(amount, dstPublicKey, dstPublicKey);
+				trans = Peer.client.sendRegularTransaction(amount, SoloMinerPeer.reversPublicKey, lockingScript);
 				if (trans != null)
 					System.out.println(trans.hash());
 				break;
