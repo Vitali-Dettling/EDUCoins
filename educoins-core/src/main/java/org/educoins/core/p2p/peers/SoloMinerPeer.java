@@ -24,21 +24,21 @@ import org.educoins.core.store.IBlockStore;
 public class SoloMinerPeer extends Peer {
 
 	private Miner miner;
-	private static int amount = 0;
+	private static Wallet wallet;
 
 	public SoloMinerPeer(BlockChain blockChain) {
-		Peer.blockChain = blockChain;	
+		Peer.blockChain = blockChain;
+		SoloMinerPeer.wallet = Peer.blockChain.getWallet();
+		this.miner = Peer.blockChain.getMiner();
+		Peer.client = new Client(Peer.blockChain);
 	}
 
 	@Override
 	public void start() throws DiscoveryException {
-		this.miner = Peer.blockChain.getMiner();
-		Peer.client = new Client(Peer.blockChain);
-
 		IProxyPeerGroup peerGroup = Peer.blockChain.getHttpProxyPeerGroup();
 		this.miner.setBlockChain(blockChain);
 		miner.addPoWListener(peerGroup);
-		
+
 		// Kick off Miner.
 		Block block = new Block();
 		blockChain.foundPoW(block);
@@ -55,12 +55,11 @@ public class SoloMinerPeer extends Peer {
 			System.out.println("\t - (R)egular transaction");
 			System.out.println("\t - (E)xit");
 			String action = scanner.nextLine();
-			int amount = -1;
 			Transaction trans = null;
-			int own = getAmount();
+			int amount = -1;
 			switch (action.toLowerCase()) {
 			case "g":
-				System.out.println("Owen EDUCoins " + own);
+				System.out.println("Owen EDUCoins " + getAmount());
 				break;
 			case "r":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
@@ -69,7 +68,7 @@ public class SoloMinerPeer extends Peer {
 				String dstPublicKey = Peer.client.getHexInput(scanner, "Type in dstPublicKey: ");
 				if (dstPublicKey == null)
 					continue;
-				trans = Peer.client.sendRegularTransaction(amount, dstPublicKey, dstPublicKey, own);
+				trans = Peer.client.sendRegularTransaction(amount, dstPublicKey, dstPublicKey);
 				if (trans != null)
 					System.out.println(trans.hash());
 				break;
@@ -80,16 +79,12 @@ public class SoloMinerPeer extends Peer {
 			}
 		}
 	}
-	
+
 	@Override
-	public int getAmount(){
-//		Wallet wallet = Peer.blockChain.getWallet();
-//		List<String> publickeys = wallet.getPublicKeys();
-//		
-//		for(String key : publickeys){
-//			SoloMinerPeer.amount = Peer.client.getAmount(key);
-//		}
-		return -1;
+	public int getAmount() {
+
+		List<String> publickeys = wallet.getPublicKeys();
+		return Peer.client.getAmount(publickeys);
 	}
 
 	@Override
@@ -97,5 +92,9 @@ public class SoloMinerPeer extends Peer {
 		// TODO Auto-generated method stub
 
 	}
-	
+
+	public String getPubKey() {
+		return SoloMinerPeer.wallet.getPublicKey();
+	}
+
 }

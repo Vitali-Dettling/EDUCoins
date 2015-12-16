@@ -2,6 +2,7 @@ package org.educoins.core;
 
 import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.p2p.peers.Peer;
+import org.educoins.core.p2p.peers.ReferencePeer;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
@@ -25,26 +26,31 @@ public class Client extends Thread implements ITransactionListener {
 	private long lastFoundTime;
 	private IBlockStore store;
 
+	private static int availableAmount = 0;
+	private static Block latestSearchedBlock;
+
 	public Client(BlockChain blockChain) {
 		this.blockChain = blockChain;
 		this.blockChain.addTransactionListener(this);
 		this.wallet = this.blockChain.getWallet();
 		this.inputs = new ArrayList<>();
 		this.lastFoundTime = System.currentTimeMillis();
-		store = this.blockChain.getBlockStore();
+		this.store = this.blockChain.getBlockStore();
+		Client.latestSearchedBlock = new Block();
 	}
 
-	public Transaction sendRegularTransaction(int amount, String dstPublicKey, String lockingScript, int availableAmount) {
+	public Transaction sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
 
 		List<Output> outputs = new ArrayList<>();
 		Output output = new Output(amount, dstPublicKey, lockingScript);
 		outputs.add(output);
-		if (amount < availableAmount) {
-			int reverseOutputAmount = availableAmount - amount;
+		if (amount < Client.availableAmount) {
+			int reverseOutputAmount = Client.availableAmount - amount;
 			String reverseDstPublicKey = this.wallet.getPublicKey();
 			String reverseLockingScript = reverseDstPublicKey;
 			Output reverseOutput = new Output(reverseOutputAmount, reverseDstPublicKey, reverseLockingScript);
 			outputs.add(reverseOutput);
+			Client.availableAmount = 0;
 		}
 		Transaction transaction = new Transaction();
 		transaction.setVersion(1);
@@ -214,4 +220,34 @@ public class Client extends Thread implements ITransactionListener {
 		return input;
 	}
 
+	public int getAmount(List<String> publicKeys) {
+
+		IBlockIterator iterator = this.store.iterator();
+
+		try {
+			while (iterator.hasNext()) {
+				Block block = iterator.next();
+				// Break up as soon as the last searched block was found.
+				if (Client.latestSearchedBlock.equals(block)) {
+					break;
+				}
+				for (Transaction tx : block.getTransactions()) {
+					for (Output outs : tx.getOutputs()) {
+						// Check whether the output belongs to the current
+						// owner.
+						for (String publicKey : publicKeys) {
+							if (outs.getLockingScript().equals(publicKey)) {
+								Client.availableAmount += outs.getAmount();
+							}
+						}
+					}
+				}
+			}
+			Client.latestSearchedBlock = this.store.getLatest();
+		} catch (BlockNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return Client.availableAmount;
+	}
 }

@@ -1,6 +1,9 @@
 package org.educoins.core.p2p.peers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -19,19 +22,12 @@ public class ReferencePeer extends Peer {
 
 	//TODO only one public key will be used. Need to be improved in using multiple keys. 
 	private static String publicKey;
-	private static int availableAmount = 0;
-	private static Map<String, String> lastBlockMap;
 	
 	public ReferencePeer(BlockChain blockChain) {
 		super(blockChain.getHttpProxyPeerGroup());
 		Peer.blockChain = blockChain;
 		publicKey = Peer.blockChain.getWallet().getPublicKey();
 		Peer.client = new Client(Peer.blockChain);
-		
-		// Genesis block.
-		ReferencePeer.lastBlockMap = new HashMap<String, String>();
-		Block genesis = new Block();
-		ReferencePeer.lastBlockMap.put(genesis.getHashPrevBlock().toString(), genesis.getHashMerkleRoot().toString());
 	}
 	
 	public void setPubKey(String publicKey){
@@ -68,25 +64,25 @@ public class ReferencePeer extends Peer {
 			String action = scanner.nextLine();
 			int amount = -1;
 			Transaction trans = null;
-			getAmount();
 			switch (action.toLowerCase()) {
 			case "p":
 				System.out.println("Send to address: " + ReferencePeer.publicKey);
 				break;
 			case "g":
-				System.out.println("Owen EDUCoins " + ReferencePeer.availableAmount);
+				
+				System.out.println("Owen EDUCoins " + getAmount());
 				break;
 			case "r":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
-				
-				if (amount > ReferencePeer.availableAmount) {
-					System.err.println("Not enough available amount (max. " + ReferencePeer.availableAmount + ")");
+				int availableAmount = getAmount();
+				if (amount > availableAmount) {
+					System.err.println("Not enough available amount (max. " + availableAmount + ")");
 					break;
 				}
 				String dstPublicKey = Peer.client.getHexInput(scanner, "Type in dstPublicKey: ");
 				if (dstPublicKey == null)
 					continue;
-				trans = Peer.client.sendRegularTransaction(amount, dstPublicKey, dstPublicKey, ReferencePeer.availableAmount);
+				trans = Peer.client.sendRegularTransaction(amount, dstPublicKey, dstPublicKey);
 				if (trans != null)
 					System.out.println(trans.hash());
 				break;
@@ -126,33 +122,7 @@ public class ReferencePeer extends Peer {
 	
 	@Override
 	public int getAmount() {
-
-		IBlockIterator iterator = Peer.blockChain.getBlockStore().iterator();
-
-		try {
-			while (iterator.hasNext()) {
-				Block block = iterator.next();
-				// Break up as soon as the last searched block was found.
-				if (ReferencePeer.lastBlockMap.get(publicKey) != null &&
-					ReferencePeer.lastBlockMap.get(publicKey).equals(block.getHashMerkleRoot())) {
-					ReferencePeer.lastBlockMap.put(publicKey, block.getHashMerkleRoot().toString());
-					break;
-				}
-				for (Transaction tx : block.getTransactions()) {
-					for (Output outs : tx.getOutputs()) {
-						// Check whether the output belongs to the current
-						// owner.
-						if (outs.getLockingScript().equals(publicKey)) {
-							ReferencePeer.availableAmount += outs.getAmount();
-						}
-					}	
-				}
-			}
-		} catch (BlockNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return ReferencePeer.availableAmount;
+		return Peer.client.getAmount(Arrays.asList(ReferencePeer.publicKey));
 	}
 	
 	@Override

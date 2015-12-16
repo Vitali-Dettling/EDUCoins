@@ -46,7 +46,7 @@ public class MockedClient {
 
 	public static List<Transaction> sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
 		transactionReceived();
-		mockedClient.sendRegularTransaction(amount, dstPublicKey, lockingScript, 10000);
+		mockedClient.sendRegularTransaction(amount, dstPublicKey, lockingScript);
 		return receivedTransaction();
 	}
 

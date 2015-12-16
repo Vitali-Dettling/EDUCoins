@@ -33,14 +33,11 @@ public class MockedBlockChain {
 
 	static {
 		
-		IBlockReceiver blockReceiver = Mockito.mock(IBlockReceiver.class);
-		ITransactionReceiver txReceiver = Mockito.mock(ITransactionReceiver.class);
-		ITransactionTransmitter txTransmitter = Mockito.mock(ITransactionTransmitter.class);
 		HttpProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
 		mockedStore = MockedStore.getStore();
 		Miner miner = Mockito.mock(Miner.class);
 		
-		mockedBlockchain = new BlockChain(peerGroup, miner, txReceiver, txTransmitter, mockedStore);
+		mockedBlockchain = new BlockChain(peerGroup, miner, peerGroup, peerGroup, mockedStore);
 
 	}
 	

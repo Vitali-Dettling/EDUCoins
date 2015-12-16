@@ -198,6 +198,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		logger.info("Received block. Verifying now...");
 
 		//TODO Verifications does not work properly at the moment. 
+		//TODO Commend in again. Is only for testing out commented.
 		if (!this.verification.verifyBlock(block)) {
 
 			logger.warn("Verification of block failed: " + block.toString());
@@ -209,8 +210,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.store.put(block);
 
 		// TODO Only the task from the Miner.
-		// Block newBlock = prepareNewBlock(block);
-		// notifyBlockReceived(newBlock);
+		 Block newBlock = prepareNewBlock(block);
+		 notifyBlockReceived(newBlock);
 		List<Transaction> transactions = block.getTransactions();
 		if (transactions != null) {
 			logger.info("Found {} transactions", transactions.size());
