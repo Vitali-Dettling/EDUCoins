@@ -12,8 +12,6 @@ import java.util.List;
 
 public class Transaction implements Hashable {
 
-	private static final int HAS_NO_ENTRIES = 0;
-
 	protected int version;
 
 	protected int inputsCount;
@@ -234,22 +232,8 @@ public class Transaction implements Hashable {
 
 	}
 
-	public Transaction revokeTransaction() throws CannotRevokeRevokeTransactionException {
-		Transaction revoke = new Transaction();
-		if (whichTransaction() == ETransaction.REVOKE) {
-			throw new CannotRevokeRevokeTransactionException();
-		}
-		revoke.setApprovedTransaction(hash());
-		for (int i = 0; i < approvals.size(); i++) {
-			Input input = new Input(approvals.get(i).getAmount(), hash().toString(), i);
-			revoke.addInput(input);
-		}
-		revoke.setOutputs(outputs);
-		setOutputs(null);
-		return revoke;
-	}
 
-	// TODO[Vitali] Much better implementation, with generic class and
+	// TODO Much better implementation, with generic class and
 	// so!!!!!!!!!!!!!!!!!!!
 	protected static byte[] getByteArrayInput(Transaction transaction) {
 		int length = 0;
@@ -266,7 +250,7 @@ public class Transaction implements Hashable {
 		return byteArray;
 	}
 
-	// TODO[Vitali] Much better implementation, with generic class and
+	// TODO Much better implementation, with generic class and
 	// so!!!!!!!!!!!!!!!!!!!
 	protected static byte[] getByteArrayOutput(Transaction transaction) {
 		int length = 0;
@@ -283,7 +267,7 @@ public class Transaction implements Hashable {
 		return byteArray;
 	}
 
-	// TODO[Vitali] Much better implementation, with generic class and
+	// TODO Much better implementation, with generic class and
 	// so!!!!!!!!!!!!!!!!!!!
 	protected static byte[] getByteArrayApproved(Transaction transaction) {
 		int length = 0;
@@ -305,12 +289,6 @@ public class Transaction implements Hashable {
 		APPROVED, COINBASE, REGULAR, REVOKE,
 
 	}
-	
-	@Override
-	public String toString() {
-		return "Transaction [version=" + version + ", inputsCount=" + inputsCount + ", inputs=" + inputs
-				+ ", outputsCount=" + outputsCount + ", outputs=" + outputs + ", approvalsCount=" + approvalsCount
-				+ ", approvals=" + approvals + ", approvedTransaction=" + approvedTransaction + "]";
-	}
+
 
 }

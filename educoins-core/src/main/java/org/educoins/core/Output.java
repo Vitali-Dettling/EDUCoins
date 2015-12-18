@@ -3,8 +3,6 @@ package org.educoins.core;
 import org.educoins.core.utils.ByteArray;
 
 public class Output {
-
-	private static final int HEX = 16;
 	
 	private int amount;
 	private String dstPublicKey;

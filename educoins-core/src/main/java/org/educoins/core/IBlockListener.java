@@ -2,6 +2,6 @@ package org.educoins.core;
 
 public interface IBlockListener {
 
-	void blockReceived(Block block);
+	void blockListener(Block block);
 	
 }

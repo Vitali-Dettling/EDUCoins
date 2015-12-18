@@ -2,24 +2,22 @@ package org.educoins.core;
 
 import java.util.Arrays;
 
+import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 
 public class Input {
 
-	private static final int HEX = 16;
-
-	private int index;
 	private int amount;
 	private String hashPrevOutput;
-	private String[] unlockingScript;
+	private String unlockingScript;
+	private String signature;
 
-	public Input(int amount, String hashPrevOutput, int index) {
+	public Input(int amount, String hashPrevOutput, String unlockingScript){
 
 		this.amount = amount;
 		this.hashPrevOutput = hashPrevOutput;
-		this.index = index;
-		// this.unlockingScript = unlockingScript;
-		this.unlockingScript = new String[2];
+		this.unlockingScript = unlockingScript;
+
 	}
 
 	public int getAmount() {
@@ -38,50 +36,71 @@ public class Input {
 		this.hashPrevOutput = hashPrevOutput;
 	}
 
-	public int getN() {
-		return index;
-	}
+//	public int getN() {
+//		return index;
+//	}
+//
+//	public void setN(int n) {
+//		this.index = n;
+//	}
 
-	public void setN(int n) {
-		this.index = n;
-	}
+//	public byte[] getUnlockingScript(EInputUnlockingScript signatureOrPublicKey) {
+//		return ByteArray.convertFromString(this.unlockingScript[signatureOrPublicKey.getNumVal()]);
+//	}
+//
+//	public void setUnlockingScript(EInputUnlockingScript signatureOrPublicKey, String value) {
+//		this.unlockingScript[signatureOrPublicKey.getNumVal()] = value;
+//	}
 
-	public byte[] getUnlockingScript(EInputUnlockingScript signatureOrPublicKey) {
-		return ByteArray.convertFromString(this.unlockingScript[signatureOrPublicKey.getNumVal()]);
+	public String getUnlockingScript() {
+		return this.unlockingScript;
 	}
-
-	public void setUnlockingScript(EInputUnlockingScript signatureOrPublicKey, String value) {
-		this.unlockingScript[signatureOrPublicKey.getNumVal()] = value;
+	
+	public void setSignature(String signature) {
+		this.signature = signature;
 	}
-
+	
+	public String getSignature(){
+		return this.signature;
+	}
+	
 	public byte[] getConcatedInput() {
 
-		// TODO [Vitali] May to concatenate more??? Did not Bitcoin say that
+		// TODO May to concatenate more??? Did not Bitcoin say that
 		// only the locking script is concatenated???
-		return this.getUnlockingScript(EInputUnlockingScript.PUBLIC_KEY);
-
-	}
-
-	public enum EInputUnlockingScript {
-
-		SIGNATURE(0), PUBLIC_KEY(1);
-
-		private int enumVal;
-
-		EInputUnlockingScript(int enumVal) {
-			this.enumVal = enumVal;
-		}
-
-		public int getNumVal() {
-			return enumVal;
-		}
+		return ByteArray.convertFromString(this.getUnlockingScript());
 
 	}
 
 	@Override
 	public String toString() {
-		return "Input [index=" + index + ", amount=" + amount + ", hashPrevOutput=" + hashPrevOutput
-				+ ", unlockingScript=" + Arrays.toString(unlockingScript) + "]";
+		return "Input [amount=" + amount + ", hashPrevOutput=" + hashPrevOutput + ", unlockingScript=" + unlockingScript
+				+ ", signature=" + signature + "]";
 	}
 
+//	public enum EInputUnlockingScript {
+//
+//		SIGNATURE(0), PUBLIC_KEY(1);
+//
+//		private int enumVal;
+//
+//		EInputUnlockingScript(int enumVal) {
+//			this.enumVal = enumVal;
+//		}
+//
+//		public int getNumVal() {
+//			return enumVal;
+//		}
+//
+//	}
+
+//	@Override
+//	public String toString() {
+//		return "Input [index=" + index + ", amount=" + amount + ", hashPrevOutput=" + hashPrevOutput
+//				+ ", unlockingScript=" + Arrays.toString(unlockingScript) + "]";
+//	}
+
+	
+	
+	
 }

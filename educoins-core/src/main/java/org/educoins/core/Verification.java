@@ -1,6 +1,5 @@
 package org.educoins.core;
 
-import org.educoins.core.Input.EInputUnlockingScript;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.utils.BinaryTree;
 import org.educoins.core.utils.Sha256Hash;
@@ -63,15 +62,16 @@ public class Verification {
 				usedOutputs.put(transHash + i, false);
 			}
 			for (Input input : transaction.getInputs()) {
+				//TODO Needs to be redone.
 				// if output is already "used" return false
-				if (usedOutputs.getOrDefault(input.getHashPrevOutput() + input.getN(), false)) {
-					return false;
-				} else {
+//				if (usedOutputs.getOrDefault(input.getHashPrevOutput() + input.getN(), false)) {
+//					return false;
+//				} else {
 					// If Key wasn't set, there was no output, otherwise set
 					// used to true
-					if (usedOutputs.replace(input.getHashPrevOutput() + input.getN(), true) == null)
-						return false;
-				}
+//					if (usedOutputs.replace(input.getHashPrevOutput() + input.getN(), true) == null)
+//						return false;
+//				}
 			}
 		}
 		return true;
@@ -326,11 +326,11 @@ public class Verification {
 		// actually that should be done through the script language.
 		// Currently it check just whether the signature corresponds with one
 		// public key in the wallet file.
-		byte[] signature = null;
+		String signature = null;
 		String hashedTransaction = transaction.hash().toString();
 		for (Input input : transaction.getInputs()) {
 
-			signature = input.getUnlockingScript(EInputUnlockingScript.SIGNATURE);
+			signature = input.getSignature();
 
 			if (this.wallet.checkSignature(hashedTransaction, signature)) {
 				System.out.println("INFO: verifyRegularTransaction: Signature is correct.");

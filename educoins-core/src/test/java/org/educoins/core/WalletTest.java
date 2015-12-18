@@ -36,8 +36,7 @@ public class WalletTest {
 		assertNotNull(pubKey);
 		assertNotNull(signature);
 		
-		byte[] sig = ByteArray.convertFromString(signature, HEX);
-		boolean verified = wallet.checkSignature(randomNumber, sig);
+		boolean verified = wallet.checkSignature(randomNumber, signature);
 		assertTrue(verified);
 	}
 

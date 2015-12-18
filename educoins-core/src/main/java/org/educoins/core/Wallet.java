@@ -60,13 +60,14 @@ public class Wallet {
 	}
 	
 	//TODO Bad performance because the whole file will be checked over and over again. Will be better with the DB.
-	public boolean checkSignature(String hashedTranscation, byte[] signature){
+	public boolean checkSignature(String hashedTranscation, String signature){
 		
 		try {
 			
 			List<String> publicKeys = this.getPublicKeys();
+			byte[] sign = ByteArray.convertFromString(signature, HEX);
 			for (String publicKey : publicKeys) {	
-				boolean rightKey = this.keyPair.verifySignature(hashedTranscation, signature, publicKey);
+				boolean rightKey = this.keyPair.verifySignature(hashedTranscation, sign, publicKey);
 				if (rightKey) {
 					return true;
 				}

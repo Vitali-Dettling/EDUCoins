@@ -25,9 +25,9 @@ public class SoloMinerNode {
 
     public static void main(String[] args) throws BlockStoreException {
     	 ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
-         BlockChain blockChain = (BlockChain) run.getBean("blockChain");
+         //BlockChain blockChain = (BlockChain) run.getBean("blockChain");
         
-         SoloMinerPeer peer = new SoloMinerPeer(blockChain);
+    	 Peer peer = new SoloMinerPeer();
 
          try {
              peer.start();

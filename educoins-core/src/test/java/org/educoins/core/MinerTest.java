@@ -1,5 +1,6 @@
 package org.educoins.core;
 
+import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.utils.Threading;
 import org.junit.*;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.*;
  * Created by dacki on 01.12.15.
  */
 public class MinerTest {
+
     private static Miner miner = mock(Miner.class);
     private static IBlockReceiver blockReceiver = mock(IBlockReceiver.class);
     private static ITransactionReceiver transactionReceiver = mock(ITransactionReceiver.class);
@@ -18,7 +20,7 @@ public class MinerTest {
 
     @BeforeClass
     public static void init() {
-        BlockChain blockchain = new BlockChain(blockReceiver, miner, transactionReceiver,transactionTransmitter, blockStore);
+        BlockChain blockchain = new BlockChain(blockReceiver, transactionReceiver,transactionTransmitter, blockStore);
     }
 
     @AfterClass
@@ -58,7 +60,7 @@ public class MinerTest {
         boolean found = false;
         Block block = new Block();
         miner.addPoWListener(powListener);
-        miner.blockReceived(block);
+        miner.blockListener(block);
         verify(powListener, timeout(300)).foundPoW(any(Block.class));
     }
 }

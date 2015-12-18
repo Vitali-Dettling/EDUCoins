@@ -59,8 +59,7 @@ public class BlockStoreFactory {
     public static Transaction generateTransaction(int number) {
         Transaction t = new Transaction();
         for (int i = 0; i < 2 * number; i++) {
-            Input input = new Input(5 * i * number, "", i);
-            input.setUnlockingScript(Input.EInputUnlockingScript.PUBLIC_KEY, "12345");
+            Input input = new Input(5 * i * number, "",  "12345");
             t.addInput(input);
         }
         for (int i = 0; i < 4 * number; i++) {
@@ -73,8 +72,7 @@ public class BlockStoreFactory {
 	public static Input generateRandomInput(String hashPrevOutput){
 		
 		int amount = (int) (Math.random() * Integer.MAX_VALUE);
-		Input input = new Input(amount, hashPrevOutput, 1);
-		input.setUnlockingScript(Input.EInputUnlockingScript.PUBLIC_KEY, "12345");
+		Input input = new Input(amount, hashPrevOutput, "12345");
 		return input;
 	}
 }

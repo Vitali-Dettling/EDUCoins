@@ -62,7 +62,7 @@ public class HttpProxyPeerGroupTest {
 
         clientPeerGroup.addBlockListener(listener);
         clientPeerGroup.receiveBlocks(blockStore.getLatest().hash());
-        verify(listener, atLeast(count)).blockReceived(any(Block.class));
+        verify(listener, atLeast(count)).blockListener(any(Block.class));
 
         ((HttpProxyPeerGroup) clientPeerGroup).setRetry(true);
     }
@@ -123,7 +123,7 @@ public class HttpProxyPeerGroupTest {
         final boolean[] received = {false};
         blockChain.addBlockListener(new IBlockListener() {
             @Override
-            public void blockReceived(Block block2) {
+            public void blockListener(Block block2) {
                 received[0] = true;
                 assertNotNull(block2);
                 assertTrue(block.equals(block2));

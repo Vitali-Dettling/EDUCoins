@@ -48,14 +48,11 @@ public class SoloMinerPeerTest {
     @Test 
     public void testGetAmount(){
     
-    	BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
-		SoloMinerPeer peer = new SoloMinerPeer(blockchain);
-
 		int expected = 0;
 		Block block = new Block();
 		for (int i = 0; i < 10; i++) {
 			block = BlockStoreFactory.getRandomBlock(block);
-			String publicKey = peer.getPubKey();
+			String publicKey = SoloMinerPeer.client.getPublicKey();
 			Output out = new Output(6, publicKey, publicKey);
 			expected += 6;
 			Transaction tx = new Transaction();
@@ -66,7 +63,7 @@ public class SoloMinerPeerTest {
 
 		int result = 0;
 		for(int i = 0 ; i < 2 ; i++){
-			result = peer.getAmount();
+			result = SoloMinerPeer.client.getAmount();
 		}
 		
 		Assert.assertEquals(expected, result);

@@ -17,7 +17,7 @@ public class MockedWallet {
 		return wallet.getSignature(publicKey, hash);
 	}
 
-	public static boolean checkSignature(String randomNumber, byte[] signature) {
+	public static boolean checkSignature(String randomNumber, String signature) {
 		return wallet.checkSignature(randomNumber, signature);
 	}
 

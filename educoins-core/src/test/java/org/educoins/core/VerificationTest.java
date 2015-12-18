@@ -69,9 +69,8 @@ public class VerificationTest {
 
 		Block block1 = new Block();
 		block1.setHashPrevBlock(block.hash());
-		Input input1 = new Input(2, block.getTransactions().get(0).hash().toString(), 0);
-		input1.setUnlockingScript(Input.EInputUnlockingScript.PUBLIC_KEY, "123");
-		input1.setUnlockingScript(Input.EInputUnlockingScript.SIGNATURE, "affe");
+		Input input1 = new Input(2, block.getTransactions().get(0).hash().toString(),  "123");
+		input1.setSignature("affe");
 		Output output1 = new Output(2, "abc", "def");
 
 		Transaction transaction1 = new Transaction();
@@ -79,7 +78,7 @@ public class VerificationTest {
 		transaction1.addInput(input1);
 		block1.addTransaction(transaction1);
 		when(blockChain.getPreviousBlock(block1)).thenReturn(block);
-		when(wallet.checkSignature(any(String.class), any(byte[].class))).thenReturn(true);
+		when(wallet.checkSignature(any(String.class), any(String.class))).thenReturn(true);
 		assertTrue(this.verification.verifyBlock(block1));
 	}
 
@@ -96,9 +95,8 @@ public class VerificationTest {
 
 		Block block1 = new Block();
 		block1.setHashPrevBlock(block.hash());
-		Input input1 = new Input(2, Sha256Hash.ZERO_HASH.toString(), 0);
-		input1.setUnlockingScript(Input.EInputUnlockingScript.SIGNATURE, "123");
-		input1.setUnlockingScript(Input.EInputUnlockingScript.PUBLIC_KEY, "adadadad");
+		Input input1 = new Input(2, Sha256Hash.ZERO_HASH.toString(), "ABC");
+		input1.setSignature("adadadad");
 		Output output1 = new Output(2, "abc", "def");
 
 		Transaction transaction1 = new Transaction();

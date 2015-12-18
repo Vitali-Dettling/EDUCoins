@@ -64,7 +64,7 @@ public class P2pBlockReceiver implements IBlockReceiver {
 
             blockList.forEach(block -> {
                 Threading.run(() -> blockStore.put(block));
-                blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block));
+                blockListeners.forEach(iBlockListener -> iBlockListener.blockListener(block));
             });
 
         } catch (DiscoveryException e) {

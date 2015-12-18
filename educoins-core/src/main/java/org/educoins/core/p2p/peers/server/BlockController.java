@@ -64,7 +64,7 @@ public class BlockController {
     @ResponseStatus(HttpStatus.CREATED)
     public void createBlock(@RequestBody @NotNull Block block) throws BlockChainVerificationException {
         logger.info("Received Block from foreign node via push");
-        blockChain.blockReceived(block);
+        blockChain.verifyReceivedBlock(block);
     }
 
     /**

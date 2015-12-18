@@ -23,7 +23,7 @@ public class Main {
         while (run++ < 100) {
             try {
                 System.out.println("SENDING...");
-                prev = BlockStoreFactory.getRandomBlock(prev);
+                //prev = BlockStoreFactory.getRandomBlock(prev);
                 proxy.transmitBlock(prev);
                 System.out.println("SLEEPING...");
                 Thread.sleep(60 * 1000);

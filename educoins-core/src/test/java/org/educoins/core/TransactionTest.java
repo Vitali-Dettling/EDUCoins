@@ -39,7 +39,7 @@ public class TransactionTest {
 	public void testWhichTransactionApprovalWithoutOutput() {
 	
 		final int AMOUNT = 16;
-		final int index = 0;
+		final String unlockingScript = "ABC";
 		final String HASH_PREVIOUS_OUTPUT= "ABC";
 		final String LOCKING_SCRIPT = "ABC";
 		final String OWNER_ADDRESS= "ABC";
@@ -47,7 +47,7 @@ public class TransactionTest {
 		
 		Transaction transaction = new Transaction();
 		
-		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, index);
+		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, unlockingScript);
 		transaction.addInput(input);
 
 		Approval approval = new Approval(AMOUNT, OWNER_ADDRESS, HOLDER_SIGNATURE, LOCKING_SCRIPT);
@@ -64,7 +64,7 @@ public class TransactionTest {
 	@Test	//Test with: output > 0
 	public void testWhichTransactionApprovalWithOutput() {
 		
-		final int INDEX = 0;
+		final String unlockingScript = "ABC";
 		final int AMOUNT = 16;
 		final String DST_PUBLIC_KEY = "ABC";
 		final String HASH_PREVIOUS_OUTPUT= "ABC";
@@ -74,7 +74,7 @@ public class TransactionTest {
 		
 		Transaction transaction = new Transaction();
 		
-		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, INDEX);
+		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, unlockingScript);
 		transaction.addInput(input);
 		
 		Output output = new Output(AMOUNT, DST_PUBLIC_KEY, LOCKING_SCRIPT);
@@ -94,7 +94,7 @@ public class TransactionTest {
 	@Test
 	public void testWhichTransactionRegular() {
 	
-		final int INDEX = 0;
+		final String unlockingScript = "ABC";
 		final int AMOUNT = 16;
 		final String DST_PUBLIC_KEY = "ABC";
 		final String LOCKING_SCRIPT = "ABC";
@@ -102,7 +102,7 @@ public class TransactionTest {
 		
 		Transaction transaction = new Transaction();
 		
-		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, INDEX);
+		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, unlockingScript);
 		transaction.addInput(input);
 		
 		Output output = new Output(AMOUNT, DST_PUBLIC_KEY, LOCKING_SCRIPT);

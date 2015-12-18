@@ -11,8 +11,10 @@ import java.util.stream.Collectors;
 
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.store.BlockNotFoundException;
+import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.store.LevelDbBlockStore;
 import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 
-public class BlockChain implements IBlockListener, ITransactionListener, IPoWListener {
+public class BlockChain {
 
 	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
@@ -33,60 +35,30 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	private final Logger logger = LoggerFactory.getLogger(BlockChain.class);
 
 	private int blockCounter;
-	private IBlockReceiver blockReceiverPeerGroup;
-	private IBlockReceiver blockReceiverResetMiner;
 	private List<IBlockListener> blockListeners;
-	private ITransactionReceiver transactionReceiver;
+
 	private ITransactionTransmitter transactionTransmitter;
 	private List<ITransactionListener> transactionListeners;
 	private List<Transaction> transactions;
-	private List<Block> blocks;
-	private Wallet wallet;
-	private Miner miner;
+	
 	private Verification verification;
 	private IBlockStore store;
 
-	private String publicKey;
+	public BlockChain(Wallet wallet) {
 
-	public BlockChain(IBlockReceiver blockReceiverPeerGroup, IBlockReceiver blockReceiverResetMiner,
-			ITransactionReceiver transactionReceiver, ITransactionTransmitter transactionTransmitter,
-			IBlockStore senderBlockStore) {
-
-		this.wallet = new Wallet();
-		this.blockListeners = new CopyOnWriteArrayList<>();
-		this.blockReceiverPeerGroup = blockReceiverPeerGroup;
-		this.blockReceiverPeerGroup.addBlockListener(this);
-		this.blockReceiverResetMiner = blockReceiverResetMiner;
-		this.blockReceiverResetMiner.addBlockListener(this);
-		this.transactionListeners = new ArrayList<>();
-		this.transactionReceiver = transactionReceiver;
-		this.transactionTransmitter = transactionTransmitter;
-		this.transactionReceiver.addTransactionListener(this);
-		this.transactions = new ArrayList<>();
-		this.verification = new Verification(this.wallet, this);
-		this.store = senderBlockStore;
+		try {
+	        this.blockListeners = new CopyOnWriteArrayList<>();
+	        this.transactionListeners = new ArrayList<>();
+			this.transactions = new ArrayList<>();
+			this.verification = new Verification(wallet, this);
+			this.store = new LevelDbBlockStore();
+			
+		} catch (BlockStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		this.blockCounter = RESET_BLOCKS_COUNT;
-	}
-
-	public void setMiner(Miner miner) {
-		this.miner = miner;
-	}
-
-	public Miner getMiner() {
-		return this.miner;
-	}
-
-	public IBlockStore getBlockStore() {
-		return this.store;
-	}
-	
-	public void setBlockStore(IBlockStore store) {
-		this.store = store;
-	}
-
-	public HttpProxyPeerGroup getHttpProxyPeerGroup() {
-		return (HttpProxyPeerGroup) this.blockReceiverPeerGroup;
 	}
 
 	@VisibleForTesting
@@ -112,7 +84,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
 	}
 
-	public @NotNull Block getLatestBlock() throws BlockNotFoundException {
+	public @NotNull Block getLatestBlock(){
 		Block latest = store.getLatest();
 		if (latest != null)
 			return latest;
@@ -134,7 +106,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		Collections.reverse(blocks);
 		return blocks;
 	}
-	
+
 	public @NotNull Collection<Block> getBlocksFrom(Sha256Hash from) throws BlockNotFoundException {
 		List<Block> blocks = new ArrayList<>();
 		IBlockIterator iterator = this.store.iterator();
@@ -142,18 +114,17 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		while (iterator.hasNext()) {
 			// TODO Does not return the genesis block.
 			Block next = iterator.next();
-			if (next.hash().equals(from)){
+			if (next.hash().equals(from)) {
 				Collections.reverse(blocks);
 				return blocks;
 			}
 			blocks.add(next);
 		}
 
-		//Includes the genesis block.
+		// Includes the genesis block.
 		Block genesisBlock = this.store.getGenesisBlock();
 		blocks.add(genesisBlock);
 		Collections.reverse(blocks);
-		
 
 		Set<Block> blocksFrom = blocks.stream().filter(block -> block.hash().equals(from)).collect(Collectors.toSet());
 		if (blocksFrom.size() > 1)
@@ -174,10 +145,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return headers;
 	}
 
-	public Wallet getWallet() {
-		return this.wallet;
-	}
-
 	public void addBlockListener(IBlockListener blockListener) {
 		this.blockListeners.add(blockListener);
 	}
@@ -185,47 +152,32 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 	public void removeBlockListener(IBlockListener blockListener) {
 		this.blockListeners.remove(blockListener);
 	}
-
+	
 	public void notifyBlockReceived(Block newBlock) {
 		synchronized (this) {
 			for (IBlockListener blockListener : this.blockListeners) {
-				blockListener.blockReceived(newBlock);
+				blockListener.blockListener(newBlock);
 			}
 		}
 	}
 
-	@Override
-	public void blockReceived(Block receivedBlock) {
+	public boolean verifyReceivedBlock(Block receivedBlock) {
 		logger.info("Received block. Verifying now...");
-		
-		//Already up to date.
-		Block latestStoredBlock = this.store.getLatest();
-		if(receivedBlock.equals(latestStoredBlock)){
-			return;
+
+		// Already up to date.
+		Block latestStoredBlock = getLatestBlock();
+		if (receivedBlock.equals(latestStoredBlock)) {
+			return true;
 		}
 
-		//Check block for validity. 
+		// Check block for validity.
 		if (!this.verification.verifyBlock(receivedBlock)) {
-
 			logger.warn("Verification of block failed: " + receivedBlock.toString());
-			
-			//TODO Delete
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			//Tries one more time to get the right blocks in order.
-			this.blockReceiverPeerGroup.receiveBlocks(latestStoredBlock.hash());
-			return;
+			return false;
 		}
 
+		//Store the verified block.
 		this.store.put(receivedBlock);
-
-		// TODO Only the task from the Miner.
-//		 Block newBlock = prepareNewBlock(block);
-//		 notifyBlockReceived(newBlock);
 		List<Transaction> transactions = receivedBlock.getTransactions();
 		if (transactions != null) {
 			logger.info("Found {} transactions", transactions.size());
@@ -234,14 +186,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			}
 		}
 		logger.info("Block processed.");
-	}
-
-	public void addTransactionListener(ITransactionListener transactionListener) {
-		this.transactionListeners.add(transactionListener);
-	}
-
-	public void removeTransactionListener(ITransactionListener transactionListener) {
-		this.transactionListeners.remove(transactionListener);
+		return true;
 	}
 
 	public void notifyTransactionReceived(Transaction transaction) {
@@ -250,7 +195,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 			listener.transactionReceived(transaction);
 		}
 	}
-
+	
 	public void sendTransaction(Transaction transaction) {
 
 		this.transactions.add(transaction);
@@ -258,7 +203,6 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		this.transactionTransmitter.transmitTransaction(transaction);
 	}
 
-	@Override
 	public void transactionReceived(Transaction transaction) {
 		logger.info("Received transaction.");
 		switch (transaction.whichTransaction()) {
@@ -280,23 +224,7 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		}
 	}
 
-	@Override
-	public void foundPoW(Block block) {
-		logger.info("Found pow. (Block {})", block.hash().toString());
-		this.store.put(block);
-		logger.info("Added block to blockStore: " + this.store.getLatest().toString());
-
-		try {
-			this.blockReceiverResetMiner.receiveBlocks(null);
-			// TODO Only the task from the Client.
-			this.blockReceiverPeerGroup.receiveBlocks(getLatestBlock().hash());
-		} catch (BlockNotFoundException e) {
-			this.blockReceiverResetMiner.receiveBlocks(null);
-			this.blockReceiverPeerGroup.receiveBlocks(block.hash());
-		}
-	}
-
-	public Block prepareNewBlock(Block currentBlock) {
+	public Block prepareNewBlock(Block currentBlock, String publicKey) {
 		Block newBlock = new Block();
 		// TODO [joeren]: which version?! Temporary take the version of the
 		// previous block.
@@ -306,22 +234,15 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		// hash merkle root of the previous block.
 		newBlock.setHashMerkleRoot(currentBlock.getHashMerkleRoot());
 
-		newBlock.addTransaction(coinbaseTransaction(currentBlock));
+		newBlock.addTransaction(coinbaseTransaction(currentBlock, publicKey));
 		newBlock.addTransactions(this.transactions);
 		this.transactions.clear();
 
 		return retargedBits(newBlock, currentBlock);
 	}
 
-	private Transaction coinbaseTransaction(Block currentBlock) {
+	private Transaction coinbaseTransaction(Block currentBlock, String publicKey) {
 
-		// TODO [Vitali] Needs to be changes just for testing.
-		if (this.publicKey == null) {
-			this.publicKey = this.wallet.getPublicKey();
-		}
-
-		// TODO [Vitali] lockingScript procedure has to be established, which
-		// fits our needs...
 		String lockingScript = publicKey;
 
 		// Input is empty because it is a coinbase transaction.
@@ -376,7 +297,17 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
 		return null;
 	}
 
-	public Block getGenesisBlock() throws BlockNotFoundException {
-		return store.getGenesisBlock();
+	public Block getGenesisBlock() {
+		try {
+			return store.getGenesisBlock();
+		} catch (BlockNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void storeBlock(Block block){
+		this.store.put(block);
 	}
 }

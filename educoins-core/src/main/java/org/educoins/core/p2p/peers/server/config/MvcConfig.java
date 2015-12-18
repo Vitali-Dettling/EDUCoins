@@ -3,8 +3,8 @@ package org.educoins.core.p2p.peers.server.config;
 import org.educoins.core.*;
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
-import org.educoins.core.p2p.peers.LocalPeer;
 import org.educoins.core.p2p.peers.Peer;
+import org.educoins.core.p2p.peers.SoloMinerPeer;
 import org.educoins.core.store.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,6 @@ public class MvcConfig {
     private IBlockStore blockStore;
     private BlockChain blockChain;
     private IProxyPeerGroup peerGroup;
-    private Miner miner;
 
     @Bean
     public IBlockStore blockStore() throws BlockStoreException {
@@ -44,21 +43,19 @@ public class MvcConfig {
         if (blockChain == null) {
         	IProxyPeerGroup proxyPeerGroup = proxyPeerGroup();
         	IBlockStore store = blockStore();
-        	Miner miner = miner();
     		
-            this.blockChain = new BlockChain(proxyPeerGroup, miner, proxyPeerGroup, proxyPeerGroup, store);
-            this.blockChain.setMiner(miner);
+          //  this.blockChain = new BlockChain();
         }
         return blockChain;
     }
-    
-    @Bean
-    public Miner miner(){
-    	 if (this.miner == null) {
-    		 this.miner = new Miner();
-    	 }
-    	 return this.miner;
-    }
+
+//    @Bean
+//    public Wallet wallet(){
+//    	 if (this.wallet == null) {
+//    		 this.wallet = new Wallet();
+//    	 }
+//    	 return this.wallet;
+//    }
 
     @Bean
     public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {

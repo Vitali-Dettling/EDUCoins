@@ -9,6 +9,7 @@ import org.educoins.core.Client;
 import org.educoins.core.Input;
 import org.educoins.core.Output;
 import org.educoins.core.Transaction;
+import org.educoins.core.Wallet;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -25,7 +26,8 @@ public class MockedClient {
 	static {
 
 		mockedBlockchain = Mockito.spy(MockedBlockChain.getMockedBlockChain());
-		mockedClient = new Client(mockedBlockchain);
+		Wallet mockedWallet = MockedWallet.getMockedWallet();
+		mockedClient = new Client(mockedWallet);
 	}
 
 	public static Client getClient() {
@@ -46,13 +48,13 @@ public class MockedClient {
 
 	public static List<Transaction> sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
 		transactionReceived();
-		mockedClient.sendRegularTransaction(amount, dstPublicKey, lockingScript);
+		//mockedClient.sendRegularTransaction(amount, dstPublicKey, lockingScript);
 		return receivedTransaction();
 	}
 
 	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
 		transactionReceived();
-		mockedClient.sendApprovedTransaction(amount, owner, holder, lockingScript);
+		//mockedClient.sendApprovedTransaction(amount, owner, holder, lockingScript);
 		return receivedTransaction();
 	}
 
@@ -69,7 +71,7 @@ public class MockedClient {
 		out.setDstPublicKey(dstPublicKey);
 		tx.addInput(input);
 		tx.addOutput(out);
-		mockedClient.transactionReceived(tx);
+		//mockedClient.transactionReceived(tx);
 	}
 	
 	public static void delete(){

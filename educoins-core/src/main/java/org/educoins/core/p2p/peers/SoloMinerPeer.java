@@ -1,49 +1,55 @@
 package org.educoins.core.p2p.peers;
 
-import org.educoins.core.*;
-import org.educoins.core.p2p.discovery.DiscoveryException;
-
-import java.util.List;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
+import org.educoins.core.IBlockListener;
+import org.educoins.core.IPoWListener;
+import org.educoins.core.ITransactionListener;
+import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.Miner;
-import org.educoins.core.Output;
 import org.educoins.core.Transaction;
-import org.educoins.core.p2p.discovery.DiscoveryException;
+import org.educoins.core.Wallet;
 import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
+import org.educoins.core.utils.Sha256Hash;
+import org.educoins.core.utils.Threading;
 
 /**
  * The {@link Peer}-Type having only reading-capabilities. Created by typus on
  * 11/3/15.
  */
-public class SoloMinerPeer extends Peer {
+public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionReceiver, ITransactionListener  {
 
 	private Miner miner;
-	private static Wallet wallet;
-	private static String reversPublicKey;
+	// TODO only one public key will be used. Need to be improved in using
+	// multiple keys.
+	private static String singlePublicKey;
+	
 
-	public SoloMinerPeer(BlockChain blockChain) {
-		Peer.blockChain = blockChain;
-		SoloMinerPeer.wallet = Peer.blockChain.getWallet();
-		reversPublicKey = SoloMinerPeer.wallet.getPublicKey();
-		this.miner = Peer.blockChain.getMiner();
-		Peer.client = new Client(Peer.blockChain);
+
+	public SoloMinerPeer() {
+		super(new HttpProxyPeerGroup());
+		
+		Peer.wallet = new Wallet();
+		Peer.client = new Client(wallet);
+		Peer.blockChain = new BlockChain(wallet);
+		this.miner = new Miner(Peer.blockChain);
 	}
 
 	@Override
-	public void start() throws DiscoveryException {
-		IProxyPeerGroup peerGroup = Peer.blockChain.getHttpProxyPeerGroup();
-		this.miner.setBlockChain(blockChain);
-		miner.addPoWListener(peerGroup);
-
+	public void start() {
+		
+		miner.addPoWListener(this);
+		miner.addPoWListener(Peer.remoteProxies);
+		Peer.blockChain.addBlockListener(this);
+		
+		SoloMinerPeer.singlePublicKey = Peer.wallet.getPublicKey();
 		// Kick off Miner.
-		Block block = new Block();
-		blockChain.foundPoW(block);
+		foundPoW(new Block());
 		client();
 	}
 
@@ -61,7 +67,7 @@ public class SoloMinerPeer extends Peer {
 			int amount = -1;
 			switch (action.toLowerCase()) {
 			case "g":
-				System.out.println("Owen EDUCoins " + getAmount());
+				System.out.println("Owen EDUCoins " + Peer.client.getAmount());
 				break;
 			case "r":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
@@ -70,7 +76,8 @@ public class SoloMinerPeer extends Peer {
 				String lockingScript = Peer.client.getHexInput(scanner, "Type in dstPublicKey: ");
 				if (lockingScript == null)
 					continue;
-				trans = Peer.client.sendRegularTransaction(amount, SoloMinerPeer.reversPublicKey, lockingScript);
+				trans = Peer.client.sendRegularTransaction(amount, lockingScript);
+				SoloMinerPeer.blockChain.sendTransaction(trans);
 				if (trans != null)
 					System.out.println(trans.hash());
 				break;
@@ -83,20 +90,50 @@ public class SoloMinerPeer extends Peer {
 	}
 
 	@Override
-	public int getAmount() {
-
-		List<String> publickeys = wallet.getPublicKeys();
-		return Peer.client.getAmount(publickeys);
-	}
-
-	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
-
+		miner.removePoWListener(this);
+		miner.removePoWListener(Peer.remoteProxies);
+		Peer.blockChain.removeBlockListener(this);
 	}
+	
+	// region listeners
+	
+		@Override
+		public void foundPoW(Block block) {	
+		
+			logger.info("Found pow. (Block {})", block.hash().toString());
+			Peer.blockChain.notifyBlockReceived(block);
 
-	public String getPubKey() {
-		return SoloMinerPeer.wallet.getPublicKey();
-	}
+			Threading.run(() -> Peer.blockListeners.forEach(iBlockListener -> iBlockListener.blockListener(block)));
+			Block newBlock = Peer.blockChain.prepareNewBlock(block, singlePublicKey);
+			this.miner.receiveBlocks(newBlock);
+		}
+		
+		
+
+		@Override
+		public void transactionReceived(Transaction transaction) {
+			Peer.blockChain.transactionReceived(transaction);
+		}		
+
+		@Override
+		public void addTransactionListener(ITransactionListener transactionListener) {
+			Peer.remoteProxies.addTransactionListener(transactionListener);
+		}
+
+		@Override
+		public void removeTransactionListener(ITransactionListener transactionListener) {
+			Peer.remoteProxies.removeTransactionListener(transactionListener);
+		}
+
+		@Override
+		public void receiveTransactions() {
+			remoteProxies.receiveTransactions();
+		}
+		
+		
+	// endregion
+
+	
 
 }
