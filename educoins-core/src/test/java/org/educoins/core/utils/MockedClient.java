@@ -68,7 +68,6 @@ public class MockedClient {
 		Transaction tx = BlockStoreFactory.generateTransaction(1);
 		Output out = tx.getOutputs().get(tx.getOutputsCount() - 1);
 		String dstPublicKey = input.getHashPrevOutput();
-		out.setDstPublicKey(dstPublicKey);
 		tx.addInput(input);
 		tx.addOutput(out);
 		//mockedClient.transactionReceived(tx);

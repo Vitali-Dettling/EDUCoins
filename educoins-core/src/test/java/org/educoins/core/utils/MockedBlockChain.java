@@ -17,27 +17,15 @@ import org.mockito.Mockito;
 
 public class MockedBlockChain {
 
-	@Mock
-	private IBlockReceiver mockedBlockReceiver;
-	@Mock
-	private ITransactionReceiver mockedTxReceiver;
-	@Mock
-	private ITransactionTransmitter mockedTxTransmitter;
-	@Mock
-	private ITransactionReceiver mockedGatewayReceiver;
-	@Mock
-	private ITransactionTransmitter mockedGatewayTransmitter;
-
 	private static IBlockStore mockedStore;
 	private static BlockChain mockedBlockchain;
 
 
 	static {
 		
-		HttpProxyPeerGroup peerGroup = new HttpProxyPeerGroup();
 		mockedStore = MockedStore.getStore();
-		
-		mockedBlockchain = new BlockChain(peerGroup, peerGroup, peerGroup, mockedStore);
+		Wallet mockedWallet = MockedWallet.getMockedWallet();
+		mockedBlockchain = new BlockChain(mockedWallet);
 
 	}
 	

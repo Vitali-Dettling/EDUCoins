@@ -45,7 +45,7 @@ public class VerificationTest {
 	@Test
 	public void testVerifyBlock1() {
 		Block block = new Block();
-		Output output = new Output(2, "abc", "def");
+		Output output = new Output(2, "abc");
 
 		CoinbaseTransaction transaction = new CoinbaseTransaction();
 		transaction.addOutput(output);
@@ -58,7 +58,7 @@ public class VerificationTest {
 	public void testVerifyBlock2() throws BlockNotFoundException {
 		Block block = new Block();
 		block.setHashPrevBlock(Sha256Hash.MAX_HASH);
-		Output output = new Output(2, "abc", "def");
+		Output output = new Output(2, "abc");
 
 		CoinbaseTransaction transaction = new CoinbaseTransaction();
 		transaction.addOutput(output);
@@ -71,7 +71,7 @@ public class VerificationTest {
 		block1.setHashPrevBlock(block.hash());
 		Input input1 = new Input(2, block.getTransactions().get(0).hash().toString(),  "123");
 		input1.setSignature("affe");
-		Output output1 = new Output(2, "abc", "def");
+		Output output1 = new Output(2, "abc");
 
 		Transaction transaction1 = new Transaction();
 		transaction1.addOutput(output1);
@@ -85,7 +85,7 @@ public class VerificationTest {
 	@Test
 	public void testVerifyBlockUseInvalidInput() throws BlockNotFoundException {
 		Block block = new Block();
-		Output output = new Output(2, "abc", "def");
+		Output output = new Output(2, "abc");
 
 		CoinbaseTransaction transaction = new CoinbaseTransaction();
 		transaction.addOutput(output);
@@ -97,7 +97,7 @@ public class VerificationTest {
 		block1.setHashPrevBlock(block.hash());
 		Input input1 = new Input(2, Sha256Hash.ZERO_HASH.toString(), "ABC");
 		input1.setSignature("adadadad");
-		Output output1 = new Output(2, "abc", "def");
+		Output output1 = new Output(2, "abc");
 
 		Transaction transaction1 = new Transaction();
 		transaction1.addOutput(output1);

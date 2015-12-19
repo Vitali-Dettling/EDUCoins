@@ -5,13 +5,11 @@ import org.educoins.core.utils.ByteArray;
 public class Output {
 	
 	private int amount;
-	private String dstPublicKey;
 	private String lockingScript;
 	
-	public Output(int amount, String dstPublicKey, String lockingScript){
+	public Output(int amount, String lockingScript){
 		
 		this.amount = amount;
-		this.dstPublicKey = dstPublicKey;
 		this.lockingScript = lockingScript;
 	}
 
@@ -21,14 +19,6 @@ public class Output {
 
 	public void setAmount(int amount) {
 		this.amount = amount;
-	}
-
-	public String getDstPublicKey() {
-		return this.dstPublicKey;
-	}
-
-	public void setDstPublicKey(String dstPublicKey) {
-		this.dstPublicKey = dstPublicKey;
 	}
 
 	public String getLockingScript() {
@@ -46,10 +36,11 @@ public class Output {
 		return ByteArray.concatByteArrays(lockingScript);
 		
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Output [amount=" + amount + ", dstPublicKey=" + dstPublicKey + ", lockingScript=" + lockingScript + "]";
+		return "Output [amount=" + amount + ", lockingScript=" + lockingScript + "]";
 	}
+	
 
 }

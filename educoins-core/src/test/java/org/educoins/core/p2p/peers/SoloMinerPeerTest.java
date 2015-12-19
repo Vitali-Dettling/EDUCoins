@@ -9,10 +9,12 @@ import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Output;
 import org.educoins.core.Transaction;
+import org.educoins.core.Wallet;
 import org.educoins.core.p2p.peers.server.PeerServer;
 import org.educoins.core.testutils.BlockStoreFactory;
 import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.MockedStore;
+import org.educoins.core.utils.MockedWallet;
 import org.educoins.core.utils.RestClient;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -34,6 +36,7 @@ public class SoloMinerPeerTest {
     private static final URI TRANSACTION_URI = URI.create("http://localhost:8083/transaction");
 
     private RestClient<Transaction> restClient = new RestClient<>();
+    private Wallet mockdedWallet = MockedWallet.getMockedWallet();
     /**
      * Submit an empty transaction. Behavior is undefined so far.
      */
@@ -52,8 +55,8 @@ public class SoloMinerPeerTest {
 		Block block = new Block();
 		for (int i = 0; i < 10; i++) {
 			block = BlockStoreFactory.getRandomBlock(block);
-			String publicKey = SoloMinerPeer.client.getPublicKey();
-			Output out = new Output(6, publicKey, publicKey);
+			String publicKey = this.mockdedWallet.getPublicKey();
+			Output out = new Output(6, publicKey);
 			expected += 6;
 			Transaction tx = new Transaction();
 			tx.addOutput(out);

@@ -199,8 +199,8 @@ public class BlockChain {
 	public void sendTransaction(Transaction transaction) {
 
 		this.transactions.add(transaction);
-		// TODO Needs to be implemented that all miner will get transactions.
-		this.transactionTransmitter.transmitTransaction(transaction);
+		//TODO Implementation of the transaction broadcast.
+		//this.transactionTransmitter.transmitTransaction(transaction);
 	}
 
 	public void transactionReceived(Transaction transaction) {
@@ -243,10 +243,8 @@ public class BlockChain {
 
 	private Transaction coinbaseTransaction(Block currentBlock, String publicKey) {
 
-		String lockingScript = publicKey;
-
 		// Input is empty because it is a coinbase transaction.
-		Output output = new Output(currentBlock.rewardCalculator(), publicKey, lockingScript);
+		Output output = new Output(currentBlock.rewardCalculator(), publicKey);
 
 		CoinbaseTransaction transaction = new CoinbaseTransaction();
 		transaction.addOutput(output);

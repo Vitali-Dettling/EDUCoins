@@ -92,6 +92,7 @@ public class Verification {
 		// 1. Find the previous block.
 		Block previousBlock;
 		try {
+			//TODO is not quite correct!
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
 			logger.warn("verifyBlock: previousBlock is not correct.");
@@ -196,7 +197,7 @@ public class Verification {
 		}
 
 		// Case 13:
-		// TODO [Vitali] Implement the check for the lock script as soon as the
+		// TODO Implement the check for the lock script as soon as the
 		// Revoke class was introduced.
 		// Till then there is no use in implementing it.
 		// For the time being it only checked that Locking Script is not empty.
@@ -215,7 +216,7 @@ public class Verification {
 
 	public boolean verifyCoinbaseTransaction(Transaction transaction, Block toVerifyBlock) {
 
-		// TODO [Vitali] Find out whether all checks are included?
+		// TODO Find out whether all checks are included?
 
 		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der
 		// Block-Chain-Technologie" p. 37f
@@ -316,13 +317,14 @@ public class Verification {
 		}
 
 		// Case 5:
-		if (sumOutputsAmount > sumInputsAmount) {
-			logger.warn("verifyRegularTransaction: more output than input");
-			return false;
-		}
+		//TODO is not quite correct!
+//		if (sumOutputsAmount > sumInputsAmount) {
+//			logger.warn("verifyRegularTransaction: more output than input");
+//			return false;
+//		}
 
 		// Case 13:
-		// TODO [Vitali] The check is current done with the ECDSA class but
+		// TODO The check is current done with the ECDSA class but
 		// actually that should be done through the script language.
 		// Currently it check just whether the signature corresponds with one
 		// public key in the wallet file.
@@ -333,7 +335,7 @@ public class Verification {
 			signature = input.getSignature();
 
 			if (this.wallet.checkSignature(hashedTransaction, signature)) {
-				System.out.println("INFO: verifyRegularTransaction: Signature is correct.");
+				logger.info("INFO: verifyRegularTransaction: Signature is correct.");
 				break;
 			}
 

@@ -1,21 +1,16 @@
 package org.educoins.core.p2p.peers;
 
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
-import org.educoins.core.IBlockListener;
 import org.educoins.core.IPoWListener;
 import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.Miner;
 import org.educoins.core.Transaction;
 import org.educoins.core.Wallet;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.utils.Sha256Hash;
 import org.educoins.core.utils.Threading;
 
 /**
@@ -50,6 +45,8 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 		SoloMinerPeer.singlePublicKey = Peer.wallet.getPublicKey();
 		// Kick off Miner.
 		foundPoW(new Block());
+		//After miner has started.
+		Peer.remoteProxies.discover();
 		client();
 	}
 
@@ -77,7 +74,9 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 				if (lockingScript == null)
 					continue;
 				trans = Peer.client.sendRegularTransaction(amount, lockingScript);
-				SoloMinerPeer.blockChain.sendTransaction(trans);
+				if(trans != null){
+					Peer.blockChain.sendTransaction(trans);
+				}
 				if (trans != null)
 					System.out.println(trans.hash());
 				break;

@@ -18,7 +18,7 @@ public class Miner {
 
 	public Miner(BlockChain blockChain) {
 		this.powListeners = new CopyOnWriteArrayList<>();
-		this.blockChain = blockChain;
+		Miner.blockChain = blockChain;
 	}
 
 	public void addPoWListener(IPoWListener powListener) {

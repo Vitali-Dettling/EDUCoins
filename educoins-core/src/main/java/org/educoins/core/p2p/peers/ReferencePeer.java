@@ -88,7 +88,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				if (dstPublicKey == null)
 					continue;
 				trans = Peer.client.sendRegularTransaction(amount, dstPublicKey);
-				ReferencePeer.blockChain.sendTransaction(trans);
+				//ReferencePeer.blockChain.sendTransaction(trans);
 				if (trans != null)
 					System.out.println(trans.hash());
 				break;

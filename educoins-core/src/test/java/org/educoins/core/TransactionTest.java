@@ -19,12 +19,11 @@ public class TransactionTest {
 	public void testWhichTransactionCoinbase() {
 	
 		final int AMOUNT = 16;
-		final String DST_PUBLIC_KEY = "ABC";
 		final String LOCKING_SCRIPT = "ABC";
 		
 		Transaction transaction = new Transaction();
 		
-		Output output = new Output(AMOUNT, DST_PUBLIC_KEY, LOCKING_SCRIPT);
+		Output output = new Output(AMOUNT, LOCKING_SCRIPT);
 		transaction.addOutput(output);
 		
 		ETransaction testee = transaction.whichTransaction();
@@ -66,7 +65,6 @@ public class TransactionTest {
 		
 		final String unlockingScript = "ABC";
 		final int AMOUNT = 16;
-		final String DST_PUBLIC_KEY = "ABC";
 		final String HASH_PREVIOUS_OUTPUT= "ABC";
 		final String LOCKING_SCRIPT = "ABC";
 		final String OWNER_ADDRESS= "ABC";
@@ -77,7 +75,7 @@ public class TransactionTest {
 		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, unlockingScript);
 		transaction.addInput(input);
 		
-		Output output = new Output(AMOUNT, DST_PUBLIC_KEY, LOCKING_SCRIPT);
+		Output output = new Output(AMOUNT, LOCKING_SCRIPT);
 		transaction.addOutput(output);
 		
 		Approval approval = new Approval(AMOUNT, OWNER_ADDRESS, HOLDER_SIGNATURE, LOCKING_SCRIPT);
@@ -96,7 +94,6 @@ public class TransactionTest {
 	
 		final String unlockingScript = "ABC";
 		final int AMOUNT = 16;
-		final String DST_PUBLIC_KEY = "ABC";
 		final String LOCKING_SCRIPT = "ABC";
 		final String HASH_PREVIOUS_OUTPUT= "ABC";
 		
@@ -105,7 +102,7 @@ public class TransactionTest {
 		Input input = new Input(AMOUNT, HASH_PREVIOUS_OUTPUT, unlockingScript);
 		transaction.addInput(input);
 		
-		Output output = new Output(AMOUNT, DST_PUBLIC_KEY, LOCKING_SCRIPT);
+		Output output = new Output(AMOUNT, LOCKING_SCRIPT);
 		transaction.addOutput(output);
 		
 		ETransaction testee = transaction.whichTransaction();

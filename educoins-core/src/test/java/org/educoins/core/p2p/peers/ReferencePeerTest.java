@@ -44,7 +44,7 @@ public class ReferencePeerTest {
 		String publicKey = peer.getPubKey();
 		for (int i = 0; i < 10; i++) {
 			block = BlockStoreFactory.getRandomBlock(block);
-			Output out = new Output(6, publicKey, publicKey);
+			Output out = new Output(6, publicKey);
 			expected += 6;
 			Transaction tx = new Transaction();
 			tx.addOutput(out);
