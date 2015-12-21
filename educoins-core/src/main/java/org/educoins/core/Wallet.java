@@ -22,7 +22,6 @@ public class Wallet {
 	private static final String SEPERATOR = ";";
 	private static final String KeyStorageFile = "/wallet.keys";
 	
-	private ECDSA keyPair;
 	private Path directoryKeyStorage;
 	
 	public Wallet(){
@@ -44,11 +43,11 @@ public class Wallet {
 	
 	public boolean compare(String message, String signature, String publicKey) {
 
-		this.keyPair = new ECDSA();
+		ECDSA keyPair = new ECDSA();
 		try {
 
 			byte[] sign = ByteArray.convertFromString(signature, HEX);
-			if (this.keyPair.verifySignature(message, sign, publicKey)) {
+			if (keyPair.verifySignature(message, sign, publicKey)) {
 				return true;
 			}
 		} catch (Exception e) {
@@ -63,11 +62,12 @@ public class Wallet {
 	public boolean checkSignature(String hashedTranscation, String signature){
 		
 		try {
+			ECDSA keyPair = new ECDSA();
 			
 			List<String> publicKeys = this.getPublicKeys();
 			byte[] sign = ByteArray.convertFromString(signature, HEX);
 			for (String publicKey : publicKeys) {	
-				boolean rightKey = this.keyPair.verifySignature(hashedTranscation, sign, publicKey);
+				boolean rightKey = keyPair.verifySignature(hashedTranscation, sign, publicKey);
 				if (rightKey) {
 					return true;
 				}
@@ -85,8 +85,9 @@ public class Wallet {
 	public String getSignature(String publicKey, String hashedTranscation){
 		
 		try {
+			ECDSA keyPair = new ECDSA();
 			
-			byte[] signature = this.keyPair.getSignature(publicKey, hashedTranscation);
+			byte[] signature = keyPair.getSignature(publicKey, hashedTranscation);
 			return ByteArray.convertToString(signature, HEX);
 		} catch (Exception e) {
 			System.err.println("ERROR: Class Wallet. Creating of the Signature.");
@@ -104,10 +105,10 @@ public class Wallet {
 	//TODO[Vitali] Right now the private public key is stored in a file but this can change, maybe???
 	public String getPublicKey() {
 		
-		this.keyPair = new ECDSA();
+		ECDSA keyPair = new ECDSA();
 		
-		String privateKey = this.keyPair.getPrivateKey();
-		String publicKey = this.keyPair.getPublicKey();
+		String privateKey = keyPair.getPrivateKey();
+		String publicKey = keyPair.getPublicKey();
 		
 		try {
 			IO.appendToFile(this.directoryKeyStorage + KeyStorageFile, privateKey + SEPERATOR + publicKey + "\r\n");

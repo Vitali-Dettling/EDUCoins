@@ -90,12 +90,11 @@ public class Verification {
 		}
 
 		// 1. Find the previous block.
-		Block previousBlock;
+		Block previousBlock = null;
 		try {
-			//TODO is not quite correct!
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
-			logger.warn("verifyBlock: previousBlock is not correct.");
+			logger.warn("verifyBlock: previousBlock is not correct. The block order is most likely wrong.");
 			return false;
 		}
 

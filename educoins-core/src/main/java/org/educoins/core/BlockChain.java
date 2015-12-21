@@ -10,6 +10,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
+import org.educoins.core.p2p.peers.IProxyPeerGroup;
+import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockIterator;
@@ -43,15 +45,19 @@ public class BlockChain {
 	
 	private Verification verification;
 	private IBlockStore store;
+	
+	private IProxyPeerGroup remoteProxies;
 
-	public BlockChain(Wallet wallet) {
+	public BlockChain(IProxyPeerGroup remoteProxies, Wallet wallet) {
 
 		try {
+
+			this.remoteProxies = remoteProxies;	
 	        this.blockListeners = new CopyOnWriteArrayList<>();
 	        this.transactionListeners = new ArrayList<>();
 			this.transactions = new ArrayList<>();
-			this.verification = new Verification(wallet, this);
 			this.store = new LevelDbBlockStore();
+			this.verification = new Verification(wallet, this);
 			
 		} catch (BlockStoreException e) {
 			// TODO Auto-generated catch block
@@ -114,11 +120,11 @@ public class BlockChain {
 		while (iterator.hasNext()) {
 			// TODO Does not return the genesis block.
 			Block next = iterator.next();
+			blocks.add(next);
 			if (next.hash().equals(from)) {
 				Collections.reverse(blocks);
 				return blocks;
 			}
-			blocks.add(next);
 		}
 
 		// Includes the genesis block.
@@ -161,19 +167,24 @@ public class BlockChain {
 		}
 	}
 
-	public boolean verifyReceivedBlock(Block receivedBlock) {
+	public void verifyReceivedBlock(Block receivedBlock) {
 		logger.info("Received block. Verifying now...");
 
 		// Already up to date.
 		Block latestStoredBlock = getLatestBlock();
 		if (receivedBlock.equals(latestStoredBlock)) {
-			return true;
+			logger.info("Blockchain is up to date.");
+			return;
 		}
 
 		// Check block for validity.
 		if (!this.verification.verifyBlock(receivedBlock)) {
 			logger.warn("Verification of block failed: " + receivedBlock.toString());
-			return false;
+			// Tries as long as the blockchain is up to date.
+			Block latestBlock = getLatestBlock();
+			System.out.println(latestBlock.hash().toString());
+			this.remoteProxies.receiveBlocks(latestBlock.hash());
+			return;
 		}
 
 		//Store the verified block.
@@ -187,7 +198,6 @@ public class BlockChain {
 			}
 		}
 		logger.info("Block processed.");
-		return true;
 	}
 
 	public void notifyTransactionReceived(Transaction transaction) {

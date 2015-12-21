@@ -30,15 +30,15 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 	private static Sha256Hash proxyPublicKey;
 	private static BlockController blockController;
 
-	protected static final Set<IBlockListener> blockListeners = new HashSet<>();
-
-	public Peer(IProxyPeerGroup remoteProxies) {
-		Peer.remoteProxies = remoteProxies;		
+	public Peer(BlockChain blockChain) {
+		Peer.blockChain = blockChain;
+		Peer.remoteProxies = new HttpProxyPeerGroup();		
 		Peer.proxyPublicKey = AppConfig.getOwnPublicKey();
 		Peer.wallet = new Wallet();
 		Peer.client = new Client(wallet);
-		Peer.blockChain = new BlockChain(wallet);
 		Peer.blockController = new BlockController(blockChain);
+		
+		Peer.blockChain.addBlockListener(this);
 	}
 
 	public abstract void start() throws DiscoveryException;
@@ -49,14 +49,14 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 
 	@Override
 	public void blockListener(Block receivedBlock) {
+		Peer.blockChain.verifyReceivedBlock(receivedBlock);
 		Peer.client.distructOwnOutputs(receivedBlock);
-		boolean result = Peer.blockChain.verifyReceivedBlock(receivedBlock);
-
-		if (!result) {
-			// Tries as long as the blockchain is up to date.
-			Block latestBlock = blockChain.getLatestBlock();
-			Peer.remoteProxies.receiveBlocks(latestBlock.hash());
-		}
+	}
+	
+	@Override
+	public void addBlockListener(IBlockListener blockListener) {
+		Peer.blockChain.addBlockListener(blockListener);
+		Peer.remoteProxies.addBlockListener(blockListener);
 	}
 
 	@Override
@@ -64,15 +64,10 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 		Peer.remoteProxies.receiveBlocks(from);
 	}
 
-	public void addBlockListener(IBlockListener blockListener) {
-		Peer.blockListeners.add(blockListener);
-		Peer.remoteProxies.addBlockListener(blockListener);
-
-	}
-
+	
 	@Override
 	public void removeBlockListener(IBlockListener blockListener) {
-		Peer.blockListeners.remove(blockListener);
+		Peer.blockChain.removeBlockListener(blockListener);
 		Peer.remoteProxies.removeBlockListener(blockListener);
 	}
 	// endregion

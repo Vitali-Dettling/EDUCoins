@@ -24,8 +24,8 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 	// multiple keys.
 	private static String singlePublicKey;
 
-	public SoloMinerPeer() {
-		super(new HttpProxyPeerGroup());
+	public SoloMinerPeer(BlockChain blockChain) {
+		super(blockChain);
 		this.miner = new Miner(Peer.blockChain);
 	}
 
@@ -34,7 +34,6 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 
 		miner.addPoWListener(this);
 		miner.addPoWListener(Peer.remoteProxies);
-		Peer.blockChain.addBlockListener(this);
 
 		SoloMinerPeer.singlePublicKey = Peer.wallet.getPublicKey();
 		// Kick off Miner.
@@ -92,13 +91,12 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 	// region listeners
 
 	@Override
-	public void foundPoW(Block block) {
+	public void foundPoW(Block powBlock) {
 
-		logger.info("Found pow. (Block {})", block.hash().toString());
-		Peer.blockChain.notifyBlockReceived(block);
-
-		Threading.run(() -> Peer.blockListeners.forEach(iBlockListener -> iBlockListener.blockListener(block)));
-		Block newBlock = Peer.blockChain.prepareNewBlock(block, singlePublicKey);
+		logger.info("Found pow. (Block {})", powBlock.hash().toString());
+		Peer.blockChain.notifyBlockReceived(powBlock);
+		//New round of miner.
+		Block newBlock = Peer.blockChain.prepareNewBlock(powBlock, singlePublicKey);
 		this.miner.receiveBlocks(newBlock);
 	}
 

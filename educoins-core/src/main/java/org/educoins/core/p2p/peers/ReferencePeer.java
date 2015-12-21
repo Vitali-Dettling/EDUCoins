@@ -25,12 +25,9 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 	private static String singlePublicKey;
 
 	public ReferencePeer(BlockChain blockChain) {
-		super(new HttpProxyPeerGroup());
+		super(blockChain);
 		singlePublicKey = Peer.wallet.getPublicKey();
-	}
-
-	public int getAmount() {
-		return ReferencePeer.client.getAmount();
+		Peer.remoteProxies.addBlockListener(this);
 	}
 
 	public void setPubKey(String publicKey) {
@@ -137,6 +134,8 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 	public void transmitTransaction(Transaction transaction) {
 		remoteProxies.transmitTransaction(transaction);
 	}
+
+
 
 	// endregion
 }

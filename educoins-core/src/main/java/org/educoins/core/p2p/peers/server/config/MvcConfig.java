@@ -43,8 +43,9 @@ public class MvcConfig {
 	@Bean
 	public BlockChain blockChain() throws BlockStoreException {
 		if (blockChain == null) {
+			IProxyPeerGroup remoteProxy = proxyPeerGroup();
 			Wallet wallet = wallet();
-			this.blockChain = new BlockChain(wallet);
+			this.blockChain = new BlockChain(remoteProxy, wallet);
 		}
 		return blockChain;
 	}

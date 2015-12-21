@@ -38,6 +38,8 @@ public class ReferencePeerTest {
 
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		ReferencePeer peer = new ReferencePeer(blockchain);
+		Wallet mockedWallet = MockedWallet.getMockedWallet();
+		Client client = new Client(mockedWallet);
 
 		int expected = 0;
 		Block block = new Block();
@@ -51,7 +53,7 @@ public class ReferencePeerTest {
 			block.addTransaction(tx);
 			MockedStore.put(block);
 		}
-		int result = peer.getAmount();
+		int result = client.getAmount();
 		Assert.assertEquals(result, expected);
 	}
 

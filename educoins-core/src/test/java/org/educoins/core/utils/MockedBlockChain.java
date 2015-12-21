@@ -9,6 +9,7 @@ import org.educoins.core.Miner;
 import org.educoins.core.Transaction;
 import org.educoins.core.Wallet;
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
+import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockStore;
@@ -25,7 +26,8 @@ public class MockedBlockChain {
 		
 		mockedStore = MockedStore.getStore();
 		Wallet mockedWallet = MockedWallet.getMockedWallet();
-		mockedBlockchain = new BlockChain(mockedWallet);
+		IProxyPeerGroup remoteProxy = new HttpProxyPeerGroup();
+		mockedBlockchain = new BlockChain(remoteProxy, mockedWallet);
 
 	}
 	
