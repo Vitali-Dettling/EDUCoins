@@ -69,6 +69,7 @@ public class BlockStoreFactory {
         return t;
     }
     
+    
 	public static Input generateRandomInput(String hashPrevOutput){
 		
 		int amount = (int) (Math.random() * Integer.MAX_VALUE);

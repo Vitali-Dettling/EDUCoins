@@ -4,6 +4,7 @@ import static org.mockito.Mockito.times;
 
 import java.util.List;
 
+import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
 import org.educoins.core.Input;
@@ -46,17 +47,18 @@ public class MockedClient {
 //		return receivedTransaction();
 //	}
 
-	public static List<Transaction> sendRegularTransaction(int amount, String dstPublicKey, String lockingScript) {
+	public static List<Transaction> sendRegularTransaction(int amount, String lockingScript) {
 		transactionReceived();
-		//mockedClient.sendRegularTransaction(amount, dstPublicKey, lockingScript);
+		mockedClient.generateRegularTransaction(amount, lockingScript);
 		return receivedTransaction();
 	}
 
-	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
-		transactionReceived();
-		//mockedClient.sendApprovedTransaction(amount, owner, holder, lockingScript);
-		return receivedTransaction();
-	}
+	//TODO Not implemented yet.
+//	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
+//		transactionReceived();
+//		mockedClient.sendApprovedTransaction(amount, owner, holder, lockingScript);
+//		return receivedTransaction();
+//	}
 
 	public static List<Transaction> sendRevokeTransaction(String publicKey) {
 		//TDOD [Vitali] Is about to come. 
@@ -67,10 +69,11 @@ public class MockedClient {
 		Input input = BlockStoreFactory.generateRandomInput(MockedWallet.getPublicKey());
 		Transaction tx = BlockStoreFactory.generateTransaction(1);
 		Output out = tx.getOutputs().get(tx.getOutputsCount() - 1);
-		String dstPublicKey = input.getHashPrevOutput();
 		tx.addInput(input);
 		tx.addOutput(out);
-		//mockedClient.transactionReceived(tx);
+		Block block = new Block();
+		block.addTransaction(tx);
+		mockedClient.distructOwnOutputs(block);
 	}
 	
 	public static void delete(){

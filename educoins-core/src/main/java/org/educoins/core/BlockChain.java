@@ -177,6 +177,7 @@ public class BlockChain {
 		}
 
 		//Store the verified block.
+		logger.info("Received Block stored in the BC after verification: " + receivedBlock.toString());
 		this.store.put(receivedBlock);
 		List<Transaction> transactions = receivedBlock.getTransactions();
 		if (transactions != null) {

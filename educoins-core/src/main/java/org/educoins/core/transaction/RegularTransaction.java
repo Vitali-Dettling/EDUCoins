@@ -44,10 +44,13 @@ public class RegularTransaction implements ITransaction {
 		outputs.add(out1);
 		
 		//Back to the owner putput.
-		String reversPublicKey = this.wallet.getPublicKey();
-		int reversAmount = outputAmount - sendAmount;
-		Output out2 = new Output(reversAmount, reversPublicKey);
-		outputs.add(out2);
+		String reversePublicKey = this.wallet.getPublicKey();
+		int reverseAmount = outputAmount - sendAmount;
+		if(reverseAmount > 0){
+			//Only a reverse amount if there is  one. Otherwise the transaction would not verify.  
+			Output out2 = new Output(reverseAmount, reversePublicKey);
+			outputs.add(out2);
+		}
 		tx.setOutputs(outputs);
 		
 		//Sign the transaction.
@@ -55,7 +58,7 @@ public class RegularTransaction implements ITransaction {
 			String signature = this.wallet.getSignature(in.getUnlockingScript(), tx.hash().toString());
 			in.setSignature(signature);
 		}
-	
+		
 		return tx;
 	}
 	

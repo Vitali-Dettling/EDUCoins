@@ -74,6 +74,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 	public void discover() {
 		try {
 			new CentralDiscovery().hello();
+			//TODO If discovery worked return?
 		} catch (DiscoveryException e) {
 			logger.warn("Could not hello the Central!", e);
 		}

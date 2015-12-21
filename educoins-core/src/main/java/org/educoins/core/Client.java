@@ -27,7 +27,7 @@ public class Client {
 		Client.locked = false;
 	}
 
-	public Transaction sendRegularTransaction(int sendAmount, String publicKey) {
+	public Transaction generateRegularTransaction(int sendAmount, String publicKey) {
 		
 		if(!checkAmount(sendAmount) || !checkOutputs()){
 			return null;

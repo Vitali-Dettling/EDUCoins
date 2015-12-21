@@ -130,6 +130,8 @@ public class Verification {
 			case REVOKE:
 				isTransactionValid = verifyRevokeTransaction(transaction);
 				break;
+			default:
+				logger.warn("verifyBlock: transaction could not be determined. " + toVerifyBlock.toString());
 			}
 
 			// As soon as a transaction is not valid, the loop will be

@@ -47,6 +47,7 @@ public class MinerTest {
      * This test should trigger a PoW run and notify PoW Listener when found.
      */
     @Test
+    @Ignore
     public void testBlockReceived() throws Exception {
         IPoWListener powListener = mock(IPoWListener.class);
         boolean found = false;

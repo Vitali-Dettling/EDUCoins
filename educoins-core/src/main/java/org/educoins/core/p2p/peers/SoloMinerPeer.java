@@ -17,18 +17,16 @@ import org.educoins.core.utils.Threading;
  * The {@link Peer}-Type having only reading-capabilities. Created by typus on
  * 11/3/15.
  */
-public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionReceiver, ITransactionListener  {
+public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionReceiver, ITransactionListener {
 
 	private Miner miner;
 	// TODO only one public key will be used. Need to be improved in using
 	// multiple keys.
 	private static String singlePublicKey;
-	
-
 
 	public SoloMinerPeer() {
 		super(new HttpProxyPeerGroup());
-		
+
 		Peer.wallet = new Wallet();
 		Peer.client = new Client(wallet);
 		Peer.blockChain = new BlockChain(wallet);
@@ -37,15 +35,15 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 
 	@Override
 	public void start() {
-		
+
 		miner.addPoWListener(this);
 		miner.addPoWListener(Peer.remoteProxies);
 		Peer.blockChain.addBlockListener(this);
-		
+
 		SoloMinerPeer.singlePublicKey = Peer.wallet.getPublicKey();
 		// Kick off Miner.
 		foundPoW(new Block());
-		//After miner has started.
+		// After miner has started.
 		Peer.remoteProxies.discover();
 		client();
 	}
@@ -73,8 +71,8 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 				String lockingScript = Peer.client.getHexInput(scanner, "Type in dstPublicKey: ");
 				if (lockingScript == null)
 					continue;
-				trans = Peer.client.sendRegularTransaction(amount, lockingScript);
-				if(trans != null){
+				trans = Peer.client.generateRegularTransaction(amount, lockingScript);
+				if (trans != null) {
 					Peer.blockChain.sendTransaction(trans);
 				}
 				if (trans != null)
@@ -94,45 +92,40 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 		miner.removePoWListener(Peer.remoteProxies);
 		Peer.blockChain.removeBlockListener(this);
 	}
-	
+
 	// region listeners
-	
-		@Override
-		public void foundPoW(Block block) {	
-		
-			logger.info("Found pow. (Block {})", block.hash().toString());
-			Peer.blockChain.notifyBlockReceived(block);
 
-			Threading.run(() -> Peer.blockListeners.forEach(iBlockListener -> iBlockListener.blockListener(block)));
-			Block newBlock = Peer.blockChain.prepareNewBlock(block, singlePublicKey);
-			this.miner.receiveBlocks(newBlock);
-		}
-		
-		
+	@Override
+	public void foundPoW(Block block) {
 
-		@Override
-		public void transactionReceived(Transaction transaction) {
-			Peer.blockChain.transactionReceived(transaction);
-		}		
+		logger.info("Found pow. (Block {})", block.hash().toString());
+		Peer.blockChain.notifyBlockReceived(block);
 
-		@Override
-		public void addTransactionListener(ITransactionListener transactionListener) {
-			Peer.remoteProxies.addTransactionListener(transactionListener);
-		}
+		Threading.run(() -> Peer.blockListeners.forEach(iBlockListener -> iBlockListener.blockListener(block)));
+		Block newBlock = Peer.blockChain.prepareNewBlock(block, singlePublicKey);
+		this.miner.receiveBlocks(newBlock);
+	}
 
-		@Override
-		public void removeTransactionListener(ITransactionListener transactionListener) {
-			Peer.remoteProxies.removeTransactionListener(transactionListener);
-		}
+	@Override
+	public void transactionReceived(Transaction transaction) {
+		Peer.blockChain.transactionReceived(transaction);
+	}
 
-		@Override
-		public void receiveTransactions() {
-			remoteProxies.receiveTransactions();
-		}
-		
-		
+	@Override
+	public void addTransactionListener(ITransactionListener transactionListener) {
+		Peer.remoteProxies.addTransactionListener(transactionListener);
+	}
+
+	@Override
+	public void removeTransactionListener(ITransactionListener transactionListener) {
+		Peer.remoteProxies.removeTransactionListener(transactionListener);
+	}
+
+	@Override
+	public void receiveTransactions() {
+		remoteProxies.receiveTransactions();
+	}
+
 	// endregion
-
-	
 
 }
