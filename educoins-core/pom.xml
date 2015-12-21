@@ -74,6 +74,13 @@
         	<artifactId>neo4j-cypher-compiler-2.2</artifactId>
         	<version>2.2.5</version>
         </dependency>
+<!-- Delete ??? -->
+        <dependency>
+        	<groupId>org.neo4j</groupId>
+        	<artifactId>neo4j-cypher-compiler-2.1</artifactId>
+        	<version>2.1.8</version>
+        </dependency>
+<!-- End delete -->
     </dependencies>
 
     <dependencyManagement>

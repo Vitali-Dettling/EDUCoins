@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.educoins.core.transaction.ApprovedTransaction;
 import org.educoins.core.transaction.RegularTransaction;
+import org.educoins.core.transaction.RevokedTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +27,20 @@ public class Client {
 		Client.blockBuffer = new ArrayList<>();
 		Client.availableAmount = 0;
 		Client.locked = false;
+	}
+	
+	public Transaction generateRevokeTransaction(int amount, String lockingScript) {
+		//TODO need real implementation.
+		RevokedTransaction approvedTransaction = new RevokedTransaction();
+		Transaction buildTx = approvedTransaction.generateRevokedTransaction(amount, lockingScript);
+		return buildTx;
+	}
+	
+	public Transaction generateApprovedTransaction(int amount, String owner, String holder, String lockingScript){
+		//TODO need real implementation.
+		ApprovedTransaction approvedTransaction = new ApprovedTransaction();
+		Transaction buildTx = approvedTransaction.generateApprovedTransaction(amount, owner, holder, lockingScript);
+		return buildTx;
 	}
 
 	public Transaction generateRegularTransaction(int sendAmount, String publicKey) {

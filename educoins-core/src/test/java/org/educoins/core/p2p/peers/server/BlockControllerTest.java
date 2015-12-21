@@ -4,6 +4,7 @@ import org.educoins.core.Block;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.testutils.BlockStoreFactory;
+import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.RestClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +16,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -42,6 +44,10 @@ public class BlockControllerTest {
         while (iterator.hasNext()) {
             expected.add(iterator.next());
         }
+
+        expected.add(this.store.getGenesisBlock());
+        Collections.reverse(expected);
+        
         URI uri = URI.create(blocksResourcePath + "from/" + iterator.get().hash());
         Block[] blocks = restClient.get(uri, Block[].class);
 
@@ -54,9 +60,9 @@ public class BlockControllerTest {
     public void TestSpecificBlock() throws Exception {
         store.put(BlockStoreFactory.getRandomBlock(store.getLatest()));
         Block expected = store.iterator().next();
-        Block block = new RestClient<Block>()
+        Block result = new RestClient<Block>()
                 .get(URI.create(blocksResourcePath + expected.hash().toString()), Block.class);
 
-        assertEquals(expected, block);
+        assertEquals(expected, result);
     }
 }

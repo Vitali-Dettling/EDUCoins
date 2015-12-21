@@ -49,16 +49,28 @@ public class MockedClient {
 
 	public static List<Transaction> sendRegularTransaction(int amount, String lockingScript) {
 		transactionReceived();
-		mockedClient.generateRegularTransaction(amount, lockingScript);
+		Block block = BlockStoreFactory.getRandomBlock();
+		Transaction tx = BlockStoreFactory.generateTransaction(1);
+		block.addTransaction(tx);
+		mockedClient.distructOwnOutputs(block);
+		Transaction transaction = mockedClient.generateRegularTransaction(amount, lockingScript);
+		mockedBlockchain.sendTransaction(transaction);
 		return receivedTransaction();
 	}
 
-	//TODO Not implemented yet.
-//	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
-//		transactionReceived();
-//		mockedClient.sendApprovedTransaction(amount, owner, holder, lockingScript);
-//		return receivedTransaction();
-//	}
+	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
+		transactionReceived();
+		Transaction transaction = mockedClient.generateApprovedTransaction(amount, owner, holder, lockingScript);
+		mockedBlockchain.sendTransaction(transaction);
+		return receivedTransaction();
+	}
+	
+	public static List<Transaction> sendRevokedTransaction(int amount, String lockingScript) {
+		transactionReceived();
+		Transaction transaction = mockedClient.generateRevokeTransaction(amount, lockingScript);
+		mockedBlockchain.sendTransaction(transaction);
+		return receivedTransaction();
+	}
 
 	public static List<Transaction> sendRevokeTransaction(String publicKey) {
 		//TDOD [Vitali] Is about to come. 

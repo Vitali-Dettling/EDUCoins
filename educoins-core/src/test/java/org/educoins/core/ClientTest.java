@@ -18,7 +18,6 @@ public class ClientTest {
 	}
 
 	@Test
-	@Ignore
 	public void testSendRegularTransaction() {
 
 		String lockingScript = MockedWallet.getPublicKey();
@@ -27,18 +26,25 @@ public class ClientTest {
 	}
 
 	@Test
-	@Ignore //TODO Approved transaction are not implemented yet.
 	public void testSendApprovedTransaction() {
 
 		String owner = MockedWallet.getPublicKey();
 		String holder = MockedWallet.getPublicKey();
 		String lockingScript = MockedWallet.getPublicKey();
-		//List<Transaction> reqeived = MockedClient.sendApprovedTransaction(1, owner, holder, lockingScript);
+		List<Transaction> reqeived = MockedClient.sendApprovedTransaction(1, owner, holder, lockingScript);
+		checkTransactionType(reqeived, ETransaction.APPROVED);
+	}
+	
+	@Test
+	public void testSendRevokeTransaction() {
 
-		//checkTransactionType(reqeived, ETransaction.APPROVED);
+		String lockingScript = MockedWallet.getPublicKey();
+		List<Transaction> reqeived = MockedClient.sendRevokedTransaction(1, lockingScript);
+		checkTransactionType(reqeived, ETransaction.REVOKE);
 	}
 
 	@Test
+	@Ignore //TODO no gateway implementation yet.
 	public void testSendGateTransaction() {
 
 //		String publicKey = MockedWallet.getPublicKey();

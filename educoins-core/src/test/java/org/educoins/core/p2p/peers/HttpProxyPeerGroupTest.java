@@ -24,8 +24,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests the {@link HttpProxyPeerGroup}
- * Created by typus on 12/3/15.
+ * Tests the {@link HttpProxyPeerGroup} Created by typus on 12/3/15.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(PeerServer.class)
@@ -33,103 +32,99 @@ import static org.mockito.Mockito.*;
 @IntegrationTest("server.port:8082")
 public class HttpProxyPeerGroupTest {
 
-    @Autowired
-    private IBlockStore blockStore;
-    @Autowired
-    private BlockChain blockChain;
-    private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup();
+	@Autowired
+	private IBlockStore blockStore;
+	@Autowired
+	private BlockChain blockChain;
+	private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup();
 
-    @Before
-    public void setup() {
-        clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8082"), "myPub1"));
-    }
+	@Before
+	public void setup() {
+		clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8082"), "myPub1"));
+	}
 
-    @Test
-    public void testDiscover() throws Exception {
-//        clientPeerGroup.discover();
-    }
+	@Test
+	public void testDiscover() throws Exception {
+		clientPeerGroup.discover();
+	}
 
-    @Test
-    public void testTransmitTransaction() throws Exception {
-    }
+	@Test
+	public void testReceiveBlocks() throws Exception {
+		IBlockListener listener = Mockito.mock(IBlockListener.class);
+		int count = getBlockCount();
 
-    @Test
-    public void testReceiveBlocks() throws Exception {
-        IBlockListener listener = Mockito.mock(IBlockListener.class);
-        int count = getBlockCount();
+		((HttpProxyPeerGroup) clientPeerGroup).setRetry(false);
 
-        ((HttpProxyPeerGroup) clientPeerGroup).setRetry(false);
+		clientPeerGroup.addBlockListener(listener);
+		clientPeerGroup.receiveBlocks(blockStore.getLatest().hash());
+		
+		verify(listener, atLeast(count)).blockListener(any(Block.class));
+		((HttpProxyPeerGroup) clientPeerGroup).setRetry(true);
+	}
 
-        clientPeerGroup.addBlockListener(listener);
-        clientPeerGroup.receiveBlocks(blockStore.getLatest().hash());
-        verify(listener, atLeast(count)).blockListener(any(Block.class));
+	@Test
+	@Ignore // Takes pretty long to test...
+	public void testRediscovery() throws Exception {
+		clientPeerGroup.clearProxies();
+		clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:42"), "myPub1"));
 
-        ((HttpProxyPeerGroup) clientPeerGroup).setRetry(true);
-    }
+		Sha256Hash hash = blockStore.getLatest().hash();
+		for (int i = 0; i < 4; ++i) {
+			clientPeerGroup.receiveBlocks(hash);
+		}
 
-    @Test
-    @Ignore //Takes pretty long to test...
-    public void testRediscovery() throws Exception {
-        clientPeerGroup.clearProxies();
-        clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:42"), "myPub1"));
+		IProxyPeerGroup spy = spy(clientPeerGroup);
+		spy.receiveBlocks(hash);
+		verify(spy, atLeastOnce()).discover(any(CentralDiscovery.class));
+	}
 
-        Sha256Hash hash = blockStore.getLatest().hash();
-        for (int i = 0; i < 4; ++i) {
-            clientPeerGroup.receiveBlocks(hash);
-        }
+	@Test
+	public void testReceiveTransactions() throws Exception {
+		ITransactionListener listener = Mockito.mock(ITransactionListener.class);
+		int count = getTxnsCount();
 
-        IProxyPeerGroup spy = spy(clientPeerGroup);
-        spy.receiveBlocks(hash);
-        verify(spy, atLeastOnce()).discover(any(CentralDiscovery.class));
-    }
+		clientPeerGroup.addTransactionListener(listener);
+		clientPeerGroup.receiveTransactions();
+		verify(listener, atLeast(count)).transactionReceived(any(Transaction.class));
+	}
 
-    @Test
-    public void testReceiveTransactions() throws Exception {
-        ITransactionListener listener = Mockito.mock(ITransactionListener.class);
-        int count = getTxnsCount();
+	private int getBlockCount() throws BlockNotFoundException {
+		int count = 0;
+		IBlockIterator iterator = blockStore.iterator();
+		while (iterator.hasNext()) {
+			iterator.next();
+			count++;
+		}
+		return count;
+	}
 
-        clientPeerGroup.addTransactionListener(listener);
-        clientPeerGroup.receiveTransactions();
-        verify(listener, atLeast(count)).transactionReceived(any(Transaction.class));
-    }
+	public int getTxnsCount() throws BlockNotFoundException {
+		final int[] count = { 0 };
+		IBlockIterator iterator = blockStore.iterator();
+		while (iterator.hasNext()) {
+			try {
+				Block block = iterator.next();
+				block.getTransactions().forEach(transaction -> count[0]++);
+			} catch (Exception e) {
+				break;
+			}
+		}
+		return count[0];
+	}
 
-    private int getBlockCount() throws BlockNotFoundException {
-        int count = 0;
-        IBlockIterator iterator = blockStore.iterator();
-        while (iterator.hasNext()) {
-            iterator.next();
-            count++;
-        }
-        return count;
-    }
-
-    public int getTxnsCount() throws BlockNotFoundException {
-        final int[] count = {0};
-        IBlockIterator iterator = blockStore.iterator();
-        while (iterator.hasNext()) {
-            try {
-                Block block = iterator.next();
-                block.getTransactions().forEach(transaction -> count[0]++);
-            } catch (Exception e) {
-                break;
-            }
-        }
-        return count[0];
-    }
-
-    @Test
-    public void testFoundPoW() throws IOException {
-        Block block = BlockStoreFactory.getRandomBlock();
-        final boolean[] received = {false};
-        blockChain.addBlockListener(new IBlockListener() {
-            @Override
-            public void blockListener(Block block2) {
-                received[0] = true;
-                assertNotNull(block2);
-                assertTrue(block.equals(block2));
-            }
-        });
-        clientPeerGroup.foundPoW(block);
-        assertTrue(received[0]);
-    }
+	@Test
+	public void testFoundPoW() throws IOException {
+		Block block = BlockStoreFactory.getRandomBlock();
+		final boolean[] received = { false };
+		blockChain.addBlockListener(new IBlockListener() {
+			@Override
+			public void blockListener(Block block2) {
+				received[0] = true;
+				assertNotNull(block2);
+				assertTrue(block.equals(block2));
+			}
+		});
+		clientPeerGroup.foundPoW(block);
+		assertTrue(received[0]);
+	}
 }

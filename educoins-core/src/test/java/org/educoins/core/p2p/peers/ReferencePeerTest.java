@@ -51,7 +51,7 @@ public class ReferencePeerTest {
 			Transaction tx = new Transaction();
 			tx.addOutput(out);
 			block.addTransaction(tx);
-			MockedStore.put(block);
+			client.distructOwnOutputs(block);
 		}
 		int result = client.getAmount();
 		Assert.assertEquals(result, expected);

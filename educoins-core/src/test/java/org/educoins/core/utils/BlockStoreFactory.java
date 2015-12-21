@@ -4,6 +4,7 @@ import org.educoins.core.Block;
 import org.educoins.core.Input;
 import org.educoins.core.Output;
 import org.educoins.core.Transaction;
+import org.educoins.core.Wallet;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
@@ -57,13 +58,27 @@ public class BlockStoreFactory {
     }
 
     public static Transaction generateTransaction(int number) {
+    	Wallet mockedWallet = MockedWallet.getMockedWallet();
         Transaction t = new Transaction();
         for (int i = 0; i < 2 * number; i++) {
-            Input input = new Input(5 * i * number, "",  "12345");
+            Input input = new Input(5 * i * number, "",  mockedWallet.getPublicKey());
             t.addInput(input);
         }
         for (int i = 0; i < 4 * number; i++) {
-            t.addOutput(new Output(5 * i * number, "123"));
+            t.addOutput(new Output(5 * i * number, mockedWallet.getPublicKey()));
+        }
+        t.setApprovals(null);
+        return t;
+    }
+    
+    public static Transaction generateTransactionWithSameUnlockingScript(int number) {
+        Transaction t = new Transaction();
+        for (int i = 0; i < 2 * number; i++) {
+            Input input = new Input(5 * i * number, "",  "ABC");
+            t.addInput(input);
+        }
+        for (int i = 0; i < 4 * number; i++) {
+            t.addOutput(new Output(5 * i * number, "ABC"));
         }
         t.setApprovals(null);
         return t;

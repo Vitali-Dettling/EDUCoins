@@ -114,22 +114,22 @@ public class BlockTest{
     public void calculateMerkleRootTest() {
         List<Transaction> list = new LinkedList<>();
         for (int i = 1; i < 6; i++) {
-            list.add(BlockStoreFactory.generateTransaction(i));
+            list.add(BlockStoreFactory.generateTransactionWithSameUnlockingScript(i));
         }
         Block b = new Block();
         b.addTransactions(list);
-        Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("5e9dc0cb197e89a155683decb4473848e50530183845119ddd8f9d361dddea8a"));
+        Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("a97d28426d66642ab44d50c5a5367ced47c5a9c5559887b660675eb16851bcf7"));
     }
 
     @Test
     public void calculateMerkleRootTest2() {
         List<Transaction> list = new LinkedList<>();
         for (int i = 20; i < 40; i++) {
-            list.add(BlockStoreFactory.generateTransaction(i));
+            list.add(BlockStoreFactory.generateTransactionWithSameUnlockingScript(i));
         }
         Block b = new Block();
         b.addTransactions(list);
-        Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("c76bc870259e380e3b7ba45ef97123df9182a53af6eb6a87fe13e06274b2532e"));
+        Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("8532c68fff31f33315444026eb34fad09793835dfc8391105fbbaf7086bd74be"));
     }
 
     @Test

@@ -9,9 +9,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
-import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockIterator;
@@ -42,27 +40,20 @@ public class BlockChain {
 	private ITransactionTransmitter transactionTransmitter;
 	private List<ITransactionListener> transactionListeners;
 	private List<Transaction> transactions;
-	
+
 	private Verification verification;
 	private IBlockStore store;
-	
+
 	private IProxyPeerGroup remoteProxies;
 
-	public BlockChain(IProxyPeerGroup remoteProxies, Wallet wallet) {
+	public BlockChain(IProxyPeerGroup remoteProxies, Wallet wallet, IBlockStore store) {
 
-		try {
-
-			this.remoteProxies = remoteProxies;	
-	        this.blockListeners = new CopyOnWriteArrayList<>();
-	        this.transactionListeners = new ArrayList<>();
-			this.transactions = new ArrayList<>();
-			this.store = new LevelDbBlockStore();
-			this.verification = new Verification(wallet, this);
-			
-		} catch (BlockStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.remoteProxies = remoteProxies;
+		this.blockListeners = new CopyOnWriteArrayList<>();
+		this.transactionListeners = new ArrayList<>();
+		this.transactions = new ArrayList<>();
+		this.store = store;
+		this.verification = new Verification(wallet, this);
 
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
@@ -90,7 +81,7 @@ public class BlockChain {
 		return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
 	}
 
-	public @NotNull Block getLatestBlock(){
+	public @NotNull Block getLatestBlock() {
 		Block latest = store.getLatest();
 		if (latest != null)
 			return latest;
@@ -107,9 +98,13 @@ public class BlockChain {
 		while (iterator.hasNext()) {
 			blocks.add(iterator.next());
 		}
-		// Includes the genesis block as well.
-		blocks.add(this.store.get(blocks.get(blocks.size() - 1).getHashPrevBlock()));
+		// Includes the genesis block.
+		if(!blocks.isEmpty()){
+			Block genesisBlock = this.store.getGenesisBlock();
+			blocks.add(genesisBlock);
+		}
 		Collections.reverse(blocks);
+		
 		return blocks;
 	}
 
@@ -128,8 +123,10 @@ public class BlockChain {
 		}
 
 		// Includes the genesis block.
-		Block genesisBlock = this.store.getGenesisBlock();
-		blocks.add(genesisBlock);
+		if(!blocks.isEmpty()){
+			Block genesisBlock = this.store.getGenesisBlock();
+			blocks.add(genesisBlock);
+		}
 		Collections.reverse(blocks);
 
 		Set<Block> blocksFrom = blocks.stream().filter(block -> block.hash().equals(from)).collect(Collectors.toSet());
@@ -158,7 +155,7 @@ public class BlockChain {
 	public void removeBlockListener(IBlockListener blockListener) {
 		this.blockListeners.remove(blockListener);
 	}
-	
+
 	public void notifyBlockReceived(Block newBlock) {
 		synchronized (this) {
 			for (IBlockListener blockListener : this.blockListeners) {
@@ -187,7 +184,7 @@ public class BlockChain {
 			return;
 		}
 
-		//Store the verified block.
+		// Store the verified block.
 		logger.info("Received Block stored in the BC after verification: " + receivedBlock.toString());
 		this.store.put(receivedBlock);
 		List<Transaction> transactions = receivedBlock.getTransactions();
@@ -206,12 +203,12 @@ public class BlockChain {
 			listener.transactionReceived(transaction);
 		}
 	}
-	
+
 	public void sendTransaction(Transaction transaction) {
 
 		this.transactions.add(transaction);
-		//TODO Implementation of the transaction broadcast.
-		//this.transactionTransmitter.transmitTransaction(transaction);
+		// TODO Implementation of the transaction broadcast.
+		// this.transactionTransmitter.transmitTransaction(transaction);
 	}
 
 	public void transactionReceived(Transaction transaction) {
@@ -316,7 +313,7 @@ public class BlockChain {
 		return null;
 	}
 
-	public void storeBlock(Block block){
+	public void storeBlock(Block block) {
 		this.store.put(block);
 	}
 }

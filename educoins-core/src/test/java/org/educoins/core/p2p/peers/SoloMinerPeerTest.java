@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
+import org.educoins.core.Client;
 import org.educoins.core.Output;
 import org.educoins.core.Transaction;
 import org.educoins.core.Wallet;
@@ -20,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.neo4j.cypher.internal.compiler.v2_1.ast.rewriters.distributeLawsRewriter;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -51,6 +53,9 @@ public class SoloMinerPeerTest {
     @Test 
     public void testGetAmount(){
     
+    	Wallet mockedWallet = MockedWallet.getMockedWallet();
+		Client client = new Client(mockedWallet);
+		
 		int expected = 0;
 		Block block = new Block();
 		for (int i = 0; i < 10; i++) {
@@ -61,12 +66,12 @@ public class SoloMinerPeerTest {
 			Transaction tx = new Transaction();
 			tx.addOutput(out);
 			block.addTransaction(tx);
-			MockedStore.put(block);
+			client.distructOwnOutputs(block);
 		}
 
 		int result = 0;
 		for(int i = 0 ; i < 2 ; i++){
-			result = SoloMinerPeer.client.getAmount();
+			result = client.getAmount();
 		}
 		
 		Assert.assertEquals(expected, result);

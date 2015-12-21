@@ -45,11 +45,12 @@ public class MvcConfig {
 		if (blockChain == null) {
 			IProxyPeerGroup remoteProxy = proxyPeerGroup();
 			Wallet wallet = wallet();
-			this.blockChain = new BlockChain(remoteProxy, wallet);
+			IBlockStore store = blockStore();
+			this.blockChain = new BlockChain(remoteProxy, wallet, store);
 		}
 		return blockChain;
 	}
-
+	
 	@Bean
 	public Wallet wallet() {
 		if (this.wallet == null) {
