@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.educoins.core.*;
 import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.DiscoveryException;
+import org.educoins.core.p2p.peers.server.BlockController;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,17 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 	protected static Client client;
 	protected static Wallet wallet;
 	private static Sha256Hash proxyPublicKey;
+	private static BlockController blockController;
 
 	protected static final Set<IBlockListener> blockListeners = new HashSet<>();
 
 	public Peer(IProxyPeerGroup remoteProxies) {
 		Peer.remoteProxies = remoteProxies;		
 		Peer.proxyPublicKey = AppConfig.getOwnPublicKey();
+		Peer.wallet = new Wallet();
+		Peer.client = new Client(wallet);
+		Peer.blockChain = new BlockChain(wallet);
+		Peer.blockController = new BlockController(blockChain);
 	}
 
 	public abstract void start() throws DiscoveryException;
@@ -46,7 +52,7 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 		Peer.client.distructOwnOutputs(receivedBlock);
 		boolean result = Peer.blockChain.verifyReceivedBlock(receivedBlock);
 
-		if (result) {
+		if (!result) {
 			// Tries as long as the blockchain is up to date.
 			Block latestBlock = blockChain.getLatestBlock();
 			Peer.remoteProxies.receiveBlocks(latestBlock.hash());

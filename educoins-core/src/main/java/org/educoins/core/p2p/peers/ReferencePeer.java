@@ -26,9 +26,6 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 
 	public ReferencePeer(BlockChain blockChain) {
 		super(new HttpProxyPeerGroup());
-		Peer.wallet = new Wallet();
-		Peer.client = new Client(wallet);
-		Peer.blockChain = new BlockChain(wallet);
 		singlePublicKey = Peer.wallet.getPublicKey();
 	}
 
@@ -46,9 +43,9 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 
 	@Override
 	public void start() throws DiscoveryException {
-		//Peer.remoteProxies.discover();
-		Block genesisBlock = new Block();
+		Peer.remoteProxies.discover();
 		// Kick starts of receiving of blocks.
+		Block genesisBlock = new Block();
 		remoteProxies.receiveBlocks(genesisBlock.hash());
 		client();
 	}

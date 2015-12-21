@@ -26,10 +26,6 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 
 	public SoloMinerPeer() {
 		super(new HttpProxyPeerGroup());
-
-		Peer.wallet = new Wallet();
-		Peer.client = new Client(wallet);
-		Peer.blockChain = new BlockChain(wallet);
 		this.miner = new Miner(Peer.blockChain);
 	}
 

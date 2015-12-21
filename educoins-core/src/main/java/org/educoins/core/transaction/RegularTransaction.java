@@ -43,7 +43,7 @@ public class RegularTransaction implements ITransaction {
 		Output out1 = new Output(sendAmount, sendPublicKey);
 		outputs.add(out1);
 		
-		//Back to the owner putput.
+		//Back to the owner output.
 		String reversePublicKey = this.wallet.getPublicKey();
 		int reverseAmount = outputAmount - sendAmount;
 		if(reverseAmount > 0){
