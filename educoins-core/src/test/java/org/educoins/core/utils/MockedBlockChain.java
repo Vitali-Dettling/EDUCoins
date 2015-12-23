@@ -6,13 +6,13 @@ import org.educoins.core.IBlockReceiver;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.ITransactionTransmitter;
 import org.educoins.core.Miner;
-import org.educoins.core.Transaction;
 import org.educoins.core.Wallet;
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.store.IBlockStore;
+import org.educoins.core.transaction.Transaction;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -28,7 +28,7 @@ public class MockedBlockChain {
 		Wallet mockedWallet = MockedWallet.getMockedWallet();
 		IProxyPeerGroup remoteProxy = new HttpProxyPeerGroup();
 		IBlockStore store = MockedStore.getStore();
-		mockedBlockchain = new BlockChain(remoteProxy, mockedWallet, store);
+		mockedBlockchain = new BlockChain(remoteProxy, store);
 
 	}
 	

@@ -7,10 +7,10 @@ import java.util.List;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
-import org.educoins.core.Input;
-import org.educoins.core.Output;
-import org.educoins.core.Transaction;
 import org.educoins.core.Wallet;
+import org.educoins.core.transaction.Input;
+import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.Transaction;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -28,7 +28,7 @@ public class MockedClient {
 
 		mockedBlockchain = Mockito.spy(MockedBlockChain.getMockedBlockChain());
 		Wallet mockedWallet = MockedWallet.getMockedWallet();
-		mockedClient = new Client(mockedWallet);
+		mockedClient = new Client();
 	}
 
 	public static Client getClient() {

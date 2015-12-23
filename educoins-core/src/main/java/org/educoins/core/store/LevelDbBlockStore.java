@@ -2,12 +2,15 @@ package org.educoins.core.store;
 
 import com.google.gson.Gson;
 import org.educoins.core.Block;
+import org.educoins.core.BlockChain;
 import org.educoins.core.utils.IO;
 import org.educoins.core.utils.Sha256Hash;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +21,8 @@ import java.io.IOException;
  */
 public class LevelDbBlockStore implements IBlockStore {
 
+	private final Logger logger = LoggerFactory.getLogger(LevelDbBlockStore.class);
+	
     private final byte[] LATEST_KEY = "latest".getBytes();
 
     private byte[] genesisHash = null;
@@ -151,9 +156,10 @@ public class LevelDbBlockStore implements IBlockStore {
     private Block getBlock(byte[] jsonblock) {
         Block block;
         try {
-            block = new Gson().fromJson(new String(jsonblock), Block.class);
+        	String storedBlock = new String(jsonblock);
+            block = new Gson().fromJson(storedBlock, Block.class);
         } catch (Exception e) {
-            System.err.println("Not a block object, why is it stored in the DB?");
+        	logger.error(e.getMessage());
             block = null;
         }
         return block;

@@ -9,10 +9,11 @@ import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
 import org.educoins.core.IBlockReceiver;
-import org.educoins.core.Output;
-import org.educoins.core.Transaction;
 import org.educoins.core.Wallet;
 import org.educoins.core.testutils.BlockStoreFactory;
+import org.educoins.core.transaction.CoinbaseTransaction;
+import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.MockedClient;
 import org.educoins.core.utils.MockedStore;
@@ -39,7 +40,7 @@ public class ReferencePeerTest {
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		ReferencePeer peer = new ReferencePeer(blockchain);
 		Wallet mockedWallet = MockedWallet.getMockedWallet();
-		Client client = new Client(mockedWallet);
+		Client client = new Client();
 
 		int expected = 0;
 		Block block = new Block();
@@ -48,7 +49,7 @@ public class ReferencePeerTest {
 			block = BlockStoreFactory.getRandomBlock(block);
 			Output out = new Output(6, publicKey);
 			expected += 6;
-			Transaction tx = new Transaction();
+			Transaction tx = new CoinbaseTransaction(2, "ABC");
 			tx.addOutput(out);
 			block.addTransaction(tx);
 			client.distructOwnOutputs(block);

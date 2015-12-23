@@ -1,32 +1,42 @@
 package org.educoins.core;
 
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.utils.Sha256Hash;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.educoins.core.store.BlockNotFoundException;
+import org.educoins.core.transaction.CoinbaseTransaction;
+import org.educoins.core.transaction.Input;
+import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.utils.Sha256Hash;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest( { Wallet.class })
 public class VerificationTest {
 	
 	private Verification verification;
 	private BlockChain blockChain;
-	private Wallet wallet;
 
 	@Rule
     public ExpectedException thrown = ExpectedException.none();
 
 	@Before
 	public void setUp(){
-		this.wallet = mock(Wallet.class);
 		this.blockChain = mock(BlockChain.class);
-		this.verification = new Verification(wallet, blockChain);
+		this.verification = new Verification(blockChain);
+		PowerMockito.mockStatic(Wallet.class);
 	}
 
 	@Test
@@ -47,7 +57,7 @@ public class VerificationTest {
 		Block block = new Block();
 		Output output = new Output(2, "abc");
 
-		CoinbaseTransaction transaction = new CoinbaseTransaction();
+		CoinbaseTransaction transaction = new CoinbaseTransaction(2, "ABC");
 		transaction.addOutput(output);
 		block.addTransaction(transaction);
 
@@ -60,7 +70,7 @@ public class VerificationTest {
 		block.setHashPrevBlock(Sha256Hash.MAX_HASH);
 		Output output = new Output(2, "abc");
 
-		CoinbaseTransaction transaction = new CoinbaseTransaction();
+		CoinbaseTransaction transaction = new CoinbaseTransaction(2, "ABC");
 		transaction.addOutput(output);
 		block.addTransaction(transaction);
 
@@ -73,12 +83,12 @@ public class VerificationTest {
 		input1.setSignature("affe");
 		Output output1 = new Output(2, "abc");
 
-		Transaction transaction1 = new Transaction();
+		Transaction transaction1 = new CoinbaseTransaction(2, "ABC");
 		transaction1.addOutput(output1);
 		transaction1.addInput(input1);
 		block1.addTransaction(transaction1);
 		when(blockChain.getPreviousBlock(block1)).thenReturn(block);
-		when(wallet.checkSignature(any(String.class), any(String.class))).thenReturn(true);
+		when(Wallet.checkSignature(any(String.class), any(String.class))).thenReturn(true);
 		assertTrue(this.verification.verifyBlock(block1));
 	}
 
@@ -87,7 +97,7 @@ public class VerificationTest {
 		Block block = new Block();
 		Output output = new Output(2, "abc");
 
-		CoinbaseTransaction transaction = new CoinbaseTransaction();
+		CoinbaseTransaction transaction = new CoinbaseTransaction(2, "ABC");
 		transaction.addOutput(output);
 		block.addTransaction(transaction);
 
@@ -99,7 +109,7 @@ public class VerificationTest {
 		input1.setSignature("adadadad");
 		Output output1 = new Output(2, "abc");
 
-		Transaction transaction1 = new Transaction();
+		Transaction transaction1 = new CoinbaseTransaction(2, "ABC");
 		transaction1.addOutput(output1);
 		transaction1.addInput(input1);
 		block1.addTransaction(transaction1);

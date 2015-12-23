@@ -1,6 +1,12 @@
 package org.educoins.core;
 
 import org.educoins.core.store.BlockNotFoundException;
+import org.educoins.core.transaction.Approval;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Input;
+import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.BinaryTree;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
@@ -18,16 +24,14 @@ public class Verification {
 	private static final int HAS_NO_ENTRIES = 0;
 	private static final String GENESIS_BLOCK = "0000000000000000000000000000000000000000000000000000000000000000";
 
-	private Wallet wallet;
 	private BlockChain blockChain;
 	private Logger logger = LoggerFactory.getLogger(BlockChain.class);
 
 	private HashMap<String, Boolean> usedOutputs;
 
-	public Verification(Wallet wallet, BlockChain blockChain) {
+	public Verification(BlockChain blockChain) {
 		this.usedOutputs = new HashMap<>();
 		this.blockChain = blockChain;
-		this.wallet = wallet;
 	}
 
 	public boolean verifyBlockChain(BlockChain newChain) {
@@ -335,7 +339,7 @@ public class Verification {
 
 			signature = input.getSignature();
 
-			if (this.wallet.checkSignature(hashedTransaction, signature)) {
+			if (Wallet.checkSignature(hashedTransaction, signature)) {
 				logger.info("INFO: verifyRegularTransaction: Signature is correct.");
 				break;
 			}

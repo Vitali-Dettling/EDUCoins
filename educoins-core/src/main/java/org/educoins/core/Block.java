@@ -2,6 +2,9 @@ package org.educoins.core;
 
 import com.google.common.primitives.UnsignedBytes;
 import org.educoins.core.cryptography.SHA256Hasher;
+import org.educoins.core.transaction.Approval;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.*;
 import org.jetbrains.annotations.NotNull;
 

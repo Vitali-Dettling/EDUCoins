@@ -1,4 +1,4 @@
-package org.educoins.core;
+package org.educoins.core.transaction;
 
 import org.educoins.core.utils.ByteArray;
 

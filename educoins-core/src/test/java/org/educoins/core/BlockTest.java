@@ -1,5 +1,6 @@
 package org.educoins.core;
 
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.Sha256Hash;

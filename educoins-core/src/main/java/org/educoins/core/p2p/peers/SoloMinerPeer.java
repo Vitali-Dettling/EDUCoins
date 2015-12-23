@@ -9,8 +9,8 @@ import org.educoins.core.IPoWListener;
 import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionReceiver;
 import org.educoins.core.Miner;
-import org.educoins.core.Transaction;
 import org.educoins.core.Wallet;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Threading;
 
 /**
@@ -35,7 +35,7 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 		miner.addPoWListener(this);
 		miner.addPoWListener(Peer.remoteProxies);
 
-		SoloMinerPeer.singlePublicKey = Peer.wallet.getPublicKey();
+		SoloMinerPeer.singlePublicKey = Wallet.getPublicKey();
 		// Kick off Miner.
 		foundPoW(new Block());
 		// After miner has started.

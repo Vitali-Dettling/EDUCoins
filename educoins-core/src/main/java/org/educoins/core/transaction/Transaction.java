@@ -1,10 +1,12 @@
-package org.educoins.core;
+package org.educoins.core.transaction;
 
+import org.educoins.core.Wallet;
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.CannotRevokeRevokeTransactionException;
 import org.educoins.core.utils.Hashable;
 import org.educoins.core.utils.Sha256Hash;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +24,7 @@ public class Transaction implements Hashable {
 
 	protected int approvalsCount;
 	protected List<Approval> approvals;
+
 	private Sha256Hash approvedTransaction;
 
 	public Transaction() {
@@ -48,8 +51,6 @@ public class Transaction implements Hashable {
 	}
 
 	public List<Input> getInputs() {
-		// [joeren]: return just a copy of the inputs list, because of
-		// potential effects with inputsCount
 		if (this.inputs != null) {
 			return new ArrayList<Input>(this.inputs);
 		}
@@ -62,6 +63,23 @@ public class Transaction implements Hashable {
 			this.inputsCount = 0;
 		} else {
 			this.inputsCount = this.inputs.size();
+		}
+	}
+
+	public void createInputs(@NotNull List<Output> copyPreviousOutputs) {
+
+		List<Input> inputs = new ArrayList<>();
+		for (Output out : copyPreviousOutputs) {
+			Input in = new Input(out.getAmount(), out.hash().toString(), out.getLockingScript());
+			inputs.add(in);
+		}
+		setInputs(inputs);
+	}
+
+	public void signInputs() {
+		for (Input in : inputs) {
+			String signature = Wallet.getSignature(in.getUnlockingScript(), this.hash().toString());
+			in.setSignature(signature);
 		}
 	}
 
@@ -166,11 +184,11 @@ public class Transaction implements Hashable {
 
 	public ETransaction whichTransaction() {
 		// Coinbase:
-		// inputs = 0; outputs > 0; 	approvals = 0;
+		// inputs = 0; outputs > 0; approvals = 0;
 		// Regular:
-		// inputs > 0; outputs > 0; 	approvals = 0;
+		// inputs > 0; outputs > 0; approvals = 0;
 		// Approval:
-		// inputs > 0; outputs >= 0; 	approvals > 0
+		// inputs > 0; outputs >= 0; approvals > 0
 
 		// Check for transaction type.
 		if (this.approvedTransaction == null) {
@@ -185,8 +203,9 @@ public class Transaction implements Hashable {
 				return ETransaction.REGULAR;
 			}
 			if ((this.getInputs() != null && this.getInputs().size() > 0)
-					&& ((this.getOutputs() == null || this.getOutputs().size() == 0) || (this.getOutputs() != null && this
-					.getOutputs().size() > 0)) && (this.getApprovals() != null && this.getApprovals().size() > 0)) {
+					&& ((this.getOutputs() == null || this.getOutputs().size() == 0)
+							|| (this.getOutputs() != null && this.getOutputs().size() > 0))
+					&& (this.getApprovals() != null && this.getApprovals().size() > 0)) {
 				return ETransaction.APPROVED;
 			}
 		} else {
@@ -202,7 +221,7 @@ public class Transaction implements Hashable {
 		return Transaction.hash(this);
 	}
 
-	public static Sha256Hash hash(Transaction transaction) {
+	private static Sha256Hash hash(Transaction transaction) {
 
 		byte[] input;
 		byte[] output;
@@ -210,32 +229,29 @@ public class Transaction implements Hashable {
 		byte[] toBeHashed = null;
 		// Check for transaction type.
 		switch (transaction.whichTransaction()) {
-			case APPROVED:
-				input = getByteArrayInput(transaction);
-				approved = getByteArrayApproved(transaction);
-				toBeHashed = ByteArray.concatByteArrays(input, approved);
-				break;
-			case COINBASE:
-				toBeHashed = getByteArrayOutput(transaction);
-				break;
-			case REGULAR:
-				input = getByteArrayInput(transaction);
-				output = getByteArrayOutput(transaction);
-				toBeHashed = ByteArray.concatByteArrays(input, output);
-				break;
-			case REVOKE:
-				toBeHashed = transaction.approvedTransaction.getBytes();
-				break;
+		case APPROVED:
+			input = getByteArrayInput(transaction);
+			approved = getByteArrayApproved(transaction);
+			toBeHashed = ByteArray.concatByteArrays(input, approved);
+			break;
+		case COINBASE:
+			toBeHashed = getByteArrayOutput(transaction);
+			break;
+		case REGULAR:
+			input = getByteArrayInput(transaction);
+			output = getByteArrayOutput(transaction);
+			toBeHashed = ByteArray.concatByteArrays(input, output);
+			break;
+		case REVOKE:
+			toBeHashed = transaction.approvedTransaction.getBytes();
+			break;
 		}
 		// hash concatenated header fields and return
 		return Sha256Hash.wrap(SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed)));
 
 	}
 
-
-	// TODO Much better implementation, with generic class and
-	// so!!!!!!!!!!!!!!!!!!!
-	protected static byte[] getByteArrayInput(Transaction transaction) {
+	private static byte[] getByteArrayInput(Transaction transaction) {
 		int length = 0;
 		for (Input input : transaction.getInputs()) {
 			length += input.getConcatedInput().length;
@@ -250,9 +266,7 @@ public class Transaction implements Hashable {
 		return byteArray;
 	}
 
-	// TODO Much better implementation, with generic class and
-	// so!!!!!!!!!!!!!!!!!!!
-	protected static byte[] getByteArrayOutput(Transaction transaction) {
+	private static byte[] getByteArrayOutput(Transaction transaction) {
 		int length = 0;
 		for (Output output : transaction.getOutputs()) {
 			length += output.getConcatedOutput().length;
@@ -267,9 +281,7 @@ public class Transaction implements Hashable {
 		return byteArray;
 	}
 
-	// TODO Much better implementation, with generic class and
-	// so!!!!!!!!!!!!!!!!!!!
-	protected static byte[] getByteArrayApproved(Transaction transaction) {
+	private static byte[] getByteArrayApproved(Transaction transaction) {
 		int length = 0;
 		for (Approval approval : transaction.getApprovals()) {
 			length += approval.getConcatedApproval().length;
@@ -278,16 +290,15 @@ public class Transaction implements Hashable {
 		int index = 0;
 		for (Approval approval : transaction.getApprovals()) {
 
-			System.arraycopy(approval.getConcatedApproval(), 0, byteArray, index, approval.getConcatedApproval().length);
+			System.arraycopy(approval.getConcatedApproval(), 0, byteArray, index,
+					approval.getConcatedApproval().length);
 			index += approval.getConcatedApproval().length;
 		}
 		return byteArray;
 	}
 
 	public enum ETransaction {
-
 		APPROVED, COINBASE, REGULAR, REVOKE,
-
 	}
 
 	@Override
@@ -297,5 +308,11 @@ public class Transaction implements Hashable {
 				+ ", approvals=" + approvals + ", approvedTransaction=" + approvedTransaction + "]";
 	}
 
-
+	/**
+	 * Needs to be overwritten. Cannot be abstract, otherwise the database will
+	 * not get block from the BC which has transaction in it.
+	 */
+	public Transaction create() {
+		return null;
+	}
 }

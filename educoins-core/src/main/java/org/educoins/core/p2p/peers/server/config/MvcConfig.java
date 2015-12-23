@@ -21,7 +21,6 @@ public class MvcConfig {
 	private IBlockStore blockStore;
 	private BlockChain blockChain;
 	private IProxyPeerGroup peerGroup;
-	private Wallet wallet;
 
 	@Bean
 	public IBlockStore blockStore() throws BlockStoreException {
@@ -44,20 +43,12 @@ public class MvcConfig {
 	public BlockChain blockChain() throws BlockStoreException {
 		if (blockChain == null) {
 			IProxyPeerGroup remoteProxy = proxyPeerGroup();
-			Wallet wallet = wallet();
 			IBlockStore store = blockStore();
-			this.blockChain = new BlockChain(remoteProxy, wallet, store);
+			this.blockChain = new BlockChain(remoteProxy, store);
 		}
 		return blockChain;
 	}
-	
-	@Bean
-	public Wallet wallet() {
-		if (this.wallet == null) {
-			this.wallet = new Wallet();
-		}
-		return this.wallet;
-	}
+
 
 	@Bean
 	public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {

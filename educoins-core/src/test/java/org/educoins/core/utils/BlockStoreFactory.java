@@ -1,13 +1,18 @@
 package org.educoins.core.utils;
 
+import java.util.List;
+
 import org.educoins.core.Block;
-import org.educoins.core.Input;
-import org.educoins.core.Output;
-import org.educoins.core.Transaction;
 import org.educoins.core.Wallet;
 import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.transaction.CoinbaseTransaction;
+import org.educoins.core.transaction.Input;
+import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.RegularTransaction;
+import org.educoins.core.transaction.Transaction;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A factory for easier testing concerning the {@link IBlockStore}.
@@ -59,7 +64,8 @@ public class BlockStoreFactory {
 
     public static Transaction generateTransaction(int number) {
     	Wallet mockedWallet = MockedWallet.getMockedWallet();
-        Transaction t = new Transaction();
+    	List<Output> copyPreviousOutputs = TxFactory.getRandomPreviousOutputs();
+        Transaction t = new RegularTransaction(copyPreviousOutputs, 2, 3, Wallet.getPublicKey());
         for (int i = 0; i < 2 * number; i++) {
             Input input = new Input(5 * i * number, "",  mockedWallet.getPublicKey());
             t.addInput(input);
@@ -72,7 +78,7 @@ public class BlockStoreFactory {
     }
     
     public static Transaction generateTransactionWithSameUnlockingScript(int number) {
-        Transaction t = new Transaction();
+    	Transaction t = new CoinbaseTransaction(2, "abc");
         for (int i = 0; i < 2 * number; i++) {
             Input input = new Input(5 * i * number, "",  "ABC");
             t.addInput(input);

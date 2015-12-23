@@ -1,7 +1,9 @@
 package org.educoins.core.p2p.peers.server;
 
 import org.educoins.core.BlockChain;
-import org.educoins.core.Transaction;
+import org.educoins.core.transaction.CoinbaseTransaction;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.RestClient;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -37,10 +39,10 @@ public class TransactionControllerTest {
     public static void init() throws URISyntaxException {
     }
 
-    @Ignore
     @Test
+    @Ignore
     public void testSubmitEmptyTransaction() throws IOException {
-        Transaction tx = new Transaction();
+        Transaction tx = new CoinbaseTransaction(2, "ABC");
         restClient.post(TRANSACTION_URI, tx);
         //TODO: Test real error case
     }

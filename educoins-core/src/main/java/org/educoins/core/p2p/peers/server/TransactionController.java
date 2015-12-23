@@ -1,7 +1,7 @@
 package org.educoins.core.p2p.peers.server;
 
 import org.educoins.core.BlockChain;
-import org.educoins.core.Transaction;
+import org.educoins.core.transaction.Transaction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * The Controller representing the REST-API for the {@link org.educoins.core.Transaction} resource.
+ * The Controller representing the REST-API for the {@link org.educoins.core.transaction.Transaction} resource.
  * Created by dacki on 06.12.15.
  */
 @RestController
@@ -27,7 +27,7 @@ public class TransactionController {
 
 
     /**
-     * Adds a {@link org.educoins.core.Transaction} to the current {@link org.educoins.core.Block} of the
+     * Adds a {@link org.educoins.core.transaction.Transaction} to the current {@link org.educoins.core.Block} of the
      * {@link BlockChain} for this {@link org.educoins.core.p2p.peers.Peer}.
      *
      * @param transaction Transaction to be added

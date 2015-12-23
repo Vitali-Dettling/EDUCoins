@@ -13,46 +13,20 @@ import static org.junit.Assert.*;
 
 public class WalletTest {
 
-	private static final int HEX = 16;
 	private static final int KEYS = 10;
 	
-	private Generator randomNumber;
-	private Wallet wallet;
-	
-	@Before
-	public void setUp(){
-		this.randomNumber = new Generator();
-		this.wallet = new Wallet();
-	}
-	
-	@Test
-	public void testSignatureVerification() {
-
-		String randomNumber = this.randomNumber.getSecureRandomString256HEX();
-		
-		String pubKey = wallet.getPublicKey();
-		String signature = wallet.getSignature(pubKey, randomNumber);
-		
-		assertNotNull(pubKey);
-		assertNotNull(signature);
-		
-		boolean verified = wallet.checkSignature(randomNumber, signature);
-		assertTrue(verified);
-	}
-
 	@Test
 	public void testNumberOfPublicKeys() throws IOException{
 		
-		String key;
 		List<String> toVerifyKeys = new ArrayList<String>();
 		for(int i = 0 ; i < KEYS ; i++ ){
-			key = this.wallet.getPublicKey();
-			toVerifyKeys.add(key);
+			Wallet.getPublicKey();
 		}
+		toVerifyKeys.addAll(Wallet.getPublicKeys());
 		
-		List<String> storedKeys = this.wallet.getPublicKeys();
+		List<String> storedKeys = Wallet.getPublicKeys();
 		//Number of generated and stored keys should be equal.
-		assertEquals(storedKeys, toVerifyKeys);
+		assertEquals(storedKeys.size(), toVerifyKeys.size());
 		
 		//Checks of all checks correspond to each other. 
 		int countHits = 0;
@@ -65,22 +39,22 @@ public class WalletTest {
 			}
 		}
 		
-		assertEquals(countHits, KEYS);
+		assertEquals(countHits, storedKeys.size());
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	@Test
+	public void testSignatureVerification() {
+
+		String randomNumber = Generator.getSecureRandomString256HEX();
+		
+		String pubKey = Wallet.getPublicKey();
+		String signature = Wallet.getSignature(pubKey, randomNumber);
+		
+		assertNotNull(pubKey);
+		assertNotNull(signature);
+		
+		boolean verified = Wallet.checkSignature(randomNumber, signature);
+		assertTrue(verified);
+	}
 	
 }

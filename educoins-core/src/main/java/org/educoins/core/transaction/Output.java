@@ -1,8 +1,11 @@
-package org.educoins.core;
+package org.educoins.core.transaction;
 
+import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Hashable;
+import org.educoins.core.utils.Sha256Hash;
 
-public class Output {
+public class Output implements Hashable  {
 	
 	private int amount;
 	private String lockingScript;
@@ -40,6 +43,12 @@ public class Output {
 	@Override
 	public String toString() {
 		return "Output [amount=" + amount + ", lockingScript=" + lockingScript + "]";
+	}
+
+	@Override
+	public Sha256Hash hash() {
+		byte[] toBeHashed = getConcatedOutput();
+		return Sha256Hash.wrap(SHA256Hasher.hash(toBeHashed));
 	}
 	
 

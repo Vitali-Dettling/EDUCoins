@@ -2,18 +2,20 @@ package org.educoins.core;
 
 import java.util.List;
 
-import org.educoins.core.Transaction.ETransaction;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Transaction.ETransaction;
 import org.educoins.core.utils.MockedClient;
 import org.educoins.core.utils.MockedWallet;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class ClientTest {
 
-	@AfterClass
-	public static void deleteTmp() {
+	@After
+	public void deleteTmp() {
 		MockedClient.delete();
 	}
 
@@ -26,6 +28,7 @@ public class ClientTest {
 	}
 
 	@Test
+	@Ignore //TDOD approved transaction is not implemented yet.
 	public void testSendApprovedTransaction() {
 
 		String owner = MockedWallet.getPublicKey();
@@ -36,6 +39,7 @@ public class ClientTest {
 	}
 	
 	@Test
+	@Ignore //TDOD revoke transaction is not implemented yet.
 	public void testSendRevokeTransaction() {
 
 		String lockingScript = MockedWallet.getPublicKey();

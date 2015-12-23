@@ -1,18 +1,13 @@
 package org.educoins.core.p2p.peers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
-import org.educoins.core.*;
+import org.educoins.core.Block;
+import org.educoins.core.BlockChain;
+import org.educoins.core.ITransactionTransmitter;
+import org.educoins.core.Wallet;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.utils.Sha256Hash;
+import org.educoins.core.transaction.Transaction;
 
 /**
  * The Reference Client consisting of a Miner, a {@link BlockChain} and a
@@ -26,7 +21,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 
 	public ReferencePeer(BlockChain blockChain) {
 		super(blockChain);
-		singlePublicKey = Peer.wallet.getPublicKey();
+		singlePublicKey = Wallet.getPublicKey();
 		Peer.remoteProxies.addBlockListener(this);
 	}
 
@@ -82,7 +77,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				if (dstPublicKey == null)
 					continue;
 				trans = Peer.client.generateRegularTransaction(amount, dstPublicKey);
-				//ReferencePeer.blockChain.sendTransaction(trans);
+				// ReferencePeer.blockChain.sendTransaction(trans);
 				if (trans != null)
 					System.out.println(trans.hash());
 				break;
@@ -106,14 +101,16 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				break;
 			case "x":
 				// TODO
-//				 Sha256Hash hash = Sha256Hash.wrap(trans.hash().toString());
-//				 Peer.client.getHexInput(scanner, "Type in hash of transaction to revoke: ");
-//				 trans = Peer.client.findTransaction(hash);
-//				 Transaction revoke = Peer.client.sendRevokeTransaction(trans);
-//				 if (revoke != null) {
-//				 System.out.println("Revoked transaction: " + trans.hash());
-//				 System.out.println("With Revoke: " + revoke.hash());
-//				 }
+				// Sha256Hash hash = Sha256Hash.wrap(trans.hash().toString());
+				// Peer.client.getHexInput(scanner, "Type in hash of transaction
+				// to revoke: ");
+				// trans = Peer.client.findTransaction(hash);
+				// Transaction revoke =
+				// Peer.client.sendRevokeTransaction(trans);
+				// if (revoke != null) {
+				// System.out.println("Revoked transaction: " + trans.hash());
+				// System.out.println("With Revoke: " + revoke.hash());
+				// }
 				break;
 			case "e":
 				running = false;
@@ -129,13 +126,11 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 	}
 
 	// region listeners
-	
+
 	@Override
 	public void transmitTransaction(Transaction transaction) {
-		remoteProxies.transmitTransaction(transaction);
+		Peer.remoteProxies.transmitTransaction(transaction);
 	}
-
-
 
 	// endregion
 }

@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.educoins.core.transaction.ApprovedTransaction;
-import org.educoins.core.transaction.RegularTransaction;
-import org.educoins.core.transaction.RevokedTransaction;
+import org.educoins.core.transaction.ApproveTransaction;
+import org.educoins.core.transaction.ITransactionFactory;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.RevokeTransaction;
+import org.educoins.core.transaction.TransactionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,32 +19,28 @@ public class Client {
 
 	private final Logger logger = LoggerFactory.getLogger(Client.class);
 
-	protected static Wallet wallet;	
-	private static List<Output> previousOutputs;
-	private static List<Block> blockBuffer;
-	private static int availableAmount;
-	private static boolean locked;
+	private List<Output> previousOutputs;
+	private ITransactionFactory transactionFactory;
+	private List<Block> blockBuffer;
+	private int availableAmount;
+	private boolean locked;
 	
-	public Client(Wallet wallet){
-		Client.wallet = wallet;
-		Client.previousOutputs = new ArrayList<>();
-		Client.blockBuffer = new ArrayList<>();
-		Client.availableAmount = 0;
-		Client.locked = false;
+	public Client(){
+		this.previousOutputs = new ArrayList<>();
+		this.transactionFactory = new TransactionFactory();
+		this.blockBuffer = new ArrayList<>();
+		this.availableAmount = 0;
+		this.locked = false;
 	}
 	
 	public Transaction generateRevokeTransaction(int amount, String lockingScript) {
-		//TODO need real implementation.
-		RevokedTransaction approvedTransaction = new RevokedTransaction();
-		Transaction buildTx = approvedTransaction.generateRevokedTransaction(amount, lockingScript);
-		return buildTx;
+		//TODO 
+		return null;
 	}
 	
 	public Transaction generateApprovedTransaction(int amount, String owner, String holder, String lockingScript){
-		//TODO need real implementation.
-		ApprovedTransaction approvedTransaction = new ApprovedTransaction();
-		Transaction buildTx = approvedTransaction.generateApprovedTransaction(amount, owner, holder, lockingScript);
-		return buildTx;
+		//TODO
+		return null;
 	}
 
 	public Transaction generateRegularTransaction(int sendAmount, String publicKey) {
@@ -49,12 +49,11 @@ public class Client {
 			return null;
 		}
 		
-		Client.locked = true;
-		Client.availableAmount -= sendAmount;
-		RegularTransaction regTx = new RegularTransaction(Client.wallet, previousOutputs);	
-		Transaction buildTx = regTx.generateRegularTransaction(sendAmount, publicKey);
-		Client.locked = false;
-		
+		this.locked = true;
+		this.availableAmount -= sendAmount;
+		Transaction buildTx = this.transactionFactory.generateRegularTransaction(this.previousOutputs, sendAmount, publicKey);
+		this.locked = false;
+
 		return buildTx;
 	}
 	
@@ -78,8 +77,8 @@ public class Client {
 	}
 
 	public void distructOwnOutputs(Block block) {
-		if(Client.locked){
-			Client.blockBuffer.add(block);
+		if(this.locked){
+			this.blockBuffer.add(block);
 		}else{
 			checkBlock(block);
 		}
@@ -87,31 +86,31 @@ public class Client {
 
 	private void checkBlock(Block block) {
 		
-		List<String> publicKeys = Client.wallet.getPublicKeys();
+		List<String> publicKeys = Wallet.getPublicKeys();
 
-		for (org.educoins.core.Transaction tx : block.getTransactions()) {
+		for (Transaction tx : block.getTransactions()) {
 			for (Output out : tx.getOutputs()) {
 				for (String publicKey : publicKeys) {
 					if (out.getLockingScript().equals(publicKey)) {
-						Client.previousOutputs.add(out);
-						Client.availableAmount += out.getAmount();
+						this.previousOutputs.add(out);
+						this.availableAmount += out.getAmount();
 					}
 				}
 			}
 		}
 		
-		if(!Client.blockBuffer.isEmpty()){
-			for(Block bufferedBlock : Client.blockBuffer){
-				Client.locked = true;
+		if(!this.blockBuffer.isEmpty()){
+			for(Block bufferedBlock : this.blockBuffer){
+				this.locked = true;
 					checkBlock(bufferedBlock);
-					Client.blockBuffer.clear();
-				Client.locked = false;
+					this.blockBuffer.clear();
+				this.locked = false;
 			}
 		}
 	}
 	
 	public int getAmount(){
-		return Client.availableAmount;
+		return this.availableAmount;
 	}
 	
 

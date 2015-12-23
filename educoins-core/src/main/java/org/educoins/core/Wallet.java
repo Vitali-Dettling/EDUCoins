@@ -2,6 +2,8 @@ package org.educoins.core;
 
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.IO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,27 +23,28 @@ public class Wallet {
 	private static final int HEX = 16;
 	private static final String SEPERATOR = ";";
 	private static final String KeyStorageFile = "/wallet.keys";
+
+	private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
 	
-	private Path directoryKeyStorage;
+	private static Path directoryKeyStorage;
 	
-	public Wallet(){
+	static{
 		
 		try {
 			
-			this.directoryKeyStorage = Paths.get(System.getProperty("user.home") + File.separator + "documents" + File.separator
+			directoryKeyStorage = Paths.get(System.getProperty("user.home") + File.separator + "documents" + File.separator
 					+ "educoins" + File.separator + "demo" + File.separator + "wallet");
 		
 			IO.deleteDirectory(directoryKeyStorage);
 			IO.createDirectory(directoryKeyStorage);
-			IO.createFile(this.directoryKeyStorage  + KeyStorageFile);
+			IO.createFile(directoryKeyStorage  + KeyStorageFile);
 		
 		} catch (IOException e) {
 			System.err.println("ERROR: Class Wallet Constructor!!!!");
-			e.printStackTrace();
 		}
 	}
 	
-	public boolean compare(String message, String signature, String publicKey) {
+	public static boolean compare(String message, String signature, String publicKey) {
 
 		ECDSA keyPair = new ECDSA();
 		try {
@@ -51,20 +54,19 @@ public class Wallet {
 				return true;
 			}
 		} catch (Exception e) {
-			System.err.println("ERROR: Class Wallet. Verification of the Signature." + e.getMessage());
-			e.printStackTrace();
+			logger.error("Verification of the Signature.");
 		}
 
 		return false;
 	}
 	
 	//TODO Bad performance because the whole file will be checked over and over again. Will be better with the DB.
-	public boolean checkSignature(String hashedTranscation, String signature){
+	public static boolean checkSignature(String hashedTranscation, String signature){
 		
 		try {
 			ECDSA keyPair = new ECDSA();
 			
-			List<String> publicKeys = this.getPublicKeys();
+			List<String> publicKeys = getPublicKeys();
 			byte[] sign = ByteArray.convertFromString(signature, HEX);
 			for (String publicKey : publicKeys) {	
 				boolean rightKey = keyPair.verifySignature(hashedTranscation, sign, publicKey);
@@ -74,15 +76,14 @@ public class Wallet {
 			}
 
 		} catch (Exception e) {
-			System.err.println("ERROR: Class Wallet. Verification of the Signature." + e.getMessage());
-			e.printStackTrace();
+			logger.error("Verification of the Signature." + e.getMessage());
 		}
 		return false;
 	}
 	
 	
 	
-	public String getSignature(String publicKey, String hashedTranscation){
+	public static String getSignature(String publicKey, String hashedTranscation){
 		
 		try {
 			ECDSA keyPair = new ECDSA();
@@ -90,8 +91,7 @@ public class Wallet {
 			byte[] signature = keyPair.getSignature(publicKey, hashedTranscation);
 			return ByteArray.convertToString(signature, HEX);
 		} catch (Exception e) {
-			System.err.println("ERROR: Class Wallet. Creating of the Signature.");
-			e.printStackTrace();
+			logger.error("Creating of the Signature.");
 		}
 		return null;
 	}
@@ -102,8 +102,8 @@ public class Wallet {
 	 * 
 	 * @return Each call of the method will create a new set of private and public key set!
 	 * */
-	//TODO[Vitali] Right now the private public key is stored in a file but this can change, maybe???
-	public String getPublicKey() {
+	//TODO Right now the private public key is stored in a file but this can change, maybe???
+	public static String getPublicKey() {
 		
 		ECDSA keyPair = new ECDSA();
 		
@@ -111,22 +111,21 @@ public class Wallet {
 		String publicKey = keyPair.getPublicKey();
 		
 		try {
-			IO.appendToFile(this.directoryKeyStorage + KeyStorageFile, privateKey + SEPERATOR + publicKey + "\r\n");
+			IO.appendToFile(directoryKeyStorage + KeyStorageFile, privateKey + SEPERATOR + publicKey + "\r\n");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("A public key could not be created.");
 		}
 
 		return publicKey;
 		
 	}
 	
-	public List<String> getPublicKeys() {
+	public static List<String> getPublicKeys() {
 		
 		List<String> publicKeys = new ArrayList<>();
 		try {
 			String keyFile;
-			keyFile = IO.readFromFile(this.directoryKeyStorage + KeyStorageFile);
+			keyFile = IO.readFromFile(directoryKeyStorage + KeyStorageFile);
 
 			BufferedReader reader = new BufferedReader(new StringReader(keyFile));
 			String line;
@@ -135,8 +134,7 @@ public class Wallet {
 				publicKeys.add(publicKey);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Public keys could not be retrieved.");
 		}
 		return publicKeys;
 	}
@@ -155,7 +153,7 @@ public class Wallet {
 	 *              can use in a wallet. The public key can then be generated from
 	 *              the private key.
 	 * */
-	private class ECDSA {
+	private static class ECDSA {
 
 		private static final String ECDSA = "EC";
 		private static final String SHA256_WITH_ECDSA = "SHA256withECDSA";
@@ -187,7 +185,6 @@ public class Wallet {
 			
 			} catch (NoSuchAlgorithmException e) {
 				System.out.println("Class ECDSA: Constructor: " + e.getMessage());
-				e.printStackTrace();
 			}
 		}
 		
@@ -268,10 +265,7 @@ public class Wallet {
 			
 			return this.signature.sign();
 		}
-		
-	
-		
-		
+
 		public String getPrivateKey(String publicKey) throws IOException {
 			
 			String keyFile = IO.readFromFile(directoryKeyStorage + KeyStorageFile);
@@ -290,70 +284,5 @@ public class Wallet {
 	
 			return privateKey;
 		}
-		
-		//TODO[Vitali] Adub this to the ECDSA class is preaty goot... -> When Time
-//		public static PrivateKey loadPrivateKey(String key64) throws GeneralSecurityException {
-//		    byte[] clear = ByteArray.convertFromString(key64, 16);
-//		    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
-//		    KeyFactory fact = KeyFactory.getInstance("DSA");
-//		    PrivateKey priv = fact.generatePrivate(keySpec);
-//		    Arrays.fill(clear, (byte) 0);
-//		    return priv;
-//		}
-//
-//
-//		public static PublicKey loadPublicKey(String stored) throws GeneralSecurityException {
-//		    byte[] data = ByteArray.convertFromString(stored, 16);
-//		    X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
-//		    KeyFactory fact = KeyFactory.getInstance("DSA");
-//		    return fact.generatePublic(spec);
-//		}
-//
-//		public static String savePrivateKey(PrivateKey priv) throws GeneralSecurityException {
-//		    KeyFactory fact = KeyFactory.getInstance("DSA");
-//		    PKCS8EncodedKeySpec spec = fact.getKeySpec(priv,
-//		            PKCS8EncodedKeySpec.class);
-//		    byte[] packed = spec.getEncoded();
-//		    String key64 = ByteArray.convertToString(packed, 16);
-//
-//		    Arrays.fill(packed, (byte) 0);
-//		    return key64;
-//		}
-//
-//
-//		public static String savePublicKey(PublicKey publ) throws GeneralSecurityException {
-//		    KeyFactory fact = KeyFactory.getInstance("DSA");
-//		    X509EncodedKeySpec spec = fact.getKeySpec(publ,
-//		            X509EncodedKeySpec.class);
-//		    return ByteArray.convertToString(spec.getEncoded(), 16);
-//		}
-//		
-//		
-//		public static void main(String[] args) throws Exception{
-//
-//			
-//		
-//			 KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
-//		    KeyPair pair = gen.generateKeyPair();
-//
-//		    String pubKey = savePublicKey(pair.getPublic());
-//		    PublicKey pubSaved = loadPublicKey(pubKey);
-//		    System.out.println(pair.getPublic()+"\n"+pubSaved);
-//
-//		    String privKey = savePrivateKey(pair.getPrivate());
-//		    PrivateKey privSaved = loadPrivateKey(privKey);
-//		    System.out.println(pair.getPrivate()+"\n"+privSaved);
-//			
-//			
-//			    
-//			   System.out.println(); 
-//			
-//
-//		}
-		
-		
-		
-	
 	}
-	
 }

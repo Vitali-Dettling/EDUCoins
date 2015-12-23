@@ -15,6 +15,12 @@ import org.educoins.core.store.BlockStoreException;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.store.LevelDbBlockStore;
+import org.educoins.core.transaction.CoinbaseTransaction;
+import org.educoins.core.transaction.ITransactionFactory;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.TransactionFactory;
 import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
@@ -45,15 +51,18 @@ public class BlockChain {
 	private IBlockStore store;
 
 	private IProxyPeerGroup remoteProxies;
+	private ITransactionFactory transactionFactory;
 
-	public BlockChain(IProxyPeerGroup remoteProxies, Wallet wallet, IBlockStore store) {
+	public BlockChain(IProxyPeerGroup remoteProxies, IBlockStore store) {
 
+		this.store = store;
 		this.remoteProxies = remoteProxies;
+
+		this.transactionFactory = new TransactionFactory();
 		this.blockListeners = new CopyOnWriteArrayList<>();
 		this.transactionListeners = new ArrayList<>();
 		this.transactions = new ArrayList<>();
-		this.store = store;
-		this.verification = new Verification(wallet, this);
+		this.verification = new Verification(this);
 
 		this.blockCounter = RESET_BLOCKS_COUNT;
 	}
@@ -99,12 +108,12 @@ public class BlockChain {
 			blocks.add(iterator.next());
 		}
 		// Includes the genesis block.
-		if(!blocks.isEmpty()){
+		if (!blocks.isEmpty()) {
 			Block genesisBlock = this.store.getGenesisBlock();
 			blocks.add(genesisBlock);
 		}
 		Collections.reverse(blocks);
-		
+
 		return blocks;
 	}
 
@@ -123,7 +132,7 @@ public class BlockChain {
 		}
 
 		// Includes the genesis block.
-		if(!blocks.isEmpty()){
+		if (!blocks.isEmpty()) {
 			Block genesisBlock = this.store.getGenesisBlock();
 			blocks.add(genesisBlock);
 		}
@@ -252,10 +261,8 @@ public class BlockChain {
 	private Transaction coinbaseTransaction(Block currentBlock, String publicKey) {
 
 		// Input is empty because it is a coinbase transaction.
-		Output output = new Output(currentBlock.rewardCalculator(), publicKey);
-
-		CoinbaseTransaction transaction = new CoinbaseTransaction();
-		transaction.addOutput(output);
+		int calculatedAmount = currentBlock.rewardCalculator();
+		Transaction transaction = this.transactionFactory.generateCoinbasedTransaction(calculatedAmount, publicKey);
 		return transaction;
 	}
 

@@ -1,122 +1,126 @@
 package org.educoins.core.store;
 
-import org.educoins.core.utils.BlockStoreFactory;
-import org.educoins.core.Block;
-import org.educoins.core.Transaction;
-import org.educoins.core.utils.IO;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import org.educoins.core.Block;
+import org.educoins.core.Wallet;
+import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.RegularTransaction;
+import org.educoins.core.transaction.Transaction;
+import org.educoins.core.utils.BlockStoreFactory;
+import org.educoins.core.utils.IO;
+import org.educoins.core.utils.TxFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
- * Default test for {@link org.educoins.core.store.LevelDbBlockStore}
- * Created by typus on 10/19/15.
+ * Default test for {@link org.educoins.core.store.LevelDbBlockStore} Created by
+ * typus on 10/19/15.
  */
 public class LevelDbBlockStoreTest {
-	
-    private IBlockStore store;
 
-    @Before
-    public void setup() {
-        try {
-            this.store = BlockStoreFactory.getBlockStore();
-        } catch (BlockStoreException e) {
-            fail();
-        }
-    }
+	private IBlockStore store;
 
-    @After
-    public void tearDown() {
-        try {
-            this.store.destroy();
-        } catch (BlockStoreException e) {
-            throw new IllegalStateException("Db could not be deleted!");
-        }
-        if (!IO.deleteDefaultBlockStoreFile())
-            throw new IllegalStateException("Db could not be deleted!");
-    }
+	@Before
+	public void setup() {
+		try {
+			this.store = BlockStoreFactory.getBlockStore();
+		} catch (BlockStoreException e) {
+			fail();
+		}
+	}
 
-    @Test
-    public void testPut() throws Exception {
-        Block b1 = BlockStoreFactory.getRandomBlock();
-        this.store.put(b1);
-        
-        int filled = 23;
-        BlockStoreFactory.fillRandom(this.store, filled);
+	@After
+	public void tearDown() {
+		try {
+			this.store.destroy();
+		} catch (BlockStoreException e) {
+			throw new IllegalStateException("Db could not be deleted!");
+		}
+		if (!IO.deleteDefaultBlockStoreFile())
+			throw new IllegalStateException("Db could not be deleted!");
+	}
 
-        Block actual = this.store.get(b1.hash());
-        byte[] expected = Block.hash(b1).getBytes();
-        byte[] actualBytes = Block.hash(actual).getBytes();
+	@Test
+	public void testPut() throws Exception {
+		Block b1 = BlockStoreFactory.getRandomBlock();
+		this.store.put(b1);
 
-        assertEquals(expected.length, actualBytes.length);
+		int filled = 23;
+		BlockStoreFactory.fillRandom(this.store, filled);
 
-        for (int i = 0; i < expected.length; i++) {
-            assertEquals(expected[i], actualBytes[i]);
-        }
-    }
+		Block actual = this.store.get(b1.hash());
+		byte[] expected = Block.hash(b1).getBytes();
+		byte[] actualBytes = Block.hash(actual).getBytes();
 
-    @Test
-    public void testIterator() throws BlockNotFoundException {
-    	
-    	int filled = 23;
-        BlockStoreFactory.fillRandomTree(this.store, filled);
+		assertEquals(expected.length, actualBytes.length);
 
-        int itemCount = 1;
-        IBlockIterator iterator = this.store.iterator();
-        while (iterator.hasNext()) {
-            iterator.next();
-            itemCount++;
-        }
+		for (int i = 0; i < expected.length; i++) {
+			assertEquals(expected[i], actualBytes[i]);
+		}
+	}
 
-        assertEquals(itemCount, filled + 1);
-    }
+	@Test
+	public void testIterator() throws BlockNotFoundException {
 
-    @Test
-    public void testPutWithTransaction() throws Exception {
-        Transaction transaction = BlockStoreFactory.generateTransaction(1);
-        transaction.setVersion(100);
+		int filled = 23;
+		BlockStoreFactory.fillRandomTree(this.store, filled);
 
-        List<Transaction> transactions = new ArrayList<>();
-        transactions.add(transaction);
+		int itemCount = 1;
+		IBlockIterator iterator = this.store.iterator();
+		while (iterator.hasNext()) {
+			iterator.next();
+			itemCount++;
+		}
 
-        Block b1 = BlockStoreFactory.getRandomBlock();
-        b1.addTransactions(transactions);
+		assertEquals(itemCount, filled + 1);
+	}
 
-        this.store.put(b1);
+	@Test
+	public void testPutWithTransaction() throws Exception {
+		List<Output> copyPreviousOutputs = TxFactory.getRandomPreviousOutputs();
+		Transaction transaction = new RegularTransaction(copyPreviousOutputs, 2, 3, Wallet.getPublicKey());
+		transaction.create();
 
-        Block b2 = this.store.get(b1.hash());
-        assert b2 != null;
-        assertEquals(1, b2.getTransactionsCount());
+		List<Transaction> transactions = new ArrayList<>();
+		transactions.add(transaction);
 
-        Transaction persisted = b2.getTransactions().get(0);
+		Block b1 = BlockStoreFactory.getRandomBlock();
+		b1.addTransactions(transactions);
 
-        assertEquals(transaction.getVersion(), persisted.getVersion());
-    }
+		this.store.put(b1);
 
-    @Test
-    public void testGetLatest() {
-        Block latest = this.store.getLatest();
+		Block b2 = this.store.get(b1.hash());
+		assert b2 != null;
+		assertEquals(1, b2.getTransactionsCount());
 
-        int filled = 23;
-        BlockStoreFactory.fillRandom(this.store, filled);
+		Transaction persisted = b2.getTransactions().get(0);
 
-        Block b1 = BlockStoreFactory.getRandomBlock();
-        this.store.put(b1);
+		assertEquals(transaction.getVersion(), persisted.getVersion());
+	}
 
-        Block actual = this.store.getLatest();
+	@Test
+	public void testGetLatest() {
+		int filled = 23;
+		BlockStoreFactory.fillRandom(this.store, filled);
 
-        byte[] expected = Block.hash(b1).getBytes();
-        byte[] actualBytes = Block.hash(actual).getBytes();
+		Block b1 = BlockStoreFactory.getRandomBlock();
+		this.store.put(b1);
 
-        assertEquals(expected.length, actualBytes.length);
+		Block actual = this.store.getLatest();
 
-        for (int i = 0; i < expected.length; i++) {
-            assertEquals(expected[i], actualBytes[i]);
-        }
-    }
+		byte[] expected = Block.hash(b1).getBytes();
+		byte[] actualBytes = Block.hash(actual).getBytes();
+
+		assertEquals(expected.length, actualBytes.length);
+
+		for (int i = 0; i < expected.length; i++) {
+			assertEquals(expected[i], actualBytes[i]);
+		}
+	}
 }

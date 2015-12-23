@@ -26,7 +26,6 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 	protected static IProxyPeerGroup remoteProxies;
 	protected static BlockChain blockChain;
 	protected static Client client;
-	protected static Wallet wallet;
 	private static Sha256Hash proxyPublicKey;
 	private static BlockController blockController;
 
@@ -34,8 +33,7 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 		Peer.blockChain = blockChain;
 		Peer.remoteProxies = new HttpProxyPeerGroup();		
 		Peer.proxyPublicKey = AppConfig.getOwnPublicKey();
-		Peer.wallet = new Wallet();
-		Peer.client = new Client(wallet);
+		Peer.client = new Client();
 		Peer.blockController = new BlockController(blockChain);
 		
 		Peer.blockChain.addBlockListener(this);

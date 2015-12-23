@@ -4,6 +4,7 @@ import org.educoins.core.*;
 import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.*;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,7 +156,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 			try {
 				proxy.getBlocks().parallelStream()
 						.forEach(block -> block.getTransactions().forEach(transaction -> transactionListeners.forEach(
-								iTransactionListener -> iTransactionListener.transactionReceived(transaction))));
+								TransactionListener -> TransactionListener.transactionReceived(transaction))));
 
 				proxy.rateHigher();
 			} catch (IOException e) {

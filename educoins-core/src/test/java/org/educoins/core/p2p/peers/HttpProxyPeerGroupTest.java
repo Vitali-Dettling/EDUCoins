@@ -6,6 +6,7 @@ import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.server.PeerServer;
 import org.educoins.core.store.*;
 import org.educoins.core.testutils.BlockStoreFactory;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 import org.junit.*;
 import org.junit.runner.RunWith;
