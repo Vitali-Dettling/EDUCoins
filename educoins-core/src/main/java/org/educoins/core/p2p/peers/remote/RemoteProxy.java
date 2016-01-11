@@ -1,7 +1,9 @@
 package org.educoins.core.p2p.peers.remote;
 
 import org.educoins.core.Block;
+import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.peers.Peer;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,12 +27,18 @@ public abstract class RemoteProxy {
     /**
      * Describes the level integrity of this Proxy.
      */
-    protected int rating = 5;
+    protected double rating = 5;
+    private double ratingIncreaseValue;
+    private double ratingDecreaseValue;
 
     public RemoteProxy() {
+        ratingIncreaseValue = AppConfig.getRatingIncreaseValue();
+        ratingDecreaseValue = AppConfig.getRatingDecreaseValue();
+        rating = AppConfig.getDefaultRanking();
     }
 
     public RemoteProxy(@NotNull URI iNetAddress, @NotNull String pubkey) {
+        this();
         this.iNetAddress = iNetAddress;
         this.pubkey = pubkey;
     }
@@ -84,6 +92,15 @@ public abstract class RemoteProxy {
     public abstract void transmitBlock(Block block) throws IOException;
 
     /**
+     * Transmits a specific {@link Transaction} to the remote node.
+     *
+     * @param transaction the {@link Transaction} to transmit.
+     * @throws IOException if the communication went wrong.
+     */
+    public abstract void transmitTransaction(Transaction transaction) throws IOException;
+
+
+    /**
      * Introduces itself to at least one other {@link Peer}.
      */
     public abstract Collection<RemoteProxy> hello() throws IOException;
@@ -92,21 +109,21 @@ public abstract class RemoteProxy {
      * Increases {@link RemoteProxy#rating}.
      */
     public void rateHigher() {
-        ++rating;
+        rating += ratingIncreaseValue;
     }
 
     /**
      * Decreases {@link RemoteProxy#rating}.
      */
     public void rateLower() {
-        --rating;
+        rating -= ratingDecreaseValue;
     }
 
     /**
      * Ratings for RemoteProxies. On successful communication, the rate increases and decreases on failure. If the
      * rating is lower then zero, the Proxy will be removed from {@link org.educoins.core.p2p.peers.HttpProxyPeerGroup}.
      */
-    public int getRating() {
+    public double getRating() {
         return rating;
     }
 
@@ -128,9 +145,9 @@ public abstract class RemoteProxy {
 
     @Override
     public int hashCode() {
-        int result = pubkey != null ? pubkey.hashCode() : 0;
+        double result = pubkey != null ? pubkey.hashCode() : 0;
         result = 31 * result + rating;
-        return result;
+        return (int) result;
     }
 
     @Override

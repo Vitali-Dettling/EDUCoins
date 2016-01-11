@@ -2,7 +2,7 @@ package org.educoins.demo;
 
 import org.educoins.core.ITransactionListener;
 import org.educoins.core.ITransactionTransmitter;
-import org.educoins.core.Transaction;
+import org.educoins.core.transaction.Transaction;
 
 public class DemoTransactionTransmitter implements ITransactionTransmitter {
 	

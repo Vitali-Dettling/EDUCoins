@@ -1,6 +1,7 @@
 package org.educoins.core.transaction;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.educoins.core.Wallet;
@@ -8,13 +9,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class RegularTransaction extends Transaction {
 
-	private  List<Output> copyPreviousOutputs;
+	private  List<Output> previousOutputs;
 	private int sendAmount;
 	private int inputAmount;
 	private String sendPublicKey;
 	
-	public RegularTransaction(@NotNull List<Output> copyPreviousOutputs, int sendAmount, int inputAmount, String sendPublicKey) {
-		this.copyPreviousOutputs = copyPreviousOutputs;
+	public RegularTransaction(@NotNull List<Output> previousOutputs, int sendAmount, int inputAmount, String sendPublicKey) {
+		this.previousOutputs = previousOutputs;
 		this.sendAmount = sendAmount;
 		this.inputAmount = inputAmount;
 		this.sendPublicKey = sendPublicKey;
@@ -25,9 +26,28 @@ public class RegularTransaction extends Transaction {
 		
 		List<Output> outputs = createOutputs(sendAmount, inputAmount, sendPublicKey);
 		super.setOutputs(outputs);
-		super.createInputs(copyPreviousOutputs);
+		List<Input> inputs = createInputs();
+		super.setInputs(inputs);
 		super.signInputs();
 		return this;
+	}
+	
+	public List<Input> createInputs() {
+
+		int enoughApproved = 0;
+		List<Input> inputs = new ArrayList<>();
+		Iterator<Output> iterator = previousOutputs.iterator();
+		while(iterator.hasNext()){
+			Output out = iterator.next();
+			enoughApproved += out.getAmount();
+			Input in = new Input(out.getAmount(), out.hash().toString(), out.getLockingScript());
+			inputs.add(in);
+			
+			if(enoughApproved == sendAmount){
+				break;
+			}
+		}
+		return inputs;
 	}
 	
 	public List<Output> createOutputs(int sendAmount, int inputAmount, String sendPublicKey) {

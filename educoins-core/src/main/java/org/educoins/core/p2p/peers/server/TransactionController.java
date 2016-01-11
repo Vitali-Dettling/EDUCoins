@@ -9,21 +9,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * The Controller representing the REST-API for the {@link org.educoins.core.transaction.Transaction} resource.
  * Created by dacki on 06.12.15.
  */
 @RestController
-@RequestMapping("/transaction")
+@RequestMapping("/transactions/")
 public class TransactionController {
 
-        private Logger logger = LoggerFactory.getLogger(TransactionController.class);
-        private BlockChain blockChain;
+    private Logger logger = LoggerFactory.getLogger(TransactionController.class);
+    private BlockChain blockChain;
 
-        @Autowired
-        public TransactionController(BlockChain blockChain) {
-            this.blockChain = blockChain;
-        }
+    @Autowired
+    public TransactionController(BlockChain blockChain) {
+        this.blockChain = blockChain;
+    }
 
 
     /**
@@ -34,8 +36,9 @@ public class TransactionController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void submitTransaction(@RequestBody @NotNull Transaction transaction) {
-        logger.info("Received transaction of type: {}", transaction.whichTransaction().name());
+    public void submitTransaction(@RequestBody @NotNull Transaction transaction, HttpServletRequest request) {
+        logger.info("Received transaction of type: {} from {}", transaction.whichTransaction().name(),
+                request.getRemoteAddr());
         blockChain.transactionReceived(transaction);
     }
 }

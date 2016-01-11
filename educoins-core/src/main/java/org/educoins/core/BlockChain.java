@@ -1,33 +1,19 @@
 package org.educoins.core;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
+import com.google.common.annotations.VisibleForTesting;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
-import org.educoins.core.store.BlockNotFoundException;
-import org.educoins.core.store.BlockStoreException;
-import org.educoins.core.store.IBlockIterator;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.core.transaction.CoinbaseTransaction;
-import org.educoins.core.transaction.ITransactionFactory;
-import org.educoins.core.transaction.Transaction;
-import org.educoins.core.transaction.Output;
-import org.educoins.core.transaction.Transaction;
-import org.educoins.core.transaction.TransactionFactory;
+import org.educoins.core.store.*;
+import org.educoins.core.transaction.*;
 import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class BlockChain {
 
@@ -57,6 +43,7 @@ public class BlockChain {
 
 		this.store = store;
 		this.remoteProxies = remoteProxies;
+		this.transactionTransmitter = remoteProxies;
 
 		this.transactionFactory = new TransactionFactory();
 		this.blockListeners = new CopyOnWriteArrayList<>();
@@ -217,7 +204,7 @@ public class BlockChain {
 
 		this.transactions.add(transaction);
 		// TODO Implementation of the transaction broadcast.
-		// this.transactionTransmitter.transmitTransaction(transaction);
+//		this.transactionTransmitter.transmitTransaction(transaction);
 	}
 
 	public void transactionReceived(Transaction transaction) {
