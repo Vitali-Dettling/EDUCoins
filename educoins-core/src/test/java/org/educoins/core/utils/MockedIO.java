@@ -9,7 +9,12 @@ public class MockedIO {
     public static final String FILE_SEPERATOR = System.getProperty("file.separator");
 	
     public static File getDefaultBlockStoreFile() {
-        return new File(TMP_DIR + FILE_SEPERATOR + "EDUCoins" + FILE_SEPERATOR + "BlockStore");
+        String directoryName = TMP_DIR + FILE_SEPERATOR + "EDUCoins";
+        File directory = new File(directoryName);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+        return new File(directoryName + FILE_SEPERATOR + "BlockStore");
     }
 
     public static boolean deleteDefaultBlockStoreFile() {
