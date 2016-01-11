@@ -18,15 +18,12 @@ public class TransactionFactory implements ITransactionFactory {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.educoins.core.transaction.ITransactionFactory#generateRegularTransaction(java.util.List, int, java.lang.String)
+	 * @see org.educoins.core.transaction.ITransactionFactory#generateApprovedTransaction(int, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Transaction generateRegularTransaction(@NotNull List<Output> previousOutputs, int sendAmount, String sendPublicKey) {
+	public Transaction generateApprovedTransaction(@NotNull List<Output> previousOutputs, int amount, String owner, String holder, String lockingScript) {
 		
-		List<Output> copyPreviousOutputs = getEnoughPreviousOutputs(previousOutputs, sendAmount);	
-		int outputAmoun = getSendedAmount(copyPreviousOutputs);	
-		
-		Transaction regTx = new RegularTransaction(copyPreviousOutputs, sendAmount, outputAmoun, sendPublicKey);
+		Transaction regTx = new ApprovedTransaction(previousOutputs, amount, owner, holder, lockingScript);
 		return regTx.create();
 	}
 
@@ -38,14 +35,18 @@ public class TransactionFactory implements ITransactionFactory {
 		//TODO 
 		return null;
 	}
-
+	
 	/* (non-Javadoc)
-	 * @see org.educoins.core.transaction.ITransactionFactory#generateApprovedTransaction(int, java.lang.String, java.lang.String, java.lang.String)
+	 * @see org.educoins.core.transaction.ITransactionFactory#generateRegularTransaction(java.util.List, int, java.lang.String)
 	 */
 	@Override
-	public Transaction generateApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
-		//TODO 
-		return null;
+	public Transaction generateRegularTransaction(@NotNull List<Output> previousOutputs, int sendAmount, String sendPublicKey) {
+		
+		//List<Output> copyPreviousOutputs = getEnoughPreviousOutputs(previousOutputs, sendAmount);	
+		int outputAmoun = getSendedAmount(previousOutputs);	
+		
+		Transaction regTx = new RegularTransaction(previousOutputs, sendAmount, outputAmoun, sendPublicKey);
+		return regTx.create();
 	}
 	
 	private int getSendedAmount(List<Output> outputs){
@@ -56,23 +57,24 @@ public class TransactionFactory implements ITransactionFactory {
 		return amount;
 	}
 	
-	private List<Output> getEnoughPreviousOutputs(List<Output> previousOutputs, int sendAmount){
-		List<Output> copyPreviousOutputs = new ArrayList<>();
-		
-		Iterator<Output> iterator = previousOutputs.iterator();
-		
-		int enough = 0;
-		while(iterator.hasNext()){
-			Output out = iterator.next();
-			enough += out.getAmount();
-			copyPreviousOutputs.add(out);
-			iterator.remove();
-			if(enough >= sendAmount){
-				break;
-			}
-		}
-		return copyPreviousOutputs;
-	}
+	//TODO Delete
+//	private List<Output> getEnoughPreviousOutputs(List<Output> previousOutputs, int sendAmount){
+//		List<Output> copyPreviousOutputs = new ArrayList<>();
+//		
+//		Iterator<Output> iterator = previousOutputs.iterator();
+//		
+//		int enough = 0;
+//		while(iterator.hasNext()){
+//			Output out = iterator.next();
+//			enough += out.getAmount();
+//			copyPreviousOutputs.add(out);
+//			iterator.remove();
+//			if(enough >= sendAmount){
+//				break;
+//			}
+//		}
+//		return copyPreviousOutputs;
+//	}
 	
 
 }

@@ -3,21 +3,63 @@ package org.educoins.core.transaction;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import junit.framework.Assert;
+
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.AssertTrue;
+
+import org.apache.logging.log4j.core.tools.Generate;
+import org.educoins.core.Block;
+import org.educoins.core.Client;
 import org.educoins.core.Wallet;
 import org.educoins.core.transaction.Approval;
 import org.educoins.core.transaction.Input;
 import org.educoins.core.transaction.Output;
 import org.educoins.core.transaction.Transaction.ETransaction;
 import org.educoins.core.transaction.TransactionFactory;
+import org.educoins.core.utils.BlockStoreFactory;
+import org.educoins.core.utils.Generator;
 import org.educoins.core.utils.TxFactory;
 
 public class TransactionTest {
 
+	
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testApprovedTransaction(){
+		Client client = new Client();
+		
+		int toApproveAmount = 1;
+		String owner = Generator.getSecureRandomString256HEX();
+		String holder = Generator.getSecureRandomString256HEX();
+		String lockingScript = Generator.getSecureRandomString256HEX();
+		
+		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
+		Block block = BlockStoreFactory.getRandomBlock();
+		Transaction tx = BlockStoreFactory.generateTransaction(1);
+		tx.setOutputs(outputs);
+		block.addTransaction(tx);
+		client.distructOwnOutputs(block);
+		
+		Transaction approvedTx = client.generateApprovedTransaction(toApproveAmount, owner, holder, lockingScript);
+		assertNotNull(approvedTx);
+		assertTrue(!approvedTx.getApprovals().isEmpty());
+		assertEquals(approvedTx.getApprovals().get(0).getAmount(), 1);
+		String hashPreviousOutput = approvedTx.getApprovals().get(0).getHashPreviousOutput();
+		boolean isTrue = false;
+		for(Output out : outputs){
+			if(hashPreviousOutput.equals(out.hash().toString()) ){
+				isTrue = true;
+				break;
+			}
+		}
+		assertTrue(isTrue);
+	}
+	
 	// Coinbase:
 	// inputs = 0;
 	// outputs > 0;
@@ -40,8 +82,6 @@ public class TransactionTest {
 	// outputs = 0 || > 0
 	// approvals > 0
 	@Test
-	@Ignore // TODO will fail because generateApprovedTransaction is not
-			// implemented yet.
 	public void testWhichTransactionApproval() {
 
 		final int AMOUNT = 16;
@@ -49,9 +89,11 @@ public class TransactionTest {
 		final String LOCKING_SCRIPT = "ABC";
 		final String OWNER_ADDRESS = "ABC";
 		final String HOLDER_SIGNATURE = "ABC";
-
+		
+		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
+		
 		ITransactionFactory txFactory = new TransactionFactory();
-		Transaction transaction = txFactory.generateApprovedTransaction(AMOUNT, HOLDER_SIGNATURE, OWNER_ADDRESS,
+		Transaction transaction = txFactory.generateApprovedTransaction(outputs, AMOUNT, HOLDER_SIGNATURE, OWNER_ADDRESS,
 				LOCKING_SCRIPT);
 
 		ETransaction testee = transaction.whichTransaction();

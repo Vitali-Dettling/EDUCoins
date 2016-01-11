@@ -213,7 +213,7 @@ public class Block {
 		int newReward;
 		int lastApprovedEDUCoins = findAllApprovedEDUCoins();
 
-		//TODO[Vitali] Einen besseren mathematischen Algorithmus ausdenken, um die Ausschütung zu bestimmen!!!
+		//TODO Einen besseren mathematischen Algorithmus ausdenken, um die Ausschütung zu bestimmen!!!
 		if (DEFAULT_REWARD == lastApprovedEDUCoins) {
 			newReward = DEFAULT_REWARD;
 		} else if(DEFAULT_REWARD > lastApprovedEDUCoins) {

@@ -217,7 +217,7 @@ public class BlockChain {
 
 		this.transactions.add(transaction);
 		// TODO Implementation of the transaction broadcast.
-		// this.transactionTransmitter.transmitTransaction(transaction);
+		this.transactionTransmitter.transmitTransaction(transaction);
 	}
 
 	public void transactionReceived(Transaction transaction) {

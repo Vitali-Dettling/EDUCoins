@@ -66,16 +66,6 @@ public class Transaction implements Hashable {
 		}
 	}
 
-	public void createInputs(@NotNull List<Output> copyPreviousOutputs) {
-
-		List<Input> inputs = new ArrayList<>();
-		for (Output out : copyPreviousOutputs) {
-			Input in = new Input(out.getAmount(), out.hash().toString(), out.getLockingScript());
-			inputs.add(in);
-		}
-		setInputs(inputs);
-	}
-
 	public void signInputs() {
 		for (Input in : inputs) {
 			String signature = Wallet.getSignature(in.getUnlockingScript(), this.hash().toString());
@@ -158,11 +148,11 @@ public class Transaction implements Hashable {
 
 	}
 
-	public void addApproval(Approval output) {
+	public void addApproval(Approval approval) {
 		if (this.approvals == null) {
 			this.approvals = new ArrayList<>();
 		}
-		this.approvals.add(output);
+		this.approvals.add(approval);
 		this.approvalsCount = this.approvals.size();
 	}
 
@@ -188,7 +178,7 @@ public class Transaction implements Hashable {
 		// Regular:
 		// inputs > 0; outputs > 0; approvals = 0;
 		// Approval:
-		// inputs > 0; outputs >= 0; approvals > 0
+		// approvals > 0
 
 		// Check for transaction type.
 		if (this.approvedTransaction == null) {
@@ -202,10 +192,7 @@ public class Transaction implements Hashable {
 					&& (this.getApprovals() == null || this.getApprovals().size() == 0)) {
 				return ETransaction.REGULAR;
 			}
-			if ((this.getInputs() != null && this.getInputs().size() > 0)
-					&& ((this.getOutputs() == null || this.getOutputs().size() == 0)
-							|| (this.getOutputs() != null && this.getOutputs().size() > 0))
-					&& (this.getApprovals() != null && this.getApprovals().size() > 0)) {
+			if (this.getApprovals() != null && this.getApprovals().size() > 0) {
 				return ETransaction.APPROVED;
 			}
 		} else {

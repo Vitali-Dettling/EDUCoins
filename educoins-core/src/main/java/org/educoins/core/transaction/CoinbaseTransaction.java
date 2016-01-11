@@ -20,10 +20,12 @@ public class CoinbaseTransaction extends Transaction {
 	@Override
 	public Transaction create() {
 		
-		//TODO redo
-		Output out = new Output(amount, publicKey);
-		super.setOutputs(Arrays.asList(out));
-
+		//Each output coins only a single coin.
+		//That later we do not have to deal with odd number of coins and reverse transactions.
+		for(int i = 0 ; i < amount ; i++){
+			Output out = new Output(1, publicKey);
+			super.addOutput(out);
+		}
 		return this;
 	}
 

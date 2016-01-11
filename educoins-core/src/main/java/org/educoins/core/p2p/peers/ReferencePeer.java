@@ -18,15 +18,13 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 	// TODO only one public key will be used. Need to be improved in using
 	// multiple keys.
 	private static String singlePublicKey;
+	private static String singleSignature;
 
 	public ReferencePeer(BlockChain blockChain) {
 		super(blockChain);
 		singlePublicKey = Wallet.getPublicKey();
+		singleSignature = Wallet.getSignature(singlePublicKey, "123456789ABCDEF");
 		Peer.remoteProxies.addBlockListener(this);
-	}
-
-	public void setPubKey(String publicKey) {
-		ReferencePeer.singlePublicKey = publicKey;
 	}
 
 	public String getPubKey() {
@@ -63,6 +61,9 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 			case "p":
 				System.out.println("Send to address: " + ReferencePeer.singlePublicKey);
 				break;
+			case "s":
+				System.out.println("Signature: " + ReferencePeer.singleSignature);
+				break;
 			case "g":
 				System.out.println("Owen EDUCoins " + Peer.client.getAmount());
 				break;
@@ -77,26 +78,26 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				if (dstPublicKey == null)
 					continue;
 				trans = Peer.client.generateRegularTransaction(amount, dstPublicKey);
-				// ReferencePeer.blockChain.sendTransaction(trans);
 				if (trans != null)
+					ReferencePeer.blockChain.sendTransaction(trans);
 					System.out.println(trans.hash());
 				break;
 			case "a":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
 				if (amount == -1)
 					continue;
-				System.out.print("Type in owner: ");
+				System.out.print("Owner address is: " + ReferencePeer.singlePublicKey);
 				String owner = scanner.nextLine();
-				System.out.print("Type in holder: ");
+				System.out.print("Type in holder signature: ");
 				String holder = scanner.nextLine();
 				System.out.print("Type in LockingScript: ");
 				String lockingScript = scanner.nextLine();
 				long time = System.currentTimeMillis();
-				// TODO
-				// trans = Peer.client.sendApprovedTransaction(amount, owner,
-				// holder, lockingScript);
+
+				trans = Peer.client.generateApprovedTransaction(amount, owner, holder, lockingScript);
 				System.out.println(System.currentTimeMillis() - time);
 				if (trans != null)
+					ReferencePeer.blockChain.sendTransaction(trans);
 					System.out.println(trans.hash());
 				break;
 			case "x":
