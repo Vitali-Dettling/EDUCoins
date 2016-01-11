@@ -24,7 +24,7 @@ public class RegularTransaction extends Transaction {
 	@Override
 	public Transaction create(){
 		
-		List<Output> outputs = createOutputs(sendAmount, inputAmount, sendPublicKey);
+		List<Output> outputs = createOutputs();
 		super.setOutputs(outputs);
 		List<Input> inputs = createInputs();
 		super.setInputs(inputs);
@@ -50,7 +50,7 @@ public class RegularTransaction extends Transaction {
 		return inputs;
 	}
 	
-	public List<Output> createOutputs(int sendAmount, int inputAmount, String sendPublicKey) {
+	public List<Output> createOutputs() {
 		// Send to output.
 		List<Output> outputs = new ArrayList<>();
 		Output out1 = new Output(sendAmount, sendPublicKey);

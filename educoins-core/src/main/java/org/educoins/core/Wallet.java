@@ -91,7 +91,7 @@ public class Wallet {
 			byte[] signature = keyPair.getSignature(publicKey, hashedTranscation);
 			return ByteArray.convertToString(signature, HEX);
 		} catch (Exception e) {
-			logger.error("Creating of the Signature.");
+			logger.error("Creating of the Signature." + e.getMessage());
 		}
 		return null;
 	}

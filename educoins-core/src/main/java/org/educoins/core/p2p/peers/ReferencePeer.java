@@ -88,9 +88,10 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				String lockingScript = scanner.nextLine();
 				
 				trans = Peer.client.generateApprovedTransaction(amount, owner, lockingScript);
-				String holderSignature = trans.getApprovals().get(0).getHolderSignature();
-				System.out.print("Holder signature is: " + holderSignature);
-				
+				if(!trans.getApprovals().isEmpty()){
+					String holderSignature = trans.getApprovals().get(0).getHolderSignature();
+					System.out.print("Holder signature is: " + holderSignature);
+				}
 				long time = System.currentTimeMillis();
 				System.out.println(System.currentTimeMillis() - time);
 				if (trans != null){
