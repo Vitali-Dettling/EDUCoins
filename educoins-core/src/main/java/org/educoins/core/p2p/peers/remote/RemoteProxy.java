@@ -2,6 +2,7 @@ package org.educoins.core.p2p.peers.remote;
 
 import org.educoins.core.Block;
 import org.educoins.core.p2p.peers.Peer;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -82,6 +83,15 @@ public abstract class RemoteProxy {
      * @throws IOException if the communication went wrong.
      */
     public abstract void transmitBlock(Block block) throws IOException;
+
+    /**
+     * Transmits a specific {@link Transaction} to the remote node.
+     *
+     * @param transaction the {@link Transaction} to transmit.
+     * @throws IOException if the communication went wrong.
+     */
+    public abstract void transmitTransaction(Transaction transaction) throws IOException;
+
 
     /**
      * Introduces itself to at least one other {@link Peer}.

@@ -5,6 +5,7 @@ import org.educoins.core.Block;
 import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.peers.Peer;
 import org.educoins.core.p2p.peers.server.PeerServer;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,6 +76,12 @@ public class HttpProxy extends RemoteProxy {
     public void transmitBlock(Block block) throws IOException {
         new RestClient<Block>()
                 .post(URI.create(iNetAddress.toString() + PeerServer.BLOCKS_RESOURCE_PATH), block, Block.class);
+    }
+
+    @Override
+    public void transmitTransaction(Transaction transaction) throws IOException {
+        new RestClient<Transaction>()
+                .post(URI.create(iNetAddress.toString() + PeerServer.TRANSACTION_RESOURCE_PATH), transaction, Transaction.class);
     }
 
     @Override

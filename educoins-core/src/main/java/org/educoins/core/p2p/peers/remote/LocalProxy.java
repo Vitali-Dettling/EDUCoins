@@ -1,7 +1,9 @@
 package org.educoins.core.p2p.peers.remote;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.educoins.core.Block;
 import org.educoins.core.store.*;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,6 +70,11 @@ public class LocalProxy extends RemoteProxy {
     @Override
     public void transmitBlock(Block block) throws IOException {
         blockStore.put(block);
+    }
+
+    @Override
+    public void transmitTransaction(Transaction transaction) throws IOException {
+        throw new NotImplementedException("Not yet implemented");
     }
 
     @Override

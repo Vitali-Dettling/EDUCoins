@@ -23,6 +23,7 @@ public class PeerServer {
     public static final String BLOCKS_RESOURCE_PATH = "/blocks/";
     public static final String BLOCK_HEADERS_RESOURCE_PATH = "/blocks/headers/";
     public static final String HELLO_HTTP_RESOURCE_PATH = "/peers/http";
+    public static final String TRANSACTION_RESOURCE_PATH = "/transactions/";
 
     public PeerServer() {
     }

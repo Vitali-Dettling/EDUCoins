@@ -14,16 +14,16 @@ import org.springframework.web.bind.annotation.*;
  * Created by dacki on 06.12.15.
  */
 @RestController
-@RequestMapping("/transaction")
+@RequestMapping("/transactions/")
 public class TransactionController {
 
-        private Logger logger = LoggerFactory.getLogger(TransactionController.class);
-        private BlockChain blockChain;
+    private Logger logger = LoggerFactory.getLogger(TransactionController.class);
+    private BlockChain blockChain;
 
-        @Autowired
-        public TransactionController(BlockChain blockChain) {
-            this.blockChain = blockChain;
-        }
+    @Autowired
+    public TransactionController(BlockChain blockChain) {
+        this.blockChain = blockChain;
+    }
 
 
     /**
