@@ -56,19 +56,19 @@ public class BlockStoreFactory {
         Block toReturn = new Block();
         toReturn.setVersion((int) (Math.random() * Integer.MAX_VALUE));
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
-        for (int i = 0; i < Math.random() * 10; ++i)
+        for (int i = 0; i < Math.random() * 10 + 1; ++i)
             toReturn.addTransaction(generateTransaction(2));
         return toReturn;
     }
 
     public static Transaction generateTransaction(int number) {
         Transaction t = new Transaction();
-        for (int i = 0; i < 2 * number; i++) {
+        for (int i = 1; i < 2 * number; i++) {
             Input input = new Input(5 * i * number, "", i);
             input.setUnlockingScript(Input.EInputUnlockingScript.PUBLIC_KEY, "12345");
             t.addInput(input);
         }
-        for (int i = 0; i < 4 * number; i++) {
+        for (int i = 1; i < 2 * number; i++) {
             t.addOutput(new Output(5 * i * number, "", "123"));
         }
         t.setApprovals(null);

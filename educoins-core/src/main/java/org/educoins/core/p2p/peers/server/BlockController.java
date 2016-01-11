@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 
 /**
@@ -49,8 +50,9 @@ public class BlockController {
      * @throws BlockNotFoundException if a Block could not be found.
      */
     @RequestMapping(value = "/from/{hash}", method = RequestMethod.GET)
-    public Collection<Block> getBlocksFrom(@PathVariable(value = "hash") String hash) throws BlockNotFoundException {
-        logger.info("Offering blocks from hash: {}", hash);
+    public Collection<Block> getBlocksFrom(@PathVariable(value = "hash") String hash, HttpServletRequest request) throws
+            BlockNotFoundException {
+        logger.info("Offering blocks from hash: {} for {}", hash, request.getRemoteAddr());
         return blockChain.getBlocksFrom(Sha256Hash.wrap(hash));
     }
 
@@ -62,8 +64,9 @@ public class BlockController {
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void createBlock(@RequestBody @NotNull Block block) throws BlockChainVerificationException {
-        logger.info("Received Block from foreign node via push");
+    public void createBlock(@RequestBody @NotNull Block block, HttpServletRequest request)
+            throws BlockChainVerificationException {
+        logger.info("Received Block from foreign node ({}) via push", request.getRemoteAddr());
         blockChain.blockReceived(block);
     }
 

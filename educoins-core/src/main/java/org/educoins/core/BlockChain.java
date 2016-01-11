@@ -103,9 +103,8 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
         List<Block> blocks = new ArrayList<>();
         IBlockIterator iterator = store.iterator();
 
-        while (iterator.hasNext()) {
+        while (iterator.hasNext() && !iterator.get().hash().equals(from)) {
             Block next = iterator.next();
-            if (next.hash().equals(from)) return blocks;
             blocks.add(next);
         }
 
@@ -113,9 +112,10 @@ public class BlockChain implements IBlockListener, ITransactionListener, IPoWLis
         if (blocksFrom.size() > 1)
             throw new IllegalStateException("More than one block with the same hash found!");
 
-        if (blocksFrom.size() == 0 && from.equals(iterator.get().hash()))
+        if (blocksFrom.size() == 0)
             throw new BlockNotFoundException(from.getBytes());
 
+        Collections.reverse(blocks);
         return blocks;
     }
 
