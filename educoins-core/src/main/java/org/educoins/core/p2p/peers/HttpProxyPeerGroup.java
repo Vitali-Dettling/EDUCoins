@@ -218,7 +218,14 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             return proxies;
         }
 
-        Collections.sort(proxies, (o1, o2) -> o1.getRating() - o2.getRating());
+        Collections.sort(proxies, (o1, o2) -> {
+            double val = o1.getRating() - o2.getRating();
+            if (val > 0)
+                return 1;
+            else if (val < 0)
+                return -1;
+            return 0;
+        });
         return proxies.subList(0, Math.min(proxies.size(), 10));
     }
 
