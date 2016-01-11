@@ -69,9 +69,8 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 				trans = Peer.client.generateRegularTransaction(amount, lockingScript);
 				if (trans != null) {
 					Peer.blockChain.sendTransaction(trans);
-				}
-				if (trans != null)
 					System.out.println(trans.hash());
+				}	
 				break;
 			case "e":
 				running = false;

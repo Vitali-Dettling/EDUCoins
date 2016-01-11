@@ -86,8 +86,8 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
 				if (amount == -1)
 					continue;
-				System.out.print("Owner address is: " + ReferencePeer.singlePublicKey);
-				String owner = scanner.nextLine();
+				System.out.print("Owner address is: " + ReferencePeer.singlePublicKey + "\n");
+				String owner = ReferencePeer.singlePublicKey;
 				System.out.print("Type in holder signature: ");
 				String holder = scanner.nextLine();
 				System.out.print("Type in LockingScript: ");
@@ -96,9 +96,10 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 
 				trans = Peer.client.generateApprovedTransaction(amount, owner, holder, lockingScript);
 				System.out.println(System.currentTimeMillis() - time);
-				if (trans != null)
+				if (trans != null){
 					ReferencePeer.blockChain.sendTransaction(trans);
 					System.out.println(trans.hash());
+				}
 				break;
 			case "x":
 				// TODO

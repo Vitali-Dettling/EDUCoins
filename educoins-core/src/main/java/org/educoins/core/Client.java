@@ -19,14 +19,15 @@ public class Client {
 	private List<Output> previousOutputs;
 	private ITransactionFactory transactionFactory;
 	private List<Block> blockBuffer;
-	private int availableAmount;
+	private static int availableAmount;
 	private boolean locked;
 	
 	public Client(){
 		this.previousOutputs = new ArrayList<>();
+		
+		Client.availableAmount = 0;
 		this.transactionFactory = new TransactionFactory();
 		this.blockBuffer = new ArrayList<>();
-		this.availableAmount = 0;
 		this.locked = false;
 	}
 	
@@ -36,13 +37,13 @@ public class Client {
 	}
 	
 	public Transaction generateApprovedTransaction(int toApproveAmount, String owner, String holder, String lockingScript){
-		
+
 		if(!checkAmount(toApproveAmount) || !checkOutputs() || !checkParams(owner) || !checkParams(holder) || !checkParams(lockingScript)){
 			return null;
 		}
 		
 		this.locked = true;
-		this.availableAmount -= toApproveAmount;
+		Client.availableAmount -= toApproveAmount;
 		Transaction buildTx = this.transactionFactory.generateApprovedTransaction(this.previousOutputs, toApproveAmount, owner, holder, lockingScript);
 		this.locked = false;
 		
