@@ -203,7 +203,6 @@ public class BlockChain {
 	public void sendTransaction(Transaction transaction) {
 
 		this.transactions.add(transaction);
-		// TODO Implementation of the transaction broadcast.
 		this.transactionTransmitters.transmitTransaction(transaction);
 	}
 

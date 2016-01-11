@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.educoins.core.Wallet;
+import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 
 public class ApprovedTransaction extends Transaction {
 
 	private int amount;
 	private String owner;
-	private String holder;
 	private String lockingScript;
 	private List<Output> previousOutput;
 	
-	public ApprovedTransaction(@NotNull List<Output> previousOutput, int amount, String owner, String holder, String lockingScript) {
+	public ApprovedTransaction(@NotNull List<Output> previousOutput, int amount, String owner, String lockingScript) {
 		this.amount = amount;
 		this.owner = owner;
-		this.holder = holder;
 		this.lockingScript = lockingScript;
 		this.previousOutput = previousOutput;
 	}
@@ -27,8 +27,11 @@ public class ApprovedTransaction extends Transaction {
 
 		List<String> hashPreviousOutput = getHashPreviousOutput();
 		for(String hashedOutput : hashPreviousOutput){
-			Approval approval = new Approval(hashedOutput, amount, owner, holder, lockingScript);
+			Approval approval = new Approval(hashedOutput, amount, owner, lockingScript);
 			super.addApproval(approval);
+			Sha256Hash hashTx = this.hash();
+			String signature = Wallet.getSignature(lockingScript, hashTx.toString());
+			approval.setHolderSignature(signature);
 		}
 		return this;
 	}

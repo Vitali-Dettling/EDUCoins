@@ -58,9 +58,9 @@ public class MockedClient {
 		return receivedTransaction();
 	}
 
-	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String holder, String lockingScript) {
+	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String lockingScript) {
 		transactionReceived();
-		Transaction transaction = mockedClient.generateApprovedTransaction(amount, owner, holder, lockingScript);
+		Transaction transaction = mockedClient.generateApprovedTransaction(amount, owner, lockingScript);
 		mockedBlockchain.sendTransaction(transaction);
 		return receivedTransaction();
 	}

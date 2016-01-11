@@ -33,7 +33,6 @@ public class TransactionTest {
 		
 		int toApproveAmount = 1;
 		String owner = Generator.getSecureRandomString256HEX();
-		String holder = Generator.getSecureRandomString256HEX();
 		String lockingScript = Generator.getSecureRandomString256HEX();
 		
 		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
@@ -43,7 +42,7 @@ public class TransactionTest {
 		block.addTransaction(tx);
 		client.distructOwnOutputs(block);
 		
-		Transaction approvedTx = client.generateApprovedTransaction(toApproveAmount, owner, holder, lockingScript);
+		Transaction approvedTx = client.generateApprovedTransaction(toApproveAmount, owner, lockingScript);
 		assertNotNull(approvedTx);
 		assertTrue(!approvedTx.getApprovals().isEmpty());
 		assertEquals(approvedTx.getApprovals().get(0).getAmount(), 1);
@@ -91,8 +90,7 @@ public class TransactionTest {
 		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
 		
 		ITransactionFactory txFactory = new TransactionFactory();
-		Transaction transaction = txFactory.generateApprovedTransaction(outputs, AMOUNT, HOLDER_SIGNATURE, OWNER_ADDRESS,
-				LOCKING_SCRIPT);
+		Transaction transaction = txFactory.generateApprovedTransaction(outputs, AMOUNT, OWNER_ADDRESS, LOCKING_SCRIPT);
 
 		ETransaction testee = transaction.whichTransaction();
 		assertEquals(testee, ETransaction.APPROVED);

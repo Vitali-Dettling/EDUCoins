@@ -196,6 +196,8 @@ public class Verification {
 		}
 
 		// Case 5:
+		//TODO Check is wrong. An approved transaction does not have any inputs it just refers to outputs or regular transactions.
+		//Bug: Needs to be fixed.
 		if (sumApprovalAmount > sumInputsAmount) {
 			logger.warn("verifyApprovedTransaction: more output than input");
 			return false;

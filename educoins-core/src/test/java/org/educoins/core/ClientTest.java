@@ -32,9 +32,8 @@ public class ClientTest {
 	public void testSendApprovedTransaction() {
 
 		String owner = MockedWallet.getPublicKey();
-		String holder = MockedWallet.getPublicKey();
 		String lockingScript = MockedWallet.getPublicKey();
-		List<Transaction> reqeived = MockedClient.sendApprovedTransaction(1, owner, holder, lockingScript);
+		List<Transaction> reqeived = MockedClient.sendApprovedTransaction(1, owner, lockingScript);
 		checkTransactionType(reqeived, ETransaction.APPROVED);
 	}
 	

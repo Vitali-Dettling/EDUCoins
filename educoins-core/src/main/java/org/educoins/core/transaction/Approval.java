@@ -10,10 +10,9 @@ public class Approval {
 	private String lockingScript;
 	private String hashPreviousOutput;
 
-	public Approval(String hashPreviousOutput ,int amount, String ownerAddress, String holderSignature, String lockingScript) {
+	public Approval(String hashPreviousOutput ,int amount, String ownerAddress, String lockingScript) {
 
 		this.amount = amount;
-		this.holderSignature = holderSignature;
 		this.ownerAddress = ownerAddress;
 		this.lockingScript = lockingScript;
 		this.hashPreviousOutput = hashPreviousOutput;
