@@ -66,7 +66,7 @@ public class AppConfig {
     }
 
     public static Sha256Hash getOwnPublicKey() {
-    	String publicKey = prop.getProperty("educoins.peer.pubkey");
+        String publicKey = prop.getProperty("educoins.peer.pubkey");
         return Sha256Hash.wrap(publicKey);
     }
 
@@ -78,4 +78,15 @@ public class AppConfig {
         return Integer.parseInt(prop.getProperty("educoins.discovery.retries.max"));
     }
 
+    public static double getRatingIncreaseValue() {
+        return Double.parseDouble(prop.getProperty("educoins.discovery.rating.increaseValue"));
+    }
+
+    public static double getRatingDecreaseValue() {
+        return Double.parseDouble(prop.getProperty("educoins.discovery.rating.decreaseValue"));
+    }
+
+    public static double getDefaultRanking() {
+        return Double.parseDouble(prop.getProperty("educoins.discovery.rating.default"));
+    }
 }
