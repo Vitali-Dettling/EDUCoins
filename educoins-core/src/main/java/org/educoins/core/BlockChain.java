@@ -29,7 +29,7 @@ public class BlockChain {
 	private int blockCounter;
 	private List<IBlockListener> blockListeners;
 
-	private ITransactionTransmitter transactionTransmitter;
+	private ITransactionTransmitter transactionTransmitters;
 	private List<ITransactionListener> transactionListeners;
 	private List<Transaction> transactions;
 
@@ -43,7 +43,7 @@ public class BlockChain {
 
 		this.store = store;
 		this.remoteProxies = remoteProxies;
-		this.transactionTransmitter = remoteProxies;
+		this.transactionTransmitters = remoteProxies;
 
 		this.transactionFactory = new TransactionFactory();
 		this.blockListeners = new CopyOnWriteArrayList<>();
@@ -204,7 +204,7 @@ public class BlockChain {
 
 		this.transactions.add(transaction);
 		// TODO Implementation of the transaction broadcast.
-//		this.transactionTransmitter.transmitTransaction(transaction);
+		this.transactionTransmitters.transmitTransaction(transaction);
 	}
 
 	public void transactionReceived(Transaction transaction) {

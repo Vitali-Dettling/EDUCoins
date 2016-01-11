@@ -27,8 +27,6 @@ import org.educoins.core.utils.TxFactory;
 
 public class TransactionTest {
 
-	
-	@SuppressWarnings("deprecation")
 	@Test
 	public void testApprovedTransaction(){
 		Client client = new Client();

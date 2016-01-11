@@ -213,8 +213,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     private Collection<RemoteProxy> getHighestRatedProxies() {
         if (proxies.size() == 0) {
-            // Otherwise each miner thread will try to register itselves
-            // discover();
+            // Otherwise each miner thread will try to register itself
+            //discover();
             return proxies;
         }
 
