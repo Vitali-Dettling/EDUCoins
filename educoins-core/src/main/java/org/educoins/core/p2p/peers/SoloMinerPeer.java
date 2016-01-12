@@ -61,7 +61,7 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 			int amount = -1;
 			switch (action.toLowerCase()) {
 			case "g":
-				System.out.println("Regular EDUCoins " + Peer.client.getAmount());
+				System.out.println("Regular EDUCoins " + Peer.client.getEDICoinsAmount());
 				break;
 			case "r":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");

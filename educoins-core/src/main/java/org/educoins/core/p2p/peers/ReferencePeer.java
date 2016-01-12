@@ -60,12 +60,12 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				System.out.println("Send to address: " + ReferencePeer.singlePublicKey);
 				break;
 			case "g":
-				System.out.println("Regular EDUCoins " + Peer.client.getAmount());
+				System.out.println("Regular EDUCoins " + Peer.client.getEDICoinsAmount());
 				System.out.println("Approved EDUCoins " + Peer.client.getApproveCoins());
 				break;
 			case "r":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
-				int availableAmount = Peer.client.getAmount();
+				int availableAmount = Peer.client.getEDICoinsAmount();
 				if (amount > availableAmount) {
 					System.err.println("Not enough available amount (max. " + availableAmount + ")");
 					break;

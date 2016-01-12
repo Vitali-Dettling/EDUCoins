@@ -71,7 +71,7 @@ public class SoloMinerPeerTest {
 			client.distructOwnOutputs(block);
 		}
 
-		int result = client.getAmount();
+		int result = client.getEDICoinsAmount();
 		Assert.assertEquals(expected, result);
 	}
 }

@@ -90,7 +90,7 @@ public class Client {
 
 	private boolean checkAmount(int sendAmount) {
 
-		int availableAmount = getAmount();
+		int availableAmount = getEDICoinsAmount();
 		if ((availableAmount - sendAmount) < 0) {
 			this.logger.info("Not enough amount. Available: " + Client.availableAmount + " which to send: " + sendAmount);
 			return false;
@@ -126,8 +126,12 @@ public class Client {
 				for (Approval app : tx.getApprovals()) {
 					for (String publicKey : publicKeys) {
 						if (app.getLockingScript().equals(publicKey)) {
-							this.approvedTransactions.add(app);
-							Client.approvedCoins += app.getAmount();	
+							String holderSignature = app.getHolderSignature();
+							String hashedTx = tx.hash().toString();
+							if(Wallet.compare(hashedTx, holderSignature, publicKey)){
+								this.approvedTransactions.add(app);
+								Client.approvedCoins += app.getAmount();	
+							}
 						}
 					}
 				}
@@ -145,7 +149,7 @@ public class Client {
 		}
 	}
 	
-	public int getAmount(){
+	public int getEDICoinsAmount(){
 		return Client.availableAmount;
 	}
 	
