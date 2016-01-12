@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import org.tbee.javafx.scene.layout.fxml.*?>
+<?import javafx.scene.layout.VBox?>
+
+
+<Pane>
+    <Label text="Overview"  style="-fx-fit-to-width: true; -fx-background-color: #7c00ff; "/>
+    <Label text="Account balance:"/>
+    <Label id="balance" text="loading..."/>
+</Pane>

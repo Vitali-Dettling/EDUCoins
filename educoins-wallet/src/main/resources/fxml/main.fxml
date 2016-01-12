@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import org.tbee.javafx.scene.layout.fxml.*?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane fx:controller="com.cak.toy.jfx.MainController" fx:id="rootpanel" maxHeight="-Infinity" maxWidth="-Infinity"
+            minHeight="-Infinity" minWidth="-Infinity" prefWidth="800.0" prefHeight="600.0"
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <left>
+        <ListView fx:id="navigation" fixedCellSize="30.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" style="-fx-font-size: 14px"/>
+    </left>
+    <center>
+        <fx:include fx:id="content" source="overview.fxml"/>
+    </center>
+</BorderPane>
