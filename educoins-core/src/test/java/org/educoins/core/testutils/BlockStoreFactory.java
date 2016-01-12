@@ -2,6 +2,7 @@ package org.educoins.core.testutils;
 
 import org.educoins.core.Block;
 import org.educoins.core.store.*;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.IO;
 
 import java.io.File;
@@ -58,4 +59,5 @@ public class BlockStoreFactory {
         toReturn.setNonce((int) (Math.random() * Integer.MAX_VALUE));
         return toReturn;
     }
+
 }

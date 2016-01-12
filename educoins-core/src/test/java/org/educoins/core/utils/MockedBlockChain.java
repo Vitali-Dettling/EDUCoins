@@ -25,7 +25,6 @@ public class MockedBlockChain {
 	static {
 		
 		mockedStore = MockedStore.getStore();
-		Wallet mockedWallet = MockedWallet.getMockedWallet();
 		IProxyPeerGroup remoteProxy = new HttpProxyPeerGroup();
 		IBlockStore store = MockedStore.getStore();
 		mockedBlockchain = new BlockChain(remoteProxy, store);

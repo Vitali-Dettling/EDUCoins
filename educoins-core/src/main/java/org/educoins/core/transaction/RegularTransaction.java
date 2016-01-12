@@ -23,7 +23,6 @@ public class RegularTransaction extends Transaction {
 	
 	@Override
 	public Transaction create(){
-		
 		List<Output> outputs = createOutputs();
 		super.setOutputs(outputs);
 		List<Input> inputs = createInputs();

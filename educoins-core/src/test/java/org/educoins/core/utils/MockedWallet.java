@@ -7,30 +7,24 @@ import org.educoins.core.Wallet;
 
 public class MockedWallet {
 	
-	private static Wallet wallet = new Wallet();
-	
 	public static String getPublicKey(){
-		return wallet.getPublicKey();
+		return Wallet.getPublicKey();
 	}
 
 	public static String getSignature(String publicKey, String hash){
-		return wallet.getSignature(publicKey, hash);
+		return Wallet.getSignature(publicKey, hash);
 	}
 
 	public static boolean checkSignature(String randomNumber, String signature) {
-		return wallet.checkSignature(randomNumber, signature);
+		return Wallet.checkSignature(randomNumber, signature);
 	}
 
 	public static List<String> getPublicKeys() {
-		return wallet.getPublicKeys();
+		return Wallet.getPublicKeys();
 	}
 
 	public static boolean compare(String message, String signature, String publicKey) {
-		return wallet.compare(message, signature, publicKey);
-	}
-
-	public static Wallet getMockedWallet() {
-		return wallet;
+		return Wallet.compare(message, signature, publicKey);
 	}
 	
 	public static void delete(){

@@ -8,8 +8,10 @@ import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
 import org.educoins.core.Wallet;
+import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.transaction.Input;
 import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.RegularTransaction;
 import org.educoins.core.transaction.Transaction;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -21,13 +23,13 @@ public class MockedClient {
 	private static BlockChain mockedBlockchain;
 
 	private static int count = 0;
+	private static List<Output> outputs;
 	private static Client mockedClient;
 	private static ArgumentCaptor<Transaction> txCaptor = ArgumentCaptor.forClass(Transaction.class);
 
 	static {
 
 		mockedBlockchain = Mockito.spy(MockedBlockChain.getMockedBlockChain());
-		Wallet mockedWallet = MockedWallet.getMockedWallet();
 		mockedClient = new Client();
 	}
 
@@ -88,7 +90,32 @@ public class MockedClient {
 		mockedClient.distructOwnOutputs(block);
 	}
 	
+	public static Transaction generateApprovedTransaction(String lockingScript){
+		Client client = MockedClient.getClient();
+		
+		int toApproveAmount = 1;
+		String owner = Generator.getSecureRandomString256HEX();
+		if(lockingScript == null){
+			lockingScript = MockedWallet.getPublicKey();
+		}
+		
+		MockedClient.outputs = TxFactory.getRandomPreviousOutputs();
+		Block block = BlockStoreFactory.getRandomBlock();
+		Transaction tx = BlockStoreFactory.generateTransaction(1);
+		tx.setOutputs(MockedClient.outputs);
+		block.addTransaction(tx);
+		client.distructOwnOutputs(block);
+		
+		return client.generateApprovedTransaction(toApproveAmount, owner, lockingScript);
+	}
+	
+	
+	public static List<Output> getOutputs(){
+		return MockedClient.outputs;
+	}
+	
 	public static void delete(){
+		MockedWallet.delete();
 		MockedBlockChain.delete();
 	}
 }

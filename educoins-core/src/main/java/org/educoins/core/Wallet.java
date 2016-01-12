@@ -256,9 +256,7 @@ public class Wallet {
 			KeyFactory keyFactory = KeyFactory.getInstance(ECDSA);
 			KeySpec PrivateKeySpec = new PKCS8EncodedKeySpec(privateKey);
 			
-			
 			PrivateKey orgPrivateKey = keyFactory.generatePrivate(PrivateKeySpec);
-			
 			
 			this.signature.initSign(orgPrivateKey);
 			this.signature.update(ByteArray.convertFromString(message));

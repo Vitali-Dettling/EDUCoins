@@ -1,59 +1,53 @@
 package org.educoins.core.p2p.peers;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
-import org.educoins.core.IBlockReceiver;
 import org.educoins.core.Wallet;
 import org.educoins.core.testutils.BlockStoreFactory;
 import org.educoins.core.transaction.CoinbaseTransaction;
 import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.RegularTransaction;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.MockedClient;
-import org.educoins.core.utils.MockedStore;
-import org.educoins.core.utils.MockedWallet;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class ReferencePeerTest {
 
-	@Test
-	public void testStart() {
-
+	@After
+	public void tearDown(){
+		MockedBlockChain.delete();
+		MockedClient.delete();
 	}
-
-	@Test
-	public void testStop() {
-
-	}
-
+	
 	@Test
 	public void testGetAmount() {
 
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		ReferencePeer peer = new ReferencePeer(blockchain);
-		Wallet mockedWallet = MockedWallet.getMockedWallet();
-		Client client = new Client();
+		Client client = MockedClient.getClient();
 
 		int expected = 0;
 		Block block = new Block();
 		String publicKey = peer.getPubKey();
-		for (int i = 0; i < 10; i++) {
-			block = BlockStoreFactory.getRandomBlock(block);
+		List<Output> outputs = new ArrayList<>();
+		
+		for (int i = 0; i < 10; i++) {			
 			Output out = new Output(6, publicKey);
 			expected += 6;
-			Transaction tx = new CoinbaseTransaction(2, "ABC");
-			tx.addOutput(out);
-			block.addTransaction(tx);
-			client.distructOwnOutputs(block);
+			outputs.add(out);
 		}
+		block = BlockStoreFactory.getRandomBlock(block);
+		Transaction tx = new RegularTransaction(outputs, expected, expected, publicKey).create();
+		block.addTransaction(tx);
+		client.distructOwnOutputs(block);
+	
 		int result = client.getAmount();
 		Assert.assertEquals(result, expected);
 	}

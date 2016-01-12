@@ -1,5 +1,7 @@
 package org.educoins.core.transaction;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -23,38 +25,65 @@ import org.educoins.core.transaction.Transaction.ETransaction;
 import org.educoins.core.transaction.TransactionFactory;
 import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.Generator;
+import org.educoins.core.utils.MockedClient;
+import org.educoins.core.utils.MockedWallet;
+import org.educoins.core.utils.Sha256Hash;
 import org.educoins.core.utils.TxFactory;
 
 public class TransactionTest {
 
+	@After
+	public void tearDown(){
+		MockedClient.delete();
+	}
+	
+	@Before
+	public void setUp(){
+		MockedClient.delete();
+	}
+	
 	@Test
-	public void testApprovedTransaction(){
-		Client client = new Client();
+	public void testPreviousOutput(){
 		
-		int toApproveAmount = 1;
-		String owner = Generator.getSecureRandomString256HEX();
-		String lockingScript = Generator.getSecureRandomString256HEX();
-		
-		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
-		Block block = BlockStoreFactory.getRandomBlock();
-		Transaction tx = BlockStoreFactory.generateTransaction(1);
-		tx.setOutputs(outputs);
-		block.addTransaction(tx);
-		client.distructOwnOutputs(block);
-		
-		Transaction approvedTx = client.generateApprovedTransaction(toApproveAmount, owner, lockingScript);
-		assertNotNull(approvedTx);
-		assertTrue(!approvedTx.getApprovals().isEmpty());
-		assertEquals(approvedTx.getApprovals().get(0).getAmount(), 1);
+		Transaction approvedTx = MockedClient.generateApprovedTransaction(null);
 		String hashPreviousOutput = approvedTx.getApprovals().get(0).getHashPreviousOutput();
-		boolean isTrue = false;
+		List<Output> outputs = MockedClient.getOutputs();
 		for(Output out : outputs){
 			if(hashPreviousOutput.equals(out.hash().toString()) ){
-				isTrue = true;
+				assertTrue(true);
 				break;
 			}
 		}
-		assertTrue(isTrue);
+	}
+	
+	@Test
+	public void testApprovedTxHolderSignature(){
+		
+		String lockingScript = MockedWallet.getPublicKey();
+		Transaction approvedTx = MockedClient.generateApprovedTransaction(lockingScript);
+
+		String holderSignature = approvedTx.getApprovals().get(0).getHolderSignature();
+		approvedTx.getApprovals().get(0).setHolderSignature(null);
+		Sha256Hash txHash = approvedTx.hash();
+		
+		String newSignature = Wallet.getSignature(lockingScript, txHash.toString());
+		
+		assertTrue(Wallet.compare(txHash.toString(), newSignature, lockingScript));
+		assertTrue(Wallet.compare(txHash.toString(), holderSignature, lockingScript));	
+	}
+	
+	@Test
+	public void testApprovedTransactionBasic(){
+		
+		Transaction approvedTx = MockedClient.generateApprovedTransaction(null);
+		
+		assertNotNull(approvedTx);
+		assertTrue(!approvedTx.getApprovals().isEmpty());
+		assertEquals(approvedTx.getApprovals().get(0).getAmount(), 1);
+		assertTrue(approvedTx.getApprovals().get(0).getHashPreviousOutput().length() > 0);
+		assertTrue(approvedTx.getApprovals().get(0).getHolderSignature().length() > 0);
+		assertTrue(approvedTx.getApprovals().get(0).getLockingScript().length() > 0);
+		assertTrue(approvedTx.getApprovals().get(0).getOwnerAddress().length() > 0);
 	}
 	
 	// Coinbase:
@@ -82,10 +111,8 @@ public class TransactionTest {
 	public void testWhichTransactionApproval() {
 
 		final int AMOUNT = 16;
-		final String HASH_PREVIOUS_OUTPUT = "ABC";
 		final String LOCKING_SCRIPT = "ABC";
 		final String OWNER_ADDRESS = "ABC";
-		final String HOLDER_SIGNATURE = "ABC";
 		
 		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
 		

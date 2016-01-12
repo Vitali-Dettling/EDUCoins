@@ -112,7 +112,8 @@ public class Client {
 		List<String> publicKeys = Wallet.getPublicKeys();
 
 		for (Transaction tx : block.getTransactions()) {
-			if(tx.whichTransaction() ==  ETransaction.REGULAR){
+			if(tx.whichTransaction() ==  ETransaction.REGULAR ||
+			   tx.whichTransaction() ==  ETransaction.COINBASE){
 				for (Output out : tx.getOutputs()) {
 					for (String publicKey : publicKeys) {
 						if (out.getLockingScript().equals(publicKey)) {

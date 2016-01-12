@@ -1,5 +1,6 @@
 package org.educoins.core.transaction;
 
+import org.educoins.core.BlockChain;
 import org.educoins.core.Wallet;
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
@@ -7,6 +8,8 @@ import org.educoins.core.utils.CannotRevokeRevokeTransactionException;
 import org.educoins.core.utils.Hashable;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -231,7 +234,7 @@ public class Transaction implements Hashable {
 			break;
 		case REVOKE:
 			toBeHashed = transaction.approvedTransaction.getBytes();
-			break;
+			break;			
 		}
 		// hash concatenated header fields and return
 		return Sha256Hash.wrap(SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed)));

@@ -63,15 +63,15 @@ public class BlockStoreFactory {
     }
 
     public static Transaction generateTransaction(int number) {
-    	Wallet mockedWallet = MockedWallet.getMockedWallet();
+    	
     	List<Output> copyPreviousOutputs = TxFactory.getRandomPreviousOutputs();
         Transaction t = new RegularTransaction(copyPreviousOutputs, 2, 3, Wallet.getPublicKey());
         for (int i = 0; i < 2 * number; i++) {
-            Input input = new Input(5 * i * number, "",  mockedWallet.getPublicKey());
+            Input input = new Input(5 * i * number, "",  MockedWallet.getPublicKey());
             t.addInput(input);
         }
         for (int i = 0; i < 4 * number; i++) {
-            t.addOutput(new Output(5 * i * number, mockedWallet.getPublicKey()));
+            t.addOutput(new Output(5 * i * number, MockedWallet.getPublicKey()));
         }
         t.setApprovals(null);
         return t;

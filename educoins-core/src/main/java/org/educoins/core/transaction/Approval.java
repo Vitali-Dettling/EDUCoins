@@ -16,6 +16,8 @@ public class Approval {
 		this.ownerAddress = ownerAddress;
 		this.lockingScript = lockingScript;
 		this.hashPreviousOutput = hashPreviousOutput;
+		
+		this.holderSignature = null;
 	}
 	
 	public void setHashPreviousOutput(String hashPreviousOutput){

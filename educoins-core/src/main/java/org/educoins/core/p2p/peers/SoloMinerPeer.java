@@ -27,6 +27,11 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 	public SoloMinerPeer(BlockChain blockChain) {
 		super(blockChain);
 		this.miner = new Miner(Peer.blockChain);
+		SoloMinerPeer.singlePublicKey = Wallet.getPublicKey();
+	}
+	
+	public String getPublicKey(){
+		return SoloMinerPeer.singlePublicKey;
 	}
 
 	@Override
@@ -35,7 +40,6 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 		miner.addPoWListener(this);
 		miner.addPoWListener(Peer.remoteProxies);
 
-		SoloMinerPeer.singlePublicKey = Wallet.getPublicKey();
 		// Kick off Miner.
 		foundPoW(new Block());
 		// After miner has started.
