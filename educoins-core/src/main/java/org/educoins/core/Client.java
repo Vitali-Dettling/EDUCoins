@@ -43,15 +43,15 @@ public class Client {
 		return null;
 	}
 	
-	public Transaction generateApprovedTransaction(int toApproveAmount, String owner, String lockingScript){
+	public Transaction generateApprovedTransaction(int toApproveAmount, String owner, String holderSignature, String lockingScript){
 
-		if(!checkAmount(toApproveAmount) || !checkOutputs() || !checkParams(owner) || !checkParams(lockingScript)){
+		if(!checkAmount(toApproveAmount) || !checkOutputs() || !checkParams(owner) || !checkParams(holderSignature) || !checkParams(lockingScript)){
 			return null;
 		}
 		
 		this.locked = true;
 		Client.availableAmount -= toApproveAmount;
-		Transaction buildTx = this.transactionFactory.generateApprovedTransaction(this.previousOutputs, toApproveAmount, owner, lockingScript);
+		Transaction buildTx = this.transactionFactory.generateApprovedTransaction(this.previousOutputs, toApproveAmount, owner, holderSignature, lockingScript);
 		this.locked = false;
 		
 		return buildTx;
@@ -81,7 +81,7 @@ public class Client {
 	
 	private boolean checkOutputs(){
 		if (previousOutputs.isEmpty()) {
-			this.logger.info("You have never got any EDUCoins.");
+			this.logger.warn("You have never got any EDUCoins.");
 			return false;
 		}
 		return true;
@@ -104,7 +104,6 @@ public class Client {
 		}else{
 			checkBlock(block);
 		}
-		this.logger.info("You have received some EDUCoins; the current amount is: " + Client.availableAmount);
 	}
 
 	private void checkBlock(Block block) {
@@ -119,16 +118,18 @@ public class Client {
 						if (out.getLockingScript().equals(publicKey)) {
 							this.previousOutputs.add(out);
 							Client.availableAmount += out.getAmount();
+							this.logger.info("You have received some EDUCoins; the current amount is: " + Client.availableAmount);
 						}
 					}
 				}
-			}else if(tx.whichTransaction() == ETransaction.APPROVED){
+			}
+			if(tx.whichTransaction() == ETransaction.APPROVED){
 				for (Approval app : tx.getApprovals()) {
 					for (String publicKey : publicKeys) {
 						if (app.getLockingScript().equals(publicKey)) {
 							String holderSignature = app.getHolderSignature();
-							String hashedTx = tx.hash().toString();
-							if(Wallet.compare(hashedTx, holderSignature, publicKey)){
+							String hashTest = "123456789ABCDEF";
+							if(Wallet.compare(hashTest, holderSignature, publicKey)){
 								this.approvedTransactions.add(app);
 								Client.approvedCoins += app.getAmount();	
 							}
@@ -150,10 +151,19 @@ public class Client {
 	}
 	
 	public int getEDICoinsAmount(){
+		
+		Client.availableAmount = 0;
+		for(Output out : this.previousOutputs){
+			Client.availableAmount += out.getAmount(); 
+		}
 		return Client.availableAmount;
 	}
 	
 	public int getApproveCoins(){
+		Client.approvedCoins = 0;
+		for(Approval app : this.approvedTransactions){
+			Client.approvedCoins += app.getAmount(); 
+		}
 		return Client.approvedCoins;
 	}
 

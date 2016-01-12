@@ -7,7 +7,9 @@ import org.educoins.core.BlockChain;
 import org.educoins.core.ITransactionTransmitter;
 import org.educoins.core.Wallet;
 import org.educoins.core.p2p.discovery.DiscoveryException;
+import org.educoins.core.transaction.Approval;
 import org.educoins.core.transaction.Transaction;
+import org.educoins.core.utils.Sha256Hash;
 
 /**
  * The Reference Client consisting of a Miner, a {@link BlockChain} and a
@@ -46,6 +48,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 			Scanner scanner = new Scanner(System.in);
 			System.out.println("Select action: ");
 			System.out.println("\t - (P)Get Public Key");
+			System.out.println("\t - (S)Create Signature");
 			System.out.println("\t - (G)Get Own EDUCoins");
 			System.out.println("\t --- Transactions types ---");
 			System.out.println("\t - (R)egular transaction");
@@ -59,6 +62,10 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 			case "p":
 				System.out.println("Send to address: " + ReferencePeer.singlePublicKey);
 				break;
+			case "s":
+				String hashTx = "123456789ABCDEF";
+				String signature = Wallet.getSignature(ReferencePeer.singlePublicKey, hashTx);
+				System.out.println("Created Signature: " + signature);
 			case "g":
 				System.out.println("Regular EDUCoins " + Peer.client.getEDICoinsAmount());
 				System.out.println("Approved EDUCoins " + Peer.client.getApproveCoins());
@@ -74,9 +81,10 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				if (dstPublicKey == null)
 					continue;
 				trans = Peer.client.generateRegularTransaction(amount, dstPublicKey);
-				if (trans != null)
+				if (trans != null){
 					ReferencePeer.blockChain.sendTransaction(trans);
 					System.out.println(trans.hash());
+				}
 				break;
 			case "a":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
@@ -86,14 +94,10 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				String owner = ReferencePeer.singlePublicKey;
 				System.out.print("Type in LockingScript: ");
 				String lockingScript = scanner.nextLine();
+				System.out.print("Holder signature is: ");
+				String holderSignature = scanner.nextLine();
 				
-				trans = Peer.client.generateApprovedTransaction(amount, owner, lockingScript);
-				if(!trans.getApprovals().isEmpty()){
-					String holderSignature = trans.getApprovals().get(0).getHolderSignature();
-					System.out.print("Holder signature is: " + holderSignature);
-				}
-				long time = System.currentTimeMillis();
-				System.out.println(System.currentTimeMillis() - time);
+				trans = Peer.client.generateApprovedTransaction(amount, owner, holderSignature, lockingScript);
 				if (trans != null){
 					ReferencePeer.blockChain.sendTransaction(trans);
 					System.out.println(trans.hash());

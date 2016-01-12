@@ -95,12 +95,13 @@ public class TransactionTest {
 
 		final int AMOUNT = 16;
 		final String LOCKING_SCRIPT = "ABC";
+		final String HOLDER_SIGNATURE = "ABC";
 		final String OWNER_ADDRESS = "ABC";
 
 		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
 
 		ITransactionFactory txFactory = new TransactionFactory();
-		Transaction transaction = txFactory.generateApprovedTransaction(outputs, AMOUNT, OWNER_ADDRESS, LOCKING_SCRIPT);
+		Transaction transaction = txFactory.generateApprovedTransaction(outputs, AMOUNT, OWNER_ADDRESS, HOLDER_SIGNATURE, LOCKING_SCRIPT);
 
 		ETransaction testee = transaction.whichTransaction();
 		assertEquals(testee, ETransaction.APPROVED);

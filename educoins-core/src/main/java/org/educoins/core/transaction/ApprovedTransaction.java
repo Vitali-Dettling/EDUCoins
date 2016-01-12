@@ -13,12 +13,14 @@ public class ApprovedTransaction extends Transaction {
 	private int amount;
 	private String owner;
 	private String lockingScript;
+	private String holderSignature;
 	private List<Output> previousOutput;
 	
-	public ApprovedTransaction(@NotNull List<Output> previousOutput, int amount, String owner, String lockingScript) {
+	public ApprovedTransaction(@NotNull List<Output> previousOutput, int amount, String owner, String holderSignature, String lockingScript) {
 		this.amount = amount;
 		this.owner = owner;
 		this.lockingScript = lockingScript;
+		this.holderSignature = holderSignature;
 		this.previousOutput = previousOutput;
 	}
 	
@@ -26,30 +28,30 @@ public class ApprovedTransaction extends Transaction {
 	public Transaction create() {
 
 		List<String> hashPreviousOutput = getHashPreviousOutput();
-		for(String hashedOutput : hashPreviousOutput){
-			Approval approval = new Approval(hashedOutput, amount, owner, lockingScript);
+		for(int i = 0 ; i < amount ; i++){
+			Approval approval = new Approval(hashPreviousOutput.get(i), amount, owner, lockingScript);
 			super.addApproval(approval);
-			Sha256Hash hashTx = this.hash();
-			String signature = Wallet.getSignature(lockingScript, hashTx.toString());
-			approval.setHolderSignature(signature);
+			approval.setHolderSignature(this.holderSignature);
 		}
 		return this;
 	}
 
 	private List<String> getHashPreviousOutput() {
 		
-		int enoughApproved = 0;
 		List<String> previousHashOutputs = new ArrayList<String>();	
 		Iterator<Output> iterator = this.previousOutput.iterator();
-		while(iterator.hasNext()){
+		for(int i = 0 ; i < amount ; i++){
 			
-			Output nextOut = iterator.next();
-			enoughApproved += nextOut.getAmount();
-			previousHashOutputs.add(nextOut.hash().toString());
-			iterator.remove();
-			
-			if(enoughApproved == amount){
-				break;
+			if(iterator.hasNext()){
+				Output nextOut = iterator.next();
+				int currentAmount = nextOut.getAmount();
+				previousHashOutputs.add(nextOut.hash().toString());
+				nextOut.setAmount(currentAmount - amount);
+				
+				if(nextOut.getAmount() == 0){
+					iterator.remove();
+				}
+				
 			}
 		}
 		

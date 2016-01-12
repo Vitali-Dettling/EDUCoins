@@ -62,7 +62,7 @@ public class MockedClient {
 
 	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String lockingScript) {
 		transactionReceived();
-		Transaction transaction = mockedClient.generateApprovedTransaction(amount, owner, lockingScript);
+		Transaction transaction = mockedClient.generateApprovedTransaction(amount, owner, owner, lockingScript);
 		mockedBlockchain.sendTransaction(transaction);
 		return receivedTransaction();
 	}
@@ -106,7 +106,7 @@ public class MockedClient {
 		block.addTransaction(tx);
 		client.distructOwnOutputs(block);
 		
-		return client.generateApprovedTransaction(toApproveAmount, owner, lockingScript);
+		return client.generateApprovedTransaction(toApproveAmount, owner, owner, lockingScript);
 	}
 	
 	

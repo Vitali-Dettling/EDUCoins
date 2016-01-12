@@ -12,6 +12,6 @@ public interface ITransactionFactory {
 
 	Transaction generateRevokeTransaction(int amount, String lockingScript);
 
-	Transaction generateApprovedTransaction(List<Output> previousOutputs, int amount, String owner, String lockingScript);
+	Transaction generateApprovedTransaction(List<Output> previousOutputs, int amount, String owner, String holderSignature, String lockingScript);
 
 }

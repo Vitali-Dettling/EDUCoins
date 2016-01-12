@@ -21,9 +21,9 @@ public class TransactionFactory implements ITransactionFactory {
 	 * @see org.educoins.core.transaction.ITransactionFactory#generateApprovedTransaction(int, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Transaction generateApprovedTransaction(@NotNull List<Output> previousOutputs, int amount, String owner, String lockingScript) {
+	public Transaction generateApprovedTransaction(@NotNull List<Output> previousOutputs, int amount, String owner, String holderSignature, String lockingScript) {
 		
-		Transaction regTx = new ApprovedTransaction(previousOutputs, amount, owner, lockingScript);
+		Transaction regTx = new ApprovedTransaction(previousOutputs, amount, owner, holderSignature, lockingScript);
 		return regTx.create();
 	}
 
