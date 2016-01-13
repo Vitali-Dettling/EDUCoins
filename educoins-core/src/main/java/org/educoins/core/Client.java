@@ -98,6 +98,7 @@ public class Client {
 		return true;
 	}
 
+	//TODO: WTF does this method name mean?
 	public void distructOwnOutputs(Block block) {
 		if(this.locked){
 			this.blockBuffer.add(block);
