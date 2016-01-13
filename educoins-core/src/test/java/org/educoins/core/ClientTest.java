@@ -7,6 +7,7 @@ import org.educoins.core.transaction.Transaction;
 import org.educoins.core.transaction.Transaction.ETransaction;
 import org.educoins.core.utils.MockedClient;
 import org.educoins.core.utils.MockedWallet;
+import org.educoins.core.utils.Sha256Hash;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -41,6 +42,7 @@ public class ClientTest {
 		Assert.assertNotEquals(amountExpected, amountResult);
 	}
 
+	@Ignore
 	@Test
 	public void testReceivingApprovedTransaction() {
 
@@ -83,7 +85,7 @@ public class ClientTest {
 	public void testSendRevokeTransaction() {
 
 		String lockingScript = MockedWallet.getPublicKey();
-		List<Transaction> reqeived = MockedClient.sendRevokedTransaction(1, lockingScript);
+		List<Transaction> reqeived = MockedClient.sendRevokedTransaction(Sha256Hash.wrap("123"), lockingScript);
 		checkTransactionType(reqeived, ETransaction.REVOKE);
 	}
 
