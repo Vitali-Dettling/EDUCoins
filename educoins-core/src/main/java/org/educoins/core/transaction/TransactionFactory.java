@@ -1,7 +1,5 @@
 package org.educoins.core.transaction;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.educoins.core.utils.Sha256Hash;
@@ -43,13 +41,13 @@ public class TransactionFactory implements ITransactionFactory {
 	@Override
 	public Transaction generateRegularTransaction(@NotNull List<Output> previousOutputs, int sendAmount, String sendPublicKey) {
 	
-		int outputAmoun = getSendedAmount(previousOutputs);	
+		int outputAmoun = getSentAmount(previousOutputs);
 		
 		Transaction regTx = new RegularTransaction(previousOutputs, sendAmount, outputAmoun, sendPublicKey);
 		return regTx.create();
 	}
 	
-	private int getSendedAmount(List<Output> outputs){
+	private int getSentAmount(List<Output> outputs){
 		int amount = 0;
 		for(Output out : outputs){
 			amount += out.getAmount();
