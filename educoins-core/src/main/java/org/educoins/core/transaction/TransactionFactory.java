@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 
 public class TransactionFactory implements ITransactionFactory {
@@ -31,9 +32,9 @@ public class TransactionFactory implements ITransactionFactory {
 	 * @see org.educoins.core.transaction.ITransactionFactory#generateRevokeTransaction(int, java.lang.String)
 	 */
 	@Override
-	public Transaction generateRevokeTransaction(int amount, String lockingScript) {
-		//TODO 
-		return null;
+	public Transaction generateRevokeTransaction(Sha256Hash transToRevokeHash, String lockingScript) {
+		Transaction revTx = new RevokeTransaction(transToRevokeHash, lockingScript);
+		return revTx.create();
 	}
 	
 	/* (non-Javadoc)

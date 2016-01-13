@@ -10,6 +10,7 @@ import org.educoins.core.transaction.ITransactionFactory;
 import org.educoins.core.transaction.Output;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.transaction.TransactionFactory;
+import org.educoins.core.utils.Sha256Hash;
 import org.educoins.core.transaction.Transaction.ETransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,14 @@ public class Client {
 		this.locked = false;
 	}
 	
-	public Transaction generateRevokeTransaction(int amount, String lockingScript) {
-		//TODO 
-		return null;
+	public Transaction generateRevokeTransaction(Sha256Hash transToRevokeHash, String lockingScript) {
+		//TODO check if else, lock, available amount
+		
+		this.locked = true;
+		Transaction buildTx = this.transactionFactory.generateRevokeTransaction(transToRevokeHash, lockingScript);
+		this.locked = false;
+		
+		return buildTx;
 	}
 	
 	public Transaction generateApprovedTransaction(int toApproveAmount, String owner, String holderSignature, String lockingScript){

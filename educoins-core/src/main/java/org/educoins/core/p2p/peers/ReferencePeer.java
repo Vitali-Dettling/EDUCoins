@@ -104,17 +104,18 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				}
 				break;
 			case "x":
-				// TODO
-				// Sha256Hash hash = Sha256Hash.wrap(trans.hash().toString());
-				// Peer.client.getHexInput(scanner, "Type in hash of transaction
-				// to revoke: ");
-				// trans = Peer.client.findTransaction(hash);
-				// Transaction revoke =
-				// Peer.client.sendRevokeTransaction(trans);
-				// if (revoke != null) {
-				// System.out.println("Revoked transaction: " + trans.hash());
-				// System.out.println("With Revoke: " + revoke.hash());
-				// }
+				String transHash = client.getHexInput(scanner, "Type in hash of transaction to revoke: ");
+				Sha256Hash hash = Sha256Hash.wrap(transHash);
+				//TODO lockingScript needs to be implemented
+//				System.out.print("Type in LockingScript: ");
+//				String lockingScript = scanner.nextLine();
+				Transaction transToRevoke = blockChain.getTransaction(hash);
+				trans = client.generateRevokeTransaction(hash, "");
+				if (trans != null) {
+					ReferencePeer.blockChain.sendTransaction(trans);
+					System.out.println("Revoked transaction: " + transToRevoke.hash());
+					System.out.println("With Revoke: " + trans.hash());
+				}
 				break;
 			case "e":
 				running = false;
