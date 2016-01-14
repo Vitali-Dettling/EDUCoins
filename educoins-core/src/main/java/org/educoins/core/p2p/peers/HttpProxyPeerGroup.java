@@ -110,7 +110,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 // TODO: parallel? -> No, because the verification needs the
                 // block in a specific order, beginning from the genesis block.
                 blocks.stream().forEach(
-                        block -> blockListeners.forEach(iBlockListener -> iBlockListener.blockListener(block)));
+                        block -> blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block)));
 
                 proxy.rateHigher();
             } catch (IOException e) {
@@ -235,7 +235,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     }
 
     @Override
-    public void foundPoW(Block block) {
+    public void blockReceived(Block block) {
         logger.info("Dispatching the new Block ({})...", block.hash());
         getHighestRatedProxies().forEach(proxy -> {
             try {

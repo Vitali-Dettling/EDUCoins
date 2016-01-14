@@ -2,9 +2,9 @@ package org.educoins.miner;
 
 import org.educoins.core.BlockChain;
 import org.educoins.core.Wallet;
+import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.p2p.peers.Peer;
-import org.educoins.core.p2p.peers.SoloMinerPeer;
+import org.educoins.core.p2p.peers.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,7 +27,8 @@ public class SoloMinerNode {
 
         ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
         BlockChain blockChain = (BlockChain) run.getBean("blockChain");
-        Peer peer = new SoloMinerPeer(blockChain);
+        IProxyPeerGroup peerGroup = (IProxyPeerGroup) run.getBean("proxyPeerGroup");
+        Peer peer = new SoloMinerPeer(blockChain, peerGroup, AppConfig.getOwnPublicKey());
 
         try {
             peer.start();

@@ -11,7 +11,7 @@
 //	@Override
 //    public void start() throws DiscoveryException {
 //		//TODO Does notthing right now.
-////      remoteProxies.discover();
+////      proxyPeerGroup.discover();
 ////      blockChain.foundPoW(new Block());
 //  }
 //

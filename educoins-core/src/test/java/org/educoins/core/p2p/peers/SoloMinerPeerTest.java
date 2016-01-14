@@ -1,27 +1,21 @@
 package org.educoins.core.p2p.peers;
 
-import java.io.IOException;
-import java.net.URI;
-
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.Client;
+import org.educoins.core.*;
+import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.peers.server.PeerServer;
-import org.educoins.core.transaction.CoinbaseTransaction;
-import org.educoins.core.transaction.Output;
-import org.educoins.core.transaction.Transaction;
-import org.educoins.core.utils.MockedBlockChain;
-import org.educoins.core.utils.MockedClient;
-import org.educoins.core.utils.RestClient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.educoins.core.transaction.*;
+import org.educoins.core.utils.*;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import java.io.IOException;
+import java.net.URI;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Created by dacki on 07.12.15.
@@ -57,11 +51,12 @@ public class SoloMinerPeerTest {
 	@Test
 	public void testGetAmount() {
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
-		SoloMinerPeer peer = new SoloMinerPeer(blockchain);
+		Sha256Hash ownPublicKey = AppConfig.getOwnPublicKey();
+		SoloMinerPeer peer = new SoloMinerPeer(blockchain, mock(IProxyPeerGroup.class), ownPublicKey);
 		Client client = MockedClient.getClient();
 
 		int expected = 0;
-		String publicKey = peer.getPublicKey();
+		String publicKey = ownPublicKey.toString();
 
 		for (int i = 0; i < 10; i++) {
 			Block block = new Block();

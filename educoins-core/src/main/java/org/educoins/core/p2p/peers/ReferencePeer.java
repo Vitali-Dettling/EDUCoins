@@ -11,127 +11,127 @@ import java.util.Scanner;
  * The Reference Client consisting of a Miner, a {@link BlockChain} and a
  * {@link Wallet}. Created by typus on 11/23/15.
  */
-public class ReferencePeer extends Peer implements ITransactionTransmitter {
+public class ReferencePeer extends Peer implements ITransactionTransmitter, IBlockListener {
 
-	// TODO only one public key will be used. Need to be improved in using
-	// multiple keys.
-	private static String singlePublicKey;
+    // TODO only one public key will be used. Need to be improved in using
+    // multiple keys.
+    protected final String singlePublicKey;
+    protected final Client client;
+    protected final Miner miner;
 
-	public ReferencePeer(BlockChain blockChain) {
-		super(blockChain);
-		singlePublicKey = Wallet.getPublicKey();
-		Peer.remoteProxies.addBlockListener(this);
-	}
+    public ReferencePeer(BlockChain blockChain, IProxyPeerGroup peerGroup, Sha256Hash publicKey) {
+        super(blockChain, peerGroup, publicKey);
+        this.miner = new Miner(blockChain);
+        this.client = new Client();
+        this.singlePublicKey = Wallet.getPublicKey();
+    }
 
-	public String getPubKey() {
-		return ReferencePeer.singlePublicKey;
-	}
+    @Override
+    public void start() throws DiscoveryException {
+        super.start();
 
-	@Override
-	public void start() throws DiscoveryException {
-		Peer.remoteProxies.discover();
-		// Kick starts of receiving of blocks.
-		Block genesisBlock = new Block();
-		remoteProxies.receiveBlocks(genesisBlock.hash());
-		client();
-	}
+        // Update blockchain
+        proxyPeerGroup.receiveBlocks(blockChain.getLatestBlock().hash());
+        client();
+    }
 
-	@Override
-	public void stop() {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    public void stop() {
+    }
 
-	private void client() {
+    private void client() {
+        boolean running = true;
+        while (running) {
 
-		boolean running = true;
-		while (running) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Select action: ");
+            System.out.println("\t - (P)Get Public Key");
+            System.out.println("\t - (S)Create Signature");
+            System.out.println("\t - (G)Get Own EDUCoins");
+            System.out.println("\t --- Transactions types ---");
+            System.out.println("\t - (R)egular transaction");
+            System.out.println("\t - (A)pproved transaction");
+            System.out.println("\t - (X)Revoke transaction");
+            System.out.println("\t - (E)xit");
+            String action = scanner.nextLine();
+            int amount = -1;
+            Transaction trans = null;
+            switch (action.toLowerCase()) {
+                case "p":
+                    System.out.println("Send to address: " + this.singlePublicKey);
+                    break;
+                case "s":
+                    String hashTx = "123456789ABCDEF";
+                    String signature = Wallet.getSignature(this.singlePublicKey, hashTx);
+                    System.out.println("Created Signature: " + signature);
+                case "g":
+                    System.out.println("Regular EDUCoins " + this.client.getEDICoinsAmount());
+                    System.out.println("Approved EDUCoins " + this.client.getApproveCoins());
+                    break;
+                case "r":
+                    amount = this.client.getIntInput(scanner, "Type in amount: ");
+                    int availableAmount = this.client.getEDICoinsAmount();
+                    if (amount > availableAmount) {
+                        System.err.println("Not enough available amount (max. " + availableAmount + ")");
+                        break;
+                    }
+                    String dstPublicKey = this.client.getHexInput(scanner, "Type in dstPublicKey: ");
+                    if (dstPublicKey == null)
+                        continue;
+                    trans = this.client.generateRegularTransaction(amount, dstPublicKey);
+                    if (trans != null) {
+                        this.blockChain.sendTransaction(trans);
+                        System.out.println(trans.hash());
+                    }
+                    break;
+                case "a":
+                    amount = this.client.getIntInput(scanner, "Type in amount: ");
+                    if (amount == -1)
+                        continue;
+                    System.out.print("Owner address is: " + this.singlePublicKey + "\n");
+                    String owner = this.singlePublicKey;
+                    System.out.print("Type in LockingScript: ");
+                    String lockingScript = scanner.nextLine();
+                    System.out.print("Holder signature is: ");
+                    String holderSignature = scanner.nextLine();
 
-			Scanner scanner = new Scanner(System.in);
-			System.out.println("Select action: ");
-			System.out.println("\t - (P)Get Public Key");
-			System.out.println("\t - (S)Create Signature");
-			System.out.println("\t - (G)Get Own EDUCoins");
-			System.out.println("\t --- Transactions types ---");
-			System.out.println("\t - (R)egular transaction");
-			System.out.println("\t - (A)pproved transaction");
-			System.out.println("\t - (X)Revoke transaction");
-			System.out.println("\t - (E)xit");
-			String action = scanner.nextLine();
-			int amount = -1;
-			Transaction trans = null;
-			switch (action.toLowerCase()) {
-			case "p":
-				System.out.println("Send to address: " + ReferencePeer.singlePublicKey);
-				break;
-			case "s":
-				String hashTx = "123456789ABCDEF";
-				String signature = Wallet.getSignature(ReferencePeer.singlePublicKey, hashTx);
-				System.out.println("Created Signature: " + signature);
-			case "g":
-				System.out.println("Regular EDUCoins " + Peer.client.getEDICoinsAmount());
-				System.out.println("Approved EDUCoins " + Peer.client.getApproveCoins());
-				break;
-			case "r":
-				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
-				int availableAmount = Peer.client.getEDICoinsAmount();
-				if (amount > availableAmount) {
-					System.err.println("Not enough available amount (max. " + availableAmount + ")");
-					break;
-				}
-				String dstPublicKey = Peer.client.getHexInput(scanner, "Type in dstPublicKey: ");
-				if (dstPublicKey == null)
-					continue;
-				trans = Peer.client.generateRegularTransaction(amount, dstPublicKey);
-				if (trans != null){
-					ReferencePeer.blockChain.sendTransaction(trans);
-					System.out.println(trans.hash());
-				}
-				break;
-			case "a":
-				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
-				if (amount == -1)
-					continue;
-				System.out.print("Owner address is: " + ReferencePeer.singlePublicKey + "\n");
-				String owner = ReferencePeer.singlePublicKey;
-				System.out.print("Type in LockingScript: ");
-				String lockingScript = scanner.nextLine();
-				System.out.print("Holder signature is: ");
-				String holderSignature = scanner.nextLine();
-
-				trans = Peer.client.generateApprovedTransaction(amount, owner, holderSignature, lockingScript);
-				if (trans != null){
-					ReferencePeer.blockChain.sendTransaction(trans);
-					System.out.println(trans.hash());
-				}
-				break;
-			case "x":
-				String transHash = client.getHexInput(scanner, "Type in hash of transaction to revoke: ");
-				Sha256Hash hash = Sha256Hash.wrap(transHash);
-				//TODO lockingScript needs to be implemented
+                    trans = this.client.generateApprovedTransaction(amount, owner, holderSignature, lockingScript);
+                    if (trans != null) {
+                        this.blockChain.sendTransaction(trans);
+                        System.out.println(trans.hash());
+                    }
+                    break;
+                case "x":
+                    String transHash = client.getHexInput(scanner, "Type in hash of transaction to revoke: ");
+                    Sha256Hash hash = Sha256Hash.wrap(transHash);
+                    //TODO lockingScript needs to be implemented
 //				System.out.print("Type in LockingScript: ");
 //				String lockingScript = scanner.nextLine();
-				Transaction transToRevoke = blockChain.getTransaction(hash);
-				trans = client.generateRevokeTransaction(hash, "");
-				if (trans != null) {
-					ReferencePeer.blockChain.sendTransaction(trans);
-					System.out.println("Revoked transaction: " + transToRevoke.hash());
-					System.out.println("With Revoke: " + trans.hash());
-				}
-				break;
-			case "e":
-				running = false;
-				break;
-			default:
-			}
-		}
-	}
+                    Transaction transToRevoke = blockChain.getTransaction(hash);
+                    trans = client.generateRevokeTransaction(hash, "");
+                    if (trans != null) {
+                        this.blockChain.sendTransaction(trans);
+                        System.out.println("Revoked transaction: " + transToRevoke.hash());
+                        System.out.println("With Revoke: " + trans.hash());
+                    }
+                    break;
+                case "e":
+                    running = false;
+                    break;
+                default:
+            }
+        }
+    }
 
-	// region listeners
+    // region listeners
+    @Override
+    public void transmitTransaction(Transaction transaction) {
+        this.proxyPeerGroup.transmitTransaction(transaction);
+    }
 
-	@Override
-	public void transmitTransaction(Transaction transaction) {
-		Peer.remoteProxies.transmitTransaction(transaction);
-	}
-
-	// endregion
+    @Override
+    public void blockReceived(Block block) {
+        this.blockChain.blockReceived(block);
+    }
+    // endregion
 }

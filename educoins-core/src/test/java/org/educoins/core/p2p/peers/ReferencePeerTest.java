@@ -1,23 +1,16 @@
 package org.educoins.core.p2p.peers;
 
+import org.educoins.core.*;
+import org.educoins.core.config.AppConfig;
+import org.educoins.core.testutils.BlockStoreFactory;
+import org.educoins.core.transaction.*;
+import org.educoins.core.utils.*;
+import org.junit.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.Client;
-import org.educoins.core.Wallet;
-import org.educoins.core.testutils.BlockStoreFactory;
-import org.educoins.core.transaction.CoinbaseTransaction;
-import org.educoins.core.transaction.Output;
-import org.educoins.core.transaction.RegularTransaction;
-import org.educoins.core.transaction.Transaction;
-import org.educoins.core.utils.MockedBlockChain;
-import org.educoins.core.utils.MockedClient;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.mockito.Mockito.*;
 
 public class ReferencePeerTest {
 
@@ -32,21 +25,21 @@ public class ReferencePeerTest {
 	public void testGetAmount() {
 
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
-		ReferencePeer peer = new ReferencePeer(blockchain);
+		Sha256Hash ownPublicKey = AppConfig.getOwnPublicKey();
+		ReferencePeer peer = new ReferencePeer(blockchain, mock(IProxyPeerGroup.class), ownPublicKey);
 		Client client = MockedClient.getClient();
 
 		int expected = 0;
 		Block block = new Block();
-		String publicKey = peer.getPubKey();
 		List<Output> outputs = new ArrayList<>();
 		
-		for (int i = 0; i < 10; i++) {			
-			Output out = new Output(6, publicKey);
+		for (int i = 0; i < 10; i++) {
+			Output out = new Output(6, ownPublicKey.toString());
 			expected += 6;
 			outputs.add(out);
 		}
 		block = BlockStoreFactory.getRandomBlock(block);
-		Transaction tx = new RegularTransaction(outputs, expected, expected, publicKey).create();
+		Transaction tx = new RegularTransaction(outputs, expected, expected, ownPublicKey.toString()).create();
 		block.addTransaction(tx);
 		client.distructOwnOutputs(block);
 	

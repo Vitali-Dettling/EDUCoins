@@ -1,15 +1,7 @@
 package org.educoins.core.p2p.peers;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.educoins.core.*;
-import org.educoins.core.config.AppConfig;
+import org.educoins.core.BlockChain;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.p2p.peers.server.BlockController;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,75 +12,48 @@ import org.slf4j.LoggerFactory;
  * Full BlockChain->blockchain Solo Miner->miner,blockchain Created by typus on
  * 10/27/15.
  */
-public abstract class Peer implements IBlockReceiver, IBlockListener {
+public abstract class Peer {
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final IProxyPeerGroup proxyPeerGroup;
+    protected final BlockChain blockChain;
+    protected final Sha256Hash publicKey;
 
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
-	protected static IProxyPeerGroup remoteProxies;
-	protected static BlockChain blockChain;
-	protected static Client client;
+    protected Peer(BlockChain blockChain, IProxyPeerGroup proxyPeerGroup, Sha256Hash publicKey) {
+        this.proxyPeerGroup = proxyPeerGroup;
+        this.blockChain = blockChain;
+        this.publicKey = publicKey;
 
-	public Peer(BlockChain blockChain) {
-		Peer.blockChain = blockChain;
-		Peer.remoteProxies = new HttpProxyPeerGroup();
-		Peer.client = new Client();
-//		Peer.blockController = new BlockController(blockChain);
+        this.proxyPeerGroup.addBlockListener(blockChain);
+    }
 
-		Peer.blockChain.addBlockListener(this);
-		Peer.remoteProxies.addBlockListener(blockChain);
-	}
+    public void start() throws DiscoveryException {
+        this.proxyPeerGroup.discover();
+        logger.info("Starting {}", getClass().getName());
+    }
 
-	public abstract void start() throws DiscoveryException;
+    public abstract void stop();
 
-	public abstract void stop();
+    // region equality
+    @Override
+    public int hashCode() {
+        int result = logger != null ? logger.hashCode() : 0;
+        result = 31 * result + (proxyPeerGroup != null ? proxyPeerGroup.hashCode() : 0);
+        return result;
+    }
 
-	// region listeners
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
-	@Override
-	public void blockListener(Block receivedBlock) {
-		Peer.blockChain.verifyReceivedBlock(receivedBlock);
-		Peer.client.distructOwnOutputs(receivedBlock);
-	}
-	
-	@Override
-	public void addBlockListener(IBlockListener blockListener) {
-		Peer.blockChain.addBlockListener(blockListener);
-		Peer.remoteProxies.addBlockListener(blockListener);
-	}
+        Peer peer = (Peer) o;
 
-	@Override
-	public void receiveBlocks(Sha256Hash from) {
-		Peer.remoteProxies.receiveBlocks(from);
-	}
+        return !(logger != null ? !logger.equals(peer.logger) : peer.logger != null)
+                && !(proxyPeerGroup != null ? !proxyPeerGroup.equals(peer.proxyPeerGroup) : peer.proxyPeerGroup != null);
 
-	
-	@Override
-	public void removeBlockListener(IBlockListener blockListener) {
-		Peer.blockChain.removeBlockListener(blockListener);
-		Peer.remoteProxies.removeBlockListener(blockListener);
-	}
-	// endregion
-
-	@Override
-	public int hashCode() {
-		int result = logger != null ? logger.hashCode() : 0;
-		result = 31 * result + (remoteProxies != null ? remoteProxies.hashCode() : 0);
-		return result;
-	}
-
-	// region equality
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		Peer peer = (Peer) o;
-
-		return !(logger != null ? !logger.equals(peer.logger) : peer.logger != null)
-				&& !(remoteProxies != null ? !remoteProxies.equals(Peer.remoteProxies) : Peer.remoteProxies != null);
-
-	}
-	// endregion
+    }
+    // endregion
 
 }

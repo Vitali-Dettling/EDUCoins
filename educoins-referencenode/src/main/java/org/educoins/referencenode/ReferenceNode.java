@@ -1,7 +1,9 @@
 package org.educoins.referencenode;
 
 import org.educoins.core.*;
+import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.DiscoveryException;
+import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.ReferencePeer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -29,7 +31,8 @@ public class ReferenceNode {
 
         ConfigurableApplicationContext run = SpringApplication.run(ReferenceNode.class, args);
         BlockChain blockChain = (BlockChain) run.getBean("blockChain");
-        ReferencePeer peer = new ReferencePeer(blockChain);
+        IProxyPeerGroup peerGroup = (IProxyPeerGroup) run.getBean("proxyPeerGroup");
+        ReferencePeer peer = new ReferencePeer(blockChain, peerGroup, AppConfig.getOwnPublicKey());
 
         try {
             peer.start();

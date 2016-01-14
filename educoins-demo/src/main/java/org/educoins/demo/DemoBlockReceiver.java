@@ -38,6 +38,6 @@ public class DemoBlockReceiver implements IBlockReceiver {
 
         Block latestBlock = this.blockStore.getLatest();
         Threading.run(() ->
-                blockListeners.forEach(iBlockListener -> iBlockListener.blockListener(latestBlock)));
+                blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(latestBlock)));
     }
 }

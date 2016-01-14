@@ -13,7 +13,7 @@ import java.util.Collection;
  * and {@link IPoWListener} to enable {@link Peer}s to handle Networking.
  * Created by typus on 12/3/15.
  */
-public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, ITransactionTransmitter, IPoWListener {
+public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, ITransactionTransmitter, IBlockListener {
     int MAX_PROXIES_SIZE = 100;
 
     /**
