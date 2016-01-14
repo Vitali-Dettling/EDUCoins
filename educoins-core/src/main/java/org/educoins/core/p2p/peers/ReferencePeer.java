@@ -1,15 +1,11 @@
 package org.educoins.core.p2p.peers;
 
-import java.util.Scanner;
-
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.ITransactionTransmitter;
-import org.educoins.core.Wallet;
+import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.transaction.Approval;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
+
+import java.util.Scanner;
 
 /**
  * The Reference Client consisting of a Miner, a {@link BlockChain} and a
@@ -38,6 +34,11 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 		Block genesisBlock = new Block();
 		remoteProxies.receiveBlocks(genesisBlock.hash());
 		client();
+	}
+
+	@Override
+	public void stop() {
+		// TODO Auto-generated method stub
 	}
 
 	private void client() {
@@ -96,7 +97,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				String lockingScript = scanner.nextLine();
 				System.out.print("Holder signature is: ");
 				String holderSignature = scanner.nextLine();
-				
+
 				trans = Peer.client.generateApprovedTransaction(amount, owner, holderSignature, lockingScript);
 				if (trans != null){
 					ReferencePeer.blockChain.sendTransaction(trans);
@@ -123,11 +124,6 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 			default:
 			}
 		}
-	}
-
-	@Override
-	public void stop() {
-		// TODO Auto-generated method stub
 	}
 
 	// region listeners

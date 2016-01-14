@@ -1,17 +1,9 @@
 package org.educoins.core.p2p.peers;
 
-import java.util.Scanner;
-
-import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.Client;
-import org.educoins.core.IPoWListener;
-import org.educoins.core.ITransactionListener;
-import org.educoins.core.ITransactionReceiver;
-import org.educoins.core.Miner;
-import org.educoins.core.Wallet;
+import org.educoins.core.*;
 import org.educoins.core.transaction.Transaction;
-import org.educoins.core.utils.Threading;
+
+import java.util.Scanner;
 
 /**
  * The {@link Peer}-Type having only reading-capabilities. Created by typus on
@@ -19,10 +11,10 @@ import org.educoins.core.utils.Threading;
  */
 public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionReceiver, ITransactionListener {
 
-	private Miner miner;
 	// TODO only one public key will be used. Need to be improved in using
 	// multiple keys.
 	private static String singlePublicKey;
+	private Miner miner;
 
 	public SoloMinerPeer(BlockChain blockChain) {
 		super(blockChain);
@@ -45,6 +37,13 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 		// After miner has started.
 		Peer.remoteProxies.discover();
 		client();
+	}
+
+	@Override
+	public void stop() {
+		miner.removePoWListener(this);
+		miner.removePoWListener(Peer.remoteProxies);
+		Peer.blockChain.removeBlockListener(this);
 	}
 
 	private void client() {
@@ -74,7 +73,7 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 				if (trans != null) {
 					Peer.blockChain.sendTransaction(trans);
 					System.out.println(trans.hash());
-				}	
+				}
 				break;
 			case "e":
 				running = false;
@@ -82,13 +81,6 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 			default:
 			}
 		}
-	}
-
-	@Override
-	public void stop() {
-		miner.removePoWListener(this);
-		miner.removePoWListener(Peer.remoteProxies);
-		Peer.blockChain.removeBlockListener(this);
 	}
 
 	// region listeners

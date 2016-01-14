@@ -46,6 +46,7 @@ public class HttpProxyPeerGroupTest {
 
 	@Ignore
 	@Test
+	//This is not easy to unit test
 	public void testDiscover() throws Exception {
 		clientPeerGroup.discover();
 	}
@@ -77,7 +78,7 @@ public class HttpProxyPeerGroupTest {
 
 		IProxyPeerGroup spy = spy(clientPeerGroup);
 		spy.receiveBlocks(hash);
-		verify(spy, atLeastOnce()).discover(any(CentralDiscovery.class));
+		verify(spy, atLeastOnce()).discoverOnce(any(CentralDiscovery.class));
 	}
 
 	@Test

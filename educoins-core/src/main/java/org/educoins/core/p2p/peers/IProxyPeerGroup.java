@@ -14,6 +14,7 @@ import java.util.Collection;
  * Created by typus on 12/3/15.
  */
 public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, ITransactionTransmitter, IPoWListener {
+    int MAX_PROXIES_SIZE = 100;
 
     /**
      * Adds a {@link RemoteProxy} to the PeerGroup.
@@ -43,7 +44,17 @@ public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, I
      * @param strategy the kind of discovery which should be executed.
      * @throws DiscoveryException if the discovery went wrong.
      */
-    void discover(DiscoveryStrategy strategy) throws DiscoveryException;
+    void discoverOnce(DiscoveryStrategy strategy) throws DiscoveryException;
+
+    /**H
+     * Starts discovery with the given
+     * {@link DiscoveryStrategy}. Afterwards {@link RemoteProxy#hello()}s all {@link Peer}s and
+     * adds their known {@link RemoteProxy}s to the PeerGroup.
+     * <p>
+     * This version of {@link IProxyPeerGroup#discoverOnce(DiscoveryStrategy)} does always use the {@link org.educoins.core.p2p.discovery.CentralDiscovery}
+     * and retries the discovery until {@link org.educoins.core.config.AppConfig#getMaxDiscoveryRetries} is reached.
+     */
+    void discover();
 
     /**
      * Returns all {@link RemoteProxy}s of the PeerGroup.
@@ -51,15 +62,4 @@ public interface IProxyPeerGroup extends IBlockReceiver, ITransactionReceiver, I
      * @return a copy.
      */
     Collection<RemoteProxy> getAllProxies();
-
-    /**
-     * Starts discovery with the given
-     * {@link DiscoveryStrategy}. Afterwards {@link RemoteProxy#hello()}s all {@link Peer}s and
-     * adds their known {@link RemoteProxy}s to the PeerGroup.
-     *
-     * This version of {@link IProxyPeerGroup#discover(DiscoveryStrategy)} does always use the {@link org.educoins.core.p2p.discovery.CentralDiscovery}
-     * and retries the discovery until {@link org.educoins.core.config.AppConfig#getMaxDiscoveryRetries} is reached.
-     *
-     */
-    void discover();
 }

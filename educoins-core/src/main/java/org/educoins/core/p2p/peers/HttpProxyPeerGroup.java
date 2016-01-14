@@ -50,25 +50,11 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     }
 
     @Override
-    public void discover(DiscoveryStrategy strategy) throws DiscoveryException {
+    public void discoverOnce(DiscoveryStrategy strategy) throws DiscoveryException {
         logger.info("Starting new Discovery ({})", strategy.getClass().getName());
         strategy.getPeers().forEach(this::addProxy);
         if (proxies.size() == 0)
             throw new DiscoveryException("No proxies received!");
-        proxies.parallelStream().forEach(proxy -> {
-            try {
-                proxy.hello().forEach(this::addProxy);
-            } catch (IOException e) {
-                logger.warn("Could not say Hello to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
-            }
-        });
-    }
-
-    @Override
-    public Collection<RemoteProxy> getAllProxies() {
-        Set<RemoteProxy> proxies = new HashSet<>();
-        proxies.addAll(this.proxies);
-        return proxies;
     }
 
     @Override
@@ -80,6 +66,13 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             logger.warn("Could not hello the Central!", e);
         }
         rediscover(0);
+    }
+
+    @Override
+    public Collection<RemoteProxy> getAllProxies() {
+        Set<RemoteProxy> proxies = new HashSet<>();
+        proxies.addAll(this.proxies);
+        return proxies;
     }
 
     @Override
@@ -231,7 +224,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     public void rediscover(int nTry) {
         try {
-            discover(new CentralDiscovery());
+            discoverOnce(new CentralDiscovery());
         } catch (DiscoveryException e1) {
             logger.error("Could not retrieve any Peers... We are isolated now!");
             if (nTry < AppConfig.getMaxDiscoveryRetries())
@@ -245,6 +238,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void foundPoW(Block block) {
+        logger.info("Dispatching the new Block ({})...", block.hash());
         getHighestRatedProxies().forEach(proxy -> {
             try {
                 proxy.transmitBlock(block);
@@ -253,6 +247,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                         e);
             }
         });
+        logger.info("Dispatching done.", block.hash());
     }
 
     public boolean isRetry() {
