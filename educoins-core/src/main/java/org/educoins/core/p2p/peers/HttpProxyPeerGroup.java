@@ -77,6 +77,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     public void transmitTransaction(Transaction transaction) {
         getHighestRatedProxies().forEach(proxy -> {
             try {
+                logger.info("Sending transaction to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 proxy.transmitTransaction(transaction);
             } catch (IOException e) {
                 logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost(),

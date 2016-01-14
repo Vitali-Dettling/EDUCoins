@@ -201,7 +201,7 @@ public class BlockChain implements IBlockListener {
 	}
 
 	public void sendTransaction(Transaction transaction) {
-
+		logger.info("Transaction of type {} submitted.", transaction.whichTransaction());
 		this.transactions.add(transaction);
 		this.transactionTransmitters.transmitTransaction(transaction);
 	}

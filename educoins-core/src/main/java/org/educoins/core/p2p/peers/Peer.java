@@ -1,15 +1,7 @@
 package org.educoins.core.p2p.peers;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.educoins.core.*;
-import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.p2p.peers.server.BlockController;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +23,6 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 		Peer.blockChain = blockChain;
 		Peer.remoteProxies = new HttpProxyPeerGroup();
 		Peer.client = new Client();
-//		Peer.blockController = new BlockController(blockChain);
-
 		Peer.blockChain.addBlockListener(this);
 		Peer.remoteProxies.addBlockListener(blockChain);
 	}

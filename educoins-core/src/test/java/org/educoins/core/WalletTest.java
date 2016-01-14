@@ -24,15 +24,15 @@ public class WalletTest {
 
 		Transaction tx = BlockStoreFactory.generateTransaction(1);
 
-		String hashedTranscation = tx.hash().toString();
+		String hashedTransaction = tx.hash().toString();
 		String publicKey = MockedWallet.getPublicKey();
 
-		String signatureTest = Wallet.getSignature(publicKey, hashedTranscation);
+		String signatureTest = Wallet.getSignature(publicKey, hashedTransaction);
 		char symbols[] = { ' ', '.', ';', '-', 'a', 'd', 'w', '1', '*', '+', '~', '|' };
 
 		for (char sym : symbols) {
 			signatureTest += signatureTest + sym;
-			assertFalse(Wallet.compare(hashedTranscation, signatureTest, publicKey));
+			assertFalse(Wallet.compare(hashedTransaction, signatureTest, publicKey));
 		}
 	}
 
@@ -41,14 +41,14 @@ public class WalletTest {
 
 		Transaction tx = BlockStoreFactory.generateTransaction(1);
 
-		String hashedTranscation = tx.hash().toString();
+		String hashedTransaction = tx.hash().toString();
 		String publicKey = MockedWallet.getPublicKey();
 
-		String signatureTest = Wallet.getSignature(publicKey, hashedTranscation);
-		String signatureResult = Wallet.getSignature(publicKey, hashedTranscation);
+		String signatureTest = Wallet.getSignature(publicKey, hashedTransaction);
+		String signatureResult = Wallet.getSignature(publicKey, hashedTransaction);
 
-		assertTrue(Wallet.compare(hashedTranscation, signatureTest, publicKey));
-		assertTrue(Wallet.compare(hashedTranscation, signatureResult, publicKey));
+		assertTrue(Wallet.compare(hashedTransaction, signatureTest, publicKey));
+		assertTrue(Wallet.compare(hashedTransaction, signatureResult, publicKey));
 	}
 
 	@Test
