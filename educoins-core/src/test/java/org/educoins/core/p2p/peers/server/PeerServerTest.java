@@ -10,11 +10,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.net.URI;
-import java.util.Collection;
 
 import static org.junit.Assert.*;
 
@@ -26,6 +26,7 @@ import static org.junit.Assert.*;
 @SpringApplicationConfiguration(PeerServer.class)
 @WebAppConfiguration
 @IntegrationTest("server.port:8080")
+@ActiveProfiles("test")
 public class PeerServerTest {
 
     @Autowired
@@ -59,7 +60,7 @@ public class PeerServerTest {
 
     @Test
     public void testStart() throws Exception {
-    	assertNotNull(restClient.get(URI.create(blockHeadersResourcePath), Block[].class));
+        assertNotNull(restClient.get(URI.create(blockHeadersResourcePath), Block[].class));
         assertNotNull(restClient.get(URI.create(blocksResourcePath), Block[].class));
     }
 

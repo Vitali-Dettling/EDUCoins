@@ -1,9 +1,9 @@
 package org.educoins.core.config;
 
+import org.educoins.core.utils.IO;
 import org.educoins.core.utils.Sha256Hash;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Properties;
@@ -88,5 +88,14 @@ public class AppConfig {
 
     public static double getDefaultRanking() {
         return Double.parseDouble(prop.getProperty("educoins.discovery.rating.default"));
+    }
+
+    public static File getBlockStoreDirectory() throws IOException {
+        String path = prop.getProperty("educoins.blockstore.directory");
+        if (path != null && !path.equals("")) {
+            return new File(path);
+        } else {
+            return IO.createTmpDir("blocks-" + getOwnPublicKey().toString());
+        }
     }
 }

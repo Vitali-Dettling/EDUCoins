@@ -1,18 +1,11 @@
 package org.educoins.core.utils;
 
-import java.util.List;
-
 import org.educoins.core.Block;
 import org.educoins.core.Wallet;
-import org.educoins.core.store.BlockStoreException;
-import org.educoins.core.store.IBlockStore;
-import org.educoins.core.store.LevelDbBlockStore;
-import org.educoins.core.transaction.CoinbaseTransaction;
-import org.educoins.core.transaction.Input;
-import org.educoins.core.transaction.Output;
-import org.educoins.core.transaction.RegularTransaction;
-import org.educoins.core.transaction.Transaction;
-import org.jetbrains.annotations.NotNull;
+import org.educoins.core.store.*;
+import org.educoins.core.transaction.*;
+
+import java.util.List;
 
 /**
  * A factory for easier testing concerning the {@link IBlockStore}.
@@ -20,11 +13,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public class BlockStoreFactory {
     public static IBlockStore getBlockStore() throws BlockStoreException {
-        return new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
+        return new LevelDbBlockStore(IO.getRandomizedBlockStoreFile());
     }
 
     public static IBlockStore getRandomlyFilledBlockStore() throws BlockStoreException {
-        return new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
+        return new LevelDbBlockStore(IO.getRandomizedBlockStoreFile());
     }
 
     public static void fillRandom(IBlockStore store, int filled) {

@@ -2,7 +2,6 @@ package org.educoins.core.testutils;
 
 import org.educoins.core.Block;
 import org.educoins.core.store.*;
-import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.IO;
 
 import java.io.File;
@@ -18,7 +17,7 @@ public class BlockStoreFactory {
     static List<File> blockStores = new ArrayList<>();
 
     public static IBlockStore getBlockStore() throws BlockStoreException {
-        File defaultBlockStoreFile = IO.getDefaultBlockStoreFile();
+        File defaultBlockStoreFile = IO.getRandomizedBlockStoreFile();
         blockStores.add(defaultBlockStoreFile);
         return new LevelDbBlockStore(defaultBlockStoreFile);
     }
@@ -30,7 +29,7 @@ public class BlockStoreFactory {
     }
 
     public static IBlockStore getRandomlyFilledBlockStore() throws BlockStoreException {
-        return new LevelDbBlockStore(IO.getDefaultBlockStoreFile());
+        return new LevelDbBlockStore(IO.getRandomizedBlockStoreFile());
     }
 
     public static void fillRandom(IBlockStore store) {
