@@ -26,17 +26,15 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 	protected static IProxyPeerGroup remoteProxies;
 	protected static BlockChain blockChain;
 	protected static Client client;
-	private static Sha256Hash proxyPublicKey;
-	private static BlockController blockController;
 
 	public Peer(BlockChain blockChain) {
 		Peer.blockChain = blockChain;
-		Peer.remoteProxies = new HttpProxyPeerGroup();		
-		Peer.proxyPublicKey = AppConfig.getOwnPublicKey();
+		Peer.remoteProxies = new HttpProxyPeerGroup();
 		Peer.client = new Client();
-		Peer.blockController = new BlockController(blockChain);
-		
+//		Peer.blockController = new BlockController(blockChain);
+
 		Peer.blockChain.addBlockListener(this);
+		Peer.remoteProxies.addBlockListener(blockChain);
 	}
 
 	public abstract void start() throws DiscoveryException;
