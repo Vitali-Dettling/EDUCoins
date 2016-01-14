@@ -37,6 +37,7 @@ public class TransactionTest {
 		}
 	}
 
+	@Ignore
 	@Test
 	public void testApprovedTxHolderSignature() {
 
@@ -95,12 +96,13 @@ public class TransactionTest {
 
 		final int AMOUNT = 16;
 		final String LOCKING_SCRIPT = "ABC";
+		final String HOLDER_SIGNATURE = "ABC";
 		final String OWNER_ADDRESS = "ABC";
 
 		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
 
 		ITransactionFactory txFactory = new TransactionFactory();
-		Transaction transaction = txFactory.generateApprovedTransaction(outputs, AMOUNT, OWNER_ADDRESS, LOCKING_SCRIPT);
+		Transaction transaction = txFactory.generateApprovedTransaction(outputs, AMOUNT, OWNER_ADDRESS, HOLDER_SIGNATURE, LOCKING_SCRIPT);
 
 		ETransaction testee = transaction.whichTransaction();
 		assertEquals(testee, ETransaction.APPROVED);
@@ -115,11 +117,12 @@ public class TransactionTest {
 			// implemented yet.
 	public void testWhichTransactionRevoke() {
 
-		final int AMOUNT = 16;
+//		final int AMOUNT = 16;
 		final String LOCKING_SCRIPT = "ABC";
-
+		Sha256Hash hash = Sha256Hash.wrap("123");
+		
 		ITransactionFactory txFactory = new TransactionFactory();
-		Transaction transaction = txFactory.generateRevokeTransaction(AMOUNT, LOCKING_SCRIPT);
+		Transaction transaction = txFactory.generateRevokeTransaction(hash, LOCKING_SCRIPT);
 
 		ETransaction testee = transaction.whichTransaction();
 		assertEquals(testee, ETransaction.REVOKE);

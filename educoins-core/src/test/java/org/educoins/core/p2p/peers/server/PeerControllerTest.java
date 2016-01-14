@@ -32,7 +32,8 @@ public class PeerControllerTest {
     @Autowired
     private HttpProxyPeerGroup peerGroup;
 
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testAddPeer() throws Exception {
         AppConfig.setInetAddress("localhost");
         HttpProxy proxy = new HttpProxy(AppConfig.getOwnAddress(HttpProxy.PROTOCOL), AppConfig.getOwnPublicKey().toString());

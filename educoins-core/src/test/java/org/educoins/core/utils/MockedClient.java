@@ -62,14 +62,15 @@ public class MockedClient {
 
 	public static List<Transaction> sendApprovedTransaction(int amount, String owner, String lockingScript) {
 		transactionReceived();
-		Transaction transaction = mockedClient.generateApprovedTransaction(amount, owner, lockingScript);
+		Transaction transaction = mockedClient.generateApprovedTransaction(amount, owner, owner, lockingScript);
 		mockedBlockchain.sendTransaction(transaction);
 		return receivedTransaction();
 	}
 	
-	public static List<Transaction> sendRevokedTransaction(int amount, String lockingScript) {
+	//TODO hash instead of amount
+	public static List<Transaction> sendRevokedTransaction(Sha256Hash transHash, String lockingScript) {
 		transactionReceived();
-		Transaction transaction = mockedClient.generateRevokeTransaction(amount, lockingScript);
+		Transaction transaction = mockedClient.generateRevokeTransaction(transHash, lockingScript);
 		mockedBlockchain.sendTransaction(transaction);
 		return receivedTransaction();
 	}
@@ -106,7 +107,7 @@ public class MockedClient {
 		block.addTransaction(tx);
 		client.distructOwnOutputs(block);
 		
-		return client.generateApprovedTransaction(toApproveAmount, owner, lockingScript);
+		return client.generateApprovedTransaction(toApproveAmount, owner, owner, lockingScript);
 	}
 	
 	
