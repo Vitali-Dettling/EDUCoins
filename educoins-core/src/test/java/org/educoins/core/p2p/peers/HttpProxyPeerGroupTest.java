@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.*;
 @SpringApplicationConfiguration(PeerServer.class)
 @WebAppConfiguration
 @IntegrationTest("server.port:8082")
+@ActiveProfiles("test")
 public class HttpProxyPeerGroupTest {
 
 	@Autowired
@@ -46,6 +48,7 @@ public class HttpProxyPeerGroupTest {
 
 	@Ignore
 	@Test
+	//This is not easy to unit test
 	public void testDiscover() throws Exception {
 		clientPeerGroup.discover();
 	}
@@ -77,7 +80,7 @@ public class HttpProxyPeerGroupTest {
 
 		IProxyPeerGroup spy = spy(clientPeerGroup);
 		spy.receiveBlocks(hash);
-		verify(spy, atLeastOnce()).discover(any(CentralDiscovery.class));
+		verify(spy, atLeastOnce()).discoverOnce(any(CentralDiscovery.class));
 	}
 
 	@Test

@@ -1,13 +1,11 @@
 package org.educoins.core;
 
-import java.security.SecureRandom;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.Sha256Hash;
-import org.educoins.core.utils.Threading;
+import org.educoins.core.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.security.SecureRandom;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Miner {
 
@@ -42,10 +40,8 @@ public class Miner {
 	}
 
 	public void receiveBlocks(Block latestBlock) {
-
 		logger.info("Received Block: " + latestBlock.toString());
-		Thread powThread = new PoWThread(latestBlock.copy());
-		Threading.run(() -> powThread.start());
+		Threading.run(new PoWThread(latestBlock.copy()));
 	}
 
 	private class PoWThread extends Thread implements IBlockListener {

@@ -2,11 +2,7 @@ package org.educoins.referencenode;
 
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
-import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
-import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.ReferencePeer;
-import org.educoins.core.store.BlockStoreException;
-import org.educoins.core.store.LevelDbBlockStore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,6 +10,8 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import java.io.IOException;
 
 /**
  * The HttpServer serving {@link Block}s.
@@ -26,7 +24,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ComponentScan(basePackages = "org.educoins.core")
 public class ReferenceNode {
 
-    public static void main(String[] args) throws BlockStoreException {
+    public static void main(String[] args) throws IOException {
+        Wallet.initialize(args);
+
         ConfigurableApplicationContext run = SpringApplication.run(ReferenceNode.class, args);
         BlockChain blockChain = (BlockChain) run.getBean("blockChain");
         ReferencePeer peer = new ReferencePeer(blockChain);

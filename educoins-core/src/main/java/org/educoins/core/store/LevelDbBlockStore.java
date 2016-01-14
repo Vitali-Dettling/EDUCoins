@@ -2,8 +2,7 @@ package org.educoins.core.store;
 
 import com.google.gson.Gson;
 import org.educoins.core.Block;
-import org.educoins.core.BlockChain;
-import org.educoins.core.utils.IO;
+import org.educoins.core.config.AppConfig;
 import org.educoins.core.utils.Sha256Hash;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.*;
@@ -30,8 +29,8 @@ public class LevelDbBlockStore implements IBlockStore {
     private DB database;
     private byte[] latest;
 
-    public LevelDbBlockStore() throws BlockStoreException {
-        this(IO.getDefaultBlockStoreFile());
+    public LevelDbBlockStore() throws IOException {
+        this(AppConfig.getBlockStoreDirectory());
     }
 
     public LevelDbBlockStore(File directory) throws BlockStoreException {
@@ -96,18 +95,6 @@ public class LevelDbBlockStore implements IBlockStore {
         return getBlock(byteBlock);
     }
     
-    @Override
-    @Nullable
-    public synchronized Block get(Block block) {
-    	Sha256Hash hash = block.hash();
-        byte[] byteBlock = database.get(hash.getBytes());
-
-        if (byteBlock == null)
-        	return null;
-
-        return getBlock(byteBlock);
-    }
-
     @SuppressWarnings("restriction")
     @Override
     @Nullable
@@ -140,6 +127,18 @@ public class LevelDbBlockStore implements IBlockStore {
     public Block getGenesisBlock() throws BlockNotFoundException {
         if (genesisHash == null) throw new BlockNotFoundException("No GenesisBlock inserted so far!");
         return get(Sha256Hash.wrap(genesisHash));
+    }
+
+    @Override
+    @NotNull
+    public synchronized Block get(Block block) {
+        Sha256Hash hash = block.hash();
+        byte[] byteBlock = database.get(hash.getBytes());
+
+        if (byteBlock == null)
+            return null;
+
+        return getBlock(byteBlock);
     }
 
     private boolean isEmpty() {

@@ -38,7 +38,9 @@ public class NodesController {
         //TODO: get protocol aware
 //        node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + request.getRemotePort()));
         node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + node.getPort()));
-        nodesRepository.save(node);
+        synchronized (nodesRepository) {
+            nodesRepository.save(node);
+        }
 
         return new ResponseEntity<>(inetAddr, HttpStatus.OK);
     }

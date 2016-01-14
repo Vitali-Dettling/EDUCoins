@@ -4,20 +4,18 @@ import org.educoins.core.Block;
 import org.educoins.core.store.IBlockIterator;
 import org.educoins.core.store.IBlockStore;
 import org.educoins.core.testutils.BlockStoreFactory;
-import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.RestClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -29,6 +27,7 @@ import static org.junit.Assert.*;
 @SpringApplicationConfiguration(PeerServer.class)
 @WebAppConfiguration
 @IntegrationTest("server.port:8090")
+@ActiveProfiles("test")
 public class BlockControllerTest {
 
     protected RestClient<Block[]> restClient = new RestClient<>();

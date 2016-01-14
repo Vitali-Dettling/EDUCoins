@@ -1,4 +1,4 @@
-package org.educoins.core.p2p.peers.server.config;
+package org.educoins.core.config;
 
 import com.google.gson.Gson;
 import org.springframework.boot.autoconfigure.condition.*;

@@ -109,7 +109,11 @@ public class IO {
         Files.copy(srcPath, dstPath);
     }
 
-    public static File getDefaultBlockStoreFile() {
+    public static File createTmpDir(String dirName) {
+        return new File(TMP_DIR + FILE_SEPERATOR + dirName);
+    }
+
+    public static File getRandomizedBlockStoreFile() {
         return new File(TMP_DIR + FILE_SEPERATOR + "EDUCoinsBlockStore" + Math.random());
     }
 

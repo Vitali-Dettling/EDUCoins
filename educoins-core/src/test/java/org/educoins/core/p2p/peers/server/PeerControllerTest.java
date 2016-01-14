@@ -8,9 +8,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.*;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 
 import static org.hamcrest.core.StringContains.*;
@@ -18,13 +20,14 @@ import static org.junit.Assert.*;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 /**
- * Tests {@link PeerController#addHttpPeer(HttpProxy)}
+ * Tests {@link PeerController#addHttpPeer(HttpProxy, HttpServletRequest)}
  * Created by typus on 12/1/15.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(PeerServer.class)
 @WebAppConfiguration
 @IntegrationTest("server.port:8081")
+@ActiveProfiles("test")
 public class PeerControllerTest {
 
     @Rule
