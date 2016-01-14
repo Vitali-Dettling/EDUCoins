@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-public class BlockChain {
+public class BlockChain implements IBlockListener {
 
 	private static final int CHECK_AFTER_BLOCKS = 10;
 	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 60;
@@ -175,6 +175,7 @@ public class BlockChain {
 			logger.warn("Verification of block failed. hash: {}, block: {}", receivedBlock.hash(), receivedBlock.toString());
 			// Tries as long as the blockchain is up to date.
 			Block latestBlock = getLatestBlock();
+			// TODO: Should a failed verification really trigger a new fetch?
 			this.remoteProxies.receiveBlocks(latestBlock.hash());
 			return;
 		}
@@ -307,5 +308,14 @@ public class BlockChain {
 
 	public void storeBlock(Block block) {
 		this.store.put(block);
+	}
+
+	@Override
+	public void blockListener(Block block) {
+		boolean isVerified = this.verification.verifyBlock(block);
+		if (isVerified) {
+			store.put(block);
+			//TODO: Open Transactions have to be removed, if they are inside the new block
+		}
 	}
 }
