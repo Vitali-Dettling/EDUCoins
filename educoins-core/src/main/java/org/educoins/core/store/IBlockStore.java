@@ -54,7 +54,4 @@ public interface IBlockStore {
      * @throws BlockNotFoundException if there is no genesis block in the store right now.
      */
     @NotNull Block getGenesisBlock() throws BlockNotFoundException;
-
-	@NotNull
-	Block get(Block block);
 }

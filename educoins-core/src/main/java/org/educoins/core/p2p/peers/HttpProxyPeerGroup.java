@@ -16,8 +16,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * An {@link IProxyPeerGroup} of {@link HttpProxyPeerGroup}.
  */
-// @Component
-// @Scope("singleton")
 public class HttpProxyPeerGroup implements IProxyPeerGroup {
     private final Logger logger = LoggerFactory.getLogger(HttpProxyPeerGroup.class);
 
@@ -241,6 +239,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         logger.info("Dispatching the new Block ({})...", block.hash());
         getHighestRatedProxies().forEach(proxy -> {
             try {
+                logger.info("Dispatching to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 proxy.transmitBlock(block);
             } catch (IOException e) {
                 logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost(),

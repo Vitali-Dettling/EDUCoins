@@ -73,10 +73,6 @@ public class LevelDbBlockStore implements IBlockStore {
         if (genesisHash == null) {
             genesisHash = hash;
         }
-        Block alreadyStored = get(block);
-		if(alreadyStored != null){
-			return;
-		}
 
         database.put(hash, getJson(block).getBytes());
         latest = block.hash().getBytes();
@@ -127,18 +123,6 @@ public class LevelDbBlockStore implements IBlockStore {
     public Block getGenesisBlock() throws BlockNotFoundException {
         if (genesisHash == null) throw new BlockNotFoundException("No GenesisBlock inserted so far!");
         return get(Sha256Hash.wrap(genesisHash));
-    }
-
-    @Override
-    @NotNull
-    public synchronized Block get(Block block) {
-        Sha256Hash hash = block.hash();
-        byte[] byteBlock = database.get(hash.getBytes());
-
-        if (byteBlock == null)
-            return null;
-
-        return getBlock(byteBlock);
     }
 
     private boolean isEmpty() {
