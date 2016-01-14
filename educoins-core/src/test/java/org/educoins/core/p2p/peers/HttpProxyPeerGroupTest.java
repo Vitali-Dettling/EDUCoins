@@ -44,6 +44,7 @@ public class HttpProxyPeerGroupTest {
 		clientPeerGroup.addProxy(new HttpProxy(URI.create(HttpProxy.PROTOCOL + "localhost:8082"), "myPub1"));
 	}
 
+	@Ignore
 	@Test
 	public void testDiscover() throws Exception {
 		clientPeerGroup.discover();

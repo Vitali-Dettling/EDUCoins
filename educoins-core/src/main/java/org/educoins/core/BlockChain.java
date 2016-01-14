@@ -161,7 +161,7 @@ public class BlockChain {
 	}
 
 	public void verifyReceivedBlock(Block receivedBlock) {
-		logger.info("Received block. Verifying now...");
+		logger.info("Received block. Verifying now. hash: {}", receivedBlock.hash());
 
 		// Already up to date.
 		Block latestStoredBlock = getLatestBlock();
@@ -172,10 +172,9 @@ public class BlockChain {
 
 		// Check block for validity.
 		if (!this.verification.verifyBlock(receivedBlock)) {
-			logger.warn("Verification of block failed: " + receivedBlock.toString());
+			logger.warn("Verification of block failed. hash: {}, block: {}", receivedBlock.hash(), receivedBlock.toString());
 			// Tries as long as the blockchain is up to date.
 			Block latestBlock = getLatestBlock();
-			System.out.println(latestBlock.hash().toString());
 			this.remoteProxies.receiveBlocks(latestBlock.hash());
 			return;
 		}

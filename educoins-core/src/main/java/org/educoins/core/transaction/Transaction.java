@@ -237,7 +237,7 @@ public class Transaction implements Hashable {
 			break;			
 		}
 		// hash concatenated header fields and return
-		return Sha256Hash.wrap(SHA256Hasher.hash(SHA256Hasher.hash(toBeHashed)));
+		return Sha256Hash.createDouble(toBeHashed);
 
 	}
 

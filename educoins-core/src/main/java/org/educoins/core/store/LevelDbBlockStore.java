@@ -97,7 +97,7 @@ public class LevelDbBlockStore implements IBlockStore {
     }
     
     @Override
-    @NotNull
+    @Nullable
     public synchronized Block get(Block block) {
     	Sha256Hash hash = block.hash();
         byte[] byteBlock = database.get(hash.getBytes());

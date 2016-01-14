@@ -90,6 +90,7 @@ public class Verification {
 		// 0. If block is the genesis block return true, because there is no
 		// previous.
 		if (toVerifyBlock.getHashPrevBlock().equals(Sha256Hash.wrap(GENESIS_BLOCK))) {
+			logger.debug("Genesis Block successfully verfified, hash: {}", toVerifyBlock.hash());
 			return true;
 		}
 
