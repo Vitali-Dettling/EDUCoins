@@ -10,6 +10,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.*;
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A small Rest-client serving default methods.
@@ -22,7 +23,9 @@ public class RestClient<T> {
     private final Gson gson;
 
     public RestClient() {
-        httpClient = HttpClientBuilder.create().build();
+        httpClient = HttpClientBuilder.create()
+                .setConnectionTimeToLive(1, TimeUnit.MINUTES)
+                .build();
         gson = new Gson();
     }
 

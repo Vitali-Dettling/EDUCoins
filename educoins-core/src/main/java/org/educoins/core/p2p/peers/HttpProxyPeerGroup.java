@@ -78,11 +78,28 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         getHighestRatedProxies().forEach(proxy -> {
             try {
                 proxy.transmitTransaction(transaction);
+                proxy.rateHigher();
             } catch (IOException e) {
                 logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost(),
                         e);
+                proxy.rateLower();
             }
         });
+    }
+
+    @Override
+    public void blockReceived(Block block) {
+        logger.info("Dispatching the new Block ({})...", block.hash());
+        getHighestRatedProxies().forEach(proxy -> {
+            try {
+                logger.info("Dispatching to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
+                proxy.transmitBlock(block);
+            } catch (IOException e) {
+                logger.warn("Could not transmit block to {}@{}", proxy.getPubkey(), proxy.getiNetAddress().getHost(), e);
+                proxy.rateLower();
+            }
+        });
+        logger.info("Dispatching done.", block.hash());
     }
 
     // region listeners
@@ -146,7 +163,6 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     public void removeTransactionListener(ITransactionListener transactionListener) {
         transactionListeners.remove(transactionListener);
     }
-    // endregion
 
     @Override
     public void receiveTransactions() {
@@ -167,6 +183,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         }
         logger.info("Receiving Transactions successful.");
     }
+    // endregion
 
     // region getter/setter
     public Set<IBlockListener> getBlockListeners() {
@@ -235,20 +252,6 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         }
     }
 
-    @Override
-    public void blockReceived(Block block) {
-        logger.info("Dispatching the new Block ({})...", block.hash());
-        getHighestRatedProxies().forEach(proxy -> {
-            try {
-                logger.info("Dispatching to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
-                proxy.transmitBlock(block);
-            } catch (IOException e) {
-                logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost(),
-                        e);
-            }
-        });
-        logger.info("Dispatching done.", block.hash());
-    }
 
     public boolean isRetry() {
         return retry;
