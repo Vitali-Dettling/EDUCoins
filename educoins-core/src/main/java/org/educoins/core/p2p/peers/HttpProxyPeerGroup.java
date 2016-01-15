@@ -82,7 +82,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             } catch (IOException e) {
                 logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost(),
                         e);
-                proxy.rateLower();
+                checkProxiesState(proxy, e);
             }
         });
     }
@@ -96,7 +96,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 proxy.transmitBlock(block);
             } catch (IOException e) {
                 logger.warn("Could not transmit block to {}@{}", proxy.getPubkey(), proxy.getiNetAddress().getHost(), e);
-                proxy.rateLower();
+                checkProxiesState(proxy, e);
             }
         });
         logger.info("Dispatching done.", block.hash());
