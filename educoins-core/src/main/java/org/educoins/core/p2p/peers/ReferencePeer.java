@@ -28,10 +28,9 @@ public class ReferencePeer extends Peer {
 
     @Override
     public void start() throws DiscoveryException {
-        blockChain.foundPoW(blockChain.getLatestBlock());
-        //kick off miner
         super.start();
-
+        //kick off miner
+        blockChain.foundPoW(blockChain.getLatestBlock());
         client();
     }
 
