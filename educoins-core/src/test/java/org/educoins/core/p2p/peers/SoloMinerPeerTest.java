@@ -44,6 +44,7 @@ public class SoloMinerPeerTest {
 	/**
 	 * Submit an empty transaction. Behavior is undefined so far.
 	 */
+	@Ignore
 	@Test
 	public void testSubmitEmpty() throws IOException {
 		Transaction tx = new CoinbaseTransaction(2, "ABC");
@@ -55,6 +56,7 @@ public class SoloMinerPeerTest {
 	public void testGetAmount() {
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		SoloMinerPeer peer = new SoloMinerPeer(blockchain);
+		MockedClient.resetClient();
 		Client client = MockedClient.getClient();
 
 		int expected = 0;
