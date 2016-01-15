@@ -4,7 +4,6 @@ import com.google.common.primitives.UnsignedBytes;
 import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.transaction.Approval;
 import org.educoins.core.transaction.Transaction;
-import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -189,21 +188,7 @@ public class Block {
         calculateMerkleRoot();
     }
 
-    /*public MessageProtos.Block toProto() {
-        MessageProtos.Block.Builder builder = MessageProtos.Block.newBuilder();
-        builder.setBits(Integer.parseInt(getBits()));
-        builder.setVersion(getVersion());
-        builder.setMerkleRoot(getHashMerkleRoot());
-        builder.setPrevBlock(getHashPrevBlock());
-        builder.setNonce((int) getNonce());
-        builder.setTimestamp(getTime());
-        builder.setTxnCount(getTransactionsCount());
-        int index = 0;
-        transactions.forEach(tnx -> builder.setTxns(index, tnx.getApprovalsCount()));
-
-        return builder.build();
-    }*/
-
+    @NotNull
     public Sha256Hash hash() {
         return Block.hash(this);
     }
@@ -250,16 +235,8 @@ public class Block {
         return result;
     }
 
-
 	@Override
-	public String toString() {
-		return "Block [version=" + version + ", hashPrevBlock=" + hashPrevBlock + ", hashMerkleRoot=" + hashMerkleRoot
-				+ ", time=" + time + ", bits=" + Arrays.toString(bits) + ", nonce=" + nonce + ", transactions="
-				+ transactions + "]";
-	}
-
-	@Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -272,5 +249,12 @@ public class Block {
                 && hashPrevBlock.equals(block.hashPrevBlock)
                 && hashMerkleRoot.equals(block.hashMerkleRoot)
                 && Arrays.equals(bits, block.bits);
+    }
+
+	@Override
+    public String toString() {
+        return "Block [version=" + version + ", hashPrevBlock=" + hashPrevBlock + ", hashMerkleRoot=" + hashMerkleRoot
+                + ", time=" + time + ", bits=" + Arrays.toString(bits) + ", nonce=" + nonce + ", transactions="
+                + transactions + "]";
     }
 }

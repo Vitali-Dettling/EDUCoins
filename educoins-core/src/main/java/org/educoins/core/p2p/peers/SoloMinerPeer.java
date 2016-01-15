@@ -1,6 +1,7 @@
 package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
+import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 
@@ -20,15 +21,15 @@ public class SoloMinerPeer extends Peer {
         this.miner = new Miner(blockChain);
         this.client = new Client();
         this.singlePublicKey = Wallet.getPublicKey();
+
+
     }
 
     @Override
-    public void start() {
-        // After miner has started.
-        this.proxyPeerGroup.discover();
-
-        // Kick off Miner.
-        blockChain.blockReceived(new Block());
+    public void start() throws DiscoveryException {
+        super.start();
+        //kick off miner
+        blockChain.foundPoW(blockChain.getLatestBlock());
         client();
     }
 

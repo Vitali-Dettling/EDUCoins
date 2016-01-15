@@ -29,9 +29,8 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter, IBlo
     @Override
     public void start() throws DiscoveryException {
         super.start();
-
-        // Update blockchain
-        proxyPeerGroup.receiveBlocks(blockChain.getLatestBlock().hash());
+        //kick off miner
+        blockChain.foundPoW(blockChain.getLatestBlock());
         client();
     }
 

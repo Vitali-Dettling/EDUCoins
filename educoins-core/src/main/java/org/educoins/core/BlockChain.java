@@ -25,23 +25,23 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     private static final int SCALE_DECIMAL_LENGTH = 100;
     private static final int RESET_BLOCKS_COUNT = 0;
 
+    private final IBlockStore store;
     private final Logger logger = LoggerFactory.getLogger(BlockChain.class);
 
     private int blockCounter;
-    private List<IBlockListener> blockListeners;
 
+    private List<IBlockListener> blockListeners;
     private ITransactionTransmitter transactionTransmitters;
     private List<IBlockListenerMiner> blockListenerMiners;
     private List<ITransactionListener> transactionListeners;
-    private List<Transaction> transactions;
 
+    private List<Transaction> transactions;
     private Verification verification;
-    private IBlockStore store;
 
     private IProxyPeerGroup remoteProxies;
     private ITransactionFactory transactionFactory;
 
-    public BlockChain(IProxyPeerGroup remoteProxies, IBlockStore store) {
+    public BlockChain(@NotNull IProxyPeerGroup remoteProxies, @NotNull IBlockStore store) {
         this.store = store;
         this.remoteProxies = remoteProxies;
         this.transactionTransmitters = remoteProxies;
@@ -52,6 +52,8 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
         this.transactions = new ArrayList<>();
         this.blockListenerMiners = new ArrayList<>();
         this.verification = new Verification(this);
+
+        this.blockListeners.add(this.remoteProxies);
 
         this.blockCounter = RESET_BLOCKS_COUNT;
     }
@@ -203,6 +205,7 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
         for (int i = 0; i < this.transactionListeners.size(); i++) {
             ITransactionListener listener = this.transactionListeners.get(i);
             listener.transactionReceived(transaction);
+            transactionReceived(transaction);
         }
     }
 
@@ -231,6 +234,8 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
                 }
                 break;
         }
+
+        sendTransaction(transaction);
     }
 
     public Block prepareNewBlock(Block currentBlock, String publicKey) {
@@ -331,6 +336,8 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
             logger.info("Block successfully verified");
             store.put(block);
 
+            notifyBlockReceived(block);
+
             List<Transaction> transactions = block.getTransactions();
             if (transactions != null) {
                 logger.info("Found {} transactions", transactions.size());
@@ -340,7 +347,7 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
             }
             //TODO: Open Transactions have to be removed, if they are inside the new block
         } else {
-            this.remoteProxies.receiveBlocks(latestBlock.hash());
+            update();
         }
 
         logger.info("Block processed.");
@@ -349,11 +356,20 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     @Override
     public void foundPoW(Block block) {
         logger.info("Found pow. (Block {})", block.hash().toString());
-        notifyBlockReceived(block);
+
         blockReceived(block);
         blockListeners.forEach(listener -> listener.blockReceived(block));
         //New round of miner.
         Block newBlock = prepareNewBlock(block, AppConfig.getOwnPublicKey().toString());
         blockListenerMiners.forEach(listener -> listener.blockReceived(newBlock));
+    }
+
+    /**
+     * Uses the remoteProxies to fetch all missing {@link Block}s from the other {@link org.educoins.core.p2p.peers.Peer}s.
+     */
+    public void update() {
+        logger.info("Updating Blockchain...");
+        this.remoteProxies.receiveBlocks(getLatestBlock().hash());
+        logger.info("Updating Blockchain done.");
     }
 }

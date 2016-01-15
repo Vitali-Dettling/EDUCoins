@@ -26,9 +26,15 @@ public abstract class Peer {
         this.proxyPeerGroup.addBlockListener(blockChain);
     }
 
+    /**
+     * Starts the {@link Peer}.
+     * This includes the initial {@link IProxyPeerGroup#discover()} and {@link BlockChain#update()}.
+     * @throws DiscoveryException if no other node could be found while discovery.
+     */
     public void start() throws DiscoveryException {
+        logger.info("Starting {}", getClass().getCanonicalName());
         this.proxyPeerGroup.discover();
-        logger.info("Starting {}", getClass().getName());
+        this.blockChain.update();
     }
 
     public abstract void stop();
