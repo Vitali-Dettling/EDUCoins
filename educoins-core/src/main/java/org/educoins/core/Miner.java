@@ -18,6 +18,7 @@ public class Miner implements IBlockListenerMiner {
         this.powListeners = new CopyOnWriteArrayList<>();
         this.blockChain = blockChain;
         this.blockChain.addBlockListenerMiner(this);
+        this.addPoWListener(this.blockChain);
     }
 
     public void addPoWListener(IPoWListener powListener) {

@@ -150,7 +150,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void receiveTransactions() {
-        logger.info("Receiving Transactions now.");
+        logger.info("Receiving Transactions now...");
         for (RemoteProxy proxy : getHighestRatedProxies()) {
             try {
                 proxy.getBlocks().parallelStream()
@@ -223,6 +223,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     public void rediscover(int nTry) {
         try {
             discoverOnce(new CentralDiscovery());
+            discoverOnce(new PeerDiscovery(proxies));
         } catch (DiscoveryException e1) {
             logger.error("Could not retrieve any Peers... We are isolated now!");
             if (nTry < AppConfig.getMaxDiscoveryRetries())

@@ -145,9 +145,7 @@ public abstract class RemoteProxy {
 
     @Override
     public int hashCode() {
-        double result = pubkey != null ? pubkey.hashCode() : 0;
-        result = 31 * result + rating;
-        return (int) result;
+        return pubkey != null ? pubkey.hashCode() : 0;
     }
 
     @Override
@@ -157,8 +155,7 @@ public abstract class RemoteProxy {
 
         RemoteProxy that = (RemoteProxy) o;
 
-        return rating == that.rating
-                && !(pubkey != null ? !pubkey.equals(that.pubkey) : that.pubkey != null);
+        return pubkey != null ? pubkey.equals(that.pubkey) : that.pubkey == null;
 
     }
 

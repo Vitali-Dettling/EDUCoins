@@ -1,18 +1,21 @@
 package org.educoins.core.p2p.discovery;
 
+import com.google.common.collect.Sets;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
 
 /**
  * Created by typus on 1/14/16.
  */
 public class PeerDiscovery implements DiscoveryStrategy {
+    private static Logger logger = LoggerFactory.getLogger(PeerDiscovery.class);
     private Collection<RemoteProxy> peers;
 
     public PeerDiscovery(Collection<RemoteProxy> peers) {
@@ -30,12 +33,12 @@ public class PeerDiscovery implements DiscoveryStrategy {
             }
         });
         if (cnt[0] >= peers.size())
-            throw new DiscoveryException("Could not hello even a single Node!");
+            throw new DiscoveryException("Could not hello even a single node!");
     }
 
     @Override
     public @NotNull Collection<RemoteProxy> getPeers() throws DiscoveryException {
-        List<RemoteProxy> peers = new CopyOnWriteArrayList<>();
+        Set<RemoteProxy> peers = Sets.newConcurrentHashSet();
         this.peers.parallelStream().forEach(proxy -> {
             try {
                 if (this.peers.size() < IProxyPeerGroup.MAX_PROXIES_SIZE)
@@ -43,6 +46,10 @@ public class PeerDiscovery implements DiscoveryStrategy {
             } catch (IOException e) {
             }
         });
+        if (peers.size() == 0)
+            throw new DiscoveryException("Could not even retrieve a single node!");
+
+        logger.info("Found {} new peer(s)!", peers.size() - this.peers.size());
         return peers;
     }
 
