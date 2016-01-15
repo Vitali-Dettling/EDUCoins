@@ -291,6 +291,7 @@ public class BlockChain implements IBlockListener {
 				if (transaction != null)
 					return transaction;
 			} catch (BlockNotFoundException ignored) {
+				logger.error("could not find block in Chain, very strange.");
 			}
 		}
 		return null;
