@@ -34,7 +34,6 @@ public abstract class Peer {
     public void start() throws DiscoveryException {
         logger.info("Starting {}", getClass().getCanonicalName());
         this.proxyPeerGroup.discover();
-        this.blockChain.update();
     }
 
     public abstract void stop();

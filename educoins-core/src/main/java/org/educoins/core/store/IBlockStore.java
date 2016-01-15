@@ -41,17 +41,27 @@ public interface IBlockStore {
     void destroy() throws BlockStoreException;
 
     /**
-     * Initializes an {@link IBlockIterator} pointing to the latest {@link Block} stored in the {@link IBlockStore}.
-     *
-     * @return the initialized {@link IBlockIterator}.
-     */
-    IBlockIterator iterator();
-
-    /**
      * Returns the genesis block. This is most likely the first block inserted.
      *
      * @return the GenesisBlock.
      * @throws BlockNotFoundException if there is no genesis block in the store right now.
      */
     @NotNull Block getGenesisBlock() throws BlockNotFoundException;
+
+    /**
+     * Checks whether the given {@link Block} is already stored in the store.
+     *
+     * @param block the {@link Block} to look for.
+     * @return true if found, false if not.
+     */
+    boolean contains(Block block);
+
+    /**
+     * Initializes an {@link IBlockIterator} pointing to the latest {@link Block} stored in the {@link IBlockStore}.
+     *
+     * @return the initialized {@link IBlockIterator}.
+     */
+    IBlockIterator iterator();
+
+
 }

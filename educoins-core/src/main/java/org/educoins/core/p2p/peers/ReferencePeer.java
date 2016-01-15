@@ -11,7 +11,7 @@ import java.util.Scanner;
  * The Reference Client consisting of a Miner, a {@link BlockChain} and a
  * {@link Wallet}. Created by typus on 11/23/15.
  */
-public class ReferencePeer extends Peer implements ITransactionTransmitter, IBlockListener {
+public class ReferencePeer extends Peer {
 
     // TODO only one public key will be used. Need to be improved in using
     // multiple keys.
@@ -28,10 +28,10 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter, IBlo
 
     @Override
     public void start() throws DiscoveryException {
+        client();
         super.start();
         //kick off miner
         blockChain.foundPoW(blockChain.getLatestBlock());
-        client();
     }
 
     @Override
@@ -121,16 +121,4 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter, IBlo
             }
         }
     }
-
-    // region listeners
-    @Override
-    public void transmitTransaction(Transaction transaction) {
-        this.proxyPeerGroup.transmitTransaction(transaction);
-    }
-
-    @Override
-    public void blockReceived(Block block) {
-        this.blockChain.blockReceived(block);
-    }
-    // endregion
 }

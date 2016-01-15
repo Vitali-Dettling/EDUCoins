@@ -27,10 +27,10 @@ public class SoloMinerPeer extends Peer {
 
     @Override
     public void start() throws DiscoveryException {
+        client();
         super.start();
         //kick off miner
         blockChain.foundPoW(blockChain.getLatestBlock());
-        client();
     }
 
     @Override

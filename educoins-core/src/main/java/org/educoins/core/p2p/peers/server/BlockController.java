@@ -66,7 +66,7 @@ public class BlockController {
     @ResponseStatus(HttpStatus.CREATED)
     public void createBlock(@RequestBody @NotNull Block block, HttpServletRequest request) throws BlockChainVerificationException {
         logger.info("Received Block from {} node via push", request.getRemoteAddr());
-        blockChain.notifyBlockReceived(block);
+        blockChain.blockReceived(block);
     }
 
     /**

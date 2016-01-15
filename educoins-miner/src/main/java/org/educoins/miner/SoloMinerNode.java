@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 @EnableWebMvc
 @EnableAutoConfiguration(exclude = {JacksonAutoConfiguration.class})
 @ComponentScan(basePackages = "org.educoins.core")
+@EnableScheduling
 public class SoloMinerNode {
 
     public static void main(String[] args) throws IOException {

@@ -27,15 +27,15 @@ public class ProductionSpringConfig {
 		return blockStore;
 	}
 
-	@Bean
-	public BlockChain blockChain() throws IOException {
-		if (blockChain == null) {
-			IProxyPeerGroup peerGroup = proxyPeerGroup();
-			IBlockStore store = blockStore();
-			this.blockChain = new BlockChain(peerGroup, store);
-		}
-		return blockChain;
-	}
+//	@Bean
+//	public BlockChain blockChain() throws IOException {
+//		if (blockChain == null) {
+//			IProxyPeerGroup peerGroup = proxyPeerGroup();
+//			IBlockStore store = blockStore();
+//			this.blockChain = new BlockChain(peerGroup, store);
+//		}
+//		return blockChain;
+//	}
 
 
 	@Bean

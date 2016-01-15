@@ -10,12 +10,17 @@ import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
 
+@Service
 public class BlockChain implements IBlockListener, IPoWListener, ITransactionListener {
 
     private static final int CHECK_AFTER_BLOCKS = 10;
@@ -27,20 +32,19 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
 
     private final IBlockStore store;
     private final Logger logger = LoggerFactory.getLogger(BlockChain.class);
-
+    private final Queue<Block> blockQueue = new LinkedBlockingDeque<>();
     private int blockCounter;
-
     private List<IBlockListener> blockListeners;
     private ITransactionTransmitter transactionTransmitters;
     private List<IBlockListenerMiner> blockListenerMiners;
     private List<ITransactionListener> transactionListeners;
-
     private List<Transaction> transactions;
     private Verification verification;
-
     private IProxyPeerGroup remoteProxies;
     private ITransactionFactory transactionFactory;
+    private int count = 0;
 
+    @Autowired
     public BlockChain(@NotNull IProxyPeerGroup remoteProxies, @NotNull IBlockStore store) {
         this.store = store;
         this.remoteProxies = remoteProxies;
@@ -79,6 +83,70 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
         System.out.println("+++++++++++++++++++++");
 
         return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
+    }
+
+    @Scheduled(fixedDelay = 1000, initialDelay = 15000)
+    public void blockProcess() {
+        if (blockQueue.size() == 0)
+            update();
+
+        processNextBlock();
+    }
+
+    @Override
+    public void blockReceived(Block block) {
+        logger.info("Block received: {}", block.hash());
+        blockQueue.add(block);
+    }
+
+    @Override
+    public void foundPoW(Block block) {
+        logger.info("Found pow. (Block {})", block.hash().toString());
+
+        blockReceived(block);
+        blockListeners.forEach(listener -> listener.blockReceived(block));
+        //New round of miner.
+        Block newBlock = prepareNewBlock(block, AppConfig.getOwnPublicKey().toString());
+        blockListenerMiners.forEach(listener -> listener.blockReceived(newBlock));
+    }
+
+    /**
+     * Uses the remoteProxies to fetch all missing {@link Block}s from the other {@link org.educoins.core.p2p.peers.Peer}s.
+     */
+    public void update() {
+        logger.info("Updating Blockchain...");
+        this.remoteProxies.receiveBlocks(getLatestBlock().hash());
+        logger.info("Updating Blockchain done.");
+    }
+
+    private void processNextBlock() {
+        Block block = blockQueue.poll();
+        Sha256Hash hash = block.hash();
+        logger.info("Processing next Block ({})...", hash);
+
+        boolean isVerified = this.verification.verifyBlock(block);
+        Block latestBlock = getLatestBlock();
+        if (block.equals(latestBlock) || store.contains(block)) {
+            logger.info("Not a new Block.");
+            return;
+        }
+
+        if (isVerified) {
+            logger.info("Block successfully verified ({})", hash);
+            store.put(block);
+
+            notifyBlockReceived(block);
+
+            List<Transaction> transactions = block.getTransactions();
+            if (transactions != null) {
+                logger.info("Found {} transactions", transactions.size());
+                for (Transaction transaction : transactions) {
+                    notifyTransactionReceived(transaction);
+                }
+            }
+        }
+
+        logger.info("Block processed ({}).", hash);
     }
 
     public @NotNull Block getLatestBlock() {
@@ -161,44 +229,9 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     }
 
     public void notifyBlockReceived(Block newBlock) {
-        synchronized (this) {
-            for (IBlockListener blockListener : this.blockListeners) {
-                blockListener.blockReceived(newBlock);
-            }
+        for (IBlockListener blockListener : this.blockListeners) {
+            blockListener.blockReceived(newBlock);
         }
-    }
-
-    public void verifyReceivedBlock(Block receivedBlock) {
-        logger.info("Received block. Verifying now. hash: {}", receivedBlock.hash());
-
-        // Already up to date.
-        Block latestStoredBlock = getLatestBlock();
-        if (receivedBlock.equals(latestStoredBlock)) {
-            logger.info("Blockchain is up to date.");
-            return;
-        }
-
-        // Check block for validity.
-        if (!this.verification.verifyBlock(receivedBlock)) {
-            logger.warn("Verification of block failed. hash: {}, block: {}", receivedBlock.hash(), receivedBlock.toString());
-            // Tries as long as the blockchain is up to date.
-            Block latestBlock = getLatestBlock();
-            // TODO: Should a failed verification really trigger a new fetch?
-            this.remoteProxies.receiveBlocks(latestBlock.hash());
-            return;
-        }
-
-        // Store the verified block.
-        logger.info("Received Block stored in the BC after verification: " + receivedBlock.toString());
-        this.store.put(receivedBlock);
-        List<Transaction> transactions = receivedBlock.getTransactions();
-        if (transactions != null) {
-            logger.info("Found {} transactions", transactions.size());
-            for (Transaction transaction : transactions) {
-                notifyTransactionReceived(transaction);
-            }
-        }
-        logger.info("Block processed.");
     }
 
     public void notifyTransactionReceived(Transaction transaction) {
@@ -210,7 +243,6 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     }
 
     public void sendTransaction(Transaction transaction) {
-
         this.transactions.add(transaction);
         this.transactionTransmitters.transmitTransaction(transaction);
     }
@@ -305,71 +337,5 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
             }
         }
         return null;
-    }
-
-    public Block getGenesisBlock() {
-        try {
-            return store.getGenesisBlock();
-        } catch (BlockNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public void storeBlock(Block block) {
-        this.store.put(block);
-    }
-
-    @Override
-    public void blockReceived(Block block) {
-        logger.info("Block received: {}", block.hash());
-
-        boolean isVerified = this.verification.verifyBlock(block);
-        Block latestBlock = getLatestBlock();
-        if (block.equals(latestBlock)) {
-            logger.info("Not a new Block");
-            return;
-        }
-
-        if (isVerified) {
-            logger.info("Block successfully verified");
-            store.put(block);
-
-            notifyBlockReceived(block);
-
-            List<Transaction> transactions = block.getTransactions();
-            if (transactions != null) {
-                logger.info("Found {} transactions", transactions.size());
-                for (Transaction transaction : transactions) {
-                    notifyTransactionReceived(transaction);
-                }
-            }
-            //TODO: Open Transactions have to be removed, if they are inside the new block
-        } else {
-            update();
-        }
-
-        logger.info("Block processed.");
-    }
-
-    @Override
-    public void foundPoW(Block block) {
-        logger.info("Found pow. (Block {})", block.hash().toString());
-
-        blockReceived(block);
-        blockListeners.forEach(listener -> listener.blockReceived(block));
-        //New round of miner.
-        Block newBlock = prepareNewBlock(block, AppConfig.getOwnPublicKey().toString());
-        blockListenerMiners.forEach(listener -> listener.blockReceived(newBlock));
-    }
-
-    /**
-     * Uses the remoteProxies to fetch all missing {@link Block}s from the other {@link org.educoins.core.p2p.peers.Peer}s.
-     */
-    public void update() {
-        logger.info("Updating Blockchain...");
-        this.remoteProxies.receiveBlocks(getLatestBlock().hash());
-        logger.info("Updating Blockchain done.");
     }
 }

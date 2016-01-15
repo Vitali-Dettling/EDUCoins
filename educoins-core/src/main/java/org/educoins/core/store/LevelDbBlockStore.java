@@ -20,8 +20,8 @@ import java.io.IOException;
  */
 public class LevelDbBlockStore implements IBlockStore {
 
-	private final Logger logger = LoggerFactory.getLogger(LevelDbBlockStore.class);
-	
+    private final Logger logger = LoggerFactory.getLogger(LevelDbBlockStore.class);
+
     private final byte[] LATEST_KEY = "latest".getBytes();
 
     private byte[] genesisHash = null;
@@ -85,12 +85,12 @@ public class LevelDbBlockStore implements IBlockStore {
         byte[] byteBlock = database.get(hash.getBytes());
 
         if (byteBlock == null)
-        	//TODO May change that in return null?
+            //TODO May change that in return null?
             throw new BlockNotFoundException(hash.toString());
 
         return getBlock(byteBlock);
     }
-    
+
     @SuppressWarnings("restriction")
     @Override
     @Nullable
@@ -114,15 +114,29 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     @Override
-    public IBlockIterator iterator() {
-        return new BlockIterator(this, genesisHash);
-    }
-
-    @Override
     @NotNull
     public Block getGenesisBlock() throws BlockNotFoundException {
         if (genesisHash == null) throw new BlockNotFoundException("No GenesisBlock inserted so far!");
         return get(Sha256Hash.wrap(genesisHash));
+    }
+
+    @Override
+    public boolean contains(Block block) {
+        IBlockIterator iterator = iterator();
+        while (iterator.hasNext()) {
+            try {
+                if (iterator.next().equals(block))
+                    return true;
+            } catch (BlockNotFoundException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public IBlockIterator iterator() {
+        return new BlockIterator(this, genesisHash);
     }
 
     private boolean isEmpty() {
@@ -139,10 +153,10 @@ public class LevelDbBlockStore implements IBlockStore {
     private Block getBlock(byte[] jsonblock) {
         Block block;
         try {
-        	String storedBlock = new String(jsonblock);
+            String storedBlock = new String(jsonblock);
             block = new Gson().fromJson(storedBlock, Block.class);
         } catch (Exception e) {
-        	logger.error(e.getMessage());
+            logger.error(e.getMessage());
             block = null;
         }
         return block;

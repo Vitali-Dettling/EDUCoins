@@ -25,17 +25,17 @@ public class TestSpringConfig {
         }
         return blockStore;
     }
-
-    // TODO: think of typing and so on.
-    @Bean
-    public BlockChain blockChain() throws IOException {
-        if (blockChain == null) {
-            IProxyPeerGroup remoteProxy = proxyPeerGroup();
-            IBlockStore store = blockStore();
-            this.blockChain = new BlockChain(remoteProxy, store);
-        }
-        return blockChain;
-    }
+//
+//    // TODO: think of typing and so on.
+//    @Bean
+//    public BlockChain blockChain() throws IOException {
+//        if (blockChain == null) {
+//            IProxyPeerGroup remoteProxy = proxyPeerGroup();
+//            IBlockStore store = blockStore();
+//            this.blockChain = new BlockChain(remoteProxy, store);
+//        }
+//        return blockChain;
+//    }
 
     @Bean
     public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {
