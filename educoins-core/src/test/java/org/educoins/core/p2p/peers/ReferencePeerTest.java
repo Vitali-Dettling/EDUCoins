@@ -6,9 +6,7 @@ import java.util.List;
 import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
-import org.educoins.core.Wallet;
 import org.educoins.core.testutils.BlockStoreFactory;
-import org.educoins.core.transaction.CoinbaseTransaction;
 import org.educoins.core.transaction.Output;
 import org.educoins.core.transaction.RegularTransaction;
 import org.educoins.core.transaction.Transaction;
@@ -27,12 +25,13 @@ public class ReferencePeerTest {
 		MockedClient.delete();
 	}
 	
-	@Ignore
 	@Test
 	public void testGetAmount() {
 
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		ReferencePeer peer = new ReferencePeer(blockchain);
+		
+		MockedClient.resetClient();
 		Client client = MockedClient.getClient();
 
 		int expected = 0;

@@ -52,12 +52,11 @@ public class SoloMinerPeerTest {
 		// TODO: Test real error case
 	}
 
-//	TODO
-	@Ignore
 	@Test
 	public void testGetAmount() {
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		SoloMinerPeer peer = new SoloMinerPeer(blockchain);
+		MockedClient.resetClient();
 		Client client = MockedClient.getClient();
 
 		int expected = 0;
