@@ -24,11 +24,11 @@ public class SoloMinerPeer extends Peer {
 
     @Override
     public void start() {
-        // Kick off Miner.
-        blockChain.blockReceived(new Block());
-
         // After miner has started.
         this.proxyPeerGroup.discover();
+
+        // Kick off Miner.
+        blockChain.blockReceived(new Block());
         client();
     }
 

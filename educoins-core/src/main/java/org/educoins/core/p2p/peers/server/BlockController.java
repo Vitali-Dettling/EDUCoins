@@ -23,8 +23,8 @@ import java.util.Collection;
 @RequestMapping("/blocks")
 public class BlockController {
 
-    private Logger logger = LoggerFactory.getLogger(BlockController.class);
-    private BlockChain blockChain;
+    private final static Logger logger = LoggerFactory.getLogger(BlockController.class);
+    private final BlockChain blockChain;
 
     @Autowired
     public BlockController(BlockChain blockChain) {
@@ -50,8 +50,9 @@ public class BlockController {
      * @throws BlockNotFoundException if a Block could not be found.
      */
     @RequestMapping(value = "/from/{hash}", method = RequestMethod.GET)
-    public Collection<Block> getBlocksFrom(@PathVariable(value = "hash") String hash) throws BlockNotFoundException {
-        logger.info("Offering blocks from hash: {}", hash);
+    public Collection<Block> getBlocksFrom(@PathVariable(value = "hash") String hash, HttpServletRequest request) throws
+            BlockNotFoundException {
+        logger.info("Offering blocks from hash: {} to {}", hash, request.getRemoteAddr());
         return blockChain.getBlocksFrom(Sha256Hash.wrap(hash));
     }
 

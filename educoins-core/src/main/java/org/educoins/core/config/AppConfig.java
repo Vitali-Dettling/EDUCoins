@@ -16,15 +16,14 @@ public class AppConfig {
 
     public static Properties prop = new Properties();
     private static String inetAddress;
-    private static AppConfig config = new AppConfig();
 
-    public AppConfig() {
+    static {
         InputStream inputStream = null;
         try {
 
             String propFileName = "application.properties";
 
-            inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+            inputStream = AppConfig.class.getClassLoader().getResourceAsStream(propFileName);
 
             if (inputStream != null) {
                 prop.load(inputStream);

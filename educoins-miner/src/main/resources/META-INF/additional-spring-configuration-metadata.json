@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "educoins.discovery.retries.max",
+      "type": "java.lang.String",
+      "description": "Description for educoins.discovery.retries.max."
+    }
+  ]
+}

@@ -19,13 +19,13 @@ import java.io.IOException;
 @EnableWebMvc
 @EnableAutoConfiguration(exclude = {JacksonAutoConfiguration.class})
 @ComponentScan(basePackages = "org.educoins.core")
-//@ConfigurationProperties(value = "classpath:/application.properties")
 public class SoloMinerNode {
 
     public static void main(String[] args) throws IOException {
         Wallet.initialize(args);
 
         ConfigurableApplicationContext run = SpringApplication.run(SoloMinerNode.class, args);
+
         BlockChain blockChain = (BlockChain) run.getBean("blockChain");
         IProxyPeerGroup peerGroup = (IProxyPeerGroup) run.getBean("proxyPeerGroup");
         Peer peer = new SoloMinerPeer(blockChain, peerGroup, AppConfig.getOwnPublicKey());

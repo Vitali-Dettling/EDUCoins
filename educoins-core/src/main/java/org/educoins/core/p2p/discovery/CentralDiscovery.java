@@ -31,13 +31,18 @@ public class CentralDiscovery implements DiscoveryStrategy {
     @Override
     public void hello() throws DiscoveryException {
         try {
-            HttpProxy thisProxy = new HttpProxy(URI.create("localhost"),
-                    AppConfig.getOwnPublicKey().toString());
+            String pubkey = AppConfig.getOwnPublicKey().toString();
+            logger.info("Helloing Central with Public Key {} now...", pubkey);
+            HttpProxy thisProxy = new HttpProxy(URI.create("localhost"), pubkey);
+
             thisProxy.setPort(AppConfig.getOwnPort());
 
             String ip = new RestClient<RemoteProxy>()
                     .post(URI.create(centralUrl + NODES), thisProxy, String.class);
+
             AppConfig.setInetAddress(ip);
+
+            logger.info("Helloing Central successful. Retrieved new IP: {}", ip);
         } catch (Exception e) {
             throw new DiscoveryException(e);
         }
