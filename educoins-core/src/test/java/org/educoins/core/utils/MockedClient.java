@@ -119,4 +119,8 @@ public class MockedClient {
 		MockedWallet.delete();
 		MockedBlockChain.delete();
 	}
+	
+	public static void resetClient() {
+		mockedClient = new Client();
+	}
 }
