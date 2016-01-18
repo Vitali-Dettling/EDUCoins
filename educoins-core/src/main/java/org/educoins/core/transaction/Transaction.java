@@ -1,19 +1,13 @@
 package org.educoins.core.transaction;
 
-import org.educoins.core.BlockChain;
-import org.educoins.core.Wallet;
-import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.CannotRevokeRevokeTransactionException;
-import org.educoins.core.utils.Hashable;
-import org.educoins.core.utils.Sha256Hash;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.educoins.core.Wallet;
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Hashable;
+import org.educoins.core.utils.Sha256Hash;
 
 public class Transaction implements Hashable {
 
@@ -50,7 +44,7 @@ public class Transaction implements Hashable {
 	}
 
 	public int getInputsCount() {
-		return this.inputsCount;
+		return this.inputs.size();
 	}
 
 	public List<Input> getInputs() {
@@ -76,6 +70,12 @@ public class Transaction implements Hashable {
 		}
 	}
 
+	public void signApprovals(String holderSignature) {
+		for (Approval app : approvals) {
+			app.setHolderSignature(holderSignature);
+		}
+	}
+
 	public void addInput(Input input) {
 		if (this.inputs == null) {
 			this.inputs = new ArrayList<>();
@@ -93,7 +93,7 @@ public class Transaction implements Hashable {
 	}
 
 	public int getOutputsCount() {
-		return this.outputsCount;
+		return this.outputs.size();
 	}
 
 	public List<Output> getOutputs() {
@@ -130,7 +130,7 @@ public class Transaction implements Hashable {
 	}
 
 	public int getApprovalsCount() {
-		return approvalsCount;
+		return this.approvals.size();
 	}
 
 	public List<Approval> getApprovals() {
@@ -181,7 +181,7 @@ public class Transaction implements Hashable {
 		// Regular:
 		// inputs > 0; outputs > 0; approvals = 0;
 		// Approval:
-		// approvals > 0
+		// inputs > 0; outputs >= 0; approvals > 0
 
 		// Check for transaction type.
 		if (this.approvedTransaction == null) {
@@ -195,7 +195,9 @@ public class Transaction implements Hashable {
 					&& (this.getApprovals() == null || this.getApprovals().size() == 0)) {
 				return ETransaction.REGULAR;
 			}
-			if (this.getApprovals() != null && this.getApprovals().size() > 0) {
+			if ((this.getInputs() != null && this.getInputs().size() > 0)
+					&& (this.getOutputs() != null && this.getOutputs().size() > 0) && this.getApprovals() != null
+					&& this.getApprovals().size() > 0) {
 				return ETransaction.APPROVED;
 			}
 		} else {
@@ -234,7 +236,7 @@ public class Transaction implements Hashable {
 			break;
 		case REVOKE:
 			toBeHashed = transaction.approvedTransaction.getBytes();
-			break;			
+			break;
 		}
 		// hash concatenated header fields and return
 		return Sha256Hash.createDouble(toBeHashed);

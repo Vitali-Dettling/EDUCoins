@@ -1,5 +1,7 @@
 package org.educoins.core.transaction;
 
+import java.util.List;
+
 import org.educoins.core.utils.Sha256Hash;
 
 public class RevokeTransaction extends Transaction {
@@ -12,11 +14,10 @@ public class RevokeTransaction extends Transaction {
 		this.lockingScript = lockingScript;
 	}
 
-
-
 	@Override
 	public Transaction create() {
 		// TODO 
+		
 		this.setApprovedTransaction(hash());
 		for (int i = 0; i < approvals.size(); i++) {
 			Input input = new Input(approvals.get(i).getAmount(), hash().toString(), "TODO");

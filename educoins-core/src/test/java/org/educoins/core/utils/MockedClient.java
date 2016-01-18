@@ -43,12 +43,6 @@ public class MockedClient {
 		return txCaptor.getAllValues();
 	}
 
-	//TODO Late, if the gateways will be implemented.
-//	public static List<Transaction> sendGateTransaction(String publicKey) {
-//		mockedClient.sendGateTransaction(publicKey);
-//		return receivedTransaction();
-//	}
-
 	public static List<Transaction> sendRegularTransaction(int amount, String lockingScript) {
 		transactionReceived();
 		Block block = BlockStoreFactory.getRandomBlock();
@@ -91,13 +85,13 @@ public class MockedClient {
 		mockedClient.distructOwnOutputs(block);
 	}
 	
-	public static Transaction generateApprovedTransaction(String lockingScript){
+	public static Transaction generateApprovedTransaction(String holderSignature){
 		Client client = MockedClient.getClient();
 		
 		int toApproveAmount = 1;
-		String owner = Generator.getSecureRandomString256HEX();
-		if(lockingScript == null){
-			lockingScript = MockedWallet.getPublicKey();
+		String owner = Wallet.getPublicKey();
+		if(holderSignature == null){
+			holderSignature = Wallet.getSignature(owner, "123456789ABCDEF");
 		}
 		
 		MockedClient.outputs = TxFactory.getRandomPreviousOutputs();
@@ -107,7 +101,7 @@ public class MockedClient {
 		block.addTransaction(tx);
 		client.distructOwnOutputs(block);
 		
-		return client.generateApprovedTransaction(toApproveAmount, owner, owner, lockingScript);
+		return client.generateApprovedTransaction(toApproveAmount, owner, holderSignature, owner);
 	}
 	
 	

@@ -60,8 +60,9 @@ public class PeerServerTest {
 
     @Test
     public void testStart() throws Exception {
-        assertNotNull(restClient.get(URI.create(blockHeadersResourcePath), Block[].class));
-        assertNotNull(restClient.get(URI.create(blocksResourcePath), Block[].class));
+    	
+       assertNotNull(restClient.get(URI.create(blockHeadersResourcePath), Block[].class));
+       assertNotNull(restClient.get(URI.create(blocksResourcePath), Block[].class));
     }
 
     @Override

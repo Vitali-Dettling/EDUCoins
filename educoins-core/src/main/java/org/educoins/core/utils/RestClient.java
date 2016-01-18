@@ -141,7 +141,7 @@ public class RestClient<T> {
             output.append(outStr);
         }
 
-        return (T) new Gson().fromJson(output.toString(), clazzOfT);
+        return (T) gson.fromJson(output.toString(), clazzOfT);
     }
 
 }

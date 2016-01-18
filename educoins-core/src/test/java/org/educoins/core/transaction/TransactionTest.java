@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.educoins.core.Wallet;
 import org.educoins.core.transaction.Transaction.ETransaction;
+import org.educoins.core.utils.Generator;
 import org.educoins.core.utils.MockedClient;
 import org.educoins.core.utils.MockedWallet;
 import org.educoins.core.utils.Sha256Hash;
@@ -27,7 +28,7 @@ public class TransactionTest {
 	public void testPreviousOutput() {
 
 		Transaction approvedTx = MockedClient.generateApprovedTransaction(null);
-		String hashPreviousOutput = approvedTx.getApprovals().get(0).getHashPreviousOutput();
+		String hashPreviousOutput = approvedTx.getInputs().get(0).getHashPrevOutput();
 		List<Output> outputs = MockedClient.getOutputs();
 		for (Output out : outputs) {
 			if (hashPreviousOutput.equals(out.hash().toString())) {
@@ -63,7 +64,6 @@ public class TransactionTest {
 		assertNotNull(approvedTx);
 		assertTrue(!approvedTx.getApprovals().isEmpty());
 		assertEquals(approvedTx.getApprovals().get(0).getAmount(), 1);
-		assertTrue(approvedTx.getApprovals().get(0).getHashPreviousOutput().length() > 0);
 		assertTrue(approvedTx.getApprovals().get(0).getHolderSignature().length() > 0);
 		assertTrue(approvedTx.getApprovals().get(0).getLockingScript().length() > 0);
 		assertTrue(approvedTx.getApprovals().get(0).getOwnerAddress().length() > 0);
@@ -112,13 +112,11 @@ public class TransactionTest {
 	// outputs = 0
 	// approvals = null
 	@Test
-	@Ignore // TODO will fail because generateApprovedTransaction is not
-			// implemented yet.
+	@Ignore
 	public void testWhichTransactionRevoke() {
 
-//		final int AMOUNT = 16;
 		final String LOCKING_SCRIPT = "ABC";
-		Sha256Hash hash = Sha256Hash.wrap("123");
+		Sha256Hash hash = Sha256Hash.wrap(Generator.getSecureRandomString256HEX());
 		
 		ITransactionFactory txFactory = new TransactionFactory();
 		Transaction transaction = txFactory.generateRevokeTransaction(hash, LOCKING_SCRIPT);
