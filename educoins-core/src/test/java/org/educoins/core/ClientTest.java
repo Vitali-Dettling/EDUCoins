@@ -1,17 +1,12 @@
 package org.educoins.core;
 
-import java.util.List;
-
 import org.educoins.core.testutils.BlockStoreFactory;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.transaction.Transaction.ETransaction;
-import org.educoins.core.utils.MockedClient;
-import org.educoins.core.utils.MockedWallet;
-import org.educoins.core.utils.Sha256Hash;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.educoins.core.utils.*;
+import org.junit.*;
+
+import java.util.List;
 
 public class ClientTest {
 
@@ -64,7 +59,6 @@ public class ClientTest {
 
 	@Test
 	public void testSendRegularTransaction() {
-
 		String lockingScript = MockedWallet.getPublicKey();
 		List<Transaction> reqeived = MockedClient.sendRegularTransaction(1, lockingScript);
 		checkTransactionType(reqeived, ETransaction.REGULAR);
