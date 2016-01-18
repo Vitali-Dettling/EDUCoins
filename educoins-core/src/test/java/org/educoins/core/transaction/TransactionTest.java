@@ -143,4 +143,15 @@ public class TransactionTest {
 		assertEquals(testee, ETransaction.REGULAR);
 	}
 
+	@Test
+	public void testGetAmount(){
+		final int AMOUNT = 16;
+		final String receiver = "ABC";
+
+		List<Output> outputs = TxFactory.getRandomPreviousOutputs();
+		ITransactionFactory txFactory = new TransactionFactory();
+		Transaction transaction = txFactory.generateRegularTransaction(outputs, AMOUNT, receiver);
+		assertEquals(AMOUNT, transaction.getAmount(Wallet.getPublicKey()));
+	}
+
 }

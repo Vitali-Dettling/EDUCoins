@@ -35,8 +35,12 @@ public class NodesController {
         URI inetAddr = URI.create(request.getRemoteAddr());
         logger.info("Retrieved 'hello' from {}@{}", node.getPubkey(), inetAddr + ":" + node.getPort());
 
+        if (inetAddr.equals(URI.create("127.0.0.1"))) {
+            logger.warn("Got request from loopback address 127.0.0.1");
+            return new ResponseEntity<URI>(HttpStatus.BAD_REQUEST);
+        }
+
         //TODO: get protocol aware
-//        node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + request.getRemotePort()));
         node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + node.getPort()));
         synchronized (nodesRepository) {
             nodesRepository.save(node);

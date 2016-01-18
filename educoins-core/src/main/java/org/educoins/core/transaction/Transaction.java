@@ -48,6 +48,17 @@ public class Transaction implements Hashable {
 		return null;
 	}
 
+	public int getAmount(String ownPublicKey){
+		int amount = 0;
+		for (Output o : outputs){
+			if (!Wallet.getPublicKeys().contains(o.getLockingScript()))
+			{
+				amount += o.getAmount();
+			}
+		}
+		return amount;
+	}
+
 	public void setInputs(List<Input> inputs) {
 		this.inputs = inputs;
 	}

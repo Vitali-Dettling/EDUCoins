@@ -49,8 +49,8 @@ public class TransactionFactory implements ITransactionFactory {
 	@Override
 	public Transaction generateRegularTransaction(@NotNull List<Output> previousOutputs, int sendAmount, String sendPublicKey) {
 	
-		int outputAmouns = getOutputAmount(previousOutputs);
-		List<Output> outputs = createOutputs(sendAmount, outputAmouns, sendPublicKey, false);
+		int outputAmounts = getOutputAmount(previousOutputs);
+		List<Output> outputs = createOutputs(sendAmount, outputAmounts, sendPublicKey, false);
 		List<Input> inputs = createInputs(previousOutputs);
 		
 		Transaction regTx = new RegularTransaction(outputs, inputs);
