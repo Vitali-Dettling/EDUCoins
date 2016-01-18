@@ -55,10 +55,17 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             throw new DiscoveryException("No proxies received!");
     }
 
+    private static boolean once = true;
+    
     @Override
     public void discover() {
         try {
-            new CentralDiscovery().hello();
+
+        	//TODO (Workaround) Should only discover once per node.
+        	if (once){
+        		new CentralDiscovery().hello();
+        		once = false;
+        	}
             //TODO If discovery worked return?
         } catch (DiscoveryException e) {
             logger.warn("Could not hello the Central!", e);
