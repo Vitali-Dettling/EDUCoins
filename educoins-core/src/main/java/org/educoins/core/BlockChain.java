@@ -122,7 +122,7 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     private void processNextBlock() {
         Block block = blockQueue.poll();
         Sha256Hash hash = block.hash();
-        logger.info("Processing next Block ({})...", hash);
+        logger.info("Processing next Block from {} ({})...", blockQueue.size(), hash);
 
         boolean isVerified = this.verification.verifyBlock(block);
         Block latestBlock = getLatestBlock();

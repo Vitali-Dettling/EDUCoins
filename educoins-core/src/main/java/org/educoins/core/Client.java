@@ -1,30 +1,23 @@
 package org.educoins.core;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
-import org.educoins.core.transaction.Approval;
-import org.educoins.core.transaction.ITransactionFactory;
-import org.educoins.core.transaction.Output;
-import org.educoins.core.transaction.Transaction;
-import org.educoins.core.transaction.TransactionFactory;
-import org.educoins.core.utils.Sha256Hash;
+import org.educoins.core.transaction.*;
 import org.educoins.core.transaction.Transaction.ETransaction;
+import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Client {
+import java.math.BigInteger;
+import java.util.*;
 
+public class Client implements IBlockListener {
+
+	private static int availableAmount;
+	private static int approvedCoins;
 	private final Logger logger = LoggerFactory.getLogger(Client.class);
-
 	private List<Output> previousOutputs;
 	private List<Approval> approvedTransactions;
 	private ITransactionFactory transactionFactory;
 	private List<Block> blockBuffer;
-	private static int availableAmount;
-	private static int approvedCoins;
 	private boolean locked;
 	
 	public Client(){
@@ -194,6 +187,11 @@ public class Client {
 			return null;
 		}
 		return input;
+	}
+
+	@Override
+	public void blockReceived(Block block) {
+		distructOwnOutputs(block);
 	}
 }
 

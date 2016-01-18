@@ -41,7 +41,7 @@ public class AppConfig {
     @Value("${educoins.discovery.rating.default}")
     private String discoveryRatingDefault;
 
-    @Value("${educoins.blockstore.directory}")
+    //    @Value("${educoins.blockstore.directory}")
     private String blockStoreDirectory;
 
     public static void setInetAddress(String ip) {

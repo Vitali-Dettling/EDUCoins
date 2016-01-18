@@ -24,6 +24,8 @@ public class ReferencePeer extends Peer {
         this.miner = new Miner(blockChain);
         this.client = new Client();
         this.singlePublicKey = Wallet.getPublicKey();
+
+        this.blockChain.addBlockListener(client);
     }
 
     @Override
