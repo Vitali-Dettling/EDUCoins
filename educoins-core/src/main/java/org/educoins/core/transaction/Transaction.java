@@ -13,24 +13,18 @@ public class Transaction implements Hashable {
 
 	protected int version;
 
-	protected int inputsCount;
 	protected List<Input> inputs;
 
-	protected int outputsCount;
 	protected List<Output> outputs;
 
-	protected int approvalsCount;
 	protected List<Approval> approvals;
 
 	private Sha256Hash approvedTransaction;
 
 	public Transaction() {
 		this.inputs = new ArrayList<>();
-		this.inputsCount = this.inputs.size();
 		this.outputs = new ArrayList<>();
-		this.outputsCount = this.outputs.size();
 		this.approvals = new ArrayList<>();
-		this.approvalsCount = this.approvals.size();
 
 		this.approvedTransaction = null;
 	}
@@ -56,11 +50,6 @@ public class Transaction implements Hashable {
 
 	public void setInputs(List<Input> inputs) {
 		this.inputs = inputs;
-		if (this.inputs == null) {
-			this.inputsCount = 0;
-		} else {
-			this.inputsCount = this.inputs.size();
-		}
 	}
 
 	public void signInputs() {
@@ -81,7 +70,6 @@ public class Transaction implements Hashable {
 			this.inputs = new ArrayList<>();
 		}
 		this.inputs.add(input);
-		this.inputsCount = this.inputs.size();
 	}
 
 	public void addInputs(Collection<Input> inputs) {
@@ -89,7 +77,6 @@ public class Transaction implements Hashable {
 			this.inputs = new ArrayList<Input>();
 		}
 		this.inputs.addAll(inputs);
-		this.inputsCount = this.inputs.size();
 	}
 
 	public int getOutputsCount() {
@@ -106,11 +93,6 @@ public class Transaction implements Hashable {
 
 	public void setOutputs(List<Output> outputs) {
 		this.outputs = outputs;
-		if (this.outputs == null) {
-			this.outputsCount = 0;
-		} else {
-			this.outputsCount = this.outputs.size();
-		}
 	}
 
 	public void addOutput(Output output) {
@@ -118,7 +100,6 @@ public class Transaction implements Hashable {
 			this.outputs = new ArrayList<>();
 		}
 		this.outputs.add(output);
-		this.outputsCount = this.outputs.size();
 	}
 
 	public void addOutputs(Collection<Output> outputs) {
@@ -126,7 +107,6 @@ public class Transaction implements Hashable {
 			this.outputs = new ArrayList<>();
 		}
 		this.outputs.addAll(outputs);
-		this.outputsCount = this.outputs.size();
 	}
 
 	public int getApprovalsCount() {
@@ -143,12 +123,6 @@ public class Transaction implements Hashable {
 
 	public void setApprovals(List<Approval> approvals) {
 		this.approvals = approvals;
-		if (this.approvals == null) {
-			this.approvalsCount = 0;
-		} else {
-			this.approvalsCount = this.approvals.size();
-		}
-
 	}
 
 	public void addApproval(Approval approval) {
@@ -156,7 +130,6 @@ public class Transaction implements Hashable {
 			this.approvals = new ArrayList<>();
 		}
 		this.approvals.add(approval);
-		this.approvalsCount = this.approvals.size();
 	}
 
 	public void addApprovals(Collection<Approval> approvals) {
@@ -164,7 +137,6 @@ public class Transaction implements Hashable {
 			this.approvals = new ArrayList<>();
 		}
 		this.approvals.addAll(approvals);
-		this.approvalsCount = this.approvals.size();
 	}
 
 	public Sha256Hash getApprovedTransaction() {
@@ -295,8 +267,8 @@ public class Transaction implements Hashable {
 
 	@Override
 	public String toString() {
-		return "Transaction [version=" + version + ", inputsCount=" + inputsCount + ", inputs=" + inputs
-				+ ", outputsCount=" + outputsCount + ", outputs=" + outputs + ", approvalsCount=" + approvalsCount
+		return "Transaction [version=" + version + ", inputsCount=" + inputs.size() + ", inputs=" + inputs
+				+ ", outputsCount=" + outputs.size() + ", outputs=" + outputs + ", approvalsCount=" + approvals.size()
 				+ ", approvals=" + approvals + ", approvedTransaction=" + approvedTransaction + "]";
 	}
 
