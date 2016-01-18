@@ -3,6 +3,8 @@ package org.educoins.central.repositories;
 import org.educoins.central.domain.Node;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -15,6 +17,7 @@ import java.util.Collection;
 public interface NodesRepository extends CrudRepository<Node, Long> {
     Collection<Node> findByTimestampBefore(LocalDateTime dateTime);
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     Node save(Node node);
 
     Collection<Node> findAll();
