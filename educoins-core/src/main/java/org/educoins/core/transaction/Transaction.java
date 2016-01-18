@@ -1,42 +1,30 @@
 package org.educoins.core.transaction;
 
-import org.educoins.core.BlockChain;
-import org.educoins.core.Wallet;
-import org.educoins.core.cryptography.SHA256Hasher;
-import org.educoins.core.utils.ByteArray;
-import org.educoins.core.utils.CannotRevokeRevokeTransactionException;
-import org.educoins.core.utils.Hashable;
-import org.educoins.core.utils.Sha256Hash;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.educoins.core.Wallet;
+import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Hashable;
+import org.educoins.core.utils.Sha256Hash;
 
 public class Transaction implements Hashable {
 
 	protected int version;
 
-	protected int inputsCount;
 	protected List<Input> inputs;
 
-	protected int outputsCount;
 	protected List<Output> outputs;
 
-	protected int approvalsCount;
 	protected List<Approval> approvals;
 
 	private Sha256Hash approvedTransaction;
 
 	public Transaction() {
 		this.inputs = new ArrayList<>();
-		this.inputsCount = this.inputs.size();
 		this.outputs = new ArrayList<>();
-		this.outputsCount = this.outputs.size();
 		this.approvals = new ArrayList<>();
-		this.approvalsCount = this.approvals.size();
 
 		this.approvedTransaction = null;
 	}
@@ -50,7 +38,7 @@ public class Transaction implements Hashable {
 	}
 
 	public int getInputsCount() {
-		return this.inputsCount;
+		return this.inputs.size();
 	}
 
 	public List<Input> getInputs() {
@@ -60,13 +48,19 @@ public class Transaction implements Hashable {
 		return null;
 	}
 
+	public int getAmount(String ownPublicKey){
+		int amount = 0;
+		for (Output o : outputs){
+			if (!Wallet.getPublicKeys().contains(o.getLockingScript()))
+			{
+				amount += o.getAmount();
+			}
+		}
+		return amount;
+	}
+
 	public void setInputs(List<Input> inputs) {
 		this.inputs = inputs;
-		if (this.inputs == null) {
-			this.inputsCount = 0;
-		} else {
-			this.inputsCount = this.inputs.size();
-		}
 	}
 
 	public void signInputs() {
@@ -76,12 +70,17 @@ public class Transaction implements Hashable {
 		}
 	}
 
+	public void signApprovals(String holderSignature) {
+		for (Approval app : approvals) {
+			app.setHolderSignature(holderSignature);
+		}
+	}
+
 	public void addInput(Input input) {
 		if (this.inputs == null) {
 			this.inputs = new ArrayList<>();
 		}
 		this.inputs.add(input);
-		this.inputsCount = this.inputs.size();
 	}
 
 	public void addInputs(Collection<Input> inputs) {
@@ -89,11 +88,10 @@ public class Transaction implements Hashable {
 			this.inputs = new ArrayList<Input>();
 		}
 		this.inputs.addAll(inputs);
-		this.inputsCount = this.inputs.size();
 	}
 
 	public int getOutputsCount() {
-		return this.outputsCount;
+		return this.outputs.size();
 	}
 
 	public List<Output> getOutputs() {
@@ -106,11 +104,6 @@ public class Transaction implements Hashable {
 
 	public void setOutputs(List<Output> outputs) {
 		this.outputs = outputs;
-		if (this.outputs == null) {
-			this.outputsCount = 0;
-		} else {
-			this.outputsCount = this.outputs.size();
-		}
 	}
 
 	public void addOutput(Output output) {
@@ -118,7 +111,6 @@ public class Transaction implements Hashable {
 			this.outputs = new ArrayList<>();
 		}
 		this.outputs.add(output);
-		this.outputsCount = this.outputs.size();
 	}
 
 	public void addOutputs(Collection<Output> outputs) {
@@ -126,11 +118,10 @@ public class Transaction implements Hashable {
 			this.outputs = new ArrayList<>();
 		}
 		this.outputs.addAll(outputs);
-		this.outputsCount = this.outputs.size();
 	}
 
 	public int getApprovalsCount() {
-		return approvalsCount;
+		return this.approvals.size();
 	}
 
 	public List<Approval> getApprovals() {
@@ -143,12 +134,6 @@ public class Transaction implements Hashable {
 
 	public void setApprovals(List<Approval> approvals) {
 		this.approvals = approvals;
-		if (this.approvals == null) {
-			this.approvalsCount = 0;
-		} else {
-			this.approvalsCount = this.approvals.size();
-		}
-
 	}
 
 	public void addApproval(Approval approval) {
@@ -156,7 +141,6 @@ public class Transaction implements Hashable {
 			this.approvals = new ArrayList<>();
 		}
 		this.approvals.add(approval);
-		this.approvalsCount = this.approvals.size();
 	}
 
 	public void addApprovals(Collection<Approval> approvals) {
@@ -164,7 +148,6 @@ public class Transaction implements Hashable {
 			this.approvals = new ArrayList<>();
 		}
 		this.approvals.addAll(approvals);
-		this.approvalsCount = this.approvals.size();
 	}
 
 	public Sha256Hash getApprovedTransaction() {
@@ -181,7 +164,7 @@ public class Transaction implements Hashable {
 		// Regular:
 		// inputs > 0; outputs > 0; approvals = 0;
 		// Approval:
-		// approvals > 0
+		// inputs > 0; outputs >= 0; approvals > 0
 
 		// Check for transaction type.
 		if (this.approvedTransaction == null) {
@@ -195,7 +178,9 @@ public class Transaction implements Hashable {
 					&& (this.getApprovals() == null || this.getApprovals().size() == 0)) {
 				return ETransaction.REGULAR;
 			}
-			if (this.getApprovals() != null && this.getApprovals().size() > 0) {
+			if ((this.getInputs() != null && this.getInputs().size() > 0)
+					&& (this.getOutputs() != null && this.getOutputs().size() > 0) && this.getApprovals() != null
+					&& this.getApprovals().size() > 0) {
 				return ETransaction.APPROVED;
 			}
 		} else {
@@ -234,7 +219,7 @@ public class Transaction implements Hashable {
 			break;
 		case REVOKE:
 			toBeHashed = transaction.approvedTransaction.getBytes();
-			break;			
+			break;
 		}
 		// hash concatenated header fields and return
 		return Sha256Hash.createDouble(toBeHashed);
@@ -293,8 +278,8 @@ public class Transaction implements Hashable {
 
 	@Override
 	public String toString() {
-		return "Transaction [version=" + version + ", inputsCount=" + inputsCount + ", inputs=" + inputs
-				+ ", outputsCount=" + outputsCount + ", outputs=" + outputs + ", approvalsCount=" + approvalsCount
+		return "Transaction [version=" + version + ", inputsCount=" + inputs.size() + ", inputs=" + inputs
+				+ ", outputsCount=" + outputs.size() + ", outputs=" + outputs + ", approvalsCount=" + approvals.size()
 				+ ", approvals=" + approvals + ", approvedTransaction=" + approvedTransaction + "]";
 	}
 

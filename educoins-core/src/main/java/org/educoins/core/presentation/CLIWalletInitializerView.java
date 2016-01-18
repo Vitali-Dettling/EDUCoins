@@ -42,7 +42,7 @@ public class CLIWalletInitializerView implements IWalletInitializerView {
     }
 
     private Path readPath(final Scanner scanner) {
-        System.out.println("Please enter the file you want to use:");
+        System.out.println("Please enter the file you want to use (for windows type: /c:/...):");
         System.out.flush();
         String fileInput = scanner.nextLine().trim();
         try {

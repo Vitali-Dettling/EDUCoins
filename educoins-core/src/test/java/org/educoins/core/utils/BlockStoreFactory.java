@@ -58,7 +58,8 @@ public class BlockStoreFactory {
     public static Transaction generateTransaction(int number) {
     	
     	List<Output> copyPreviousOutputs = TxFactory.getRandomPreviousOutputs();
-        Transaction t = new RegularTransaction(copyPreviousOutputs, 2, 3, Wallet.getPublicKey());
+    	List<Input> inputs = TxFactory.getRandomPreviousInputs();
+        Transaction t = new RegularTransaction(copyPreviousOutputs, inputs);
         for (int i = 0; i < 2 * number; i++) {
             Input input = new Input(5 * i * number, "",  MockedWallet.getPublicKey());
             t.addInput(input);

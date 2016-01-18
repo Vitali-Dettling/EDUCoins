@@ -160,15 +160,15 @@ public class Client {
 	}
 	
 	public int getEDICoinsAmount(){
-		
-		Client.availableAmount = 0;
+		int amount = 0;
 		for(Output out : this.previousOutputs){
-			Client.availableAmount += out.getAmount(); 
+			amount += out.getAmount();
 		}
-		return Client.availableAmount;
+		Client.availableAmount = amount;
+		return amount;
 	}
 	
-	public int getApproveCoins(){
+	public int getApprovedCoins(){
 		Client.approvedCoins = 0;
 		for(Approval app : this.approvedTransactions){
 			Client.approvedCoins += app.getAmount(); 
@@ -198,15 +198,18 @@ public class Client {
 		return input;
 	}
 
-	public List<TransactionVM> getListOfTransactions(BlockChain bc) {
+	public List<TransactionVM> 	getListOfTransactions(BlockChain bc) {
 		List<TransactionVM> returnList = new ArrayList<>();
 		try {
 			for (Block b : bc.getBlocks()) {
 				for (Transaction t : b.getTransactions()) {
-					TransactionVM tvm = new TransactionVM();
-					tvm.setTransactionType(t.whichTransaction());
-					tvm.setHash(t.hash());
-					returnList.add(tvm);
+					if (t.whichTransaction() != ETransaction.COINBASE) {
+						TransactionVM tvm = new TransactionVM();
+						tvm.setTransactionType(t.whichTransaction());
+						tvm.setHash(t.hash());
+						tvm.setAmount(t.getAmount(Wallet.getPublicKey()));
+						returnList.add(tvm);
+					}
 				}
 			}
 		} catch (BlockNotFoundException e) {

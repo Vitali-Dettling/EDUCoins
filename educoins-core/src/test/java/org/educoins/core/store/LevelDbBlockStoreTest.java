@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.educoins.core.Block;
 import org.educoins.core.Wallet;
+import org.educoins.core.transaction.Input;
 import org.educoins.core.transaction.Output;
 import org.educoins.core.transaction.RegularTransaction;
 import org.educoins.core.transaction.Transaction;
@@ -84,7 +85,8 @@ public class LevelDbBlockStoreTest {
 	@Test
 	public void testPutWithTransaction() throws Exception {
 		List<Output> copyPreviousOutputs = TxFactory.getRandomPreviousOutputs();
-		Transaction transaction = new RegularTransaction(copyPreviousOutputs, 2, 3, Wallet.getPublicKey());
+		List<Input> inputs = TxFactory.getRandomPreviousInputs();
+		Transaction transaction = new RegularTransaction(copyPreviousOutputs, inputs);
 		transaction.create();
 
 		List<Transaction> transactions = new ArrayList<>();

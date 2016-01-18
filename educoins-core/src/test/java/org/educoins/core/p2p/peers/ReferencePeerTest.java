@@ -7,11 +7,13 @@ import org.educoins.core.Block;
 import org.educoins.core.BlockChain;
 import org.educoins.core.Client;
 import org.educoins.core.testutils.BlockStoreFactory;
+import org.educoins.core.transaction.Input;
 import org.educoins.core.transaction.Output;
 import org.educoins.core.transaction.RegularTransaction;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.MockedBlockChain;
 import org.educoins.core.utils.MockedClient;
+import org.educoins.core.utils.TxFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -45,7 +47,10 @@ public class ReferencePeerTest {
 			outputs.add(out);
 		}
 		block = BlockStoreFactory.getRandomBlock(block);
-		Transaction tx = new RegularTransaction(outputs, expected, expected, publicKey).create();
+		
+		List<Input> inputs = TxFactory.getRandomPreviousInputs();
+		
+		Transaction tx = new RegularTransaction(outputs, inputs).create();
 		block.addTransaction(tx);
 		client.distructOwnOutputs(block);
 	

@@ -70,7 +70,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				System.out.println("Created Signature: " + signature);
 			case "g":
 				System.out.println("Regular EDUCoins " + Peer.client.getEDICoinsAmount());
-				System.out.println("Approved EDUCoins " + Peer.client.getApproveCoins());
+				System.out.println("Approved EDUCoins " + Peer.client.getApprovedCoins());
 				break;
 			case "r":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
@@ -127,10 +127,8 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 			case "l":
 				List<TransactionVM> vm = client.getListOfTransactions(Peer.blockChain);
 				for (TransactionVM t : vm) {
-					System.out.println("-> Transaction:");
-					System.out.println("Type: " + t.getTransactionType().toString());
-					System.out.println("Amount: " + t.getAmount());
-					System.out.println("Hash: " + t.getHash());
+					System.out.print("-> Transaction:\t Type: " + t.getTransactionType().toString() + "\t| Hash: " + t.getHash() + "\t| ");
+					System.out.print("Amount: " + t.getAmount() + "\n");
 				}
 				break;
 			case "e":

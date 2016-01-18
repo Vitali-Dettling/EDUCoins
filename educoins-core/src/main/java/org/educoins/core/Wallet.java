@@ -81,6 +81,8 @@ public class Wallet {
      *
      * @return Each call of the method will create a new set of private and public key set!
      */
+    // TODO Why the fuck does this method generate a new key on every call???
+
     //TODO Right now the private public key is stored in a file but this can change, maybe???
     public static String getPublicKey() {
 

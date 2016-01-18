@@ -75,7 +75,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
     @Override
     public void transmitTransaction(Transaction transaction) {
-        getHighestRatedProxies().forEach(proxy -> {
+    	Collection<RemoteProxy> proxies = getHighestRatedProxies();
+    	proxies.forEach(proxy -> {
             try {
                 logger.info("Sending transaction to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 proxy.transmitTransaction(transaction);

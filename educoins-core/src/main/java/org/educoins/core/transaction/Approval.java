@@ -8,24 +8,14 @@ public class Approval {
 	private String holderSignature;
 	private String ownerAddress;
 	private String lockingScript;
-	private String hashPreviousOutput;
 
-	public Approval(String hashPreviousOutput ,int amount, String ownerAddress, String lockingScript) {
+	public Approval(int amount, String ownerAddress, String lockingScript) {
 
 		this.amount = amount;
 		this.ownerAddress = ownerAddress;
 		this.lockingScript = lockingScript;
-		this.hashPreviousOutput = hashPreviousOutput;
 		
 		this.holderSignature = null;
-	}
-	
-	public void setHashPreviousOutput(String hashPreviousOutput){
-		this.hashPreviousOutput = hashPreviousOutput;
-	}
-	
-	public String getHashPreviousOutput(){
-		return this.hashPreviousOutput;
 	}
 
 	public int getAmount() {
@@ -74,6 +64,6 @@ public class Approval {
 	@Override
 	public String toString() {
 		return "Approval [amount=" + amount + ", holderSignature=" + holderSignature + ", ownerAddress=" + ownerAddress
-				+ ", lockingScript=" + lockingScript + ", hashPreviousOutput=" + hashPreviousOutput + "]";
+				+ ", lockingScript=" + lockingScript + ", hashPreviousOutput=" + "]";
 	}
 }

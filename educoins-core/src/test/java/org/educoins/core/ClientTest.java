@@ -19,30 +19,7 @@ public class ClientTest {
 	public void deleteTmp() {
 		MockedClient.delete();
 	}
-
-	@Test
-	public void testNotIntendedApproval() {
-
-		Client mockedClient = MockedClient.getClient();
-
-		Transaction approvedTx = MockedClient.generateApprovedTransaction(null);
-
-		Block block = new Block();
-		block = BlockStoreFactory.getRandomBlock(block);
-
-		String wrongLockingScript = Wallet.getPublicKey();
-		approvedTx.getApprovals().get(0).setLockingScript(wrongLockingScript);
-
-		block.addTransaction(approvedTx);
-		mockedClient.distructOwnOutputs(block);
-
-		int amountResult = mockedClient.getApproveCoins();
-		int amountExpected = approvedTx.getApprovals().get(0).getAmount();
-
-		Assert.assertNotEquals(amountExpected, amountResult);
-	}
-
-	@Ignore
+	
 	@Test
 	public void testReceivingApprovedTransaction() {
 
@@ -55,13 +32,13 @@ public class ClientTest {
 		block.addTransaction(approvedTx);
 		mockedClient.distructOwnOutputs(block);
 
-		int amountResult = mockedClient.getApproveCoins();
+		int amountResult = mockedClient.getApprovedCoins();
 		int amountExpected = approvedTx.getApprovals().get(0).getAmount();
 
 		Assert.assertEquals(amountExpected, amountResult);
 
 	}
-
+	
 	@Test
 	public void testSendRegularTransaction() {
 
@@ -71,7 +48,6 @@ public class ClientTest {
 	}
 
 	@Test
-	@Ignore // TDOD approved transaction is not implemented yet.
 	public void testSendApprovedTransaction() {
 
 		String owner = MockedWallet.getPublicKey();
@@ -81,7 +57,7 @@ public class ClientTest {
 	}
 
 	@Test
-	@Ignore // TDOD revoke transaction is not implemented yet.
+	@Ignore //TODO is not implemented yet.
 	public void testSendRevokeTransaction() {
 
 		String lockingScript = MockedWallet.getPublicKey();
