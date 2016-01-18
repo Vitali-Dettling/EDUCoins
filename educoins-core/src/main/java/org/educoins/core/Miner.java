@@ -85,6 +85,8 @@ public class Miner implements IBlockListenerMiner {
             if (this.active) {
                 logger.info("Found a sufficient PoW hash: {}", challenge.toString());
                 notifyFoundPoW(block);
+            } else {
+                logger.info("Mining interrupted!");
             }
 
             Miner.this.blockChain.removeBlockListener(this);
@@ -92,8 +94,8 @@ public class Miner implements IBlockListenerMiner {
 
         @Override
         public void blockReceived(Block block) {
+
             this.active = false;
-            logger.info("Mining interrupted!");
         }
     }
 }

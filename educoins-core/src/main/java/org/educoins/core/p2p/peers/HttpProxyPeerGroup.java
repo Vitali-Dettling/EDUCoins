@@ -242,14 +242,18 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         try {
             discoverOnce(new CentralDiscovery());
             discoverOnce(new PeerDiscovery(proxies));
+
         } catch (DiscoveryException e1) {
-            logger.error("Could not retrieve any Peers... We are isolated now!");
-            if (nTry < AppConfig.getMaxDiscoveryRetries())
+            if (nTry < AppConfig.getMaxDiscoveryRetries() && proxies.size() == 0) {
+                logger.error("Could not retrieve any Peers... We are isolated now!");
                 try {
-                    Thread.sleep(nTry * 2000);
+                    // escalation (3secs, 6secs, 12secs...)
+                    Thread.sleep(nTry * 3000);
                     rediscover(++nTry);
                 } catch (InterruptedException e) {
+                    logger.debug("Sleep interrupted!?", e);
                 }
+            }
         }
     }
 
