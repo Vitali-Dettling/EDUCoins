@@ -14,6 +14,7 @@ import java.io.IOException;
  */
 @Configuration
 @Profile("production")
+@DependsOn("appConfig")
 public class ProductionSpringConfig {
 	private IBlockStore blockStore;
 	private BlockChain blockChain;
