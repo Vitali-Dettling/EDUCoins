@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.educoins.core.p2p.peers.Peer;
+import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.transaction.Approval;
 import org.educoins.core.transaction.ITransactionFactory;
 import org.educoins.core.transaction.Output;
@@ -31,8 +33,8 @@ public class Client {
 		this.previousOutputs = new ArrayList<>();
 		this.approvedTransactions = new ArrayList<>();
 		
-		Client.availableAmount = 0;
-		Client.approvedCoins = 0;
+		availableAmount = 0;
+		approvedCoins = 0;
 		
 		this.transactionFactory = new TransactionFactory();
 		this.blockBuffer = new ArrayList<>();
@@ -56,7 +58,7 @@ public class Client {
 		}
 		
 		this.locked = true;
-		Client.availableAmount -= toApproveAmount;
+		availableAmount -= toApproveAmount;
 		Transaction buildTx = this.transactionFactory.generateApprovedTransaction(this.previousOutputs, toApproveAmount, owner, holderSignature, lockingScript);
 		this.locked = false;
 		
@@ -70,7 +72,7 @@ public class Client {
 		}
 		
 		this.locked = true;
-		Client.availableAmount -= sendAmount;
+		availableAmount -= sendAmount;
 		Transaction buildTx = this.transactionFactory.generateRegularTransaction(this.previousOutputs, sendAmount, publicKey);
 		this.locked = false;
 
@@ -98,7 +100,7 @@ public class Client {
 
 		int availableAmount = getEDICoinsAmount();
 		if ((availableAmount - sendAmount) < 0) {
-			this.logger.info("Not enough amount. Available: " + Client.availableAmount + " which to send: " + sendAmount);
+			this.logger.info("Not enough amount. Available: " + availableAmount + " which to send: " + sendAmount);
 			return false;
 		}
 		return true;
@@ -124,8 +126,8 @@ public class Client {
 					for (String publicKey : publicKeys) {
 						if (out.getLockingScript().equals(publicKey)) {
 							this.previousOutputs.add(out);
-							Client.availableAmount += out.getAmount();
-							this.logger.info("You have received some EDUCoins; the current amount is: " + Client.availableAmount);
+							availableAmount += out.getAmount();
+							this.logger.info("You have received some EDUCoins; the current amount is: " + availableAmount);
 						}
 					}
 				}
@@ -138,7 +140,7 @@ public class Client {
 							String hashTest = "123456789ABCDEF";
 							if(Wallet.compare(hashTest, holderSignature, publicKey)){
 								this.approvedTransactions.add(app);
-								Client.approvedCoins += app.getAmount();	
+								approvedCoins += app.getAmount();	
 							}
 						}
 					}
@@ -159,19 +161,19 @@ public class Client {
 	
 	public int getEDICoinsAmount(){
 		
-		Client.availableAmount = 0;
+		availableAmount = 0;
 		for(Output out : this.previousOutputs){
-			Client.availableAmount += out.getAmount(); 
+			availableAmount += out.getAmount(); 
 		}
-		return Client.availableAmount;
+		return availableAmount;
 	}
 	
 	public int getApproveCoins(){
-		Client.approvedCoins = 0;
+		approvedCoins = 0;
 		for(Approval app : this.approvedTransactions){
-			Client.approvedCoins += app.getAmount(); 
+			approvedCoins += app.getAmount(); 
 		}
-		return Client.approvedCoins;
+		return approvedCoins;
 	}
 
 	public int getIntInput(Scanner scanner, String prompt) {
@@ -194,6 +196,23 @@ public class Client {
 			return null;
 		}
 		return input;
+	}
+
+	public List<TransactionVM> getListOfTransactions(BlockChain bc) {
+		List<TransactionVM> returnList = new ArrayList<>();
+		try {
+			for (Block b : bc.getBlocks()) {
+				for (Transaction t : b.getTransactions()) {
+					TransactionVM tvm = new TransactionVM();
+					tvm.setTransactionType(t.whichTransaction());
+					tvm.setHash(t.hash());
+					returnList.add(tvm);
+				}
+			}
+		} catch (BlockNotFoundException e) {
+			e.printStackTrace();
+		}
+		return returnList;
 	}
 }
 

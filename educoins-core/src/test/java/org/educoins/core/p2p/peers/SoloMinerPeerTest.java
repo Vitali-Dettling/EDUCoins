@@ -46,13 +46,12 @@ public class SoloMinerPeerTest {
 		// TODO: Test real error case
 	}
 
-//	TODO
-	@Ignore
 	@Test
 	public void testGetAmount() {
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		Sha256Hash ownPublicKey = AppConfig.getOwnPublicKey();
 		SoloMinerPeer peer = new SoloMinerPeer(blockchain, mock(IProxyPeerGroup.class), ownPublicKey);
+		MockedClient.resetClient();
 		Client client = MockedClient.getClient();
 
 		int expected = 0;

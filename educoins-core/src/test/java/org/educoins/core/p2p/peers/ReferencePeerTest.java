@@ -20,13 +20,14 @@ public class ReferencePeerTest {
 		MockedClient.delete();
 	}
 	
-	@Ignore
 	@Test
 	public void testGetAmount() {
 
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		Sha256Hash ownPublicKey = AppConfig.getOwnPublicKey();
 		ReferencePeer peer = new ReferencePeer(blockchain, mock(IProxyPeerGroup.class), ownPublicKey);
+		
+		MockedClient.resetClient();
 		Client client = MockedClient.getClient();
 
 		int expected = 0;

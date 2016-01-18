@@ -5,6 +5,7 @@ import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -80,7 +81,7 @@ public class ReferencePeer extends Peer {
                     trans = this.client.generateRegularTransaction(amount, dstPublicKey);
                     if (trans != null) {
                         this.blockChain.sendTransaction(trans);
-                        System.out.println(trans.hash());
+					System.out.println("Hash of created transaction: " + trans.hash());
                     }
                     break;
                 case "a":
@@ -107,12 +108,26 @@ public class ReferencePeer extends Peer {
 //				System.out.print("Type in LockingScript: ");
 //				String lockingScript = scanner.nextLine();
                     Transaction transToRevoke = blockChain.getTransaction(hash);
+				if (transToRevoke == null) {
+					System.out.println("Could not find transaction.");
+				}
+				else {
                     trans = client.generateRevokeTransaction(hash, "");
                     if (trans != null) {
                         this.blockChain.sendTransaction(trans);
                         System.out.println("Revoked transaction: " + transToRevoke.hash());
                         System.out.println("With Revoke: " + trans.hash());
                     }
+				}
+				break;
+			case "l":
+				List<TransactionVM> vm = client.getListOfTransactions(blockChain);
+				for (TransactionVM t : vm) {
+					System.out.println("-> Transaction:");
+					System.out.println("Type: " + t.getTransactionType().toString());
+					System.out.println("Amount: " + t.getAmount());
+					System.out.println("Hash: " + t.getHash());
+				}
                     break;
                 case "e":
                     running = false;

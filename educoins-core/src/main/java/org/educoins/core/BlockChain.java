@@ -243,6 +243,7 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     }
 
     public void sendTransaction(Transaction transaction) {
+		logger.info("Transaction of type {} submitted.", transaction.whichTransaction());
         this.transactions.add(transaction);
         this.transactionTransmitters.transmitTransaction(transaction);
     }
@@ -334,6 +335,7 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
                 if (transaction != null)
                     return transaction;
             } catch (BlockNotFoundException ignored) {
+				logger.error("could not find block in Chain, very strange.");
             }
         }
         return null;

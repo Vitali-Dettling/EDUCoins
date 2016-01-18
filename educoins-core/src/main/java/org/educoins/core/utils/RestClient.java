@@ -2,11 +2,13 @@ package org.educoins.core.utils;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.educoins.core.Block;
 
 import java.io.*;
 import java.net.URI;
@@ -26,7 +28,7 @@ public class RestClient<T> {
         httpClient = HttpClientBuilder.create()
                 .setConnectionTimeToLive(1, TimeUnit.MINUTES)
                 .build();
-        gson = new Gson();
+        gson = CustomGsonSerializer.getGson();
     }
 
     public T get(URI uri, Class clazzOfT) throws IOException {
