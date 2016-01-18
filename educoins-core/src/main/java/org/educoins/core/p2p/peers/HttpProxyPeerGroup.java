@@ -60,7 +60,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     @Override
     public void discover() {
         try {
-        	//TODO (Workaround) Should only enter once per node.
+
+        	//TODO (Workaround) Should only discover once per node.
         	if (once){
         		new CentralDiscovery().hello();
         		once = false;
