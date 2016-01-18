@@ -163,8 +163,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             } catch (IOException e) {
                 if (checkProxiesState(proxy, e))
                     return;
-                logger.error("Could not retrieve Blocks from proxy: {}@{}", proxy.getPubkey(), proxy.getiNetAddress(),
-                        e);
+                logger.error("Could not retrieve Blocks from proxy: {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
+                logger.debug("", e);
             }
         }
         logger.info("Receiving Transactions successful.");
