@@ -28,7 +28,7 @@ public class TxFactory {
 	
 	public static List<Output> getRandomPreviousOutputs(){
 		
-		List<Output> outputs = new ArrayList<Output>();
+		List<Output> outputs = new ArrayList<>();
 		String publicKey = Wallet.getPublicKey();
 		
 		for(int i = 1 ; i < 20 ; i++){

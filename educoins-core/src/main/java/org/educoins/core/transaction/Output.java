@@ -8,6 +8,10 @@ import org.educoins.core.utils.Sha256Hash;
 public class Output implements Hashable  {
 	
 	private int amount;
+
+	/**
+	 * aka Receiver Public Key
+	 */
 	private String lockingScript;
 	
 	public Output(int amount, String lockingScript){
