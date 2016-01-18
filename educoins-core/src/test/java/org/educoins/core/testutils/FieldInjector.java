@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
  * Created by typus on 11/12/15.
  */
 public class FieldInjector {
+
     public static void setField(Object target, Object source, String fieldName)
             throws NoSuchFieldException, IllegalAccessException {
         Field declaredField = target.getClass().getDeclaredField(fieldName);

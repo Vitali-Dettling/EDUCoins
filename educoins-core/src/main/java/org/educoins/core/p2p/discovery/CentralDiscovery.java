@@ -24,8 +24,12 @@ public class CentralDiscovery implements DiscoveryStrategy {
     private RestClient<RemoteProxy[]> client;
 
     public CentralDiscovery() {
-        this.centralUrl = AppConfig.getCentralUrl();
+        this(AppConfig.getCentralUrl());
         this.client = new RestClient<>();
+    }
+
+    public CentralDiscovery(String centralUrl) {
+        this.centralUrl = centralUrl;
     }
 
     @Override
@@ -62,7 +66,7 @@ public class CentralDiscovery implements DiscoveryStrategy {
             RemoteProxy[] nodes = client
                     .get(URI.create(centralUrl + uri), HttpProxy[].class);
 
-            if (nodes == null) return peers;
+            if (nodes == null) throw new DiscoveryException("No nodes received.");
             return Arrays.asList(nodes);
 
         } catch (IOException e) {
