@@ -78,6 +78,8 @@ public class Miner {
 			if (this.active) {
 				logger.info("Found a sufficient PoW hash: {}", challenge.toString());
 				notifyFoundPoW(block);
+			} else {
+				logger.info("Mining process interrupted!");
 			}
 
 			Miner.blockChain.removeBlockListener(this);
@@ -86,6 +88,7 @@ public class Miner {
 		@Override
 		public void blockListener(Block block) {
 			this.active = false;
+			logger.debug("received block {}", block.hash());
 		}	
 	}
 }
