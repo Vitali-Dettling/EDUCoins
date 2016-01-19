@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
@@ -36,15 +39,13 @@ public class NodesController {
         logger.info("Retrieved 'hello' from {}@{}", node.getPubkey(), inetAddr + ":" + node.getPort());
 
         if (inetAddr.equals(URI.create("127.0.0.1"))) {
-            logger.warn("Got request from loopback address 127.0.0.1");
+            logger.warn("Got request from loopback address 127.0.0.1. Please use the real IP of your central!");
             return new ResponseEntity<URI>(HttpStatus.BAD_REQUEST);
         }
 
         //TODO: get protocol aware
         node.setInetAddress(URI.create("http://" + inetAddr.toString() + ':' + node.getPort()));
-        synchronized (nodesRepository) {
-            nodesRepository.save(node);
-        }
+        nodesRepository.save(node);
 
         return new ResponseEntity<>(inetAddr, HttpStatus.OK);
     }

@@ -33,8 +33,8 @@ public class Client {
 		this.previousOutputs = new ArrayList<>();
 		this.approvedTransactions = new ArrayList<>();
 		
-		Client.availableAmount = 0;
-		Client.approvedCoins = 0;
+		availableAmount = 0;
+		approvedCoins = 0;
 		
 		this.transactionFactory = new TransactionFactory();
 		this.blockBuffer = new ArrayList<>();
@@ -58,7 +58,7 @@ public class Client {
 		}
 		
 		this.locked = true;
-		Client.availableAmount -= toApproveAmount;
+		availableAmount -= toApproveAmount;
 		Transaction buildTx = this.transactionFactory.generateApprovedTransaction(this.previousOutputs, toApproveAmount, owner, holderSignature, lockingScript);
 		this.locked = false;
 		
@@ -72,7 +72,7 @@ public class Client {
 		}
 		
 		this.locked = true;
-		Client.availableAmount -= sendAmount;
+		availableAmount -= sendAmount;
 		Transaction buildTx = this.transactionFactory.generateRegularTransaction(this.previousOutputs, sendAmount, publicKey);
 		this.locked = false;
 
@@ -100,7 +100,7 @@ public class Client {
 
 		int availableAmount = getEDICoinsAmount();
 		if ((availableAmount - sendAmount) < 0) {
-			this.logger.info("Not enough amount. Available: " + Client.availableAmount + " which to send: " + sendAmount);
+			this.logger.info("Not enough amount. Available: " + availableAmount + " which to send: " + sendAmount);
 			return false;
 		}
 		return true;
@@ -126,8 +126,8 @@ public class Client {
 					for (String publicKey : publicKeys) {
 						if (out.getLockingScript().equals(publicKey)) {
 							this.previousOutputs.add(out);
-							Client.availableAmount += out.getAmount();
-							this.logger.info("You have received some EDUCoins; the current amount is: " + Client.availableAmount);
+							availableAmount += out.getAmount();
+							this.logger.info("You have received some EDUCoins; the current amount is: " + availableAmount);
 						}
 					}
 				}
@@ -140,7 +140,7 @@ public class Client {
 							String hashTest = "123456789ABCDEF";
 							if(Wallet.compare(hashTest, holderSignature, publicKey)){
 								this.approvedTransactions.add(app);
-								Client.approvedCoins += app.getAmount();	
+								approvedCoins += app.getAmount();	
 							}
 						}
 					}
@@ -164,16 +164,16 @@ public class Client {
 		for(Output out : this.previousOutputs){
 			amount += out.getAmount();
 		}
-		Client.availableAmount = amount;
+		availableAmount = amount;
 		return amount;
 	}
 	
 	public int getApprovedCoins(){
-		Client.approvedCoins = 0;
+		approvedCoins = 0;
 		for(Approval app : this.approvedTransactions){
-			Client.approvedCoins += app.getAmount(); 
+			approvedCoins += app.getAmount(); 
 		}
-		return Client.approvedCoins;
+		return approvedCoins;
 	}
 
 	public int getIntInput(Scanner scanner, String prompt) {

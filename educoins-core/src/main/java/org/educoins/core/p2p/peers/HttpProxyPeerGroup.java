@@ -58,8 +58,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     @Override
     public void discover() {
         try {
-            new CentralDiscovery().hello();
-            //TODO If discovery worked return?
+       		new CentralDiscovery().hello();
         } catch (DiscoveryException e) {
             logger.warn("Could not hello the Central!", e);
         }
@@ -118,8 +117,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             } catch (IOException e) {
                 if (checkProxiesState(proxy, e))
                     return;
-                logger.error("Could not retrieve Blocks from proxy: {}@{}", proxy.getPubkey(), proxy.getiNetAddress(),
-                        e);
+                logger.error("Could not retrieve Blocks from proxy: {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
+                logger.debug("", e);
                 retry(blocksReceived, from);
             }
         }
