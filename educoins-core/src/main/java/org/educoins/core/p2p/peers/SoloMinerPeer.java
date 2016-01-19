@@ -28,7 +28,6 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 
 	@Override
 	public void start() {
-
 		miner.addPoWListener(this);
 		miner.addPoWListener(Peer.remoteProxies);
 
