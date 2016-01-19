@@ -1,9 +1,12 @@
 package org.educoins.core.config;
 
 import org.educoins.core.BlockChain;
+import org.educoins.core.p2p.discovery.IProxySelectorStrategy;
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.store.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.*;
 
 import java.io.IOException;
@@ -16,17 +19,21 @@ import java.io.IOException;
 @Profile("production")
 @DependsOn("appConfig")
 public class ProductionSpringConfig {
-	private IBlockStore blockStore;
-	private BlockChain blockChain;
-	private IProxyPeerGroup peerGroup;
+    private IBlockStore blockStore;
+    private BlockChain blockChain;
+    private IProxyPeerGroup peerGroup;
 
-	@Bean
-	public IBlockStore blockStore() throws IOException {
-		if (blockStore == null) {
-			this.blockStore = new LevelDbBlockStore(AppConfig.getBlockStoreDirectory());
-		}
-		return blockStore;
-	}
+    @Autowired
+    @Qualifier("topTenProxySelector")
+    private IProxySelectorStrategy selectorStrategy;
+
+    @Bean
+    public IBlockStore blockStore() throws IOException {
+        if (blockStore == null) {
+            this.blockStore = new LevelDbBlockStore(AppConfig.getBlockStoreDirectory());
+        }
+        return blockStore;
+    }
 
 //	@Bean
 //	public BlockChain blockChain() throws IOException {
@@ -39,12 +46,12 @@ public class ProductionSpringConfig {
 //	}
 
 
-	@Bean
-	public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {
-		if (peerGroup == null) {
-			peerGroup = new HttpProxyPeerGroup();
-		}
-		return peerGroup;
-	}
+    @Bean
+    public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {
+        if (peerGroup == null) {
+            peerGroup = new HttpProxyPeerGroup(selectorStrategy);
+        }
+        return peerGroup;
+    }
 
 }

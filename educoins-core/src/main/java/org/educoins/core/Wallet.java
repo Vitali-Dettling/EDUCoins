@@ -23,6 +23,28 @@ public class Wallet {
     private static Path directoryKeyStorage = Paths.get(System.getProperty("user.home") + File.separator + "documents" + File.separator
             + "educoins" + File.separator + "demo" + File.separator + "wallet");
 
+
+    public static void initialize(String[] args) throws IOException {
+        List<String> argsList = Arrays.asList(args);
+        if (argsList.contains(ArgsWalletInitializerView.ARG_WALLET)) {
+            initializerView = new ArgsWalletInitializerView(argsList);
+        } else {
+            initializerView = new CLIWalletInitializerView();
+        }
+
+        directoryKeyStorage = initializerView.getWalletFile(directoryKeyStorage);
+
+        File pathFile = directoryKeyStorage.toFile();
+        if (pathFile.isFile()) {
+            keyStorageFile = pathFile.getName();
+            directoryKeyStorage = Paths.get(pathFile.getParent());
+        }
+
+        IO.createDirectory(directoryKeyStorage);
+        IO.createFile(directoryKeyStorage + keyStorageFile);
+    }
+
+
     public static boolean compare(String message, String signature, String publicKey) {
 
         ECDSA keyPair = new ECDSA();
@@ -118,25 +140,6 @@ public class Wallet {
         return publicKeys;
     }
 
-    public static void initialize(String[] args) throws IOException {
-        List<String> argsList = Arrays.asList(args);
-        if (argsList.contains(ArgsWalletInitializerView.ARG_WALLET)) {
-            initializerView = new ArgsWalletInitializerView(argsList);
-        } else {
-            initializerView = new CLIWalletInitializerView();
-        }
-
-        directoryKeyStorage = initializerView.getWalletFile(directoryKeyStorage);
-
-        File pathFile = directoryKeyStorage.toFile();
-        if (pathFile.isFile()) {
-            keyStorageFile = pathFile.getName();
-            directoryKeyStorage = Paths.get(pathFile.getParent());
-        }
-
-        IO.createDirectory(directoryKeyStorage);
-        IO.createFile(directoryKeyStorage + keyStorageFile);
-    }
 
     /**
      * Nested calls that just the wallet class can use it.

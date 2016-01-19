@@ -45,7 +45,7 @@ public class ReferencePeerTest {
 		client.distructOwnOutputs(block);
 	
 		int result = client.getEDICoinsAmount();
-		Assert.assertEquals(result, expected);
+		Assert.assertEquals(expected, result);
 	}
 
 }

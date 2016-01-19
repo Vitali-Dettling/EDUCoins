@@ -8,6 +8,7 @@ import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,11 +23,19 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     private List<RemoteProxy> proxies = new CopyOnWriteArrayList<>();
     private Set<IBlockListener> blockListeners = new HashSet<>();
     private Set<ITransactionListener> transactionListeners = new HashSet<>();
+
+    private IProxySelectorStrategy proxySelectorStrategy;
+
     /**
      * If set, {@link #receiveBlocks(Sha256Hash)} will recurse if no blocks were
      * received.
      */
     private boolean retry = true;
+
+    @Autowired
+    public HttpProxyPeerGroup(IProxySelectorStrategy proxySelectorStrategy) {
+        this.proxySelectorStrategy = proxySelectorStrategy;
+    }
 
     @Override
     public void addProxy(RemoteProxy proxy) {
@@ -226,16 +235,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
             discover();
             return proxies;
         }
-
-        Collections.sort(proxies, (o1, o2) -> {
-            double val = o1.getRating() - o2.getRating();
-            if (val > 0)
-                return 1;
-            else if (val < 0)
-                return -1;
-            return 0;
-        });
-        return proxies.subList(0, Math.min(proxies.size(), 10));
+        return proxySelectorStrategy.getProxies(proxies);
     }
 
     public void rediscover(int nTry) {

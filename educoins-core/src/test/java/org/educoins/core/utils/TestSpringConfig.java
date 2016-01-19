@@ -1,6 +1,6 @@
 package org.educoins.core.utils;
 
-import org.educoins.core.BlockChain;
+import org.educoins.core.p2p.discovery.TopTenProxySelector;
 import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.store.*;
@@ -16,7 +16,6 @@ import java.io.IOException;
 @DependsOn("appConfig")
 public class TestSpringConfig {
     private IBlockStore blockStore;
-    private BlockChain blockChain;
     private IProxyPeerGroup peerGroup;
 
     @Bean
@@ -26,22 +25,11 @@ public class TestSpringConfig {
         }
         return blockStore;
     }
-//
-//    // TODO: think of typing and so on.
-//    @Bean
-//    public BlockChain blockChain() throws IOException {
-//        if (blockChain == null) {
-//            IProxyPeerGroup remoteProxy = proxyPeerGroup();
-//            IBlockStore store = blockStore();
-//            this.blockChain = new BlockChain(remoteProxy, store);
-//        }
-//        return blockChain;
-//    }
 
     @Bean
     public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {
         if (peerGroup == null) {
-            peerGroup = new HttpProxyPeerGroup();
+            peerGroup = new HttpProxyPeerGroup(new TopTenProxySelector());
         }
         return peerGroup;
     }

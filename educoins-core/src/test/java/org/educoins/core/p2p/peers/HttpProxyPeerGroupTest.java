@@ -2,6 +2,7 @@ package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.CentralDiscovery;
+import org.educoins.core.p2p.discovery.TopTenProxySelector;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.server.PeerServer;
 import org.educoins.core.store.*;
@@ -39,7 +40,7 @@ public class HttpProxyPeerGroupTest {
 	private IBlockStore blockStore;
 	@Autowired
 	private BlockChain blockChain;
-	private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup();
+	private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup(new TopTenProxySelector());
 
 	@Before
 	public void setup() {
