@@ -66,7 +66,7 @@ public class Wallet {
         try {
             ECDSA keyPair = new ECDSA();
 
-            byte[] signature = keyPair.getSignature(publicKey, hashedTranscation);
+            byte[] signature = keyPair.getSignature(publicKey, hashedTranscation.toString());
             return ByteArray.convertToString(signature, HEX);
         } catch (Exception e) {
             logger.error("Creating of the Signature." + e.getMessage());

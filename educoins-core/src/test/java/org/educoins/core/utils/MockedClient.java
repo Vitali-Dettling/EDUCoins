@@ -75,7 +75,8 @@ public class MockedClient {
 	}
 	
 	private static void transactionReceived(){
-		Input input = BlockStoreFactory.generateRandomInput(MockedWallet.getPublicKey());
+		// TODO What hash should be used?
+		Input input = BlockStoreFactory.generateRandomInput(Sha256Hash.ZERO_HASH);
 		Transaction tx = BlockStoreFactory.generateTransaction(1);
 		Output out = tx.getOutputs().get(tx.getOutputsCount() - 1);
 		tx.addInput(input);

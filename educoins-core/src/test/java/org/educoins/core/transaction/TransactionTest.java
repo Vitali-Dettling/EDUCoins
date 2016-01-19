@@ -28,7 +28,7 @@ public class TransactionTest {
 	public void testPreviousOutput() {
 
 		Transaction approvedTx = MockedClient.generateApprovedTransaction(null);
-		String hashPreviousOutput = approvedTx.getInputs().get(0).getHashPrevOutput();
+		Sha256Hash hashPreviousOutput = approvedTx.getInputs().get(0).getHashPrevOutput();
 		List<Output> outputs = MockedClient.getOutputs();
 		for (Output out : outputs) {
 			if (hashPreviousOutput.equals(out.hash().toString())) {

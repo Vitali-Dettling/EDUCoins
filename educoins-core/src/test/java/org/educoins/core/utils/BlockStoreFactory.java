@@ -61,7 +61,7 @@ public class BlockStoreFactory {
     	List<Input> inputs = TxFactory.getRandomPreviousInputs();
         Transaction t = new RegularTransaction(copyPreviousOutputs, inputs);
         for (int i = 0; i < 2 * number; i++) {
-            Input input = new Input(5 * i * number, "",  MockedWallet.getPublicKey());
+            Input input = new Input(5 * i * number, Sha256Hash.ZERO_HASH,  MockedWallet.getPublicKey());
             t.addInput(input);
         }
         for (int i = 0; i < 4 * number; i++) {
@@ -74,7 +74,7 @@ public class BlockStoreFactory {
     public static Transaction generateTransactionWithSameUnlockingScript(int number) {
     	Transaction t = new CoinbaseTransaction(2, "abc");
         for (int i = 0; i < 2 * number; i++) {
-            Input input = new Input(5 * i * number, "",  "ABC");
+            Input input = new Input(5 * i * number, Sha256Hash.ZERO_HASH,  "ABC");
             t.addInput(input);
         }
         for (int i = 0; i < 4 * number; i++) {
@@ -85,7 +85,7 @@ public class BlockStoreFactory {
     }
     
     
-	public static Input generateRandomInput(String hashPrevOutput){
+	public static Input generateRandomInput(Sha256Hash hashPrevOutput){
 		
 		int amount = (int) (Math.random() * Integer.MAX_VALUE);
 		Input input = new Input(amount, hashPrevOutput, "12345");

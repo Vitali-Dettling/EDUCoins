@@ -79,7 +79,7 @@ public class VerificationTest {
 
 		Block block1 = new Block();
 		block1.setHashPrevBlock(block.hash());
-		Input input1 = new Input(2, block.getTransactions().get(0).hash().toString(),  "123");
+		Input input1 = new Input(2, block.getTransactions().get(0).hash(),  "123");
 		input1.setSignature("affe");
 		Output output1 = new Output(2, "abc");
 
@@ -105,7 +105,7 @@ public class VerificationTest {
 
 		Block block1 = new Block();
 		block1.setHashPrevBlock(block.hash());
-		Input input1 = new Input(0, Sha256Hash.ZERO_HASH.toString(), "ABC");
+		Input input1 = new Input(0, Sha256Hash.ZERO_HASH, "ABC");
 		input1.setSignature("adadadad");
 		Output output1 = new Output(2, "abc");
 

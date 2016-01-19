@@ -76,7 +76,7 @@ public class TransactionFactory implements ITransactionFactory {
 		//Iterates through all outputs, adds it into the input and removes them.
 		while(iterator.hasNext()){
 			Output out = iterator.next();
-			Input in = new Input(out.getAmount(), out.hash().toString(), out.getLockingScript());
+			Input in = new Input(out.getAmount(), out.hash(), out.getLockingScript());
 			inputs.add(in);
 			iterator.remove();
 		}

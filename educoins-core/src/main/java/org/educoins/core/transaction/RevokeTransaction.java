@@ -20,7 +20,7 @@ public class RevokeTransaction extends Transaction {
 		
 		this.setApprovedTransaction(hash());
 		for (int i = 0; i < approvals.size(); i++) {
-			Input input = new Input(approvals.get(i).getAmount(), hash().toString(), "TODO");
+			Input input = new Input(approvals.get(i).getAmount(), hash(), "TODO");
 			this.addInput(input);
 		}
 		this.setOutputs(outputs);

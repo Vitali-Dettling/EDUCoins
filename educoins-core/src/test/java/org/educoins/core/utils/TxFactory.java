@@ -19,7 +19,7 @@ public class TxFactory {
 		List<Output> outputs = getRandomPreviousOutputs();
 
 		for(int i = 1 ; i < 19 ; i++){
-			Input out = new Input(i, outputs.get(i).hash().toString(), publicKey);
+			Input out = new Input(i, outputs.get(i).hash(), publicKey);
 			inputs.add(out);
 		}
 	
