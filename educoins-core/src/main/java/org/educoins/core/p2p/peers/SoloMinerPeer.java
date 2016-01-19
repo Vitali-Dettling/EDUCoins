@@ -29,6 +29,7 @@ public class SoloMinerPeer extends Peer {
     public void start() throws DiscoveryException {
         super.start();
         //kick off miner
+
         blockChain.foundPoW(blockChain.getLatestBlock());
         client();
     }

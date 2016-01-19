@@ -94,8 +94,8 @@ public class Miner implements IBlockListenerMiner {
 
         @Override
         public void blockReceived(Block block) {
-
             this.active = false;
+            logger.info("Received block {}", block.hash());
         }
     }
 }

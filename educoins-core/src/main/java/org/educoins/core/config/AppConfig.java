@@ -70,9 +70,6 @@ public class AppConfig {
     public static String getCentralUrl() {
         return inner.centralUrl;
     }
-//    public static String getCentralUrl() {
-//        return prop.getProperty("educoins.discovery.central.url");
-//    }
 
     public void setCentralUrl(String centralUrl) {
         this.centralUrl = centralUrl;
@@ -128,6 +125,7 @@ public class AppConfig {
         AppConfig.inner = this;
     }
 
+    //region inner getter/setter
     public String getOwnPubKey() {
         return ownPubKey;
     }
@@ -167,4 +165,6 @@ public class AppConfig {
     public void setDiscoveryRatingDefault(String discoveryRatingDefault) {
         this.discoveryRatingDefault = discoveryRatingDefault;
     }
+
+    //endregion
 }
