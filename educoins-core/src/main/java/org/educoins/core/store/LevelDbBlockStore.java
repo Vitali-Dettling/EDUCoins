@@ -48,8 +48,12 @@ public class LevelDbBlockStore implements IBlockStore {
             }
 
             database.put(hash, getJson(block).getBytes());
+
+            byte[] bytes = database.get(LATEST_KEY);
+            if (bytes == null) {
             latest = block.hash().getBytes();
             database.put(LATEST_KEY, latest);
+            }
 
         } catch (IOException e) {
             try {
@@ -114,15 +118,29 @@ public class LevelDbBlockStore implements IBlockStore {
     }
 
     @Override
-    public IBlockIterator iterator() {
-        return new BlockIterator(this, genesisHash);
-    }
-
-    @Override
     @NotNull
     public Block getGenesisBlock() throws BlockNotFoundException {
         if (genesisHash == null) throw new BlockNotFoundException("No GenesisBlock inserted so far!");
         return get(Sha256Hash.wrap(genesisHash));
+    }
+
+    @Override
+    public boolean contains(Block block) {
+        IBlockIterator iterator = iterator();
+        while (iterator.hasNext()) {
+            try {
+                if (iterator.next().equals(block))
+                    return true;
+            } catch (BlockNotFoundException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public IBlockIterator iterator() {
+        return new BlockIterator(this, genesisHash);
     }
 
     private boolean isEmpty() {
