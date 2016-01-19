@@ -48,8 +48,12 @@ public class LevelDbBlockStore implements IBlockStore {
             }
 
             database.put(hash, getJson(block).getBytes());
-            latest = block.hash().getBytes();
-            database.put(LATEST_KEY, latest);
+
+            byte[] bytes = database.get(LATEST_KEY);
+            if (bytes == null) {
+                latest = block.hash().getBytes();
+                database.put(LATEST_KEY, latest);
+            }
 
         } catch (IOException e) {
             try {
