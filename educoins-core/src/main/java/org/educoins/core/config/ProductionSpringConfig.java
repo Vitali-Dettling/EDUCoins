@@ -1,9 +1,7 @@
 package org.educoins.core.config;
 
-import org.educoins.core.BlockChain;
 import org.educoins.core.p2p.discovery.IProxySelectorStrategy;
-import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
-import org.educoins.core.p2p.peers.IProxyPeerGroup;
+import org.educoins.core.p2p.peers.*;
 import org.educoins.core.store.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +18,7 @@ import java.io.IOException;
 @DependsOn("appConfig")
 public class ProductionSpringConfig {
     private IBlockStore blockStore;
-    private BlockChain blockChain;
+    private ProxySet proxySet;
     private IProxyPeerGroup peerGroup;
 
     @Autowired
@@ -33,6 +31,14 @@ public class ProductionSpringConfig {
             this.blockStore = new LevelDbBlockStore(AppConfig.getBlockStoreDirectory());
         }
         return blockStore;
+    }
+
+    @Bean
+    public ProxySet proxySet() {
+        if (proxySet == null) {
+            this.proxySet = new ProxySet(selectorStrategy);
+        }
+        return proxySet;
     }
 
 //	@Bean
@@ -49,7 +55,7 @@ public class ProductionSpringConfig {
     @Bean
     public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {
         if (peerGroup == null) {
-            peerGroup = new HttpProxyPeerGroup(selectorStrategy);
+            peerGroup = new HttpProxyPeerGroup(proxySet());
         }
         return peerGroup;
     }

@@ -1,7 +1,6 @@
 package org.educoins.core;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.store.*;
 import org.educoins.core.transaction.*;
@@ -42,7 +41,6 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     private Verification verification;
     private IProxyPeerGroup remoteProxies;
     private ITransactionFactory transactionFactory;
-    private int count = 0;
 
     @Autowired
     public BlockChain(@NotNull IProxyPeerGroup remoteProxies, @NotNull IBlockStore store) {
@@ -85,10 +83,10 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
         return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
     }
 
-    @Scheduled(fixedDelay = 1000, initialDelay = 15000)
+    @Scheduled(fixedDelay = 5, initialDelay = 15000)
     public void blockProcess() {
-        if (blockQueue.size() == 0)
-            update();
+//        if (blockQueue.size() == 0)
+//            update();
 
         processNextBlock();
     }
@@ -105,8 +103,13 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
 
         blockReceived(block);
         blockListeners.forEach(listener -> listener.blockReceived(block));
+
         //New round of miner.
-        Block newBlock = prepareNewBlock(block, AppConfig.getOwnPublicKey().toString());
+        triggerMiners(block);
+    }
+
+    private void triggerMiners(Block block) {
+        Block newBlock = prepareNewBlock(block, Wallet.getPublicKey());
         blockListenerMiners.forEach(listener -> listener.blockReceived(newBlock));
     }
 
@@ -123,17 +126,20 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
         if (blockQueue.isEmpty()) return;
 
         Block block = blockQueue.poll();
+        processBlock(block);
+    }
 
+    private void processBlock(Block block) {
         Sha256Hash hash = block.hash();
         logger.info("Processing next Block ({} left in queue) ({})...", blockQueue.size(), hash);
 
-        boolean isVerified = this.verification.verifyBlock(block);
         Block latestBlock = getLatestBlock();
         if (block.equals(latestBlock) || store.contains(block)) {
             logger.info("Not a new Block.");
             return;
         }
 
+        boolean isVerified = this.verification.verifyBlock(block);
         if (isVerified) {
             logger.info("Block successfully verified ({})", hash);
             store.put(block);
@@ -148,7 +154,6 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
                 }
             }
         }
-
         logger.info("Block processed ({}).", hash);
     }
 
@@ -246,13 +251,14 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     }
 
     public void sendTransaction(Transaction transaction) {
-		logger.info("Transaction of type {} submitted.", transaction.whichTransaction());
-        this.transactions.add(transaction);
+        logger.info("Transaction of type {} submitted.", transaction.whichTransaction());
         this.transactionTransmitters.transmitTransaction(transaction);
+        triggerMiners(getLatestBlock());
     }
 
     public void transactionReceived(Transaction transaction) {
         logger.info("Received transaction.");
+
         switch (transaction.whichTransaction()) {
             case APPROVED:
                 if (this.verification.verifyApprovedTransaction(transaction)) {
@@ -292,7 +298,6 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     }
 
     private Transaction coinbaseTransaction(Block currentBlock, String publicKey) {
-
         // Input is empty because it is a coinbase transaction.
         int calculatedAmount = currentBlock.rewardCalculator();
         Transaction transaction = this.transactionFactory.generateCoinbasedTransaction(calculatedAmount, publicKey);
@@ -338,7 +343,7 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
                 if (transaction != null)
                     return transaction;
             } catch (BlockNotFoundException ignored) {
-				logger.error("could not find block in Chain, very strange.");
+                logger.error("could not find block in Chain, very strange.");
             }
         }
         return null;

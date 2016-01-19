@@ -1,8 +1,7 @@
 package org.educoins.core.utils;
 
 import org.educoins.core.p2p.discovery.TopTenProxySelector;
-import org.educoins.core.p2p.peers.HttpProxyPeerGroup;
-import org.educoins.core.p2p.peers.IProxyPeerGroup;
+import org.educoins.core.p2p.peers.*;
 import org.educoins.core.store.*;
 import org.springframework.context.annotation.*;
 
@@ -29,7 +28,7 @@ public class TestSpringConfig {
     @Bean
     public IProxyPeerGroup proxyPeerGroup() throws BlockStoreException {
         if (peerGroup == null) {
-            peerGroup = new HttpProxyPeerGroup(new TopTenProxySelector());
+            peerGroup = new HttpProxyPeerGroup(new ProxySet(new TopTenProxySelector()));
         }
         return peerGroup;
     }

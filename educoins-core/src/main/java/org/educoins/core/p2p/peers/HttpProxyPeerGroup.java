@@ -1,18 +1,18 @@
 package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
-import org.educoins.core.config.AppConfig;
-import org.educoins.core.p2p.discovery.*;
+import org.educoins.core.p2p.discovery.DiscoveryException;
+import org.educoins.core.p2p.discovery.DiscoveryStrategy;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * An {@link IProxyPeerGroup} of {@link HttpProxyPeerGroup}.
@@ -20,93 +20,81 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class HttpProxyPeerGroup implements IProxyPeerGroup {
     private final Logger logger = LoggerFactory.getLogger(HttpProxyPeerGroup.class);
 
-    private List<RemoteProxy> proxies = new CopyOnWriteArrayList<>();
     private Set<IBlockListener> blockListeners = new HashSet<>();
     private Set<ITransactionListener> transactionListeners = new HashSet<>();
-
-    private IProxySelectorStrategy proxySelectorStrategy;
+    private ProxySet proxySet;
 
     /**
      * If set, {@link #receiveBlocks(Sha256Hash)} will recurse if no blocks were
      * received.
      */
-    private boolean retry = true;
+    private boolean retry = false;
 
     @Autowired
-    public HttpProxyPeerGroup(IProxySelectorStrategy proxySelectorStrategy) {
-        this.proxySelectorStrategy = proxySelectorStrategy;
+    public HttpProxyPeerGroup(@NotNull ProxySet proxySet) {
+        this.proxySet = proxySet;
     }
 
     @Override
     public void addProxy(RemoteProxy proxy) {
-        if (!proxies.contains(proxy) && !proxy.getPubkey().equals(AppConfig.getOwnPublicKey().toString())
-                && proxies.size() < 100) {
-            logger.info("Added peer " + proxy);
-            this.proxies.add(proxy);
-        }
+        this.proxySet.addProxy(proxy);
     }
 
     @Override
     public void clearProxies() {
-        this.proxies.clear();
+        this.proxySet.clear();
     }
 
     @Override
     public boolean containsProxy(RemoteProxy proxy) {
-        return this.proxies.contains(proxy);
+        return this.proxySet.contains(proxy);
     }
 
     @Override
     public void discoverOnce(DiscoveryStrategy strategy) throws DiscoveryException {
         logger.info("Starting new Discovery ({})", strategy.getClass().getName());
         strategy.getPeers().forEach(this::addProxy);
-        if (proxies.size() == 0)
+        if (proxySet.size() == 0)
             throw new DiscoveryException("No proxies received!");
     }
 
     @Override
     public void discover() {
-        try {
-            new CentralDiscovery().hello();
-            //TODO If discovery worked return?
-        } catch (DiscoveryException e) {
-            logger.warn("Could not hello the Central!", e);
-        }
-        rediscover(0);
+        proxySet.discover();
     }
 
     @Override
     public Collection<RemoteProxy> getAllProxies() {
-        Set<RemoteProxy> proxies = new HashSet<>();
-        proxies.addAll(this.proxies);
-        return proxies;
+        return proxySet.getAllProxies();
     }
 
     @Override
     public void transmitTransaction(Transaction transaction) {
-        getHighestRatedProxies().forEach(proxy -> {
+        proxySet.getProxiesToCommunicate().forEach(proxy -> {
             try {
                 logger.info("Sending transaction to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 proxy.transmitTransaction(transaction);
-                proxy.rateHigher();
+                proxySet.onCommunicationSuccess(proxy);
             } catch (IOException e) {
                 logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost(),
                         e);
-                checkProxiesState(proxy, e);
+                proxySet.onCommunicationFailure(proxy);
             }
         });
+        logger.info("Transaction transmission done.");
     }
 
     @Override
     public void blockReceived(Block block) {
         logger.info("Dispatching the new Block ({})...", block.hash());
-        getHighestRatedProxies().forEach(proxy -> {
+        proxySet.getProxiesToCommunicate().forEach(proxy -> {
             try {
                 logger.info("Dispatching to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 proxy.transmitBlock(block);
+                proxySet.onCommunicationSuccess(proxy);
             } catch (IOException e) {
                 logger.warn("Could not transmit block to {}@{}", proxy.getPubkey(), proxy.getiNetAddress().getHost(), e);
-                checkProxiesState(proxy, e);
+                proxySet.onCommunicationFailure(proxy);
             }
         });
         logger.info("Dispatching done.", block.hash());
@@ -127,7 +115,7 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     public void receiveBlocks(Sha256Hash from) {
         logger.info("Receiving blocks now...");
         long blocksReceived = 0;
-        for (RemoteProxy proxy : getHighestRatedProxies()) {
+        for (RemoteProxy proxy : proxySet.getProxiesToCommunicate()) {
             try {
                 Collection<Block> blocks = proxy.getBlocks(from);
                 blocksReceived += blocks.size();
@@ -139,12 +127,11 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 blocks.stream().forEach(
                         block -> blockListeners.forEach(iBlockListener -> iBlockListener.blockReceived(block)));
 
-                proxy.rateHigher();
+                proxySet.onCommunicationSuccess(proxy);
             } catch (IOException e) {
-                if (checkProxiesState(proxy, e))
-                    return;
                 logger.error("Could not retrieve Blocks from proxy: {}@{}", proxy.getPubkey(), proxy.getiNetAddress(),
                         e);
+                proxySet.onCommunicationFailure(proxy);
                 retry(blocksReceived, from);
             }
         }
@@ -177,16 +164,15 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
     @Override
     public void receiveTransactions() {
         logger.info("Receiving Transactions now...");
-        for (RemoteProxy proxy : getHighestRatedProxies()) {
+        for (RemoteProxy proxy : proxySet.getProxiesToCommunicate()) {
             try {
-                proxy.getBlocks().parallelStream()
+                proxy.getBlocks()
                         .forEach(block -> block.getTransactions().forEach(transaction -> transactionListeners.forEach(
                                 TransactionListener -> TransactionListener.transactionReceived(transaction))));
 
-                proxy.rateHigher();
+                proxySet.onCommunicationSuccess(proxy);
             } catch (IOException e) {
-                if (checkProxiesState(proxy, e))
-                    return;
+                proxySet.onCommunicationFailure(proxy);
                 logger.error("Could not retrieve Blocks from proxy: {}@{}", proxy.getPubkey(), proxy.getiNetAddress(),
                         e);
             }
@@ -212,51 +198,6 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         this.transactionListeners = transactionListeners;
     }
     // endregion
-
-    private boolean checkProxiesState(RemoteProxy proxy, IOException e) {
-        // Proxy should no longer be part of the peer group because it failed to
-        // respond in any way.
-        proxy.rateLower();
-
-        if (proxy.getRating() <= 0) {
-            proxies.remove(proxy);
-            logger.info("Removed Proxy from peer group {}@{}", proxy.getPubkey(), proxy.getiNetAddress().getHost(), e);
-
-            if (proxies.size() == 0)
-                discover();
-            return true;
-        }
-        return false;
-    }
-
-    private Collection<RemoteProxy> getHighestRatedProxies() {
-        if (proxies.size() == 0) {
-            // Otherwise each miner thread will try to register itself
-            discover();
-            return proxies;
-        }
-        return proxySelectorStrategy.getProxies(proxies);
-    }
-
-    public void rediscover(int nTry) {
-        try {
-            discoverOnce(new CentralDiscovery());
-            discoverOnce(new PeerDiscovery(proxies));
-
-        } catch (DiscoveryException e1) {
-            if (nTry < AppConfig.getMaxDiscoveryRetries() && proxies.size() == 0) {
-                logger.error("Could not retrieve any Peers... We are isolated now!");
-                try {
-                    // escalation (3secs, 6secs, 12secs...)
-                    Thread.sleep(nTry * 3000);
-                    rediscover(++nTry);
-                } catch (InterruptedException e) {
-                    logger.debug("Sleep interrupted!?", e);
-                }
-            }
-        }
-    }
-
 
     public boolean isRetry() {
         return retry;

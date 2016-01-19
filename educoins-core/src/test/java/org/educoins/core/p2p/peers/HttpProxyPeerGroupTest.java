@@ -40,7 +40,7 @@ public class HttpProxyPeerGroupTest {
 	private IBlockStore blockStore;
 	@Autowired
 	private BlockChain blockChain;
-	private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup(new TopTenProxySelector());
+	private IProxyPeerGroup clientPeerGroup = new HttpProxyPeerGroup(new ProxySet(new TopTenProxySelector()));
 
 	@Before
 	public void setup() {
