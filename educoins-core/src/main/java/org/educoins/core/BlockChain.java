@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +31,7 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
 
     private final IBlockStore store;
     private final Logger logger = LoggerFactory.getLogger(BlockChain.class);
-    private final Queue<Block> blockQueue = new LinkedBlockingDeque<>();
+    private final Queue<Block> blockQueue = new ConcurrentLinkedQueue<>();
     private int blockCounter;
     private List<IBlockListener> blockListeners;
     private ITransactionTransmitter transactionTransmitters;
@@ -94,7 +94,8 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     @Override
     public void blockReceived(Block block) {
         logger.info("Block received: {}", block.hash());
-        blockQueue.add(block);
+        if (!blockQueue.contains(block))
+            blockQueue.add(block);
     }
 
     @Override
