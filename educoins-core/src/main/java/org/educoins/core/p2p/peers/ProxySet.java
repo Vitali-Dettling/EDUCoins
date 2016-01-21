@@ -3,6 +3,7 @@ package org.educoins.core.p2p.peers;
 import org.educoins.core.config.AppConfig;
 import org.educoins.core.p2p.discovery.*;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +65,15 @@ public class ProxySet {
     }
 
     public void onCommunicationFailure(RemoteProxy proxy) {
-        checkProxiesState(proxies.get(proxy.getPubkey()));
+        RemoteProxy proxyFromOwnSet = proxies.get(proxy.getPubkey());
+        if (proxyFromOwnSet != null)
+            checkProxiesState(proxyFromOwnSet);
     }
 
     public void onCommunicationSuccess(RemoteProxy proxy) {
-        proxies.get(proxy.getPubkey()).rateHigher();
+        RemoteProxy proxyFromOwnSet = proxies.get(proxy.getPubkey());
+        if (proxyFromOwnSet != null)
+            proxyFromOwnSet.rateHigher();
     }
 
     public void addProxy(RemoteProxy proxy) {
@@ -99,7 +104,7 @@ public class ProxySet {
         return proxies;
     }
 
-    private void checkProxiesState(RemoteProxy proxy) {
+    private void checkProxiesState(@NotNull RemoteProxy proxy) {
         // Proxy should no longer be part of the peer group because it failed to
         // respond in any way.
         proxy.rateLower();

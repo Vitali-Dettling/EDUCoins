@@ -2,17 +2,15 @@ package org.educoins.core.utils;
 
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.educoins.core.Block;
 
 import java.io.*;
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A small Rest-client serving default methods.
@@ -20,14 +18,25 @@ import java.util.concurrent.TimeUnit;
  */
 public class RestClient<T> {
 
+    public static final int TIMEOUT = 60 * 1000;
     private final String APPLICATION_JSON = "application/json";
     private final HttpClient httpClient;
     private final Gson gson;
 
+    private final RequestConfig config;
+
     public RestClient() {
-        httpClient = HttpClientBuilder.create()
-                .setConnectionTimeToLive(1, TimeUnit.MINUTES)
+        config = RequestConfig.custom()
+                .setSocketTimeout(TIMEOUT)
+                .setConnectTimeout(TIMEOUT)
+                .setConnectionRequestTimeout(TIMEOUT)
                 .build();
+
+        httpClient = HttpClientBuilder.create()
+                .disableAutomaticRetries()
+                .setDefaultRequestConfig(config).build();
+
+
         gson = CustomGsonSerializer.getGson();
     }
 
@@ -145,6 +154,9 @@ public class RestClient<T> {
         }
 
         return (T) gson.fromJson(output.toString(), clazzOfT);
+    }
+
+    private void applyTimeouts(HttpEntityEnclosingRequestBase request) {
     }
 
 }

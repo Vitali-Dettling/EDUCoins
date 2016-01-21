@@ -21,11 +21,9 @@ public class CentralDiscovery implements DiscoveryStrategy {
     public static final String NODES = "nodes/";
     private final Logger logger = LoggerFactory.getLogger(CentralDiscovery.class);
     private String centralUrl;
-    private RestClient<RemoteProxy[]> client;
 
     public CentralDiscovery() {
         this(AppConfig.getCentralUrl());
-        this.client = new RestClient<>();
     }
 
     public CentralDiscovery(String centralUrl) {
@@ -63,7 +61,7 @@ public class CentralDiscovery implements DiscoveryStrategy {
     private Collection<RemoteProxy> getRemoteProxies(String uri) throws DiscoveryException {
         try {
             List<RemoteProxy> peers = new ArrayList<>();
-            RemoteProxy[] nodes = client
+            RemoteProxy[] nodes = new RestClient<RemoteProxy[]>()
                     .get(URI.create(centralUrl + uri), HttpProxy[].class);
 
             if (nodes == null) throw new DiscoveryException("No nodes received.");

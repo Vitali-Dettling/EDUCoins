@@ -141,17 +141,20 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
 
         boolean isVerified = this.verification.verifyBlock(block);
         if (isVerified) {
-            logger.info("Block successfully verified ({})", hash);
             store.put(block);
+            logger.info("Block successfully verified and stored ({})", hash);
 
             notifyBlockReceived(block);
 
             List<Transaction> transactions = block.getTransactions();
             if (transactions != null) {
                 logger.info("Found {} transactions", transactions.size());
-                for (Transaction transaction : transactions) {
-                    notifyTransactionReceived(transaction);
-                }
+
+                transactions.forEach(transaction -> {
+                    verifyTransaction(transaction);
+                    transactionListeners
+                            .forEach(iTransactionListener -> iTransactionListener.transactionReceived(transaction));
+                });
             }
         }
         logger.info("Block processed ({}).", hash);
@@ -242,14 +245,6 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
         }
     }
 
-    public void notifyTransactionReceived(Transaction transaction) {
-        for (int i = 0; i < this.transactionListeners.size(); i++) {
-            ITransactionListener listener = this.transactionListeners.get(i);
-            listener.transactionReceived(transaction);
-            transactionReceived(transaction);
-        }
-    }
-
     public void sendTransaction(Transaction transaction) {
         logger.info("Transaction of type {} submitted.", transaction.whichTransaction());
         this.transactionTransmitters.transmitTransaction(transaction);
@@ -259,26 +254,10 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
     public void transactionReceived(Transaction transaction) {
         logger.info("Received transaction.");
 
-        switch (transaction.whichTransaction()) {
-            case APPROVED:
-                if (this.verification.verifyApprovedTransaction(transaction)) {
-                    this.transactions.add(transaction);
-                }
-                break;
-            case REGULAR:
-                if (this.verification.verifyRegularTransaction(transaction)) {
-                    this.transactions.add(transaction);
-                }
-                break;
-            case REVOKE:
-                if (this.verification.verifyRevokeTransaction(transaction)) {
-                    this.transactions.add(transaction);
-                }
-                break;
-        }
-
-        sendTransaction(transaction);
+        if (verifyTransaction(transaction))
+            sendTransaction(transaction);
     }
+
 
     public Block prepareNewBlock(Block currentBlock, String publicKey) {
         Block newBlock = new Block();
@@ -348,4 +327,29 @@ public class BlockChain implements IBlockListener, IPoWListener, ITransactionLis
         }
         return null;
     }
+
+    public boolean verifyTransaction(Transaction transaction) {
+        switch (transaction.whichTransaction()) {
+            case APPROVED:
+                if (this.verification.verifyApprovedTransaction(transaction)) {
+                    this.transactions.add(transaction);
+                    return true;
+                }
+                break;
+            case REGULAR:
+                if (this.verification.verifyRegularTransaction(transaction)) {
+                    this.transactions.add(transaction);
+                    return true;
+                }
+                break;
+            case REVOKE:
+                if (this.verification.verifyRevokeTransaction(transaction)) {
+                    this.transactions.add(transaction);
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+
 }
