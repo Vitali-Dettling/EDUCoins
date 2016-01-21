@@ -245,7 +245,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 logger.info("Dispatching to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 proxy.transmitBlock(block);
             } catch (IOException e) {
-                logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost());
+                checkProxiesState(proxy, e);
+                logger.warn("Could not transmit block to {}@{}", proxy.getPubkey(), proxy.getiNetAddress().getHost());
                 logger.debug("", e);
             }
         });

@@ -32,11 +32,7 @@ public class Miner {
 	}
 
 	public void notifyFoundPoW(Block block) {
-		for (IPoWListener listener : this.powListeners) {
-			if (listener != null) {
-				listener.foundPoW(block);
-			}
-		}
+        this.powListeners.forEach(listener -> listener.foundPoW(block));
 	}
 
 	public void receiveBlocks(Block latestBlock) {

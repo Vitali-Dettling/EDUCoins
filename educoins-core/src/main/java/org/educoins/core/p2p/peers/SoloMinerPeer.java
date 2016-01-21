@@ -29,7 +29,6 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 	@Override
 	public void start() {
 		miner.addPoWListener(this);
-		miner.addPoWListener(Peer.remoteProxies);
 
 		// Kick off Miner.
 		foundPoW(new Block());
@@ -89,6 +88,7 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 
 		logger.info("Found pow. (Block {})", powBlock.hash().toString());
 		Peer.blockChain.notifyBlockReceived(powBlock);
+		remoteProxies.foundPoW(powBlock);
 		//New round of miner.
 		Block newBlock = Peer.blockChain.prepareNewBlock(powBlock, singlePublicKey);
 		this.miner.receiveBlocks(newBlock);
