@@ -65,6 +65,7 @@ public class Transaction implements Hashable {
 
 	public void signInputs() {
 		for (Input in : inputs) {
+			// TODO Change unterlying methods so that it's not necessary to call toString on hash
 			String signature = Wallet.getSignature(in.getUnlockingScript(), this.hash().toString());
 			in.setSignature(signature);
 		}
