@@ -60,7 +60,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
         try {
        		new CentralDiscovery().hello();
         } catch (DiscoveryException e) {
-            logger.warn("Could not hello the Central!", e);
+            logger.warn("Could not hello the Central!");
+            logger.debug("", e);
         }
         rediscover(0);
     }
@@ -80,8 +81,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 logger.info("Sending transaction to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 proxy.transmitTransaction(transaction);
             } catch (IOException e) {
-                logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost(),
-                        e);
+                logger.warn("Could not transmit transaction to {}@{}", proxy.getPubkey(), proxy.getiNetAddress().getHost());
+                logger.debug("", e);
             }
         });
     }
@@ -194,7 +195,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
 
         if (proxy.getRating() <= 0) {
             proxies.remove(proxy);
-            logger.info("Removed Proxy from peer group {}@{}", proxy.getPubkey(), proxy.getiNetAddress().getHost(), e);
+            logger.info("Removed Proxy from peer group {}@{}", proxy.getPubkey(), proxy.getiNetAddress().getHost());
+            logger.debug("", e);
 
             if (proxies.size() == 0)
                 discover();
@@ -243,8 +245,8 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                 logger.info("Dispatching to {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 proxy.transmitBlock(block);
             } catch (IOException e) {
-                logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost(),
-                        e);
+                logger.warn("Could not transmit block to {}@{]", proxy.getPubkey(), proxy.getiNetAddress().getHost());
+                logger.debug("", e);
             }
         });
         logger.info("Dispatching done.", block.hash());
