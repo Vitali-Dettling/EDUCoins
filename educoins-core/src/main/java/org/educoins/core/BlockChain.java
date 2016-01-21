@@ -182,7 +182,17 @@ public class BlockChain implements IBlockListener {
 
 		// Store the verified block.
 		logger.info("Received Block stored in the BC after verification: " + receivedBlock.toString());
+
 		this.store.put(receivedBlock);
+		/* TODO: A new node might overwrite the Blockchain with its own Blocks.
+				 The length (=combined difficulties) have to be taken into account
+				 so that only the longest chain will survive.
+
+				 Beware: When receiving a new, longer blockchain, the Blocks will be
+				 transferred step by step, so unless the transfer is finished it is
+				 actually shorter but may not be deleted.
+		 */
+
 		List<Transaction> transactions = receivedBlock.getTransactions();
 		if (transactions != null) {
 			logger.info("Found {} transactions", transactions.size());
