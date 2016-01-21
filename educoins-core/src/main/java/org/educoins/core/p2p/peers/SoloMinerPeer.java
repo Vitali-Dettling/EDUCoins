@@ -31,7 +31,7 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 		miner.addPoWListener(this);
 
 		// Kick off Miner.
-		foundPoW(new Block());
+		foundPoW(blockChain.getLatestBlock());
 		// After miner has started.
 		Peer.remoteProxies.discover();
 		client();
