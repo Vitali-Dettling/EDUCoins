@@ -120,9 +120,10 @@ public class HttpProxyPeerGroup implements IProxyPeerGroup {
                     return;
                 logger.error("Could not retrieve Blocks from proxy: {}@{}", proxy.getPubkey(), proxy.getiNetAddress());
                 logger.debug("", e);
-                retry(blocksReceived, from);
+               
             }
         }
+        retry(blocksReceived, from);
         logger.info("Receiving blocks done.");
     }
 
