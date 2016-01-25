@@ -8,26 +8,53 @@ public class RevokeTransaction extends Transaction {
 	
 	private Sha256Hash transToRevokeHash;
 	private String lockingScript;
+	private List<Transaction> approvedTransactions;
 	
-	public RevokeTransaction(Sha256Hash transToRevokeHash, String lockingScript) {
+	public RevokeTransaction(List<Transaction> approvedTransactions, Sha256Hash transToRevokeHash, String lockingScript) {
+		this.approvedTransactions = approvedTransactions;
 		this.transToRevokeHash = transToRevokeHash;
 		this.lockingScript = lockingScript;
 	}
-
+	
 	@Override
 	public Transaction create() {
-		// TODO 
 		
-		this.setApprovedTransaction(hash());
-		for (int i = 0; i < approvals.size(); i++) {
-			Input input = new Input(approvals.get(i).getAmount(), hash(), "TODO");
-			this.addInput(input);
+		this.setApprovedTransaction(this.transToRevokeHash);
+		List<Approval> apps = null;
+		for(Transaction tx : this.approvedTransactions){
+			Sha256Hash hashTx =  tx.hash();
+			
+			if(hashTx.toString().equals(this.transToRevokeHash.toString())){
+				apps = tx.getApprovals();
+				break;
+			}
 		}
-		this.setOutputs(outputs);
-		setOutputs(null);
 		
+		Revoke revoke = null;
+		for(Approval app : apps){
+			//TODO Here check for public key of the approved tx.
+			revoke = new Revoke(app.hash(), app.getAmount(), app.getOwnerAddress());
+		}
+		
+		this.setRevokes(revoke);
+		this.signRevokes();
 		return this;
 	}
+
+//	@Override
+//	public Transaction create() {
+//		// TODO 
+//		
+//		this.setApprovedTransaction(hash());
+//		for (int i = 0; i < approvals.size(); i++) {
+//			Input input = new Input(approvals.get(i).getAmount(), hash(), "TODO");
+//			this.addInput(input);
+//		}
+//		this.setOutputs(outputs);
+//		setOutputs(null);
+//		
+//		return this;
+//	}
 	
 }
 	

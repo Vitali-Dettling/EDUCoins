@@ -52,6 +52,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 			System.out.println("\t - (P)Get Public Key");
 			System.out.println("\t - (S)Create Signature");
 			System.out.println("\t - (G)Get Own EDUCoins");
+			System.out.println("\t - (L)ist of all Transactions");
 			System.out.println("\t --- Transactions types ---");
 			System.out.println("\t - (R)egular transaction");
 			System.out.println("\t - (A)pproved transaction");
@@ -96,7 +97,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				String owner = ReferencePeer.singlePublicKey;
 				System.out.print("Type in LockingScript: ");
 				String lockingScript = scanner.nextLine();
-				System.out.print("Holder signature is: ");
+				System.out.print("Holder signature is for: ");
 				String holderSignature = scanner.nextLine();
 
 				trans = Peer.client.generateApprovedTransaction(amount, owner, holderSignature, lockingScript);
@@ -128,6 +129,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				List<TransactionVM> vm = client.getListOfTransactions(Peer.blockChain);
 				for (TransactionVM t : vm) {
 					System.out.print("-> Transaction:\t Type: " + t.getTransactionType().toString() + "\t| Hash: " + t.getHash() + "\t| ");
+					System.out.print("PubKey: " + t.getReceiver() + "\t|");
 					System.out.print("Amount: " + t.getAmount() + "\n");
 				}
 				break;

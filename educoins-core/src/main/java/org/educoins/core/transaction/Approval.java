@@ -1,8 +1,11 @@
 package org.educoins.core.transaction;
 
+import org.educoins.core.cryptography.SHA256Hasher;
 import org.educoins.core.utils.ByteArray;
+import org.educoins.core.utils.Hashable;
+import org.educoins.core.utils.Sha256Hash;
 
-public class Approval {
+public class Approval implements Hashable {
 
 	private int amount;
 	private String holderSignature;
@@ -60,6 +63,13 @@ public class Approval {
 		return ByteArray.concatByteArrays(lockingScript);
 
 	}
+
+	@Override
+	public Sha256Hash hash() {
+		byte[] toBeHashed = getConcatedApproval();
+		return Sha256Hash.wrap(SHA256Hasher.hash(toBeHashed));
+	}
+
 
 	@Override
 	public String toString() {

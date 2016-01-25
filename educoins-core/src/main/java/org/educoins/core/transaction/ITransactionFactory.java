@@ -11,7 +11,7 @@ public interface ITransactionFactory {
 
 	Transaction generateRegularTransaction(List<Output> previousOutputs, int sendAmount, String sendPublicKey);
 
-	Transaction generateRevokeTransaction(Sha256Hash transToRevokeHash, String lockingScript);
+	Transaction generateRevokeTransaction(List<Transaction> approvedTransactions, Sha256Hash transToRevokeHash, String lockingScript);
 
 	Transaction generateApprovedTransaction(List<Output> previousOutputs, int amount, String owner, String holderSignature, String lockingScript);
 

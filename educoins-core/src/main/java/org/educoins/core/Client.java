@@ -22,7 +22,7 @@ public class Client {
 	private final Logger logger = LoggerFactory.getLogger(Client.class);
 
 	private List<Output> previousOutputs;
-	private List<Approval> approvedTransactions;
+	private List<Transaction> approvedTransactions;
 	private ITransactionFactory transactionFactory;
 	private List<Block> blockBuffer;
 	private static int availableAmount;
@@ -45,7 +45,7 @@ public class Client {
 		//TODO check if else, lock, available amount
 		
 		this.locked = true;
-		Transaction buildTx = this.transactionFactory.generateRevokeTransaction(transToRevokeHash, lockingScript);
+		Transaction buildTx = this.transactionFactory.generateRevokeTransaction(this.approvedTransactions, transToRevokeHash, lockingScript);
 		this.locked = false;
 		
 		return buildTx;
@@ -139,7 +139,7 @@ public class Client {
 							String holderSignature = app.getHolderSignature();
 							String hashTest = "123456789ABCDEF";
 							if(Wallet.compare(hashTest, holderSignature, publicKey)){
-								this.approvedTransactions.add(app);
+								this.approvedTransactions.add(tx);
 								approvedCoins += app.getAmount();	
 							}
 						}
@@ -170,8 +170,10 @@ public class Client {
 	
 	public int getApprovedCoins(){
 		approvedCoins = 0;
-		for(Approval app : this.approvedTransactions){
-			approvedCoins += app.getAmount(); 
+		for(Transaction txs : this.approvedTransactions){
+			for(Approval app : txs.getApprovals()){
+				approvedCoins += app.getAmount(); 
+			}
 		}
 		return approvedCoins;
 	}

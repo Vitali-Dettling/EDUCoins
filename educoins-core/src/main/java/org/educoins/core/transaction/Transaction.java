@@ -18,6 +18,8 @@ public class Transaction implements Hashable {
 	protected List<Output> outputs;
 
 	protected List<Approval> approvals;
+	
+	protected List<Revoke> revokes;
 
 	private Sha256Hash approvedTransaction;
 
@@ -25,8 +27,24 @@ public class Transaction implements Hashable {
 		this.inputs = new ArrayList<>();
 		this.outputs = new ArrayList<>();
 		this.approvals = new ArrayList<>();
+		this.revokes = new ArrayList<>();
 
 		this.approvedTransaction = null;
+	}
+	
+	public void setRevokes(Revoke revoke){
+		if (this.revokes != null) {
+			this.revokes = new ArrayList<Revoke>();
+		}
+		this.revokes.add(revoke);
+	}
+	
+	public void signRevokes(){
+		for (Revoke rev : revokes) {
+			// TODO Change unterlying methods so that it's not necessary to call toString on hash
+			String signature = Wallet.getSignature(rev.getOwnerPubKey(), this.hash().toString());
+			rev.setOwnerSig(signature);
+		}
 	}
 
 	public int getVersion() {
@@ -185,7 +203,7 @@ public class Transaction implements Hashable {
 				return ETransaction.APPROVED;
 			}
 		} else {
-			if (inputs != null && inputs.size() != 0) {
+			if (revokes != null && revokes.size() != 0) {
 				return ETransaction.REVOKE;
 			}
 		}
