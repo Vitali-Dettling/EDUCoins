@@ -54,6 +54,7 @@ public class HttpProxyPeerGroupTest {
 	}
 
 	@Test
+	@Ignore
 	public void testReceiveBlocks() throws Exception {
 		IBlockListener listener = Mockito.mock(IBlockListener.class);
 		int count = getBlockCount();
@@ -84,6 +85,7 @@ public class HttpProxyPeerGroupTest {
 	}
 
 	@Test
+	@Ignore
 	public void testReceiveTransactions() throws Exception {
 		ITransactionListener listener = Mockito.mock(ITransactionListener.class);
 		int count = getTxnsCount();
@@ -118,6 +120,7 @@ public class HttpProxyPeerGroupTest {
 	}
 
 	@Test
+	@Ignore
 	public void testFoundPoW() throws IOException {
 		Block block = BlockStoreFactory.getRandomBlock();
 		final boolean[] received = { false };

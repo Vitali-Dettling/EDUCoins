@@ -4,10 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.educoins.core.Wallet;
 import org.educoins.core.transaction.Transaction.ETransaction;
+import org.educoins.core.utils.BlockStoreFactory;
 import org.educoins.core.utils.Generator;
 import org.educoins.core.utils.MockedClient;
 import org.educoins.core.utils.MockedWallet;
@@ -108,18 +110,17 @@ public class TransactionTest {
 	}
 
 	// Revoke:
-	// inputs > 0;
-	// outputs = 0
-	// approvals = null
+	// Revoke > 0
 	@Test
-	@Ignore
 	public void testWhichTransactionRevoke() {
 
-		final String LOCKING_SCRIPT = "ABC";
-		Sha256Hash hash = Sha256Hash.wrap(Generator.getSecureRandomString256HEX());
-		
+		final String LOCKING_SCRIPT = Generator.getSecureRandomString256HEX();
+	
+		Transaction tx = BlockStoreFactory.generateTransactionWithSameUnlockingScript(2);
+		Approval app = new Approval(2, LOCKING_SCRIPT, LOCKING_SCRIPT);
+		tx.addApproval(app);
 		ITransactionFactory txFactory = new TransactionFactory();
-		Transaction transaction = txFactory.generateRevokeTransaction(hash, LOCKING_SCRIPT);
+		Transaction transaction = txFactory.generateRevokeTransaction(Arrays.asList(tx), tx.hash(), LOCKING_SCRIPT);
 
 		ETransaction testee = transaction.whichTransaction();
 		assertEquals(testee, ETransaction.REVOKE);

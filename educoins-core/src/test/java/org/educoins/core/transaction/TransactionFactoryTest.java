@@ -68,7 +68,7 @@ public class TransactionFactoryTest {
         // 2 Outputs, spend amount and change
         assertEquals(2, tx.getOutputsCount());
         assertEquals(sendAmount, tx.getAmount(receiver));
-        assertEquals(accountBalanceSender - sendAmount, tx.getAmount(sender));
+        assertEquals(sendAmount, tx.getAmount(sender));
         assertTotalBalance(tx, accountBalanceSender);
     }
 
