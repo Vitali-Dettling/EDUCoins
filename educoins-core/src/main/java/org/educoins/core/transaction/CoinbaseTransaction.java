@@ -14,7 +14,7 @@ public class CoinbaseTransaction extends Transaction {
 
     @Override
     public Transaction create() {
-        Output out = new Output(1, publicKey);
+        Output out = new Output(this.amount, this.publicKey);
         super.setOutputs(new ArrayList<Output>() {{
             add(out);
         }});
