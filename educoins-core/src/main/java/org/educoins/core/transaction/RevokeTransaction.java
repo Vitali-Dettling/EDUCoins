@@ -7,13 +7,11 @@ import org.educoins.core.utils.Sha256Hash;
 public class RevokeTransaction extends Transaction {
 	
 	private Sha256Hash transToRevokeHash;
-	private String lockingScript;
 	private List<Transaction> approvedTransactions;
 	
-	public RevokeTransaction(List<Transaction> approvedTransactions, Sha256Hash transToRevokeHash, String lockingScript) {
+	public RevokeTransaction(List<Transaction> approvedTransactions, Sha256Hash transToRevokeHash) {
 		this.approvedTransactions = approvedTransactions;
 		this.transToRevokeHash = transToRevokeHash;
-		this.lockingScript = lockingScript;
 	}
 	
 	@Override

@@ -23,8 +23,8 @@ public class TransactionFactory implements ITransactionFactory {
 	 * @see org.educoins.core.transaction.ITransactionFactory#generateRevokeTransaction(int, java.lang.String)
 	 */
 	@Override
-	public Transaction generateRevokeTransaction(List<Transaction> approvedTransactions, Sha256Hash transToRevokeHash, String lockingScript) {
-		Transaction revTx = new RevokeTransaction(approvedTransactions, transToRevokeHash, lockingScript);
+	public Transaction generateRevokeTransaction(List<Transaction> approvedTransactions, Sha256Hash transToRevokeHash) {
+		Transaction revTx = new RevokeTransaction(approvedTransactions, transToRevokeHash);
 		return revTx.create();
 	}
 	

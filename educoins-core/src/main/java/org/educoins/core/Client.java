@@ -10,6 +10,7 @@ import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.transaction.Approval;
 import org.educoins.core.transaction.ITransactionFactory;
 import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.Revoke;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.transaction.TransactionFactory;
 import org.educoins.core.utils.Sha256Hash;
@@ -41,11 +42,15 @@ public class Client {
 		this.locked = false;
 	}
 	
-	public Transaction generateRevokeTransaction(Sha256Hash transToRevokeHash, String lockingScript) {
-		//TODO check if else, lock, available amount
-		
+	public Transaction generateRevokeTransaction(Sha256Hash transToRevokeHash) {
+
+		if(this.approvedTransactions.isEmpty()){
+			this.logger.warn("There is no approved educoins.");
+			return null;
+		}
+	
 		this.locked = true;
-		Transaction buildTx = this.transactionFactory.generateRevokeTransaction(this.approvedTransactions, transToRevokeHash, lockingScript);
+		Transaction buildTx = this.transactionFactory.generateRevokeTransaction(this.approvedTransactions, transToRevokeHash);
 		this.locked = false;
 		
 		return buildTx;
@@ -160,12 +165,7 @@ public class Client {
 	}
 	
 	public int getEDICoinsAmount(){
-		int amount = 0;
-		for(Output out : this.previousOutputs){
-			amount += out.getAmount();
-		}
-		availableAmount = amount;
-		return amount;
+		return availableAmount;
 	}
 	
 	public int getApprovedCoins(){
@@ -202,6 +202,7 @@ public class Client {
 
 	public List<TransactionVM> 	getListOfTransactions(BlockChain bc) {
 		List<TransactionVM> returnList = new ArrayList<>();
+
 		try {
 			for (Block b : bc.getBlocks()) {
 				for (Transaction t : b.getTransactions()) {
@@ -209,7 +210,6 @@ public class Client {
 						TransactionVM tvm = new TransactionVM();
 						tvm.setTransactionType(t.whichTransaction());
 						tvm.setHash(t.hash());
-						tvm.setAmount(t.getAmount(Wallet.getPublicKey()));
 						returnList.add(tvm);
 					}
 				}

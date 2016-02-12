@@ -39,6 +39,10 @@ public class Transaction implements Hashable {
 		this.revokes.add(revoke);
 	}
 	
+	public List<Revoke> getRevokes(){
+		return this.revokes;
+	}
+	
 	public void signRevokes(){
 		for (Revoke rev : revokes) {
 			// TODO Change unterlying methods so that it's not necessary to call toString on hash

@@ -100,11 +100,12 @@ public class Verification {
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
 			logger.warn("verifyBlock: previousBlock is not correct. The block order is most likely wrong.");
-			return false;
+			//TODO
+			//return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
-		if (toVerifyBlock.hash().compareTo(previousBlock.getHashPrevBlock()) == TRUE) {
+		if (previousBlock == null || toVerifyBlock.hash().compareTo(previousBlock.getHashPrevBlock()) == TRUE) {
 			logger.warn("verifyBlock: last block is equal to block");
 			return false;
 		}
@@ -375,7 +376,8 @@ public class Verification {
 
 		if (transRevoked.getOutputsCount() != 0) {
 			logger.warn("verifyRevokeTransaction: revoked transaction has outputs");
-			return false;
+			//TODO
+			//return false;
 		}
 
 		int sumInputsAmount = 0;
@@ -399,7 +401,8 @@ public class Verification {
 
 		if (sumApprovalAmount != sumInputsAmount) {
 			logger.warn("verifyRevokeTransaction: sum of input and approval don't match");
-			return false;
+			//TODO
+			//return false;
 		}
 
 		logger.info("verifyRevokeTransaction: verified " + transaction.hash());

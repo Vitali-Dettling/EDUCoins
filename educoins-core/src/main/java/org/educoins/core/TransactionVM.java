@@ -8,6 +8,10 @@ import org.educoins.core.utils.Sha256Hash;
  */
 public class TransactionVM {
 
+    private int amount;
+    private Sha256Hash sender;
+    private Sha256Hash receiver;
+    
     public Transaction.ETransaction getTransactionType() {
         return transactionType;
     }
@@ -42,19 +46,14 @@ public class TransactionVM {
         this.receiver = receiver;
     }
 
-    private int amount;
-    private Sha256Hash sender;
-    private Sha256Hash receiver;
-
     public void setHash(Sha256Hash hash) {
         this.hash = hash;
     }
 
     private Sha256Hash hash;
 
-
-
     public Sha256Hash getHash() {
         return hash;
     }
 }
+
