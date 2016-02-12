@@ -329,4 +329,8 @@ public class BlockChain implements IBlockListener {
 			//TODO: Open Transactions have to be removed, if they are inside the new block
 		}
 	}
+	
+	public boolean approvalValide(String stillApproved){
+		return this.verification.approvalValide(stillApproved);
+	}
 }

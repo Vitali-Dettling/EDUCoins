@@ -120,7 +120,7 @@ public class TransactionTest {
 		Approval app = new Approval(2, LOCKING_SCRIPT, LOCKING_SCRIPT);
 		tx.addApproval(app);
 		ITransactionFactory txFactory = new TransactionFactory();
-		Transaction transaction = txFactory.generateRevokeTransaction(Arrays.asList(tx), tx.hash());
+		Transaction transaction = txFactory.generateRevokeTransaction(Arrays.asList(tx), tx.hash().toString());
 
 		ETransaction testee = transaction.whichTransaction();
 		assertEquals(testee, ETransaction.REVOKE);

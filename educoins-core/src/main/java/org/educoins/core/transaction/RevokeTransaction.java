@@ -6,21 +6,22 @@ import org.educoins.core.utils.Sha256Hash;
 
 public class RevokeTransaction extends Transaction {
 	
-	private Sha256Hash transToRevokeHash;
+	private String transToRevokeHash;
 	private List<Transaction> approvedTransactions;
 	
-	public RevokeTransaction(List<Transaction> approvedTransactions, Sha256Hash transToRevokeHash) {
+	public RevokeTransaction(List<Transaction> approvedTransactions, String transToRevokeHash) {
 		this.approvedTransactions = approvedTransactions;
 		this.transToRevokeHash = transToRevokeHash;
 	}
 	
 	@Override
 	public Transaction create() {
-		
-		this.setApprovedTransaction(this.transToRevokeHash);
+		Sha256Hash sha256Tx = Sha256Hash.wrap(this.transToRevokeHash);
+		this.setApprovedTransaction(sha256Tx);
 		List<Approval> apps = null;
+		Sha256Hash hashTx = null;
 		for(Transaction tx : this.approvedTransactions){
-			Sha256Hash hashTx =  tx.hash();
+			hashTx =  tx.hash();
 			
 			if(hashTx.toString().equals(this.transToRevokeHash.toString())){
 				apps = tx.getApprovals();
@@ -29,9 +30,11 @@ public class RevokeTransaction extends Transaction {
 		}
 		
 		Revoke revoke = null;
-		for(Approval app : apps){
-			//TODO Here check for public key of the approved tx.
-			revoke = new Revoke(app.hash(), app.getAmount(), app.getOwnerAddress());
+		if(apps != null){
+			for(Approval app : apps){
+				//TODO Here check for public key of the approved tx.
+				revoke = new Revoke(sha256Tx, app.getAmount(), app.getOwnerAddress());
+			}
 		}
 		
 		this.setRevokes(revoke);

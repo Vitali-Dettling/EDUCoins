@@ -42,7 +42,7 @@ public class Client {
 		this.locked = false;
 	}
 	
-	public Transaction generateRevokeTransaction(Sha256Hash transToRevokeHash) {
+	public Transaction generateRevokeTransaction(String transToRevokeHash) {
 
 		if(this.approvedTransactions.isEmpty()){
 			this.logger.warn("There is no approved educoins.");

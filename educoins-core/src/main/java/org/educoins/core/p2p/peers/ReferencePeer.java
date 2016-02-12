@@ -4,6 +4,7 @@ import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
 import org.educoins.core.transaction.Revoke;
 import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Transaction.ETransaction;
 import org.educoins.core.utils.Sha256Hash;
 
 import java.util.List;
@@ -50,10 +51,11 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 
 			Scanner scanner = new Scanner(System.in);
 			System.out.println("Select action: ");
-			System.out.println("\t - (P)Get Public Key");
-			System.out.println("\t - (S)Create Signature");
-			System.out.println("\t - (G)Get Own EDUCoins");
+			System.out.println("\t - (P)ublic Key");
+			System.out.println("\t - (S)ignature");
+			System.out.println("\t - (G)et Own EDUCoins");
 			System.out.println("\t - (L)ist of all Transactions");
+			System.out.println("\t - (C)heck approved EDUCoins");
 			System.out.println("\t --- Transactions types ---");
 			System.out.println("\t - (R)egular transaction");
 			System.out.println("\t - (A)pproved transaction");
@@ -109,9 +111,8 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				break;
 			case "x":
 				String transHash = client.getHexInput(scanner, "Type in hash of transaction to revoke: ");
-				Sha256Hash hash = Sha256Hash.wrap(transHash);
-
-				trans = client.generateRevokeTransaction(hash);
+				trans = client.generateRevokeTransaction(transHash);
+			
 				if (trans != null) {
 					ReferencePeer.blockChain.sendTransaction(trans);
 					System.out.println("With Revoke: " + trans.hash());
@@ -121,9 +122,26 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				List<TransactionVM> vm = client.getListOfTransactions(Peer.blockChain);
 				for (TransactionVM t : vm) {
 					System.out.print("-> Transaction:\t Type: " + t.getTransactionType().toString() + "\t| Hash: " + t.getHash() + "\t| ");
-					System.out.print("PubKey: " + t.getReceiver().toString() + "\t|");
+					if(t.getTransactionType() == ETransaction.REVOKE){
+						Transaction tx = Peer.blockChain.getTransaction(t.getHash());
+						System.out.print("Revoked: " + tx.getRevokes().get(0).getHashPrevApproval() + "\t|");
+					}
+					System.out.println();
 				}
 				break;
+			case "c":
+				System.out.println("Please, enter the approved hash: ");
+				String stillApproved = scanner.nextLine();
+				
+				boolean result = Peer.blockChain.approvalValide(stillApproved);
+				
+				if(result){
+					System.out.println("The approved educoins are still valide.");
+				}else{
+					System.out.println("The educoins had been revoked.");
+				}
+				
+			break;
 			case "e":
 				running = false;
 				break;

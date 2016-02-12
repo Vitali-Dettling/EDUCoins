@@ -1,20 +1,19 @@
 package org.educoins.core;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
 import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.transaction.Approval;
-import org.educoins.core.transaction.Transaction;
-import org.educoins.core.transaction.Transaction;
 import org.educoins.core.transaction.Input;
 import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.Revoke;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.BinaryTree;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 public class Verification {
 
@@ -66,16 +65,18 @@ public class Verification {
 				usedOutputs.put(transHash + i, false);
 			}
 			for (Input input : transaction.getInputs()) {
-				//TODO Needs to be redone.
+				// TODO Needs to be redone.
 				// if output is already "used" return false
-//				if (usedOutputs.getOrDefault(input.getHashPrevOutput() + input.getN(), false)) {
-//					return false;
-//				} else {
-					// If Key wasn't set, there was no output, otherwise set
-					// used to true
-//					if (usedOutputs.replace(input.getHashPrevOutput() + input.getN(), true) == null)
-//						return false;
-//				}
+				// if (usedOutputs.getOrDefault(input.getHashPrevOutput() +
+				// input.getN(), false)) {
+				// return false;
+				// } else {
+				// If Key wasn't set, there was no output, otherwise set
+				// used to true
+				// if (usedOutputs.replace(input.getHashPrevOutput() +
+				// input.getN(), true) == null)
+				// return false;
+				// }
 			}
 		}
 		return true;
@@ -100,8 +101,8 @@ public class Verification {
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
 			logger.warn("verifyBlock: previousBlock is not correct. The block order is most likely wrong.");
-			//TODO
-			//return false;
+			// TODO
+			// return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
@@ -198,8 +199,9 @@ public class Verification {
 		}
 
 		// Case 5:
-		//TODO Check is wrong. An approved transaction does not have any inputs it just refers to outputs or regular transactions.
-		//Bug: Needs to be fixed.
+		// TODO Check is wrong. An approved transaction does not have any inputs
+		// it just refers to outputs or regular transactions.
+		// Bug: Needs to be fixed.
 		if (sumApprovalAmount > sumInputsAmount) {
 			logger.warn("verifyApprovedTransaction: more output than input");
 			return false;
@@ -326,11 +328,11 @@ public class Verification {
 		}
 
 		// Case 5:
-		//TODO is not quite correct!
-//		if (sumOutputsAmount > sumInputsAmount) {
-//			logger.warn("verifyRegularTransaction: more output than input");
-//			return false;
-//		}
+		// TODO is not quite correct!
+		// if (sumOutputsAmount > sumInputsAmount) {
+		// logger.warn("verifyRegularTransaction: more output than input");
+		// return false;
+		// }
 
 		// Case 13:
 		// TODO The check is current done with the ECDSA class but
@@ -376,8 +378,8 @@ public class Verification {
 
 		if (transRevoked.getOutputsCount() != 0) {
 			logger.warn("verifyRevokeTransaction: revoked transaction has outputs");
-			//TODO
-			//return false;
+			// TODO
+			// return false;
 		}
 
 		int sumInputsAmount = 0;
@@ -401,8 +403,8 @@ public class Verification {
 
 		if (sumApprovalAmount != sumInputsAmount) {
 			logger.warn("verifyRevokeTransaction: sum of input and approval don't match");
-			//TODO
-			//return false;
+			// TODO
+			// return false;
 		}
 
 		logger.info("verifyRevokeTransaction: verified " + transaction.hash());
@@ -413,6 +415,25 @@ public class Verification {
 		Sha256Hash merkle = block.getHashMerkleRoot();
 		BinaryTree<Transaction> tree = new BinaryTree<>(block.getTransactions());
 		return tree.getRoot().hash().equals(merkle);
+	}
+
+	public boolean approvalValide(String stillApproved) {
+
+		try {
+			for (Block block : this.blockChain.getBlocks()) {
+				for (Transaction tx : block.getTransactions()) {
+					for (Revoke rev : tx.getRevokes()) {
+						if (rev.getHashPrevApproval().toString().equals(stillApproved)) {
+							return false;
+						}
+					}
+				}
+			}
+		} catch (BlockNotFoundException e) {
+			logger.error("While checking the approved transaction against the revoke transaction. ");
+		}
+
+		return true;
 	}
 
 }

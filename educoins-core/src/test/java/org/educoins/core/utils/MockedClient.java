@@ -64,7 +64,7 @@ public class MockedClient {
 	//TODO hash instead of amount
 	public static List<Transaction> sendRevokedTransaction(Sha256Hash transHash, String lockingScript) {
 		transactionReceived();
-		Transaction transaction = mockedClient.generateRevokeTransaction(transHash);
+		Transaction transaction = mockedClient.generateRevokeTransaction(transHash.toString());
 		mockedBlockchain.sendTransaction(transaction);
 		return receivedTransaction();
 	}
