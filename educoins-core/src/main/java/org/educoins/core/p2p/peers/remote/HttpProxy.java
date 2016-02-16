@@ -25,7 +25,7 @@ public class HttpProxy extends RemoteProxy {
     public static final String PROTOCOL = "http://";
 
     private int ownPort = AppConfig.getOwnPort();
-    private Sha256Hash ownPublicKey = AppConfig.getOwnPublicKey();
+    private String ownPublicKey = AppConfig.getOwnPublicKey();
 
     public HttpProxy() {
     }

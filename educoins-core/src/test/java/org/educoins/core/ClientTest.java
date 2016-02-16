@@ -5,15 +5,19 @@ import java.util.List;
 import org.educoins.core.testutils.BlockStoreFactory;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.transaction.Transaction.ETransaction;
+import org.educoins.core.utils.AppConfigInitializer;
 import org.educoins.core.utils.MockedClient;
 import org.educoins.core.utils.MockedWallet;
 import org.educoins.core.utils.Sha256Hash;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 public class ClientTest {
+
+
+	@Before
+	public void init() {
+		AppConfigInitializer.init();
+	}
 
 	@After
 	public void deleteTmp() {

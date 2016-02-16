@@ -3,18 +3,26 @@ package org.educoins.core.p2p.discovery;
 import org.educoins.core.p2p.peers.remote.HttpProxy;
 import org.educoins.core.p2p.peers.remote.RemoteProxy;
 import org.educoins.core.testutils.FieldInjector;
+import org.educoins.core.utils.AppConfigInitializer;
 import org.educoins.core.utils.RestClient;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
-import static junit.framework.TestCase.*;
-import static org.mockito.Mockito.*;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests {@link CentralDiscovery}.
@@ -26,14 +34,16 @@ public class CentralDiscoveryTest {
     public final ExpectedException exception = ExpectedException.none();
 
     String centralUrl = "http://localhost:1337";
-    DiscoveryStrategy discovery = new CentralDiscovery();
+    DiscoveryStrategy discovery;
     RestClient clientMock = Mockito.mock(RestClient.class);
     List<RemoteProxy> expectedPeers = new ArrayList<>();
     private URI uriReference;
 
     @Before
     public void setup() throws NoSuchFieldException, IllegalAccessException, IOException, URISyntaxException {
+        AppConfigInitializer.init();
         uriReference = new URI(centralUrl + "/nodes/");
+        discovery = new CentralDiscovery();
         FieldInjector.setField(discovery, clientMock, "client");
     }
 
