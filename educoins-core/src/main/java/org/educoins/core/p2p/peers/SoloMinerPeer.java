@@ -1,9 +1,11 @@
 package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
+import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Threading;
 
+import java.util.Collection;
 import java.util.Scanner;
 
 /**
@@ -31,11 +33,23 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 	public void start() {
 		miner.addPoWListener(this);
 
-		// Kick off Miner.
-		foundPoW(blockChain.getLatestBlock());
-		// After miner has started.
-		Peer.remoteProxies.discover();
-		client();
+		try {
+			Collection<Block> blocks = blockChain.getBlocks();
+		
+			if(!blocks.isEmpty()){
+				blocks.forEach(block -> SoloMinerPeer.client.ownTransactions(block));
+			}
+			
+			// Kick off Miner.
+			foundPoW(blockChain.getLatestBlock());
+			// After miner has started.
+			Peer.remoteProxies.discover();
+			client();
+		} catch (BlockNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	@Override
