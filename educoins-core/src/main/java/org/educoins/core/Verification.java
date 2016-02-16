@@ -102,7 +102,7 @@ public class Verification {
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
 			logger.warn("verifyBlock: previousBlock is not correct. The block order is most likely wrong.");
-			return false;
+			//return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
