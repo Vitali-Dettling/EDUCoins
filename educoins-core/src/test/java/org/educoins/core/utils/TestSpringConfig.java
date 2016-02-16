@@ -13,6 +13,7 @@ import java.io.IOException;
  */
 @Configuration
 @Profile("test")
+@DependsOn("appConfig")
 public class TestSpringConfig {
     private IBlockStore blockStore;
     private BlockChain blockChain;
