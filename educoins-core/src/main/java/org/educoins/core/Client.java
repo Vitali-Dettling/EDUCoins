@@ -142,10 +142,11 @@ public class Client {
 					for (String publicKey : publicKeys) {
 						if (app.getLockingScript().equals(publicKey)) {
 							String holderSignature = app.getHolderSignature();
-							String hashTest = "123456789ABCDEF";
-							if(Wallet.compare(hashTest, holderSignature, publicKey)){
-								this.approvedTransactions.add(tx);
-								approvedCoins += app.getAmount();	
+							for(String message : Wallet.getSignatures()){
+								if(Wallet.compare(message, holderSignature, publicKey)){
+									this.approvedTransactions.add(tx);
+									approvedCoins += app.getAmount();	
+								}
 							}
 						}
 					}

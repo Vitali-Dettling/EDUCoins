@@ -3,6 +3,7 @@ package org.educoins.core;
 import org.educoins.core.presentation.*;
 import org.educoins.core.utils.ByteArray;
 import org.educoins.core.utils.IO;
+import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +17,16 @@ import java.util.*;
 public class Wallet {
 
     private static final int HEX = 16;
+	private static final int BYTE_256 = 256;
     private static final String KEY_SEPERATOR = ";";
     private static final Logger logger = LoggerFactory.getLogger(Wallet.class);
     private static IWalletInitializerView initializerView = new CLIWalletInitializerView();
     private static String keyStorageFile = "/wallet.keys";
+    private static String signatureStorage = "/signatures";
     private static Path directoryKeyStorage = Paths.get(System.getProperty("user.home") + File.separator + "documents" + File.separator
             + "educoins" + File.separator + "demo" + File.separator + "wallet");
+    
+	private static SecureRandom secureRandom = new SecureRandom();
 
     public static boolean compare(String message, String signature, String publicKey) {
 
@@ -100,6 +105,23 @@ public class Wallet {
         return publicKey;
 
     }
+    
+    public static List<String> getSignatures(){
+    	 List<String> signatures = new ArrayList<>();
+         try {
+             String keyFile;
+             keyFile = IO.readFromFile(directoryKeyStorage + signatureStorage);
+
+             BufferedReader reader = new BufferedReader(new StringReader(keyFile));
+             String line;
+             while ((line = reader.readLine()) != null) {
+                 signatures.add(line);
+             }
+         } catch (IOException e) {
+             logger.error("Signatures could not be retrieved.");
+         }
+         return signatures;
+    }
 
     public static List<String> getPublicKeys() {
 
@@ -139,6 +161,20 @@ public class Wallet {
         IO.createDirectory(directoryKeyStorage);
         IO.createFile(directoryKeyStorage + keyStorageFile);
     }
+	
+	public static String getSecureRandomString256HEX(){
+		
+		String randomSignature = null;
+        try {
+        	byte[] nextByte = new byte[BYTE_256]; 
+    		secureRandom.nextBytes(nextByte);
+    		randomSignature = Sha256Hash.wrap(nextByte).toString();
+			IO.appendToFile(directoryKeyStorage + signatureStorage, randomSignature + "\r\n");
+		} catch (IOException e) {
+			 logger.error("Signature could not be created randomly.");
+		}
+		return randomSignature;
+	}
 
     /**
      * Nested calls that just the wallet class can use it.

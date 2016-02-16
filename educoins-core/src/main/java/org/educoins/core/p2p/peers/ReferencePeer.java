@@ -69,8 +69,8 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				System.out.println("Send to address: " + ReferencePeer.singlePublicKey);
 				break;
 			case "s":
-				String hashTx = "123456789ABCDEF";
-				String signature = Wallet.getSignature(ReferencePeer.singlePublicKey, hashTx);
+				String randomSignature = Wallet.getSecureRandomString256HEX();
+				String signature = Wallet.getSignature(ReferencePeer.singlePublicKey, randomSignature);
 				System.out.println("Created Signature: " + signature);
 			case "g":
 				System.out.println("Regular EDUCoins " + Peer.client.getEDICoinsAmount());
