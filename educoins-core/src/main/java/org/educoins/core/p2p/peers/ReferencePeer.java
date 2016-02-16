@@ -54,7 +54,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 			System.out.println("\t - (P)ublic Key");
 			System.out.println("\t - (S)ignature");
 			System.out.println("\t - (G)et Own EDUCoins");
-			System.out.println("\t - (L)ist of all Transactions");
+			System.out.println("\t - (L)ist of Transactions");
 			System.out.println("\t - (C)heck approved EDUCoins");
 			System.out.println("\t --- Transactions types ---");
 			System.out.println("\t - (R)egular transaction");

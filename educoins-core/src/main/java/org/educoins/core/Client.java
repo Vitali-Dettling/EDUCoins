@@ -166,7 +166,7 @@ public class Client {
 	}
 	
 	public int getEDICoinsAmount(){
-		return availableAmount;
+		return availableAmount - getApprovedCoins();
 	}
 	
 	public int getApprovedCoins(){
