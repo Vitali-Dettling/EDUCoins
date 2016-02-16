@@ -73,12 +73,12 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				String signature = Wallet.getSignature(ReferencePeer.singlePublicKey, randomSignature);
 				System.out.println("Created Signature: " + signature);
 			case "g":
-				System.out.println("Regular EDUCoins " + Peer.client.getEDICoinsAmount());
+				System.out.println("Regular EDUCoins " + Peer.client.getEDUCoinsAmount());
 				System.out.println("Approved EDUCoins " + Peer.client.getApprovedCoins());
 				break;
 			case "r":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
-				int availableAmount = Peer.client.getEDICoinsAmount();
+				int availableAmount = Peer.client.getEDUCoinsAmount();
 				if (amount > availableAmount) {
 					System.err.println("Not enough available amount (max. " + availableAmount + ")");
 					break;

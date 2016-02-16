@@ -9,6 +9,7 @@ import org.educoins.core.store.BlockNotFoundException;
 import org.educoins.core.transaction.Approval;
 import org.educoins.core.transaction.ITransactionFactory;
 import org.educoins.core.transaction.Output;
+import org.educoins.core.transaction.Revoke;
 import org.educoins.core.transaction.Transaction;
 import org.educoins.core.transaction.Transaction.ETransaction;
 import org.educoins.core.transaction.TransactionFactory;
@@ -25,6 +26,7 @@ public class Client {
 	private List<Block> blockBuffer;
 	private static int availableAmount;
 	private static int approvedCoins;
+	private static int revokedCoins;
 	private boolean locked;
 
 	public Client() {
@@ -33,6 +35,7 @@ public class Client {
 
 		availableAmount = 0;
 		approvedCoins = 0;
+		revokedCoins = 0;
 
 		this.transactionFactory = new TransactionFactory();
 		this.blockBuffer = new ArrayList<>();
@@ -45,10 +48,15 @@ public class Client {
 			this.logger.warn("There is no approved educoins.");
 			return null;
 		}
+		if(!isApprovedTransactionHash(transToRevokeHash)){
+			this.logger.warn("The transaction is not an approved one.");
+			return null;
+		}
 
 		this.locked = true;
 		Transaction buildTx = this.transactionFactory.generateRevokeTransaction(this.approvedTransactions,
 				transToRevokeHash);
+		revokedCoins += buildTx.getRevokes().iterator().next().getAmount();
 		this.locked = false;
 
 		return buildTx;
@@ -67,7 +75,6 @@ public class Client {
 		Transaction buildTx = this.transactionFactory.generateApprovedTransaction(this.previousOutputs, toApproveAmount,
 				owner, holderSignature, lockingScript);
 		this.locked = false;
-
 		return buildTx;
 	}
 
@@ -84,6 +91,17 @@ public class Client {
 		this.locked = false;
 
 		return buildTx;
+	}
+	
+	private boolean isApprovedTransactionHash(String transToRevokeHash){
+		
+		for(Transaction tx : this.approvedTransactions){
+			
+			if(tx.hash().toString().equals(transToRevokeHash)){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean checkParams(String param) {
@@ -104,7 +122,7 @@ public class Client {
 
 	private boolean checkAmount(int sendAmount) {
 
-		int availableAmount = getEDICoinsAmount();
+		int availableAmount = getEDUCoinsAmount();
 		if ((availableAmount - sendAmount) < 0) {
 			this.logger.info("Not enough amount. Available: " + availableAmount + " which to send: " + sendAmount);
 			return false;
@@ -152,7 +170,16 @@ public class Client {
 					}
 				}
 			}
+			if (tx.whichTransaction() == ETransaction.REVOKE) {
+				for (Revoke rev : tx.getRevokes()) {
+					for (String publicKey : publicKeys) {
+						if (rev.getOwnerPubKey().equals(publicKey)) {
+							revokedCoins += rev.getAmount();
+					}
+				}
+			}
 		}
+	}
 
 		// Recursive as soon as multiple blocks are found while creating a
 		// transaction.
@@ -166,18 +193,16 @@ public class Client {
 		}
 	}
 
-	public int getEDICoinsAmount() {
-		return availableAmount - getApprovedCoins();
+	public int getEDUCoinsAmount() {
+		int availableAmount = 0;
+		for(Output out : this.previousOutputs){
+			availableAmount += out.getAmount();
+		}
+		return availableAmount - approvedCoins;
 	}
 
 	public int getApprovedCoins() {
-		approvedCoins = 0;
-		for (Transaction txs : this.approvedTransactions) {
-			for (Approval app : txs.getApprovals()) {
-				approvedCoins += app.getAmount();
-			}
-		}
-		return approvedCoins;
+		return approvedCoins - revokedCoins;
 	}
 
 	public int getIntInput(Scanner scanner, String prompt) {

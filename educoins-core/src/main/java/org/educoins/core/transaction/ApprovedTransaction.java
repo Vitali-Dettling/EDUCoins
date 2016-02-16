@@ -4,9 +4,6 @@ import java.util.List;
 
 public class ApprovedTransaction extends Transaction {
 
-//	private List<Input> inputs;
-//	private List<Approval> approvals;
-//	private List<Output> outputs;
 	private String holderSignature;
 
 	public ApprovedTransaction(List<Approval> approvals, List<Output> outputs, List<Input> inputs, String holderSignature) {
@@ -18,9 +15,6 @@ public class ApprovedTransaction extends Transaction {
 
 	@Override
 	public Transaction create() {
-//		super.setApprovals(this.approvals);
-//		super.setInputs(this.inputs);
-//		super.setOutputs(this.outputs);
 		super.signApprovals(this.holderSignature);
 		super.signInputs();
 		return this;

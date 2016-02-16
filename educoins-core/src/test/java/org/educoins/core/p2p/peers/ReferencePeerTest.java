@@ -54,7 +54,7 @@ public class ReferencePeerTest {
 		block.addTransaction(tx);
 		client.ownTransactions(block);
 	
-		int result = client.getEDICoinsAmount();
+		int result = client.getEDUCoinsAmount();
 		Assert.assertEquals(result, expected);
 	}
 
