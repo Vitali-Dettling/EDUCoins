@@ -26,7 +26,7 @@ public class Verification {
 	private BlockChain blockChain;
 	private Logger logger = LoggerFactory.getLogger(BlockChain.class);
 
-	private HashMap<String, Boolean> usedOutputs;
+	private HashMap<Sha256Hash, Boolean> usedOutputs;
 
 	public Verification(BlockChain blockChain) {
 		this.usedOutputs = new HashMap<>();
@@ -62,21 +62,18 @@ public class Verification {
 			String transHash = transaction.hash().toString();
 			// put all outputs to list and set to "not used"
 			for (int i = 0; i < transaction.getOutputsCount(); i++) {
-				usedOutputs.put(transHash + i, false);
+				usedOutputs.put(transaction.getOutputs().get(i).hash(), false);
 			}
 			for (Input input : transaction.getInputs()) {
-				// TODO Needs to be redone.
 				// if output is already "used" return false
-				// if (usedOutputs.getOrDefault(input.getHashPrevOutput() +
-				// input.getN(), false)) {
-				// return false;
-				// } else {
+				if (usedOutputs.getOrDefault(input.getHashPrevOutput(), false)) {
+					return false;
+				} else {
 				// If Key wasn't set, there was no output, otherwise set
 				// used to true
-				// if (usedOutputs.replace(input.getHashPrevOutput() +
-				// input.getN(), true) == null)
-				// return false;
-				// }
+				if (usedOutputs.replace(input.getHashPrevOutput(), true) == null)
+					return false;
+				}
 			}
 		}
 		return true;
