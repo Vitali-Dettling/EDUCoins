@@ -2,9 +2,12 @@ package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
 import org.educoins.core.p2p.discovery.DiscoveryException;
+import org.educoins.core.transaction.Transaction;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * A PeerNode representation. Necessary for P2P Networking. The concrete
@@ -35,10 +38,44 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 
 	@Override
 	public void blockListener(Block receivedBlock) {
-		Peer.blockChain.verifyReceivedBlock(receivedBlock);
-		Peer.client.ownTransactions(receivedBlock);
+		logger.info("Received block. hash: {}", receivedBlock.hash());
+		if (blockChain.contains(receivedBlock)) return;
+
+		boolean stored = blockChain.storeBlock(receivedBlock);
+		if (!stored) {
+			// The received Block might be younger than the one we have stored,
+			// so we try to get up to date.
+			remoteProxies.receiveBlocks(blockChain.getLatestBlock().hash());
+		} else {
+			/* TODO: A new node might overwrite the Blockchain with its own Blocks.
+			 The length (=combined difficulties) have to be taken into account
+			 so that only the longest chain will survive.
+
+			 Beware: When receiving a new, longer blockchain, the Blocks will be
+			 transferred step by step, so unless the transfer is finished it is
+			 actually shorter but may not be deleted.
+			*/
+			handleNewValidBlock(receivedBlock);
+			Peer.client.ownTransactions(receivedBlock);
+
+			List<Transaction> transactions = receivedBlock.getTransactions();
+			if (transactions != null) {
+				logger.info("Found {} transactions", transactions.size());
+				for (Transaction transaction : transactions) {
+					blockChain.notifyTransactionReceived(transaction);
+				}
+			}
+
+		}
+		logger.info("Block processed.");
 	}
-	
+
+	/**
+	 * Specific implementation for handling a new valid Block.
+	 * This template method is called by the {@link Peer#blockListener(Block)}
+     */
+	protected abstract void handleNewValidBlock(Block block);
+
 	@Override
 	public void addBlockListener(IBlockListener blockListener) {
 		Peer.blockChain.addBlockListener(blockListener);

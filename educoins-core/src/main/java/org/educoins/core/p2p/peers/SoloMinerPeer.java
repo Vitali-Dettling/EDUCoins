@@ -45,6 +45,13 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 		Peer.blockChain.removeBlockListener(this);
 	}
 
+	@Override
+	protected void handleNewValidBlock(Block block) {
+		Block newBlock = blockChain.prepareNewBlock(block, singlePublicKey);
+		miner.receiveBlocks(newBlock);
+	}
+
+
 	private void client() {
 
 		boolean running = true;

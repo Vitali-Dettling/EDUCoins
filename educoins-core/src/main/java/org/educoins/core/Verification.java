@@ -86,7 +86,7 @@ public class Verification {
 	public boolean verifyBlock(Block toVerifyBlock) {
 
 		if (toVerifyBlock == null) {
-			throw new NullPointerException("Block is null.");
+			return false;
 		}
 
 		// 0. If block is the genesis block return true, because there is no
@@ -101,20 +101,20 @@ public class Verification {
 		try {
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
-			logger.warn("verifyBlock: previousBlock is not correct. The block order is most likely wrong.");
-			//return false;
+			logger.warn("storeBlock: previousBlock is not correct. The block order is most likely wrong.");
+			return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
-		if (previousBlock == null || toVerifyBlock.hash().compareTo(previousBlock.getHashPrevBlock()) == TRUE) {
-			logger.warn("verifyBlock: last block is equal to block");
+		if (toVerifyBlock.hash().compareTo(previousBlock.getHashPrevBlock()) == TRUE) {
+			logger.warn("storeBlock: last block is equal to block");
 			return false;
 		}
 
 		// 4. At least one transaction has to be in the block, namely the
 		// coinbase transaction.
 		if (toVerifyBlock.getTransactions().size() <= HAS_NO_ENTRIES) {
-			logger.warn("verifyBlock: no transactions");
+			logger.warn("storeBlock: no transactions");
 			return false;
 		}
 
@@ -137,7 +137,7 @@ public class Verification {
 				isTransactionValid = verifyRevokeTransaction(transaction);
 				break;
 			default:
-				logger.warn("verifyBlock: transaction could not be determined. " + toVerifyBlock.toString());
+				logger.warn("storeBlock: transaction could not be determined. " + toVerifyBlock.toString());
 			}
 
 			// As soon as a transaction is not valid, the loop will be
@@ -149,13 +149,12 @@ public class Verification {
 
 		// 6. verify inputs
 		if (!verifyAllTransactions(toVerifyBlock)) {
-			logger.warn("verifyBlock: transaction inputs are not valid!");
-
-			//return false;
+			logger.warn("storeBlock: transaction inputs are not valid!");
+			return false;
 		}
 
 		if (!verifyMerkle(toVerifyBlock)) {
-			logger.warn("verifyBlock: verfication of merkle root failed");
+			logger.warn("storeBlock: verfication of merkle root failed");
 			return false;
 		}
 		return true;

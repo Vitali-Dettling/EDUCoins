@@ -44,9 +44,8 @@ public class VerificationTest {
 		
 		//Check null.
 		Block block = null;
-		thrown.expect(NullPointerException.class);						
-		this.verification.verifyBlock(block);
-		
+		assertFalse(verification.verifyBlock(block));
+
 		//Check Genesis block.
 		block = new Block();
 		assertTrue(this.verification.verifyBlock(block));

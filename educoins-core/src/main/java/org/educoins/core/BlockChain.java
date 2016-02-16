@@ -160,47 +160,32 @@ public class BlockChain implements IBlockListener {
 		}
 	}
 
+	//TODO: Rename and redesign. This method does way more than just verify.
 	public void verifyReceivedBlock(Block receivedBlock) {
-		logger.info("Received block. Verifying now. hash: {}", receivedBlock.hash());
-
-		// Already up to date.
-		Block latestStoredBlock = getLatestBlock();
-		if (receivedBlock.equals(latestStoredBlock)) {
-			logger.info("Blockchain is up to date.");
-			return;
-		}
-
-		// Check block for validity.
-		if (!this.verification.verifyBlock(receivedBlock)) {
-			logger.warn("Verification of block failed. hash: {}, block: {}", receivedBlock.hash(), receivedBlock.toString());
-			// Tries as long as the blockchain is up to date.
-			Block latestBlock = getLatestBlock();
-			// TODO: Should a failed verification really trigger a new fetch?
-			this.remoteProxies.receiveBlocks(latestBlock.hash());
-			return;
-		}
+		if (storeBlock(receivedBlock)) return;
 
 		// Store the verified block.
 		logger.info("Received Block stored in the BC after verification: " + receivedBlock.toString());
 
 		this.store.put(receivedBlock);
-		/* TODO: A new node might overwrite the Blockchain with its own Blocks.
-				 The length (=combined difficulties) have to be taken into account
-				 so that only the longest chain will survive.
 
-				 Beware: When receiving a new, longer blockchain, the Blocks will be
-				 transferred step by step, so unless the transfer is finished it is
-				 actually shorter but may not be deleted.
-		 */
+	}
 
-		List<Transaction> transactions = receivedBlock.getTransactions();
-		if (transactions != null) {
-			logger.info("Found {} transactions", transactions.size());
-			for (Transaction transaction : transactions) {
-				notifyTransactionReceived(transaction);
-			}
+	/**
+	 * Checks if the Block is valid and stores it (if valid).
+	 * @return <code>true</code> if valid and stored, else <code>false</code>.
+     */
+	public boolean storeBlock(Block block) {
+		logger.info("Verifying Block. hash: {}", block.hash());
+
+		// Check block for validity.
+		if (!this.verification.verifyBlock(block)) {
+			logger.warn("Verification of block failed. hash: {}, block: {}", block.hash(), block.toString());
+			return false;
 		}
-		logger.info("Block processed.");
+		store.put(block);
+		logger.info("Block stored. hash {}", block.hash());
+		return true;
 	}
 
 	public void notifyTransactionReceived(Transaction transaction) {
@@ -317,10 +302,6 @@ public class BlockChain implements IBlockListener {
 		return null;
 	}
 
-	public void storeBlock(Block block) {
-		this.store.put(block);
-	}
-
 	@Override
 	public void blockListener(Block block) {
 		boolean isVerified = this.verification.verifyBlock(block);
@@ -332,5 +313,9 @@ public class BlockChain implements IBlockListener {
 	
 	public boolean approvalValide(String stillApproved){
 		return this.verification.approvalValide(stillApproved);
+	}
+
+	public boolean contains(Block block) {
+		return store.contains(block);
 	}
 }

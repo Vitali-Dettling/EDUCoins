@@ -44,6 +44,11 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	protected void handleNewValidBlock(Block block) {
+		// No special behavior for reference peer so far
+	}
+
 	private void client() {
 
 		boolean running = true;

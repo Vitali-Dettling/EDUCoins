@@ -26,8 +26,7 @@ public class BlockChainTest {
 	}
 
 	@Test
-	@Ignore
-	public void testGetBlocksFromIncludsGenesisBlock() throws BlockNotFoundException {
+	public void testGetBlocksFromIncludingGenesisBlock() throws BlockNotFoundException {
 		
 		Block genesisBlock = new Block();
 		BlockStoreFactory.fillRandomTree(this.mockekStore);

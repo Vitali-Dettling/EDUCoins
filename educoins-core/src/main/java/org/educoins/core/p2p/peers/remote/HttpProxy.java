@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * The Representation of a {@link Peer} communicating via HTTP.
@@ -44,7 +45,7 @@ public class HttpProxy extends RemoteProxy {
 
     @Override
     @NotNull
-    public Collection<Block> getBlocks() throws IOException {
+    public List<Block> getBlocks() throws IOException {
         return Arrays.asList(
                 new RestClient<Block[]>()
                         .get(URI.create(iNetAddress.toString() + PeerServer.BLOCKS_RESOURCE_PATH),
@@ -52,7 +53,7 @@ public class HttpProxy extends RemoteProxy {
     }
 
     @Override
-    public @NotNull Collection<Block> getBlocks(Sha256Hash from) throws IOException {
+    public @NotNull List<Block> getBlocks(Sha256Hash from) throws IOException {
         return Arrays.asList(
                 new RestClient<Block[]>()
                         .get(URI.create(iNetAddress.toString() + PeerServer.BLOCKS_FROM_RESOURCE_PATH + from.toString()),
