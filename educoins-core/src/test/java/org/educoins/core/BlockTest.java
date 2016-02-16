@@ -119,7 +119,7 @@ public class BlockTest{
         }
         Block b = new Block();
         b.addTransactions(list);
-        Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("a97d28426d66642ab44d50c5a5367ced47c5a9c5559887b660675eb16851bcf7"));
+        Assert.assertEquals(Sha256Hash.wrap("a7833eccf6bed7ca41482806151b71c36b2a192d65eaee4317771f1a2669d394"), b.getHashMerkleRoot());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class BlockTest{
         }
         Block b = new Block();
         b.addTransactions(list);
-        Assert.assertEquals(b.getHashMerkleRoot(), Sha256Hash.wrap("8532c68fff31f33315444026eb34fad09793835dfc8391105fbbaf7086bd74be"));
+        Assert.assertEquals(Sha256Hash.wrap("daa2fcf60738bc84c8ccbe0e277bcf54cf1038d53b1d82f603e1e1b223ab0e1b"),b.getHashMerkleRoot());
     }
 
     @Test

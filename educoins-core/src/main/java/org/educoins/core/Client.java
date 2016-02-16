@@ -27,7 +27,7 @@ public class Client {
 	private static int availableAmount;
 	private static int approvedCoins;
 	private static int revokedCoins;
-	private boolean locked;
+ 	boolean locked;
 
 	public Client() {
 		this.previousOutputs = new ArrayList<>();
@@ -64,7 +64,7 @@ public class Client {
 		this.locked = true;
 		Transaction buildTx = this.transactionFactory.generateRevokeTransaction(this.approvedTransactions,
 				transToRevokeHash);
-		revokedCoins += buildTx.getRevokes().iterator().next().getAmount();
+		availableAmount -= buildTx.getRevokes().iterator().next().getAmount();
 		this.locked = false;
 
 		return buildTx;
@@ -151,14 +151,24 @@ public class Client {
 		List<String> publicKeys = Wallet.getPublicKeys();
 
 		for (Transaction tx : block.getTransactions()) {
-			if (tx.whichTransaction() == ETransaction.REGULAR || tx.whichTransaction() == ETransaction.COINBASE) {
+			if (tx.whichTransaction() == ETransaction.COINBASE) {
 				for (Output out : tx.getOutputs()) {
 					for (String publicKey : publicKeys) {
 						if (out.getLockingScript().equals(publicKey)) {
 							this.previousOutputs.add(out);
 							availableAmount += out.getAmount();
-							this.logger
-									.info("You have received some EDUCoins; the current amount is: " + availableAmount);
+						}
+					}
+				}
+			}
+		}
+		for (Transaction tx : block.getTransactions()) {
+			if (tx.whichTransaction() == ETransaction.REGULAR) {
+				for (Output out : tx.getOutputs()) {
+					for (String publicKey : publicKeys) {
+						if (out.getLockingScript().equals(publicKey)) {
+							this.previousOutputs.add(out);
+							availableAmount += out.getAmount();
 						}
 					}
 				}
@@ -167,13 +177,19 @@ public class Client {
 				for (Approval app : tx.getApprovals()) {
 					for (String publicKey : publicKeys) {
 						if (app.getLockingScript().equals(publicKey)) {
-							String holderSignature = app.getHolderSignature();
-							for (String message : Wallet.getSignatures()) {
-								if (Wallet.compare(message, holderSignature, publicKey)) {
+//							String holderSignature = app.getHolderSignature();
+//							for (String message : Wallet.getSignatures()) {
+//								if (Wallet.compare(message, holderSignature, publicKey)) {
 									this.approvedTransactions.add(tx);
 									approvedCoins += app.getAmount();
-								}
-							}
+//								}
+//							}
+						}
+						if(app.getOwnerAddress().equals(publicKey)){
+							for (Output out : tx.getOutputs()) {
+								this.previousOutputs = new ArrayList<>();
+								this.previousOutputs.add(out);
+								availableAmount += out.getAmount();
 						}
 					}
 				}
@@ -183,6 +199,7 @@ public class Client {
 					for (String publicKey : publicKeys) {
 						if (rev.getOwnerPubKey().equals(publicKey)) {
 							revokedCoins += rev.getAmount();
+						}
 					}
 				}
 			}
@@ -206,11 +223,17 @@ public class Client {
 		for(Output out : this.previousOutputs){
 			availableAmount += out.getAmount();
 		}
-		return availableAmount - approvedCoins;
+		return availableAmount;
 	}
 
 	public int getApprovedCoins() {
-		return approvedCoins - revokedCoins;
+		int approvedCoins = 0;
+		for(Transaction tx : this.approvedTransactions){
+			for(Approval app : tx.getApprovals()){
+				approvedCoins += app.getAmount();
+			}
+		}
+		return approvedCoins;
 	}
 
 	public int getIntInput(Scanner scanner, String prompt) {

@@ -35,7 +35,7 @@ public class TransactionFactory implements ITransactionFactory {
 	public Transaction generateApprovedTransaction(@NotNull List<Output> previousOutputs, int toApproveAmount, String owner, String holderSignature, String lockingScript) {
 		
 		int outputAmouns = getOutputAmount(previousOutputs);
-		List<Approval> approvals = createApprovals(toApproveAmount, owner, lockingScript);
+		List<Approval> approvals = createApprovals(toApproveAmount, owner, holderSignature, lockingScript);
 		List<Output> outputs = createOutputs(toApproveAmount, outputAmouns, owner, true);
 		List<Input> inputs = createInputs(previousOutputs);
 		
@@ -58,10 +58,10 @@ public class TransactionFactory implements ITransactionFactory {
 	}
 	
 	
-	private List<Approval> createApprovals(int toApproveAmount, String ownerAddress, String lockingScript){
+	private List<Approval> createApprovals(int toApproveAmount, String ownerAddress, String holderSignature, String lockingScript){
 		List<Approval> approvals = new ArrayList<>();
 
-		Approval approval = new Approval(toApproveAmount, ownerAddress, lockingScript);
+		Approval approval = new Approval(toApproveAmount, ownerAddress, holderSignature, lockingScript);
 		approvals.add(approval);
 		
 		return approvals;

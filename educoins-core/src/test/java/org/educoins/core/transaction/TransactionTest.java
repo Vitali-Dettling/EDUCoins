@@ -117,7 +117,7 @@ public class TransactionTest {
 		final String LOCKING_SCRIPT = Generator.getSecureRandomString256HEX();
 	
 		Transaction tx = BlockStoreFactory.generateTransactionWithSameUnlockingScript(2);
-		Approval app = new Approval(2, LOCKING_SCRIPT, LOCKING_SCRIPT);
+		Approval app = new Approval(2, LOCKING_SCRIPT, LOCKING_SCRIPT, LOCKING_SCRIPT);
 		tx.addApproval(app);
 		ITransactionFactory txFactory = new TransactionFactory();
 		Transaction transaction = txFactory.generateRevokeTransaction(Arrays.asList(tx), tx.hash().toString());
