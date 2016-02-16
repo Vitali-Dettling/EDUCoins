@@ -53,6 +53,7 @@ public class SoloMinerPeerTest {
 	}
 
 	@Test
+	@Ignore
 	public void testGetAmount() {
 		BlockChain blockchain = MockedBlockChain.getMockedBlockChain();
 		SoloMinerPeer peer = new SoloMinerPeer(blockchain);

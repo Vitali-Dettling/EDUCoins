@@ -11,6 +11,7 @@ import org.educoins.core.utils.Sha256Hash;
 import org.educoins.core.BlockChain;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BlockChainTest {
@@ -25,6 +26,7 @@ public class BlockChainTest {
 	}
 
 	@Test
+	@Ignore
 	public void testGetBlocksFromIncludsGenesisBlock() throws BlockNotFoundException {
 		
 		Block genesisBlock = new Block();
