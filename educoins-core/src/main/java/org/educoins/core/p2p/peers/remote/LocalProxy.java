@@ -35,8 +35,8 @@ public class LocalProxy extends RemoteProxy {
 
     @Override
     @NotNull
-    public Collection<Block> getBlocks() {
-        Collection<Block> allBlocks = new ArrayList<>();
+    public List<Block> getBlocks() {
+        List<Block> allBlocks = new ArrayList<>();
 
         IBlockIterator iterator = blockStore.iterator();
 
@@ -52,7 +52,7 @@ public class LocalProxy extends RemoteProxy {
     }
 
     @Override
-    public @NotNull Collection<Block> getBlocks(Sha256Hash from) throws IOException {
+    public @NotNull List<Block> getBlocks(Sha256Hash from) throws IOException {
         return getBlocks();
     }
 

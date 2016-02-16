@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * The base class representing a remote note.
@@ -58,8 +59,7 @@ public abstract class RemoteProxy {
      * @return All {@link Block}s the {@link RemoteProxy} knows
      * @throws IOException if the communication went wrong.
      */
-    @NotNull
-    public abstract Collection<Block> getBlocks() throws IOException;
+    public abstract @NotNull List<Block> getBlocks() throws IOException;
 
     /**
      * Returns all {@link Block}s from the specific {@link RemoteProxy} which are newer then the specified {@link
@@ -70,7 +70,7 @@ public abstract class RemoteProxy {
      * @throws IOException if the communication went wrong.
      */
     @NotNull
-    public abstract Collection<Block> getBlocks(Sha256Hash from) throws IOException;
+    public abstract List<Block> getBlocks(Sha256Hash from) throws IOException;
 
 
     /**
