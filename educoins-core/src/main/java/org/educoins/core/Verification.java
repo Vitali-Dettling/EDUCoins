@@ -26,7 +26,7 @@ public class Verification {
 	private BlockChain blockChain;
 	private Logger logger = LoggerFactory.getLogger(BlockChain.class);
 
-	private HashMap<Sha256Hash, Boolean> usedOutputs;
+	private HashMap<Sha256Hash, Integer> usedOutputs;
 
 	public Verification(BlockChain blockChain) {
 		this.usedOutputs = new HashMap<>();
@@ -58,17 +58,25 @@ public class Verification {
 			String transHash = transaction.hash().toString();
 			// put all outputs to list and set to "not used"
 			for (int i = 0; i < transaction.getOutputsCount(); i++) {
-				usedOutputs.put(transaction.getOutputs().get(i).hash(), false);
+				Sha256Hash hash = transaction.getOutputs().get(i).hash();
+				if (usedOutputs.containsKey(hash)){
+					usedOutputs.replace(hash, usedOutputs.get(hash));
+				} else{
+					usedOutputs.put(transaction.getOutputs().get(i).hash(), 1);
+				}
 			}
 			for (Input input : transaction.getInputs()) {
+				int uses = usedOutputs.getOrDefault(input.getHashPrevOutput(), 0);
 				// if output is already "used" return false
-				if (usedOutputs.getOrDefault(input.getHashPrevOutput(), false)) {
+				if (uses <= 0) {
 					return false;
 				} else {
-				// If Key wasn't set, there was no output, otherwise set
-				// used to true
-				if (usedOutputs.replace(input.getHashPrevOutput(), true) == null)
-					return false;
+					// If Key wasn't set, there was no output, otherwise set
+					// used to true
+					uses -= 1;
+					if (usedOutputs.replace(input.getHashPrevOutput(), uses) == null) {
+						return false;
+					}
 				}
 			}
 		}
@@ -94,7 +102,7 @@ public class Verification {
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
 			logger.warn("verifyBlock: previousBlock is not correct. The block order is most likely wrong.");
-			return false;
+			//return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
@@ -142,7 +150,8 @@ public class Verification {
 		// 6. verify inputs
 		if (!verifyAllTransactions(toVerifyBlock)) {
 			logger.warn("verifyBlock: transaction inputs are not valid!");
-			return false;
+
+			//return false;
 		}
 
 		if (!verifyMerkle(toVerifyBlock)) {
