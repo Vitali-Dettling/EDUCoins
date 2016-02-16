@@ -12,13 +12,12 @@ public class Approval implements Hashable {
 	private String ownerAddress;
 	private String lockingScript;
 
-	public Approval(int amount, String ownerAddress, String lockingScript) {
+	public Approval(int amount, String ownerAddress, String holderSignature, String lockingScript) {
 
 		this.amount = amount;
 		this.ownerAddress = ownerAddress;
 		this.lockingScript = lockingScript;
-		
-		this.holderSignature = null;
+		this.holderSignature = holderSignature;
 	}
 
 	public int getAmount() {

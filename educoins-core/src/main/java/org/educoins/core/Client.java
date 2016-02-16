@@ -149,8 +149,6 @@ public class Client {
 						if (out.getLockingScript().equals(publicKey)) {
 							this.previousOutputs.add(out);
 							availableAmount += out.getAmount();
-							this.logger
-									.info("You have received some EDUCoins; the current amount is: " + availableAmount);
 						}
 					}
 				}
@@ -159,13 +157,13 @@ public class Client {
 				for (Approval app : tx.getApprovals()) {
 					for (String publicKey : publicKeys) {
 						if (app.getLockingScript().equals(publicKey)) {
-							String holderSignature = app.getHolderSignature();
-							for (String message : Wallet.getSignatures()) {
-								if (Wallet.compare(message, holderSignature, publicKey)) {
+//							String holderSignature = app.getHolderSignature();
+//							for (String message : Wallet.getSignatures()) {
+//								if (Wallet.compare(message, holderSignature, publicKey)) {
 									this.approvedTransactions.add(tx);
 									approvedCoins += app.getAmount();
-								}
-							}
+//								}
+//							}
 						}
 					}
 				}
