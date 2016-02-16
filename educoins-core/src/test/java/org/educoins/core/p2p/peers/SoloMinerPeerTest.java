@@ -69,7 +69,7 @@ public class SoloMinerPeerTest {
 				expected += out.getAmount();
 			}
 			block.addTransaction(tx);
-			client.distructOwnOutputs(block);
+			client.ownTransactions(block);
 		}
 
 		int result = client.getEDICoinsAmount();

@@ -48,7 +48,7 @@ public class MockedClient {
 		Block block = BlockStoreFactory.getRandomBlock();
 		Transaction tx = BlockStoreFactory.generateTransaction(1);
 		block.addTransaction(tx);
-		mockedClient.distructOwnOutputs(block);
+		mockedClient.ownTransactions(block);
 		Transaction transaction = mockedClient.generateRegularTransaction(amount, lockingScript);
 		mockedBlockchain.sendTransaction(transaction);
 		return receivedTransaction();
@@ -83,7 +83,7 @@ public class MockedClient {
 		tx.addOutput(out);
 		Block block = new Block();
 		block.addTransaction(tx);
-		mockedClient.distructOwnOutputs(block);
+		mockedClient.ownTransactions(block);
 	}
 	
 	public static Transaction generateApprovedTransaction(String holderSignature){
@@ -100,7 +100,7 @@ public class MockedClient {
 		Transaction tx = BlockStoreFactory.generateTransaction(1);
 		tx.setOutputs(MockedClient.outputs);
 		block.addTransaction(tx);
-		client.distructOwnOutputs(block);
+		client.ownTransactions(block);
 		
 		return client.generateApprovedTransaction(toApproveAmount, owner, holderSignature, owner);
 	}

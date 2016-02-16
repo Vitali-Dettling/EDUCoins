@@ -36,7 +36,7 @@ public abstract class Peer implements IBlockReceiver, IBlockListener {
 	@Override
 	public void blockListener(Block receivedBlock) {
 		Peer.blockChain.verifyReceivedBlock(receivedBlock);
-		Peer.client.distructOwnOutputs(receivedBlock);
+		Peer.client.ownTransactions(receivedBlock);
 	}
 	
 	@Override
