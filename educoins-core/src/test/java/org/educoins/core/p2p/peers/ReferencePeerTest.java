@@ -52,7 +52,7 @@ public class ReferencePeerTest {
 		
 		Transaction tx = new RegularTransaction(outputs, inputs).create();
 		block.addTransaction(tx);
-		client.distructOwnOutputs(block);
+		client.ownTransactions(block);
 	
 		int result = client.getEDICoinsAmount();
 		Assert.assertEquals(result, expected);

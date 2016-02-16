@@ -31,7 +31,7 @@ public class ClientTest {
 		Block block = new Block();
 		block = BlockStoreFactory.getRandomBlock(block);
 		block.addTransaction(approvedTx);
-		mockedClient.distructOwnOutputs(block);
+		mockedClient.ownTransactions(block);
 
 		int amountResult = mockedClient.getApprovedCoins();
 		int amountExpected = approvedTx.getApprovals().get(0).getAmount();
