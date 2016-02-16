@@ -69,6 +69,12 @@ public class Miner {
 
 				challenge = this.block.hash();
 
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
 			} while (this.active && challenge.compareTo(targetThreshold) < 0);
 
 			if (this.active) {

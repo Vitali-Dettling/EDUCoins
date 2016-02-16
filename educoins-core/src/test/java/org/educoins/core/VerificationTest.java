@@ -79,7 +79,7 @@ public class VerificationTest {
 
 		Block block1 = new Block();
 		block1.setHashPrevBlock(block.hash());
-		Input input1 = new Input(2, block.getTransactions().get(0).hash(),  "123");
+		Input input1 = new Input(2, output.hash(),  "123");
 		input1.setSignature("affe");
 		Output output1 = new Output(2, "abc");
 

@@ -21,6 +21,7 @@ public class ClientTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testReceivingApprovedTransaction() {
 
 		Client mockedClient = MockedClient.getClient();
