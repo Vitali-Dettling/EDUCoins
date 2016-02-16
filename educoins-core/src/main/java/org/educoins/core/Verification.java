@@ -34,7 +34,6 @@ public class Verification {
 	}
 
 	public boolean verifyBlockChain(BlockChain newChain) {
-		// TODO: replaced with reversed list
 		assert newChain != null;
 
 		this.blockChain = newChain;
@@ -47,9 +46,6 @@ public class Verification {
 				// verify block, if fails, return false
 				if (!verifyBlock(currentBlock))
 					return false;
-				// verify all transactions in this block
-				if (!verifyAllTransactions(currentBlock))
-					return true;
 			}
 		} catch (BlockNotFoundException e) {
 			return false;
@@ -98,8 +94,7 @@ public class Verification {
 			previousBlock = this.blockChain.getPreviousBlock(toVerifyBlock);
 		} catch (BlockNotFoundException e) {
 			logger.warn("verifyBlock: previousBlock is not correct. The block order is most likely wrong.");
-			// TODO
-			// return false;
+			return false;
 		}
 
 		// 3. Are the hashes equal of the current block and the previous one?
@@ -166,9 +161,6 @@ public class Verification {
 			return false;
 		}
 
-		int sumInputsAmount = 0;
-		int sumApprovalAmount = 0;
-
 		// Case 4:
 		for (Input input : inputs) {
 			int amount = input.getAmount();
@@ -176,8 +168,6 @@ public class Verification {
 				logger.warn("verifyApprovedTransaction: input amounts is negative or zero");
 				return false;
 			}
-			// sum up for case 5
-			sumInputsAmount += amount;
 		}
 
 		for (Approval approval : approvals) {
@@ -191,15 +181,13 @@ public class Verification {
 				logger.warn("verifyApprovedTransaction: output amount is negative or zero");
 				return false;
 			}
-			// sum up for case 5
-			sumApprovalAmount += amount;
+
 		}
 
 		// Case 5:
-		// TODO Check is wrong. An approved transaction does not have any inputs
-		// it just refers to outputs or regular transactions.
-		// Bug: Needs to be fixed.
-		if (sumApprovalAmount > sumInputsAmount) {
+		int AmountOfApprovalsInTransaction = approvals.stream().mapToInt(a -> a.getAmount()).sum();
+		int AmountOfInputsInTransaction = inputs.stream().mapToInt( i -> i.getAmount()).sum();
+		if (AmountOfApprovalsInTransaction > AmountOfInputsInTransaction) {
 			logger.warn("verifyApprovedTransaction: more output than input");
 			return false;
 		}
@@ -223,8 +211,6 @@ public class Verification {
 	}
 
 	public boolean verifyCoinbaseTransaction(Transaction transaction, Block toVerifyBlock) {
-
-		// TODO Find out whether all checks are included?
 
 		// After "Bildungsnachweise als Digitale Währung - eine Anwendung der
 		// Block-Chain-Technologie" p. 37f
@@ -324,13 +310,6 @@ public class Verification {
 			sumOutputsAmount += amount;
 		}
 
-		// Case 5:
-		// TODO is not quite correct!
-		// if (sumOutputsAmount > sumInputsAmount) {
-		// logger.warn("verifyRegularTransaction: more output than input");
-		// return false;
-		// }
-
 		// Case 13:
 		// TODO The check is current done with the ECDSA class but
 		// actually that should be done through the script language.
@@ -375,8 +354,7 @@ public class Verification {
 
 		if (transRevoked.getOutputsCount() != 0) {
 			logger.warn("verifyRevokeTransaction: revoked transaction has outputs");
-			// TODO
-			// return false;
+			return false;
 		}
 
 		int sumInputsAmount = 0;
@@ -396,12 +374,6 @@ public class Verification {
 				return false;
 			}
 			sumApprovalAmount += approval.getAmount();
-		}
-
-		if (sumApprovalAmount != sumInputsAmount) {
-			logger.warn("verifyRevokeTransaction: sum of input and approval don't match");
-			// TODO
-			// return false;
 		}
 
 		logger.info("verifyRevokeTransaction: verified " + transaction.hash());
