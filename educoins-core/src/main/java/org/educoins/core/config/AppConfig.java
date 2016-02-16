@@ -1,7 +1,6 @@
 package org.educoins.core.config;
 
 import org.educoins.core.utils.IO;
-import org.educoins.core.utils.Sha256Hash;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -75,8 +74,8 @@ public class AppConfig {
         this.centralUrl = centralUrl;
     }
 
-    public static Sha256Hash getOwnPublicKey() {
-        return Sha256Hash.wrap(inner.ownPubKey);
+    public static String getOwnPublicKey() {
+        return inner.ownPubKey;
     }
 
     public static int getServerPort() {
