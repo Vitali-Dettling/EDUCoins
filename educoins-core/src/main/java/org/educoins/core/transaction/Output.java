@@ -40,7 +40,8 @@ public class Output implements Hashable  {
 		
 		//TODO [Vitali] May to concatenate more??? Did not Bitcoin say that only the locking script is concatenated???
 		byte[] lockingScript = ByteArray.convertFromString(getLockingScript());
-		return ByteArray.concatByteArrays(lockingScript);
+		byte[] byteAmount = ByteArray.convertFromInt(amount);
+		return ByteArray.concatByteArrays(lockingScript, byteAmount);
 		
 	}
 

@@ -93,11 +93,11 @@ public class Transaction implements Hashable {
 		}
 	}
 
-	public void signApprovals(String holderSignature) {
-		for (Approval app : approvals) {
-			app.setHolderSignature(holderSignature);
-		}
-	}
+//	public void signApprovals(String holderSignature) {
+//		for (Approval app : approvals) {
+//			app.setHolderSignature(holderSignature);
+//		}
+//	}
 
 	public void addInput(Input input) {
 		if (this.inputs == null) {
