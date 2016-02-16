@@ -167,7 +167,6 @@ public class Client {
 				for (Output out : tx.getOutputs()) {
 					for (String publicKey : publicKeys) {
 						if (out.getLockingScript().equals(publicKey)) {
-							this.previousOutputs = new ArrayList<>();
 							this.previousOutputs.add(out);
 							availableAmount += out.getAmount();
 						}
