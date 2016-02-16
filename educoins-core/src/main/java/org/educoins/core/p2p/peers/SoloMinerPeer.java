@@ -2,6 +2,7 @@ package org.educoins.core.p2p.peers;
 
 import org.educoins.core.*;
 import org.educoins.core.transaction.Transaction;
+import org.educoins.core.utils.Threading;
 
 import java.util.Scanner;
 
@@ -85,10 +86,9 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 
 	@Override
 	public void foundPoW(Block powBlock) {
-
 		logger.info("Found pow. (Block {})", powBlock.hash().toString());
 		Peer.blockChain.notifyBlockReceived(powBlock);
-		remoteProxies.foundPoW(powBlock);
+		Threading.run(() -> remoteProxies.foundPoW(powBlock));
 		//New round of miner.
 		Block newBlock = Peer.blockChain.prepareNewBlock(powBlock, singlePublicKey);
 		this.miner.receiveBlocks(newBlock);
