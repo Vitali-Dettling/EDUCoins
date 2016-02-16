@@ -151,10 +151,23 @@ public class Client {
 		List<String> publicKeys = Wallet.getPublicKeys();
 
 		for (Transaction tx : block.getTransactions()) {
-			if (tx.whichTransaction() == ETransaction.REGULAR || tx.whichTransaction() == ETransaction.COINBASE) {
+			if (tx.whichTransaction() == ETransaction.COINBASE) {
 				for (Output out : tx.getOutputs()) {
 					for (String publicKey : publicKeys) {
 						if (out.getLockingScript().equals(publicKey)) {
+							this.previousOutputs.add(out);
+							availableAmount += out.getAmount();
+						}
+					}
+				}
+			}
+		}
+		for (Transaction tx : block.getTransactions()) {
+			if (tx.whichTransaction() == ETransaction.REGULAR) {
+				for (Output out : tx.getOutputs()) {
+					for (String publicKey : publicKeys) {
+						if (out.getLockingScript().equals(publicKey)) {
+							this.previousOutputs = new ArrayList<>();
 							this.previousOutputs.add(out);
 							availableAmount += out.getAmount();
 						}
@@ -173,6 +186,12 @@ public class Client {
 //								}
 //							}
 						}
+						if(app.getOwnerAddress().equals(publicKey)){
+							for (Output out : tx.getOutputs()) {
+								this.previousOutputs = new ArrayList<>();
+								this.previousOutputs.add(out);
+								availableAmount += out.getAmount();
+						}
 					}
 				}
 			}
@@ -181,6 +200,7 @@ public class Client {
 					for (String publicKey : publicKeys) {
 						if (rev.getOwnerPubKey().equals(publicKey)) {
 							revokedCoins += rev.getAmount();
+						}
 					}
 				}
 			}
