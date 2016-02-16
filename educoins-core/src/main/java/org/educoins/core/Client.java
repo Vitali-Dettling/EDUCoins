@@ -42,6 +42,14 @@ public class Client {
 		this.locked = false;
 	}
 
+	public Client(List<Output> previousOutputs, List<Transaction> approvedTransactions, ITransactionFactory transactionFactory, List<Block> blockBuffer) {
+		this();
+		this.previousOutputs = previousOutputs;
+		this.approvedTransactions = approvedTransactions;
+		this.transactionFactory = transactionFactory;
+		this.blockBuffer = blockBuffer;
+	}
+
 	public Transaction generateRevokeTransaction(String transToRevokeHash) {
 
 		if (this.approvedTransactions.isEmpty()) {

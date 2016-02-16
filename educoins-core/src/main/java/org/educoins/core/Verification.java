@@ -287,27 +287,15 @@ public class Verification {
 			return false;
 		}
 
-		int sumInputsAmount = NO_COINS;
-		int sumOutputsAmount = NO_COINS;
-
 		// Case 4:
-		for (Input input : inputs) {
-			int amount = input.getAmount();
-			if (amount <= NO_COINS) {
-				logger.warn("verifyRegularTransaction: input amounts is negative or zero");
-				return false;
-			}
-			// sum up for case 5
-			sumInputsAmount += amount;
+		if (inputs.stream().mapToInt(i -> i.getAmount()).sum() <= 0 ){
+			logger.warn("verifyRegularTransaction: input amounts is negative or zero");
+			return false;
 		}
-		for (Output output : outputs) {
-			int amount = output.getAmount();
-			if (amount <= NO_COINS) {
-				logger.warn("verifyRegularTransaction: output amount is negative or zero");
-				return false;
-			}
-			// sum up for case 5
-			sumOutputsAmount += amount;
+
+		if (outputs.stream().mapToInt(o -> o.getAmount()).sum() <= 0 ){
+			logger.warn("verifyRegularTransaction: output amounts is negative or zero");
+			return false;
 		}
 
 		// Case 13:

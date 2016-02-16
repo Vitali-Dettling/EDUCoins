@@ -2,45 +2,47 @@ package org.educoins.core.config;
 
 import org.educoins.core.utils.IO;
 import org.educoins.core.utils.Sha256Hash;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.io.*;
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.Properties;
 
 /**
  * Makes resources/application.properties accessible.
  * Created by typus on 12/1/15.
  */
+@Component
 public class AppConfig {
-
-    public static Properties prop = new Properties();
+    private static AppConfig inner;
     private static String inetAddress;
-    private static AppConfig config = new AppConfig();
 
-    public AppConfig() {
-        InputStream inputStream = null;
-        try {
+    @Value("${server.port}")
+    private int ownPort;
 
-            String propFileName = "application.properties";
+    @Value("${educoins.peer.pubkey}")
+    private String ownPubKey;
 
-            inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+    @Value("${educoins.discovery.central.url}")
+    private String centralUrl;
 
-            if (inputStream != null) {
-                prop.load(inputStream);
-            }
+    @Value("${educoins.discovery.retries.max}")
+    private String discoveryMaxRetries;
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (inputStream != null)
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
-    }
+    @Value("${educoins.discovery.rating.increaseValue}")
+    private String discoveryRatingIncreaseValue;
+
+    @Value("${educoins.discovery.rating.decreaseValue}")
+    private String discoverRatingDecreaseValue;
+
+    @Value("${educoins.discovery.rating.default}")
+    private String discoveryRatingDefault;
+
+    //    @Value("${educoins.blockstore.directory}")
+    private String blockStoreDirectory;
 
     public static void setInetAddress(String ip) {
         inetAddress = ip;
@@ -61,41 +63,108 @@ public class AppConfig {
         return AppConfig.getServerPort();
     }
 
+    public void setOwnPort(int ownPort) {
+        this.ownPort = ownPort;
+    }
+
     public static String getCentralUrl() {
-        return prop.getProperty("educoins.discovery.central.url");
+        return inner.centralUrl;
+    }
+
+    public void setCentralUrl(String centralUrl) {
+        this.centralUrl = centralUrl;
     }
 
     public static Sha256Hash getOwnPublicKey() {
-        String publicKey = prop.getProperty("educoins.peer.pubkey");
-        return Sha256Hash.wrap(publicKey);
+        return Sha256Hash.wrap(inner.ownPubKey);
     }
 
     public static int getServerPort() {
-        return Integer.parseInt(prop.getProperty("server.port"));
+        return inner.ownPort;
     }
 
     public static int getMaxDiscoveryRetries() {
-        return Integer.parseInt(prop.getProperty("educoins.discovery.retries.max"));
+        return Integer.parseInt(inner.discoveryMaxRetries);
     }
 
     public static double getRatingIncreaseValue() {
-        return Double.parseDouble(prop.getProperty("educoins.discovery.rating.increaseValue"));
+        return Double.parseDouble(inner.discoveryRatingIncreaseValue);
     }
 
     public static double getRatingDecreaseValue() {
-        return Double.parseDouble(prop.getProperty("educoins.discovery.rating.decreaseValue"));
+        return Double.parseDouble(inner.discoverRatingDecreaseValue);
     }
 
     public static double getDefaultRanking() {
-        return Double.parseDouble(prop.getProperty("educoins.discovery.rating.default"));
+        return Double.parseDouble(inner.discoveryRatingDefault);
     }
 
     public static File getBlockStoreDirectory() throws IOException {
-        String path = prop.getProperty("educoins.blockstore.directory");
+        String path = inner.blockStoreDirectory;
         if (path != null && !path.equals("")) {
             return new File(path);
         } else {
             return IO.createTmpDir("blocks-" + getOwnPublicKey().toString());
         }
     }
+
+    public void setBlockStoreDirectory(String blockStoreDirectory) {
+        this.blockStoreDirectory = blockStoreDirectory;
+    }
+
+    public static AppConfig getInner() {
+        return inner;
+    }
+
+    public static void setInner(AppConfig inner) {
+        AppConfig.inner = inner;
+    }
+
+    @PostConstruct
+    void inject() {
+        AppConfig.inner = this;
+    }
+
+    //region inner getter/setter
+    public String getOwnPubKey() {
+        return ownPubKey;
+    }
+
+    public void setOwnPubKey(String ownPubKey) {
+        this.ownPubKey = ownPubKey;
+    }
+
+    public String getDiscoveryMaxRetries() {
+        return discoveryMaxRetries;
+    }
+
+    public void setDiscoveryMaxRetries(String discoveryMaxRetries) {
+        this.discoveryMaxRetries = discoveryMaxRetries;
+    }
+
+    public String getDiscoveryRatingIncreaseValue() {
+        return discoveryRatingIncreaseValue;
+    }
+
+    public void setDiscoveryRatingIncreaseValue(String discoveryRatingIncreaseValue) {
+        this.discoveryRatingIncreaseValue = discoveryRatingIncreaseValue;
+    }
+
+    public String getDiscoverRatingDecreaseValue() {
+        return discoverRatingDecreaseValue;
+    }
+
+    public void setDiscoverRatingDecreaseValue(String discoverRatingDecreaseValue) {
+        this.discoverRatingDecreaseValue = discoverRatingDecreaseValue;
+    }
+
+    public String getDiscoveryRatingDefault() {
+        return discoveryRatingDefault;
+    }
+
+    public void setDiscoveryRatingDefault(String discoveryRatingDefault) {
+        this.discoveryRatingDefault = discoveryRatingDefault;
+    }
+
+    //endregion
 }
