@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
+import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Miner {
@@ -68,9 +69,9 @@ public class Miner {
 				this.block.setNonce(ByteArray.convertToInt(nonce));
 
 				challenge = this.block.hash();
-
+				
 			} while (this.active && challenge.compareTo(targetThreshold) < 0);
-
+			
 			if (this.active) {
 				logger.info("Found a sufficient PoW hash: {}", challenge.toString());
 				notifyFoundPoW(block);

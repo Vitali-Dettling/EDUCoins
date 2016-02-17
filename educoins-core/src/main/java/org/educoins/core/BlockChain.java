@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
 public class BlockChain implements IBlockListener {
 
 	private static final int CHECK_AFTER_BLOCKS = 10;
-	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 10;
+	private static final int DESIRED_TIME_PER_BLOCK_IN_SEC = 30;
 	private static final int IN_SECONDS = 1000;
 	private static final int DESIRED_BLOCK_TIME = DESIRED_TIME_PER_BLOCK_IN_SEC * IN_SECONDS * CHECK_AFTER_BLOCKS;
 	private static final int SCALE_DECIMAL_LENGTH = 100;
@@ -58,34 +60,54 @@ public class BlockChain implements IBlockListener {
 	}
 
 	/**
-     * Bitcoin Example:
-     * http://bitcoin.stackexchange.com/questions/5838/how-is-difficulty-calculated
-     * The Bitcoin difficulty started at 1 (and can never go below that). 
-     * Then for every 2016 blocks that are found, the timestamps of the blocks are compared to find out how much time it took to find 2016 blocks, 
-     * call it T. We want 2016 blocks to take 2 weeks, so if T is different, we multiply the difficulty by (2 weeks / T) - this way, 
-     * if the hashrate continues the way it was, it will now take 2 weeks to find 2016 blocks.
-     * */
-    @VisibleForTesting
-    public static Sha256Hash calcNewDifficulty(Sha256Hash oldDiff, long currentTime, long allBlocksSinceLastTime) {
-        BigDecimal oldDifficulty = new BigDecimal(oldDiff.toBigInteger()).setScale(SCALE_DECIMAL_LENGTH,
-                BigDecimal.ROUND_HALF_UP);
+	 * Formula: New Difficulty = Old Difficulty * (Actual Time of Last 10
+	 * Blocks/ 30 minutes)
+	 */
+	@VisibleForTesting
+	public static Sha256Hash calcNewDifficulty(Sha256Hash oldDiff, long currentTime, long allBlocksSinceLastTime) {
 
-        BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime);
+		BigDecimal oldDifficulty = new BigDecimal(oldDiff.toBigInteger()).setScale(SCALE_DECIMAL_LENGTH,
+				BigDecimal.ROUND_HALF_UP);
 
-        // New Difficulty = Old Difficulty * (20160 minutes/
-        // Actual Time of Last 2016 Blocks)
-        BigDecimal returnValue = oldDifficulty
-                .multiply(desiredBlockTime.divide(actualBlockTime, BigDecimal.ROUND_HALF_UP)
-                        .setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
+		BigDecimal actualBlockTime = BigDecimal.valueOf(currentTime - allBlocksSinceLastTime);
+		BigDecimal dif = actualBlockTime.divide(desiredBlockTime, SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP);
+		BigDecimal returnValue = oldDifficulty.multiply(dif.setScale(SCALE_DECIMAL_LENGTH, BigDecimal.ROUND_HALF_UP));
 
-        System.out.println("+++++++++++++++++++++");
-        System.out.println("ActualBlockTime: " + actualBlockTime);
-        System.out.println("OldDiff: " + FormatToScientifc.format(oldDifficulty, 1) + " | newDiff: "
-                + FormatToScientifc.format(returnValue, 1));
-        System.out.println("+++++++++++++++++++++");
+		System.out.println("+++++++++++++++++++++");
+		System.out.println("ActualBlockTime: " + FormatToScientifc.format(actualBlockTime, 1));
+		System.out.println("OldDiff: " + FormatToScientifc.format(oldDifficulty, 1) + " | newDiff: "
+				+ FormatToScientifc.format(returnValue, 1));
+		System.out.println("+++++++++++++++++++++");
 
-        return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
-    }
+		return Sha256Hash.wrap(returnValue.toBigInteger().toByteArray());
+	}
+
+	/**
+	 * Bitcoin explanation: Mastering Bitcoin 195 Every 2,016 blocks, all nodes
+	 * retarget the proof-of-work difficulty. The equation for retargeting
+	 * difficulty measures the time it took to find the last 2,016 blocks and
+	 * compares that to the expected time of 20,160 minutes.
+	 * <p>
+	 * New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks /
+	 * 20160 minutes)
+	 */
+	private Block retargedBits(Block newBlock, Block previousBlock) {
+		if (this.blockCounter == CHECK_AFTER_BLOCKS) {
+
+			long currentTime = System.currentTimeMillis();
+			long allBlocksSinceLastTime = previousBlock.getTime();
+
+			newBlock.setBits(calcNewDifficulty(previousBlock.getBits(), currentTime, allBlocksSinceLastTime));
+			newBlock.setTime(currentTime);
+			this.blockCounter = RESET_BLOCKS_COUNT;
+		} else {
+			// The last time stamp since the last retargeting of the difficulty.
+			newBlock.setTime(previousBlock.getTime());
+			newBlock.setBits(previousBlock.getBits());
+		}
+		this.blockCounter++;
+		return newBlock;
+	}
 
 	public @NotNull Block getLatestBlock() {
 		Block latest = store.getLatest();
@@ -271,32 +293,6 @@ public class BlockChain implements IBlockListener {
 		int calculatedAmount = currentBlock.rewardCalculator();
 		Transaction transaction = this.transactionFactory.generateCoinbasedTransaction(calculatedAmount, publicKey);
 		return transaction;
-	}
-
-	/**
-	 * Bitcoin explanation: Mastering Bitcoin 195 Every 2,016 blocks, all nodes
-	 * retarget the proof-of-work difficulty. The equation for retargeting
-	 * difficulty measures the time it took to find the last 2,016 blocks and
-	 * compares that to the expected time of 20,160 minutes.
-	 * <p>
-	 * New Difficulty = Old Difficulty * (Actual Time of Last 2016 Blocks /
-	 * 20160 minutes)
-	 */
-	private Block retargedBits(Block newBlock, Block previousBlock) {
-		if (this.blockCounter == CHECK_AFTER_BLOCKS) {
-			long currentTime = System.currentTimeMillis();
-			long allBlocksSinceLastTime = previousBlock.getTime();
-
-			newBlock.setBits(calcNewDifficulty(previousBlock.getBits(), currentTime, allBlocksSinceLastTime));
-			newBlock.setTime(currentTime);
-			this.blockCounter = RESET_BLOCKS_COUNT;
-		} else {
-			// The last time stamp since the last retargeting of the difficulty.
-			newBlock.setTime(previousBlock.getTime());
-			newBlock.setBits(previousBlock.getBits());
-		}
-		this.blockCounter++;
-		return newBlock;
 	}
 
 	public Block getPreviousBlock(Block currentBlock) throws BlockNotFoundException {
