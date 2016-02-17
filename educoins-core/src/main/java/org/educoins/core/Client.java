@@ -53,11 +53,11 @@ public class Client {
 	public Transaction generateRevokeTransaction(String transToRevokeHash) {
 
 		if (this.approvedTransactions.isEmpty()) {
-			this.logger.warn("There is no approved educoins.");
+			this.logger.warn("There are no approved educoins.");
 			return null;
 		}
 		if(!isApprovedTransactionHash(transToRevokeHash)){
-			this.logger.warn("The transaction is not an approved one.");
+			this.logger.warn("The transaction is either not an approved one or you haven't approved it.");
 			return null;
 		}
 
@@ -161,8 +161,6 @@ public class Client {
 					}
 				}
 			}
-		}
-		for (Transaction tx : block.getTransactions()) {
 			if (tx.whichTransaction() == ETransaction.REGULAR) {
 				for (Output out : tx.getOutputs()) {
 					for (String publicKey : publicKeys) {
@@ -177,16 +175,11 @@ public class Client {
 				for (Approval app : tx.getApprovals()) {
 					for (String publicKey : publicKeys) {
 						if (app.getLockingScript().equals(publicKey)) {
-//							String holderSignature = app.getHolderSignature();
-//							for (String message : Wallet.getSignatures()) {
-//								if (Wallet.compare(message, holderSignature, publicKey)) {
-									this.approvedTransactions.add(tx);
-									approvedCoins += app.getAmount();
-//								}
-//							}
+							approvedCoins += app.getAmount();
 						}
 						if(app.getOwnerAddress().equals(publicKey)){
 							for (Output out : tx.getOutputs()) {
+								this.approvedTransactions.add(tx);
 								this.previousOutputs = new ArrayList<>();
 								this.previousOutputs.add(out);
 								availableAmount += out.getAmount();
@@ -194,17 +187,17 @@ public class Client {
 					}
 				}
 			}
-			if (tx.whichTransaction() == ETransaction.REVOKE) {
-				for (Revoke rev : tx.getRevokes()) {
-					for (String publicKey : publicKeys) {
-						if (rev.getOwnerPubKey().equals(publicKey)) {
-							revokedCoins += rev.getAmount();
-						}
+		}
+		if (tx.whichTransaction() == ETransaction.REVOKE) {
+			for (Revoke rev : tx.getRevokes()) {
+				for (String publicKey : publicKeys) {
+					if (rev.getOwnerPubKey().equals(publicKey)) {
+						revokedCoins += rev.getAmount();
 					}
 				}
 			}
 		}
-	}
+	}//For loop Transactions
 
 		// Recursive as soon as multiple blocks are found while creating a
 		// transaction.
@@ -230,7 +223,11 @@ public class Client {
 		int approvedCoins = 0;
 		for(Transaction tx : this.approvedTransactions){
 			for(Approval app : tx.getApprovals()){
-				approvedCoins += app.getAmount();
+				for (String publicKey : Wallet.getPublicKeys()) {
+					if (app.getLockingScript().equals(publicKey)) {
+						approvedCoins += app.getAmount();
+					}
+				}
 			}
 		}
 		return approvedCoins;

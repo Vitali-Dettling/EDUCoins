@@ -138,12 +138,15 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				System.out.println("Please, enter the approved hash: ");
 				String stillApproved = scanner.nextLine();
 				
-				boolean result = Peer.blockChain.approvalValide(stillApproved);
+				ETransaction result = Peer.blockChain.approvalValide(stillApproved);
 				
-				if(result){
+				if(ETransaction.APPROVED == result){
 					System.out.println("The approved educoins are still valide.");
-				}else{
+				}
+				else if(ETransaction.REVOKE == result){
 					System.out.println("The educoins had been revoked.");
+				}else{
+					System.out.println("It is not a approved transaction hash.");
 				}
 				
 			break;

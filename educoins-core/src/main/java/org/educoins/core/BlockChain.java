@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.educoins.core.p2p.peers.IProxyPeerGroup;
 import org.educoins.core.store.*;
 import org.educoins.core.transaction.*;
+import org.educoins.core.transaction.Transaction.ETransaction;
 import org.educoins.core.utils.FormatToScientifc;
 import org.educoins.core.utils.Sha256Hash;
 import org.jetbrains.annotations.NotNull;
@@ -334,8 +335,21 @@ public class BlockChain implements IBlockListener {
 		}
 	}
 
-	public boolean approvalValide(String stillApproved) {
-		return this.verification.approvalValide(stillApproved);
+	public ETransaction approvalValide(String stillApproved) {
+		try {
+			for (Block block : this.getBlocks()) {
+				for (Transaction tx : block.getTransactions()) {
+					if(tx.hash().toString().equals(stillApproved)){
+						if(tx.whichTransaction() == ETransaction.APPROVED){
+							return this.verification.approvalValide(stillApproved);
+						}
+					}
+				}
+			}
+		} catch (BlockNotFoundException e) {
+			logger.error("While checking the approved transaction against the revoke transaction. ");
+		}
+		return null;
 	}
 
 	public boolean contains(Block block) {

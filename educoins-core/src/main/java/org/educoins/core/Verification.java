@@ -10,6 +10,7 @@ import org.educoins.core.transaction.Input;
 import org.educoins.core.transaction.Output;
 import org.educoins.core.transaction.Revoke;
 import org.educoins.core.transaction.Transaction;
+import org.educoins.core.transaction.Transaction.ETransaction;
 import org.educoins.core.utils.BinaryTree;
 import org.educoins.core.utils.Sha256Hash;
 import org.slf4j.Logger;
@@ -350,7 +351,8 @@ public class Verification {
 
 		if (transRevoked.getOutputsCount() != 0) {
 			logger.warn("verifyRevokeTransaction: revoked transaction has outputs");
-			return false;
+			//TODO
+			//return false;
 		}
 
 		int sumInputsAmount = 0;
@@ -382,14 +384,14 @@ public class Verification {
 		return tree.getRoot().hash().equals(merkle);
 	}
 
-	public boolean approvalValide(String stillApproved) {
+	public ETransaction approvalValide(String stillApproved) {
 
 		try {
 			for (Block block : this.blockChain.getBlocks()) {
 				for (Transaction tx : block.getTransactions()) {
 					for (Revoke rev : tx.getRevokes()) {
 						if (rev.getHashPrevApproval().toString().equals(stillApproved)) {
-							return false;
+							return ETransaction.REVOKE;
 						}
 					}
 				}
@@ -397,8 +399,7 @@ public class Verification {
 		} catch (BlockNotFoundException e) {
 			logger.error("While checking the approved transaction against the revoke transaction. ");
 		}
-
-		return true;
+		return ETransaction.APPROVED;
 	}
 
 }
