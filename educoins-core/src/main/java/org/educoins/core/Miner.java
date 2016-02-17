@@ -32,7 +32,7 @@ public class Miner {
 	}
 
 	public void notifyFoundPoW(Block block) {
-        this.powListeners.forEach(listener -> listener.foundPoW(block));
+		this.powListeners.forEach(listener -> listener.foundPoW(block));
 	}
 
 	public void receiveBlocks(Block latestBlock) {
@@ -68,12 +68,6 @@ public class Miner {
 				this.block.setNonce(ByteArray.convertToInt(nonce));
 
 				challenge = this.block.hash();
-
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 
 			} while (this.active && challenge.compareTo(targetThreshold) < 0);
 

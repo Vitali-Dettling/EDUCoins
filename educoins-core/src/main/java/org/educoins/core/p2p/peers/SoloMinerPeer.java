@@ -32,24 +32,12 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 	@Override
 	public void start() {
 		miner.addPoWListener(this);
-
-		try {
-			Collection<Block> blocks = blockChain.getBlocks();
-		
-			if(!blocks.isEmpty()){
-				blocks.forEach(block -> SoloMinerPeer.client.ownTransactions(block));
-			}
 			
-			// Kick off Miner.
-			foundPoW(blockChain.getLatestBlock());
-			// After miner has started.
-			Peer.remoteProxies.discover();
-			client();
-		} catch (BlockNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		// Kick off Miner.
+		foundPoW(blockChain.getLatestBlock());
+		// After miner has started.
+		Peer.remoteProxies.discover();
+		client();
 	}
 
 	@Override
@@ -61,8 +49,9 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 
 	@Override
 	protected void handleNewValidBlock(Block block) {
-		Block newBlock = blockChain.prepareNewBlock(block, singlePublicKey);
-		miner.receiveBlocks(newBlock);
+		//TODO ??? If committed in the miner is going crazy.
+//		Block newBlock = blockChain.prepareNewBlock(block, singlePublicKey);
+//		miner.receiveBlocks(newBlock);
 	}
 
 
