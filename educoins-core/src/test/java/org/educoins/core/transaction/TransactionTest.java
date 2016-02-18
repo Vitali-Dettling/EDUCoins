@@ -84,7 +84,7 @@ public class TransactionTest {
 		ITransactionFactory txFactory = new TransactionFactory();
 		Transaction transaction = txFactory.generateCoinbasedTransaction(AMOUNT, LOCKING_SCRIPT);
 
-		ETransaction testee = transaction.whichTransaction();
+		ETransaction testee = transaction.transactionType();
 		assertEquals(testee, ETransaction.COINBASE);
 	}
 
@@ -105,7 +105,7 @@ public class TransactionTest {
 		ITransactionFactory txFactory = new TransactionFactory();
 		Transaction transaction = txFactory.generateApprovedTransaction(outputs, AMOUNT, OWNER_ADDRESS, HOLDER_SIGNATURE, LOCKING_SCRIPT);
 
-		ETransaction testee = transaction.whichTransaction();
+		ETransaction testee = transaction.transactionType();
 		assertEquals(testee, ETransaction.APPROVED);
 	}
 
@@ -122,7 +122,7 @@ public class TransactionTest {
 		ITransactionFactory txFactory = new TransactionFactory();
 		Transaction transaction = txFactory.generateRevokeTransaction(Arrays.asList(tx), tx.hash().toString());
 
-		ETransaction testee = transaction.whichTransaction();
+		ETransaction testee = transaction.transactionType();
 		assertEquals(testee, ETransaction.REVOKE);
 	}
 
@@ -140,7 +140,7 @@ public class TransactionTest {
 		ITransactionFactory txFactory = new TransactionFactory();
 		Transaction transaction = txFactory.generateRegularTransaction(outputs, AMOUNT, unlockingScript);
 
-		ETransaction testee = transaction.whichTransaction();
+		ETransaction testee = transaction.transactionType();
 		assertEquals(testee, ETransaction.REGULAR);
 	}
 

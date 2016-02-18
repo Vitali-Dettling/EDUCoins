@@ -15,7 +15,7 @@ public class ApprovedTransaction extends Transaction {
 
 	@Override
 	public Transaction create() {
-		//super.signApprovals(this.holderSignature);
+
 		super.signInputs();
 		return this;
 	}

@@ -61,7 +61,7 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 			System.out.println("\t - (G)et Own EDUCoins");
 			System.out.println("\t - (L)ist of Transactions");
 			System.out.println("\t - (C)heck approved EDUCoins");
-			System.out.println("\t --- Transactions types ---");
+			System.out.println("\t --- Transaction types ---");
 			System.out.println("\t - (R)egular transaction");
 			System.out.println("\t - (A)pproved transaction");
 			System.out.println("\t - (X)Revoke transaction");
@@ -78,12 +78,17 @@ public class ReferencePeer extends Peer implements ITransactionTransmitter {
 				String signature = Wallet.getSignature(ReferencePeer.singlePublicKey, randomSignature);
 				System.out.println("Created Signature: " + signature);
 			case "g":
-				System.out.println("Regular EDUCoins " + Peer.client.getEDUCoinsAmount());
-				System.out.println("Approved EDUCoins " + Peer.client.getApprovedCoins());
+				int regular = Peer.client.getRegularAmount();
+				int approved = Peer.client.getApprovedAmount();
+				int revoked = Peer.client.getRevokedAmount();
+				System.out.println("Regular EDUCoins " + regular);
+				System.out.println("Approved EDUCoins " + approved);
+				System.out.println("Revoked EDUCoins " + revoked);
+				System.out.println("Current EDUCoins " + (approved - revoked));
 				break;
 			case "r":
 				amount = Peer.client.getIntInput(scanner, "Type in amount: ");
-				int availableAmount = Peer.client.getEDUCoinsAmount();
+				int availableAmount = Peer.client.getRegularAmount();
 				if (amount > availableAmount) {
 					System.err.println("Not enough available amount (max. " + availableAmount + ")");
 					break;

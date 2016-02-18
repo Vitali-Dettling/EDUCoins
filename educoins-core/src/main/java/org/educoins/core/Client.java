@@ -2,6 +2,7 @@ package org.educoins.core;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -22,27 +23,23 @@ public class Client {
 
 	private List<Output> previousOutputs;
 	private List<Transaction> approvedTransactions;
+	private List<Transaction> revokeTransactions;
 	private ITransactionFactory transactionFactory;
 	private List<Block> blockBuffer;
-	private static int availableAmount;
-	private static int approvedCoins;
-	private static int revokedCoins;
- 	boolean locked;
+	boolean locked;
 
 	public Client() {
 		this.previousOutputs = new ArrayList<>();
 		this.approvedTransactions = new ArrayList<>();
-
-		availableAmount = 0;
-		approvedCoins = 0;
-		revokedCoins = 0;
+		this.revokeTransactions = new ArrayList<>();
 
 		this.transactionFactory = new TransactionFactory();
 		this.blockBuffer = new ArrayList<>();
 		this.locked = false;
 	}
 
-	public Client(List<Output> previousOutputs, List<Transaction> approvedTransactions, ITransactionFactory transactionFactory, List<Block> blockBuffer) {
+	public Client(List<Output> previousOutputs, List<Transaction> approvedTransactions,
+			ITransactionFactory transactionFactory, List<Block> blockBuffer) {
 		this();
 		this.previousOutputs = previousOutputs;
 		this.approvedTransactions = approvedTransactions;
@@ -56,15 +53,15 @@ public class Client {
 			this.logger.warn("There are no approved educoins.");
 			return null;
 		}
-		if(!isApprovedTransactionHash(transToRevokeHash)){
+		if (!isApprovedTransactionHash(transToRevokeHash)) {
 			this.logger.warn("The transaction is either not an approved one or you haven't approved it.");
 			return null;
 		}
-
+		
 		this.locked = true;
 		Transaction buildTx = this.transactionFactory.generateRevokeTransaction(this.approvedTransactions,
 				transToRevokeHash);
-		availableAmount -= buildTx.getRevokes().iterator().next().getAmount();
+		buildTx.getRevokes().iterator().next().getAmount();
 		this.locked = false;
 
 		return buildTx;
@@ -79,7 +76,6 @@ public class Client {
 		}
 
 		this.locked = true;
-		availableAmount -= toApproveAmount;
 		Transaction buildTx = this.transactionFactory.generateApprovedTransaction(this.previousOutputs, toApproveAmount,
 				owner, holderSignature, lockingScript);
 		this.locked = false;
@@ -93,19 +89,18 @@ public class Client {
 		}
 
 		this.locked = true;
-		availableAmount -= sendAmount;
 		Transaction buildTx = this.transactionFactory.generateRegularTransaction(this.previousOutputs, sendAmount,
 				publicKey);
 		this.locked = false;
 
 		return buildTx;
 	}
-	
-	private boolean isApprovedTransactionHash(String transToRevokeHash){
-		
-		for(Transaction tx : this.approvedTransactions){
-			
-			if(tx.hash().toString().equals(transToRevokeHash)){
+
+	private boolean isApprovedTransactionHash(String transToRevokeHash) {
+
+		for (Transaction tx : this.approvedTransactions) {
+
+			if (tx.hash().toString().equals(transToRevokeHash)) {
 				return true;
 			}
 		}
@@ -130,7 +125,7 @@ public class Client {
 
 	private boolean checkAmount(int sendAmount) {
 
-		int availableAmount = getEDUCoinsAmount();
+		int availableAmount = getRegularAmount();
 		if ((availableAmount - sendAmount) < 0) {
 			this.logger.info("Not enough amount. Available: " + availableAmount + " which to send: " + sendAmount);
 			return false;
@@ -142,87 +137,148 @@ public class Client {
 		if (this.locked) {
 			this.blockBuffer.add(block);
 		} else {
-			checkBlock(block);
+			ownTransactionsSeperator(block);
 		}
 	}
 
-	private void checkBlock(Block block) {
-
-		List<String> publicKeys = Wallet.getPublicKeys();
+	/**
+	 * Recursive as soon as multiple blocks are found while creating a
+	 * transaction.
+	 * 
+	 */
+	private void ownTransactionsSeperator(Block block) {
 
 		for (Transaction tx : block.getTransactions()) {
-			if (tx.whichTransaction() == ETransaction.COINBASE) {
-				for (Output out : tx.getOutputs()) {
-					for (String publicKey : publicKeys) {
-						if (out.getLockingScript().equals(publicKey)) {
-							this.previousOutputs.add(out);
-							availableAmount += out.getAmount();
-						}
-					}
-				}
-			}
-			if (tx.whichTransaction() == ETransaction.REGULAR) {
-				for (Output out : tx.getOutputs()) {
-					for (String publicKey : publicKeys) {
-						if (out.getLockingScript().equals(publicKey)) {
-							this.previousOutputs.add(out);
-							availableAmount += out.getAmount();
-						}
-					}
-				}
-			}
-			if (tx.whichTransaction() == ETransaction.APPROVED) {
-				for (Approval app : tx.getApprovals()) {
-					for (String publicKey : publicKeys) {
-						if (app.getLockingScript().equals(publicKey)) {
-							approvedCoins += app.getAmount();
-						}
-						if(app.getOwnerAddress().equals(publicKey)){
-							for (Output out : tx.getOutputs()) {
-								this.approvedTransactions.add(tx);
-								this.previousOutputs = new ArrayList<>();
-								this.previousOutputs.add(out);
-								availableAmount += out.getAmount();
-						}
-					}
-				}
-			}
-		}
-		if (tx.whichTransaction() == ETransaction.REVOKE) {
-			for (Revoke rev : tx.getRevokes()) {
-				for (String publicKey : publicKeys) {
-					if (rev.getOwnerPubKey().equals(publicKey)) {
-						revokedCoins += rev.getAmount();
-					}
-				}
-			}
-		}
-	}//For loop Transactions
 
-		// Recursive as soon as multiple blocks are found while creating a
-		// transaction.
-		if (!this.blockBuffer.isEmpty()) {
-			for (Block bufferedBlock : this.blockBuffer) {
-				this.locked = true;
-				checkBlock(bufferedBlock);
-				this.blockBuffer.clear();
-				this.locked = false;
+			switch (tx.transactionType()) {
+			case COINBASE:
+				checkCoinbase(tx);
+				break;
+			case REGULAR:
+				checkRegular(tx);
+				break;
+			case APPROVED:
+				checkApproved(tx);
+				break;
+			case REVOKE:
+				checkRevoke(tx);
+				break;
+			default:
+				this.logger.info("Type of transaction is unknown.");
+			}
+
+			if (!this.blockBuffer.isEmpty()) {
+				for (Block bufferedBlock : this.blockBuffer) {
+					this.locked = true;
+					ownTransactionsSeperator(bufferedBlock);
+					this.blockBuffer.clear();
+					this.locked = false;
+				}
 			}
 		}
 	}
 
-	public int getEDUCoinsAmount() {
+	private void checkRevoke(Transaction tx) {
+		for (Revoke rev : tx.getRevokes()) {
+			for(Transaction appTx : this.approvedTransactions){
+				//Does the revoke belong to one of my approvals?
+				if (rev.getHashPrevApproval().toString().equals(appTx.hash().toString())) {
+					//Should not count twice the transaction.
+					Iterator<Transaction> iter = this.revokeTransactions.iterator();
+					if(iter.hasNext()){
+						if(!tx.hash().toString().equals(iter.next().hash().toString())){
+							this.revokeTransactions.add(iter.next());
+						}
+					}else{//First Iteration.
+						this.revokeTransactions.isEmpty();
+						this.revokeTransactions.add(tx);
+					}
+				}
+			}
+		}
+	}
+
+	private void checkApproved(Transaction tx) {
+		for (Approval app : tx.getApprovals()) {
+			for (String publicKey : Wallet.getPublicKeys()) {
+				//Approved EDUCoins
+				if (app.getLockingScript().equals(publicKey)) {
+					//Should not count twice the transaction.
+					Iterator<Transaction> iter = this.approvedTransactions.iterator();
+					if(iter.hasNext()){
+						if(!tx.hash().toString().equals(iter.next().hash().toString())){
+							this.approvedTransactions.add(tx);
+						}
+					}else{
+						//First Iteration.
+						this.approvedTransactions.isEmpty();
+						this.approvedTransactions.add(tx);
+					}
+				}//Reverse Transactions.
+				if (app.getOwnerAddress().equals(publicKey)) {
+					for (Output out : tx.getOutputs()) {
+						this.previousOutputs = new ArrayList<>();
+						this.previousOutputs.add(out);
+						out.getAmount();
+					}
+				}
+			}
+		}
+	}
+
+	private void checkRegular(Transaction tx) {
+
+		List<Output> outs = tx.getOutputs();
+		
+		//Does the transaction belong to me?
+		for (String publicKey : Wallet.getPublicKeys()) {
+			// Received coins form strangers.
+			for(Output out : outs){
+				if (out.getLockingScript().equals(publicKey)) {
+					this.previousOutputs.add(out);
+					// Reverse transaction.
+					if(out.getAmount() < getRegularAmount()){		
+						this.previousOutputs = new ArrayList<>();
+						this.previousOutputs.add(out);
+					}
+				}
+			}
+		}
+	}
+
+	private void checkCoinbase(Transaction tx) {
+		for (Output out : tx.getOutputs()) {
+			for (String publicKey : Wallet.getPublicKeys()) {
+				if (out.getLockingScript().equals(publicKey)) {
+					this.previousOutputs.add(out);
+					out.getAmount();
+				}
+			}
+		}
+	}
+	
+	public int getRevokedAmount(){
+		int revokeAmount = 0;
+		for(Transaction tx : this.revokeTransactions){
+			for (Revoke rev : tx.getRevokes()) {
+				revokeAmount += rev.getAmount();
+			}
+		}
+		return revokeAmount;
+	}
+
+	public int getRegularAmount() {
 		int availableAmount = 0;
-		for(Output out : this.previousOutputs){
+		for (Output out : this.previousOutputs) {
 			availableAmount += out.getAmount();
 		}
 		return availableAmount;
 	}
 
-	public int getApprovedCoins() {
+	public int getApprovedAmount() {
 		int approvedCoins = 0;
-		for(Transaction tx : this.approvedTransactions){
-			for(Approval app : tx.getApprovals()){
+		for (Transaction tx : this.approvedTransactions) {
+			for (Approval app : tx.getApprovals()) {
 				for (String publicKey : Wallet.getPublicKeys()) {
 					if (app.getLockingScript().equals(publicKey)) {
 						approvedCoins += app.getAmount();
@@ -261,9 +317,9 @@ public class Client {
 		try {
 			for (Block b : bc.getBlocks()) {
 				for (Transaction t : b.getTransactions()) {
-					if (t.whichTransaction() != ETransaction.COINBASE) {
+					if (t.transactionType() != ETransaction.COINBASE) {
 						TransactionVM tvm = new TransactionVM();
-						tvm.setTransactionType(t.whichTransaction());
+						tvm.setTransactionType(t.transactionType());
 						tvm.setHash(t.hash());
 						returnList.add(tvm);
 					}

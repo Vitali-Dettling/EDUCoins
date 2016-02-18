@@ -37,7 +37,7 @@ public class TransactionController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void submitTransaction(@RequestBody @NotNull Transaction transaction, HttpServletRequest request) {
-        logger.info("Received transaction of type: {} from {}", transaction.whichTransaction().name(),
+        logger.info("Received transaction of type: {} from {}", transaction.transactionType().name(),
                 request.getRemoteAddr());
         blockChain.transactionReceived(transaction);
     }

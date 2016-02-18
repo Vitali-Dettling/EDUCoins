@@ -40,22 +40,6 @@ public class RevokeTransaction extends Transaction {
 		this.setRevokes(revoke);
 		this.signRevokes();
 		return this;
-	}
-
-//	@Override
-//	public Transaction create() {
-//		// TODO 
-//		
-//		this.setApprovedTransaction(hash());
-//		for (int i = 0; i < approvals.size(); i++) {
-//			Input input = new Input(approvals.get(i).getAmount(), hash(), "TODO");
-//			this.addInput(input);
-//		}
-//		this.setOutputs(outputs);
-//		setOutputs(null);
-//		
-//		return this;
-//	}
-	
+	}	
 }
 	

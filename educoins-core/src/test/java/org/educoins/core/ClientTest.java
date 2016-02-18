@@ -72,7 +72,7 @@ public class ClientTest {
 
 	private void checkTransactionType(List<Transaction> reqeived, ETransaction type) {
 		Transaction tx = reqeived.get(reqeived.size() - 1);
-		ETransaction txType = tx.whichTransaction();
+		ETransaction txType = tx.transactionType();
 		reqeived = null;
 		Assert.assertTrue(txType == type);
 	}

@@ -93,12 +93,6 @@ public class Transaction implements Hashable {
 		}
 	}
 
-//	public void signApprovals(String holderSignature) {
-//		for (Approval app : approvals) {
-//			app.setHolderSignature(holderSignature);
-//		}
-//	}
-
 	public void addInput(Input input) {
 		if (this.inputs == null) {
 			this.inputs = new ArrayList<>();
@@ -181,7 +175,7 @@ public class Transaction implements Hashable {
 		this.approvedTransaction = approvedTransaction;
 	}
 
-	public ETransaction whichTransaction() {
+	public ETransaction transactionType() {
 		// Coinbase:
 		// inputs = 0; outputs > 0; approvals = 0;
 		// Regular:
@@ -226,7 +220,7 @@ public class Transaction implements Hashable {
 		byte[] approved;
 		byte[] toBeHashed = null;
 		// Check for transaction type.
-		switch (transaction.whichTransaction()) {
+		switch (transaction.transactionType()) {
 		case APPROVED:
 			input = getByteArrayInput(transaction);
 			approved = getByteArrayApproved(transaction);

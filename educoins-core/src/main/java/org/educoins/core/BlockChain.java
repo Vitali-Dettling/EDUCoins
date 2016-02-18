@@ -245,14 +245,14 @@ public class BlockChain implements IBlockListener {
 	}
 
 	public void sendTransaction(Transaction transaction) {
-		logger.info("Transaction of type {} submitted.", transaction.whichTransaction());
+		logger.info("Transaction of type {} submitted.", transaction.transactionType());
 		this.transactions.add(transaction);
 		this.transactionTransmitters.transmitTransaction(transaction);
 	}
 
 	public void transactionReceived(Transaction transaction) {
 		logger.info("Received transaction.");
-		switch (transaction.whichTransaction()) {
+		switch (transaction.transactionType()) {
 		case APPROVED:
 			if (this.verification.verifyApprovedTransaction(transaction)) {
 				this.transactions.add(transaction);
@@ -340,7 +340,7 @@ public class BlockChain implements IBlockListener {
 			for (Block block : this.getBlocks()) {
 				for (Transaction tx : block.getTransactions()) {
 					if(tx.hash().toString().equals(stillApproved)){
-						if(tx.whichTransaction() == ETransaction.APPROVED){
+						if(tx.transactionType() == ETransaction.APPROVED){
 							return this.verification.approvalValide(stillApproved);
 						}
 					}

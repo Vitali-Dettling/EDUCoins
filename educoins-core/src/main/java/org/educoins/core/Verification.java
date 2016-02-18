@@ -124,7 +124,7 @@ public class Verification {
 		List<Transaction> transactions = toVerifyBlock.getTransactions();
 		for (Transaction transaction : transactions) {
 			// 5.1 Check for transaction type.
-			switch (transaction.whichTransaction()) {
+			switch (transaction.transactionType()) {
 			case APPROVED:
 				isTransactionValid = verifyApprovedTransaction(transaction);
 				break;
