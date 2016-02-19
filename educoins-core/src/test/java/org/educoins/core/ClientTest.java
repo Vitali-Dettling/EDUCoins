@@ -37,7 +37,7 @@ public class ClientTest {
 		block.addTransaction(approvedTx);
 		mockedClient.ownTransactions(block);
 
-		int amountResult = mockedClient.getApprovedCoins();
+		int amountResult = mockedClient.getApprovedAmount();
 		int amountExpected = approvedTx.getApprovals().get(0).getAmount();
 
 		Assert.assertEquals(amountExpected, amountResult);

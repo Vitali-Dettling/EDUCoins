@@ -23,19 +23,22 @@ public class RevokeTransaction extends Transaction {
 		for(Transaction tx : this.approvedTransactions){
 			hashTx =  tx.hash();
 			
-			if(hashTx.toString().equals(this.transToRevokeHash.toString())){
+			if(hashTx.toString().equals(this.transToRevokeHash)){
 				apps = tx.getApprovals();
 				break;
 			}
 		}
 		
 		Revoke revoke = null;
-		if(apps != null){
+		if(apps == null){
+			//TODO Should never occur.
+			return null;
+		}
 			for(Approval app : apps){
 				//TODO Here check for public key of the approved tx.
 				revoke = new Revoke(sha256Tx, app.getAmount(), app.getOwnerAddress());
 			}
-		}
+
 		
 		this.setRevokes(revoke);
 		this.signRevokes();

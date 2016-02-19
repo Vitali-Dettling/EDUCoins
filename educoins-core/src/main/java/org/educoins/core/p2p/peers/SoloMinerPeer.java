@@ -63,7 +63,7 @@ public class SoloMinerPeer extends Peer implements IPoWListener, ITransactionRec
 		while (running) {
 			Scanner scanner = new Scanner(System.in);
 			System.out.println("Select action:");
-			System.out.println("\t - (G)Get Own EDUCoins");
+			System.out.println("\t - (G)Get own EDUCoins");
 			System.out.println("\t - (R)egular transaction");
 			System.out.println("\t - (L)ist of Transactions");
 			System.out.println("\t - (E)xit");
