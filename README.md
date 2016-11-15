@@ -1,4 +1,4 @@
-# CreditSystem
+# EDUCoins
 Educational Credits as Digital Currency: Application of the Blockchain Technology
 
 ## Locations
